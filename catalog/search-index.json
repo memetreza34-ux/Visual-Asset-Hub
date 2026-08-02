@@ -1,0 +1,83 @@
+{
+  "indexVersion": 1,
+  "catalogVersion": 1,
+  "catalogUpdatedAt": "2026-08-02T14:30:00.000Z",
+  "assetCount": 0,
+  "facets": {
+    "types": {
+      "video": 0,
+      "image": 0,
+      "animation": 0,
+      "overlay": 0,
+      "screen-recording": 0,
+      "graphic": 0,
+      "icon": 0,
+      "mockup": 0
+    },
+    "categories": {
+      "people-lifestyle": 0,
+      "business-work": 0,
+      "technology-ai": 0,
+      "money-finance": 0,
+      "education-learning": 0,
+      "health-fitness": 0,
+      "food-drink": 0,
+      "travel-places": 0,
+      "nature-environment": 0,
+      "industry-trades": 0,
+      "vehicles-transport": 0,
+      "home-architecture": 0,
+      "social-media-creator": 0,
+      "objects-products": 0,
+      "news-events": 0,
+      "emotions-reactions": 0,
+      "abstract-backgrounds": 0,
+      "ui-apps": 0,
+      "science-engineering": 0,
+      "culture-entertainment": 0
+    },
+    "orientations": {
+      "vertical": 0,
+      "horizontal": 0,
+      "square": 0,
+      "portrait": 0,
+      "landscape": 0,
+      "transparent": 0,
+      "mixed": 0
+    },
+    "styles": {
+      "realistic": 0,
+      "cinematic": 0,
+      "documentary": 0,
+      "studio": 0,
+      "ugc": 0,
+      "minimal": 0,
+      "isometric-3d": 0,
+      "illustration-2d": 0,
+      "illustration-3d": 0,
+      "motion-graphics": 0,
+      "ui": 0,
+      "transparent-overlay": 0,
+      "texture": 0,
+      "mixed": 0
+    },
+    "statuses": {
+      "inbox": 0,
+      "review": 0,
+      "approved": 0,
+      "restricted": 0,
+      "archived": 0
+    },
+    "licenseStatuses": {
+      "owned": 0,
+      "licensed": 0,
+      "public-domain": 0,
+      "cc0": 0,
+      "cc-by": 0,
+      "editorial-only": 0,
+      "restricted": 0,
+      "unknown": 0
+    }
+  },
+  "records": []
+}
