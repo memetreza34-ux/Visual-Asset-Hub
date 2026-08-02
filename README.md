@@ -52,6 +52,24 @@ npm run asset:add -- \
 
 Mit `--dry-run true` werden ID, Name und Ziel berechnet, ohne Dateien zu verändern.
 
+## Kostenlose Pexels-Suche
+
+1. `.env.example` als `.env` kopieren.
+2. Den Schlüssel ausschließlich lokal eintragen:
+
+```env
+PEXELS_API_KEY=DEIN_PEXELS_SCHLUESSEL
+```
+
+3. Nach B-Rolls oder Bildern suchen:
+
+```bash
+npm run pexels:search -- "Person arbeitet am Laptop" --type video --orientation vertical --per-page 20
+npm run pexels:search -- "moderne Fabrik" --type photo --orientation horizontal --per-page 20
+```
+
+Die Ergebnisse werden unter `.local-storage/pexels-search/` gespeichert. Der Schlüssel, die Suchdateien und große Medien werden nicht in GitHub veröffentlicht. Die Suche lädt zunächst nur Metadaten und Vorschaulinks, keine Originaldateien. Weitere Hinweise stehen in [`docs/PEXELS.md`](docs/PEXELS.md).
+
 ## Grundstruktur
 
 ```text
@@ -110,6 +128,7 @@ Das genaue Datenmodell steht in [`catalog/schema.json`](catalog/schema.json). Di
 
 ```bash
 npm run asset:add -- --help
+npm run pexels:search -- --help
 npm run validate
 npm run index
 npm run test
@@ -118,9 +137,10 @@ npm run serve
 ```
 
 - `asset:add`: nimmt eine neue Datei sicher auf und rollt bei Fehlern zurück
+- `pexels:search`: sucht kostenlose Pexels-Fotos oder -Videos und speichert Quellenangaben lokal
 - `validate`: prüft IDs, Dateinamen, Kategorien, Pfade, Rechte, Laufzeiten und Dubletten
 - `index`: erzeugt `catalog/search-index.json` für die Websuche
-- `test`: prüft Taxonomie, Katalogvertrag und deterministische Indexierung
+- `test`: prüft Taxonomie, Katalogvertrag, Pexels-Client und deterministische Indexierung
 - `check`: führt Validierung, Indexierung und Tests aus
 - `serve`: startet die lokale Suchoberfläche
 
@@ -155,10 +175,11 @@ Die erste funktionsfähige Stufe enthält:
 - verbindlichen Benennungsstandard
 - strukturiertes Metadatenschema
 - sicheren Asset-Import
+- kostenlose Pexels-Foto- und Videosuche
 - Rechte- und Dublettenprüfung
 - deterministischen Suchindex
 - responsive Websuche mit Filtern und Detailansicht
 - Git-LFS-Regeln
 - automatischen GitHub-Workflow
 
-Spätere Ausbaustufen: automatische Vorschauerzeugung, Metadatenanalyse über FFmpeg, KI-Tagging, Cloud-Storage-Synchronisierung, Nutzungshistorie und visuelle Ähnlichkeitssuche.
+Spätere Ausbaustufen: gezielter Originaldownload, automatische Vorschauerzeugung, Metadatenanalyse über FFmpeg, KI-Tagging, Cloud-Storage-Synchronisierung, Nutzungshistorie und visuelle Ähnlichkeitssuche.
