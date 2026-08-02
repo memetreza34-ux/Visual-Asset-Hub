@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://visual-asset-hub.local/catalog/schema.json",
+  "title": "Visual Asset Hub Catalog",
+  "type": "object",
+  "required": ["catalogVersion", "updatedAt", "assets"],
+  "properties": {
+    "catalogVersion": { "type": "integer", "minimum": 1 },
+    "updatedAt": { "type": "string", "format": "date-time" },
+    "assets": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/asset" }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "asset": {
+      "type": "object",
+      "required": [
+        "id",
+        "filename",
+        "title",
+        "description",
+        "type",
+        "category",
+        "tags",
+        "subject",
+        "action",
+        "orientation",
+        "shotType",
+        "cameraMovement",
+        "style",
+        "status",
+        "qualityRating",
+        "storage",
+        "rights",
+        "createdAt",
+        "importedAt"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^VAH-[A-Z0-9]{8}$" },
+        "filename": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]+$" },
+        "title": { "type": "string", "minLength": 3, "maxLength": 160 },
+        "description": { "type": "string", "minLength": 10, "maxLength": 1500 },
+        "type": {
+          "enum": ["video", "image", "animation", "overlay", "screen-recording", "graphic", "icon", "mockup"]
+        },
+        "category": { "$ref": "#/$defs/slug" },
+        "secondaryCategories": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/slug" },
+          "uniqueItems": true,
+          "maxItems": 5,
+          "default": []
+        },
+        "tags": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/slug" },
+          "uniqueItems": true,
+          "minItems": 2,
+          "maxItems": 40
+        },
+        "searchAliases": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 2, "maxLength": 80 },
+          "uniqueItems": true,
+          "maxItems": 30,
+          "default": []
+        },
+        "subject": { "$ref": "#/$defs/slug" },
+        "action": { "$ref": "#/$defs/slug" },
+        "orientation": {
+          "enum": ["vertical", "horizontal", "square", "portrait", "landscape", "transparent", "mixed"]
+        },
+        "shotType": {
+          "enum": ["ecu", "cu", "mcu", "ms", "mls", "ls", "els", "top-down", "pov", "macro", "screen", "aerial", "mixed", "not-applicable"]
+        },
+        "cameraMovement": {
+          "enum": ["static", "pan", "tilt", "zoom", "dolly", "tracking", "handheld", "orbit", "drone", "screen-capture", "mixed", "not-applicable"]
+        },
+        "style": {
+          "enum": ["realistic", "cinematic", "documentary", "studio", "ugc", "minimal", "isometric-3d", "illustration-2d", "illustration-3d", "motion-graphics", "ui", "transparent-overlay", "texture", "mixed"]
+        },
+        "status": { "enum": ["inbox", "review", "approved", "restricted", "archived"] },
+        "qualityRating": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "technical": {
+          "type": "object",
+          "properties": {
+            "width": { "type": "integer", "minimum": 1 },
+            "height": { "type": "integer", "minimum": 1 },
+            "durationSeconds": { "type": "number", "minimum": 0 },
+            "fps": { "type": "number", "minimum": 0 },
+            "codec": { "type": "string", "maxLength": 40 },
+            "hasAudio": { "type": "boolean" },
+            "alphaChannel": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        },
+        "storage": {
+          "type": "object",
+          "required": ["kind"],
+          "properties": {
+            "kind": { "enum": ["repository", "git-lfs", "external"] },
+            "path": { "type": "string", "maxLength": 500 },
+            "previewPath": { "type": "string", "maxLength": 500 },
+            "externalUrl": { "type": "string", "format": "uri", "maxLength": 2000 }
+          },
+          "additionalProperties": false
+        },
+        "rights": {
+          "type": "object",
+          "required": ["licenseStatus", "sourceName", "usageScopes", "attributionRequired"],
+          "properties": {
+            "licenseStatus": {
+              "enum": ["owned", "licensed", "public-domain", "cc0", "cc-by", "editorial-only", "restricted", "unknown"]
+            },
+            "sourceName": { "type": "string", "minLength": 2, "maxLength": 200 },
+            "sourceUrl": { "type": "string", "format": "uri", "maxLength": 2000 },
+            "licenseUrl": { "type": "string", "format": "uri", "maxLength": 2000 },
+            "usageScopes": {
+              "type": "array",
+              "items": {
+                "enum": ["organic-social", "paid-ads", "youtube", "website", "app", "presentation", "client-work", "editorial", "internal-only"]
+              },
+              "uniqueItems": true,
+              "minItems": 1
+            },
+            "attributionRequired": { "type": "boolean" },
+            "attributionText": { "type": "string", "maxLength": 1000 },
+            "expiresAt": { "type": "string", "format": "date" },
+            "notes": { "type": "string", "maxLength": 2000 }
+          },
+          "additionalProperties": false
+        },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "importedAt": { "type": "string", "format": "date-time" },
+        "createdBy": { "type": "string", "maxLength": 120 },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "notes": { "type": "string", "maxLength": 3000 }
+      },
+      "additionalProperties": false
+    }
+  }
+}
