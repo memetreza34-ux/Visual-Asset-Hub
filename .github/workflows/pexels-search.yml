@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+      PEXELS_API_KEY: ${{ secrets.PEXELS_API }}
 
     steps:
       - name: Repository laden
@@ -59,7 +59,7 @@ jobs:
         shell: bash
         run: |
           if [ -z "$PEXELS_API_KEY" ]; then
-            echo "PEXELS_API_KEY fehlt. Unter Settings > Secrets and variables > Actions anlegen."
+            echo "GitHub Secret PEXELS_API fehlt. Unter Settings > Secrets and variables > Actions anlegen."
             exit 1
           fi
 
