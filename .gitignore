@@ -1,0 +1,22 @@
+node_modules/
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+*.log
+
+# Ungeprüfte und lokale Arbeitsdateien nicht veröffentlichen.
+inbox/*
+!inbox/README.md
+archive/*
+!archive/README.md
+tmp/
+
+# Betriebssystem- und Editor-Dateien.
+.vscode/
+.idea/
+
+# Lokale Storage- und Vorschaudaten.
+.local-storage/
+preview-cache/

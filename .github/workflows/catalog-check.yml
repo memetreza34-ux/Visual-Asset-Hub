@@ -1,0 +1,35 @@
+name: Catalog Check
+
+on:
+  push:
+    branches: [main, "codex/**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: visual-asset-hub-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  catalog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout metadata and code
+        uses: actions/checkout@v4
+        with:
+          lfs: false
+          persist-credentials: false
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate, build index and test
+        run: npm run check
+
+      - name: Verify generated index is committed
+        run: git diff --exit-code -- catalog/search-index.json

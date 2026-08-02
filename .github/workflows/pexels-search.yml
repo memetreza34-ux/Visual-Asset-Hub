@@ -1,0 +1,81 @@
+name: Pexels suchen
+
+on:
+  workflow_dispatch:
+    inputs:
+      query:
+        description: "Wonach soll gesucht werden?"
+        required: true
+        type: string
+      media_type:
+        description: "Fotos oder Videos"
+        required: true
+        default: video
+        type: choice
+        options:
+          - video
+          - photo
+      orientation:
+        description: "Format"
+        required: true
+        default: vertical
+        type: choice
+        options:
+          - vertical
+          - horizontal
+          - square
+          - any
+      per_page:
+        description: "Anzahl der Ergebnisse"
+        required: true
+        default: "20"
+        type: choice
+        options:
+          - "10"
+          - "20"
+          - "40"
+          - "80"
+
+permissions:
+  contents: read
+
+jobs:
+  search:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+
+    steps:
+      - name: Repository laden
+        uses: actions/checkout@v4
+
+      - name: Node.js 22 verwenden
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: API-Schlüssel prüfen
+        shell: bash
+        run: |
+          if [ -z "$PEXELS_API_KEY" ]; then
+            echo "PEXELS_API_KEY fehlt. Unter Settings > Secrets and variables > Actions anlegen."
+            exit 1
+          fi
+
+      - name: Pexels durchsuchen
+        shell: bash
+        run: |
+          ARGS=("${{ inputs.query }}" --type "${{ inputs.media_type }}" --per-page "${{ inputs.per_page }}")
+          if [ "${{ inputs.orientation }}" != "any" ]; then
+            ARGS+=(--orientation "${{ inputs.orientation }}")
+          fi
+          npm run pexels:search -- "${ARGS[@]}"
+
+      - name: Suchergebnisse bereitstellen
+        uses: actions/upload-artifact@v4
+        with:
+          name: pexels-${{ inputs.media_type }}-results
+          path: .local-storage/pexels-search/
+          if-no-files-found: error
+          retention-days: 7

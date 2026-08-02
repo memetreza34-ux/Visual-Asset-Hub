@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "description": "Empfohlene Themen-Tags pro Hauptkategorie. Weitere präzise Slug-Tags bleiben erlaubt.",
+  "topics": {
+    "people-lifestyle": ["daily-life", "morning-routine", "family", "friends", "children", "teenager", "adult", "senior", "community", "relationship", "fashion", "shopping", "cleaning", "hobby", "personal-growth", "diversity"],
+    "business-work": ["office", "meeting", "teamwork", "startup", "leadership", "remote-work", "presentation", "sales", "customer-service", "negotiation", "planning", "hiring", "freelancing", "workspace", "productivity", "time-management"],
+    "technology-ai": ["artificial-intelligence", "coding", "software", "automation", "cloud", "robotics", "cybersecurity", "data", "computer", "smartphone", "gadget", "electronics", "virtual-reality", "smart-home", "machine-learning", "server"],
+    "money-finance": ["money", "banking", "saving", "budgeting", "investing", "trading", "stock-market", "crypto", "tax", "debt", "inflation", "economy", "insurance", "ecommerce", "passive-income", "payment"],
+    "education-learning": ["studying", "school", "university", "book", "online-learning", "classroom", "note-taking", "exam", "tutoring", "research", "focus", "calendar", "task-list", "habit", "goal-setting", "deep-work"],
+    "health-fitness": ["doctor", "hospital", "medicine", "nutrition", "mental-health", "sleep", "stress", "self-care", "therapy", "anatomy", "prevention", "gym", "running", "workout", "stretching", "recovery", "swimming", "cycling", "boxing", "yoga"],
+    "food-drink": ["cooking", "kitchen", "restaurant", "grocery", "fruit", "vegetable", "fast-food", "healthy-meal", "drink", "coffee", "bakery", "dessert", "meal-prep", "ingredient", "breakfast", "dinner"],
+    "travel-places": ["airport", "airplane", "hotel", "beach", "mountain", "city-trip", "road-trip", "suitcase", "map", "vacation", "train-travel", "adventure", "landmark", "tourism", "street", "skyline"],
+    "nature-environment": ["forest", "river", "ocean", "sunset", "sky", "flower", "animal", "weather", "landscape", "mountain", "desert", "underwater", "climate", "renewable-energy", "recycling", "sustainability"],
+    "industry-trades": ["factory", "machine", "tool", "electrician", "construction-site", "warehouse", "maintenance", "production", "work-safety", "energy", "logistics", "technician", "installation", "repair", "inspection", "craft"],
+    "vehicles-transport": ["car", "train", "airplane", "bicycle", "motorcycle", "ship", "electric-vehicle", "public-transport", "traffic", "delivery", "truck", "station", "railway", "charging", "driving", "commuting"],
+    "home-architecture": ["house", "apartment", "construction", "architecture", "interior", "rental", "property-investment", "renovation", "office-building", "smart-building", "living-room", "kitchen", "bathroom", "garden", "furniture", "floor-plan"],
+    "social-media-creator": ["creator", "influencer", "podcast", "youtube", "tiktok", "instagram", "livestream", "content-creation", "video-editing", "thumbnail", "audience", "engagement", "camera", "microphone", "viral", "notification"],
+    "objects-products": ["product", "package", "box", "bottle", "device", "tool", "clothing", "accessory", "cosmetic", "furniture", "food-package", "electronics", "unboxing", "showcase", "prototype", "merchandise"],
+    "news-events": ["interview", "microphone", "breaking-news", "newspaper", "reporter", "timeline", "documentary", "press", "public-event", "archive-footage", "conference", "announcement", "speech", "crowd", "election", "emergency"],
+    "emotions-reactions": ["success", "failure", "stress", "happiness", "loneliness", "hope", "fear", "confusion", "motivation", "discipline", "growth", "freedom", "risk", "trust", "surprise", "anger", "sadness", "confidence"],
+    "abstract-backgrounds": ["gradient", "light-leak", "particle", "futuristic", "minimal", "texture", "geometric", "dark", "clean", "motion-background", "paper", "glass", "smoke", "wave", "grid", "noise"],
+    "ui-apps": ["dashboard", "app-interface", "chart", "graph", "notification", "mobile-screen", "website", "laptop-screen", "code-screen", "payment-interface", "map-interface", "form", "login", "analytics", "calendar", "settings"],
+    "science-engineering": ["physics", "chemistry", "biology", "space", "astronomy", "mathematics", "experiment", "microscope", "laboratory", "climate", "electricity", "circuit", "motor", "sensor", "engineering", "technical-drawing"],
+    "culture-entertainment": ["music", "film", "gaming", "art", "museum", "festival", "concert", "theater", "mosque", "church", "prayer", "tradition", "cultural-event", "history", "heritage", "community-event"]
+  },
+  "moods": ["neutral", "calm", "focused", "happy", "serious", "energetic", "dramatic", "inspiring", "premium", "emotional", "tense", "hopeful", "sad", "confident", "urgent", "curious", "trustworthy", "playful"]
+}
