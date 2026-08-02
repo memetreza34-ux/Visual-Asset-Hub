@@ -126,11 +126,15 @@ if (args.dryRun === 'true') {
 }
 
 let copiedPath;
+let copiedByScript = false;
 try {
   if (sourceFile) {
     copiedPath = path.join(root, ...assetPath.split('/'));
     fs.mkdirSync(path.dirname(copiedPath), { recursive: true });
-    fs.copyFileSync(sourceFile, copiedPath, fs.constants.COPYFILE_EXCL);
+    if (path.resolve(sourceFile) !== path.resolve(copiedPath)) {
+      fs.copyFileSync(sourceFile, copiedPath, fs.constants.COPYFILE_EXCL);
+      copiedByScript = true;
+    }
   }
   fs.writeFileSync(catalogPath, `${JSON.stringify(nextCatalog, null, 2)}\n`);
 
@@ -152,7 +156,7 @@ try {
   console.log(`Asset ${id} wurde sicher aufgenommen.`);
 } catch (error) {
   fs.writeFileSync(catalogPath, previousCatalog);
-  if (copiedPath && fs.existsSync(copiedPath)) fs.rmSync(copiedPath, { force: true });
+  if (copiedByScript && copiedPath && fs.existsSync(copiedPath)) fs.rmSync(copiedPath, { force: true });
   fail(`Import wurde zurückgerollt: ${error instanceof Error ? error.message : String(error)}`);
 }
 
@@ -217,7 +221,18 @@ function slugExtension(value) {
 }
 
 function sha256(file) {
-  return createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+  const hash = createHash('sha256');
+  const descriptor = fs.openSync(file, 'r');
+  const buffer = Buffer.allocUnsafe(1024 * 1024);
+  try {
+    let bytesRead;
+    while ((bytesRead = fs.readSync(descriptor, buffer, 0, buffer.length, null)) > 0) {
+      hash.update(buffer.subarray(0, bytesRead));
+    }
+    return hash.digest('hex');
+  } finally {
+    fs.closeSync(descriptor);
+  }
 }
 
 function compact(value) {
