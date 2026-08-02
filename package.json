@@ -1,0 +1,16 @@
+{
+  "name": "visual-asset-hub",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "asset:add": "node scripts/add-asset.mjs",
+    "validate": "node scripts/validate-catalog.mjs",
+    "index": "node scripts/build-index.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "check": "npm run validate && npm run index && npm run test"
+  }
+}
