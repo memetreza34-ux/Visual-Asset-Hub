@@ -8,6 +8,7 @@
   },
   "scripts": {
     "asset:add": "node scripts/add-asset.mjs",
+    "pexels:search": "node scripts/pexels-search.mjs",
     "validate": "node scripts/validate-catalog.mjs",
     "index": "node scripts/build-index.mjs",
     "serve": "node scripts/serve.mjs",
