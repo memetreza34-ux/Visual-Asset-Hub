@@ -1,0 +1,44 @@
+name: Pexels Smoke Test
+
+on:
+  push:
+    branches:
+      - agent/pexels-smoke-test
+
+permissions:
+  contents: read
+
+jobs:
+  search:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+
+    steps:
+      - name: Repository laden
+        uses: actions/checkout@v4
+
+      - name: Node.js 22 verwenden
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: API-Schlüssel prüfen
+        shell: bash
+        run: |
+          if [ -z "$PEXELS_API_KEY" ]; then
+            echo "PEXELS_API_KEY fehlt"
+            exit 1
+          fi
+
+      - name: Testsuche ausführen
+        run: npm run pexels:search -- "artificial intelligence technology" --type video --orientation vertical --per-page 10
+
+      - name: Ergebnisse hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: pexels-ai-technology-vertical-videos
+          path: .local-storage/pexels-search/
+          if-no-files-found: error
+          retention-days: 7
