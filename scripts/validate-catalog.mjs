@@ -15,7 +15,7 @@ const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const idPattern = /^VAH-[A-Z0-9]{8}$/;
 const shaPattern = /^[a-f0-9]{64}$/;
 const filenamePattern = /^[a-z0-9][a-z0-9._-]+$/;
-const secretParamPattern = /(token|signature|sig|secret|api[-_]?key|access[-_]?key|credential)/i;
+const secretParamPattern = /(token|signature|sig|secret|api[-_]?key|access[-_]?key|credential|expires|x-amz|x-goog|policy)/i;
 
 const allowed = {
   types: new Set(taxonomy.assetTypes),
@@ -34,12 +34,13 @@ if (!Number.isInteger(catalog.catalogVersion) || catalog.catalogVersion < 1) {
 }
 if (!isDateTime(catalog.updatedAt)) errors.push('updatedAt muss ein gültiger ISO-Zeitstempel sein.');
 if (!Array.isArray(catalog.assets)) errors.push('assets muss ein Array sein.');
+const assets = Array.isArray(catalog.assets) ? catalog.assets : [];
 
 const ids = new Set();
 const filenames = new Set();
 const hashes = new Map();
 
-for (const [index, asset] of (catalog.assets ?? []).entries()) {
+for (const [index, asset] of assets.entries()) {
   const ref = asset?.id || `assets[${index}]`;
   if (!asset || typeof asset !== 'object' || Array.isArray(asset)) {
     errors.push(`${ref}: Asset muss ein Objekt sein.`);
@@ -103,7 +104,7 @@ if (errors.length) {
   console.error(`Katalogprüfung fehlgeschlagen (${errors.length}):\n- ${errors.join('\n- ')}`);
   process.exit(1);
 }
-console.log(`Katalogprüfung erfolgreich: ${catalog.assets.length} Assets, ${warnings.length} Warnungen.`);
+console.log(`Katalogprüfung erfolgreich: ${assets.length} Assets, ${warnings.length} Warnungen.`);
 
 function validateFilename(asset, ref) {
   const prefix = taxonomy.typePrefixes?.[asset.type];
@@ -132,8 +133,8 @@ function validateFilename(asset, ref) {
 
 function validateStorage(asset, ref) {
   const storage = asset.storage;
-  if (!storage || typeof storage !== 'object') {
-    errors.push(`${ref}: storage fehlt.`);
+  if (!storage || typeof storage !== 'object' || Array.isArray(storage)) {
+    errors.push(`${ref}: storage fehlt oder ist ungültig.`);
     return;
   }
   if (!['repository', 'git-lfs', 'external'].includes(storage.kind)) {
@@ -163,24 +164,28 @@ function validateStorage(asset, ref) {
 
 function validateRights(asset, ref) {
   const rights = asset.rights;
-  if (!rights || typeof rights !== 'object') {
-    errors.push(`${ref}: rights fehlt.`);
+  if (!rights || typeof rights !== 'object' || Array.isArray(rights)) {
+    errors.push(`${ref}: rights fehlt oder ist ungültig.`);
     return;
   }
   assertAllowed(rights.licenseStatus, allowed.licenses, `${ref}: unbekannter Lizenzstatus`, errors);
   requiredString(rights, 'sourceName', `${ref}.rights`, 2, 200);
 
-  if (!Array.isArray(rights.usageScopes) || rights.usageScopes.length === 0) {
+  const usageScopes = Array.isArray(rights.usageScopes) ? rights.usageScopes : [];
+  if (usageScopes.length === 0) {
     errors.push(`${ref}: mindestens ein Nutzungsbereich ist erforderlich.`);
   } else {
-    const unique = new Set(rights.usageScopes);
-    if (unique.size !== rights.usageScopes.length) errors.push(`${ref}: Nutzungsbereiche enthalten Duplikate.`);
-    for (const scope of rights.usageScopes) assertAllowed(scope, allowed.scopes, `${ref}: unbekannter Nutzungsbereich`, errors);
+    const unique = new Set(usageScopes);
+    if (unique.size !== usageScopes.length) errors.push(`${ref}: Nutzungsbereiche enthalten Duplikate.`);
+    for (const scope of usageScopes) assertAllowed(scope, allowed.scopes, `${ref}: unbekannter Nutzungsbereich`, errors);
   }
 
   if (typeof rights.attributionRequired !== 'boolean') errors.push(`${ref}: attributionRequired muss true oder false sein.`);
   if (rights.attributionRequired && !rights.attributionText?.trim()) {
     errors.push(`${ref}: notwendiger Attributionstext fehlt.`);
+  }
+  if (rights.licenseStatus === 'cc-by' && rights.attributionRequired !== true) {
+    errors.push(`${ref}: CC-BY erfordert eine dokumentierte Attribution.`);
   }
   if (rights.sourceUrl) validateSafeUrl(rights.sourceUrl, `${ref}.rights.sourceUrl`);
   if (rights.licenseUrl) validateSafeUrl(rights.licenseUrl, `${ref}.rights.licenseUrl`);
@@ -196,7 +201,7 @@ function validateRights(asset, ref) {
   if (asset.status === 'approved' && ['unknown', 'restricted'].includes(rights.licenseStatus)) {
     errors.push(`${ref}: approved ist mit Lizenzstatus ${rights.licenseStatus} nicht erlaubt.`);
   }
-  if (rights.licenseStatus === 'editorial-only' && rights.usageScopes.some((scope) => !['editorial', 'internal-only'].includes(scope))) {
+  if (rights.licenseStatus === 'editorial-only' && usageScopes.some((scope) => !['editorial', 'internal-only'].includes(scope))) {
     errors.push(`${ref}: editorial-only darf nicht für kommerzielle Nutzungsbereiche freigegeben werden.`);
   }
   if (asset.status === 'restricted' && rights.licenseStatus === 'owned') {
@@ -207,7 +212,7 @@ function validateRights(asset, ref) {
 function validateTechnical(asset, ref) {
   if (asset.technical === undefined) return;
   const technical = asset.technical;
-  if (!technical || typeof technical !== 'object') {
+  if (!technical || typeof technical !== 'object' || Array.isArray(technical)) {
     errors.push(`${ref}: technical muss ein Objekt sein.`);
     return;
   }
