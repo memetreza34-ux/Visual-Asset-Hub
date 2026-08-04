@@ -10,7 +10,7 @@ const elements = {
   orientation: document.querySelector('#orientation-filter'), style: document.querySelector('#style-filter'), status: document.querySelector('#status-filter'),
   license: document.querySelector('#license-filter'), usage: document.querySelector('#usage-filter'), sort: document.querySelector('#sort-filter'),
   favoritesFilter: document.querySelector('#favorites-filter'), reset: document.querySelector('#reset'), loadMore: document.querySelector('#load-more'),
-  assetCount: document.querySelector('#asset-count'), reviewCount: document.querySelector('#review-count'), approvedCount: document.querySelector('#approved-count'),
+  assetCount: document.querySelector('#asset-count'), reviewCount: document.querySelector('#review-count'), approvedCount: document.querySelector('#approved-count'), usageCount: document.querySelector('#usage-count'),
   resultCount: document.querySelector('#result-count'), catalogDate: document.querySelector('#catalog-date'), grid: document.querySelector('#asset-grid'),
   empty: document.querySelector('#empty-state'), cardTemplate: document.querySelector('#asset-card-template'), dialog: document.querySelector('#asset-dialog'),
   dialogContent: document.querySelector('#dialog-content'), dialogClose: document.querySelector('.dialog-close')
@@ -28,6 +28,7 @@ async function init() {
   elements.assetCount.textContent = String(state.index.assetCount);
   elements.reviewCount.textContent = String(state.index.reviewCount ?? countStatus('review'));
   elements.approvedCount.textContent = String(state.index.approvedCount ?? countStatus('approved'));
+  elements.usageCount.textContent = String(state.index.totalUsageCount ?? 0);
   elements.catalogDate.textContent = `Katalogstand: ${formatDate(state.index.catalogUpdatedAt)}`;
   populateFilter(elements.type, state.index.facets.types);
   populateFilter(elements.category, state.index.facets.categories);
@@ -94,7 +95,7 @@ function createCard(record) {
     const image = document.createElement('img'); image.src = resolveAssetUrl(record.preview); image.alt = ''; image.loading = 'lazy'; preview.replaceChildren(image);
   } else fragment.querySelector('.preview-type').textContent = typeLabel(record.type);
   fragment.querySelector('.type-badge').textContent = typeLabel(record.type);
-  fragment.querySelector('.quality').textContent = `★ ${record.qualityRating}/5`;
+  fragment.querySelector('.quality').textContent = `★ ${record.qualityRating}/5${record.usageCount ? ` · ${record.usageCount}× genutzt` : ''}`;
   fragment.querySelector('h2').textContent = record.title;
   fragment.querySelector('.description').textContent = record.description;
   fragment.querySelector('.category').textContent = label(record.category);
@@ -136,7 +137,8 @@ function openDetails(record) {
       ['Dateiname',record.filename],['Typ',typeLabel(record.type)],['Kategorie',label(record.category)],['Motiv',label(record.subject)],['Handlung',label(record.action)],
       ['Ausrichtung',label(record.orientation)],['Kamera',`${label(record.shotType)} · ${label(record.cameraMovement)}`],['Stil',label(record.style)],['Status',label(record.status)],
       ['Lizenz',label(record.licenseStatus)],['Quelle',record.sourceName || '–'],['Erlaubte Nutzung',record.usageScopes.map(label).join(', ')],
-      ['Attribution',record.attributionRequired ? (record.attributionText || 'Erforderlich') : 'Nicht erforderlich'],['Importiert',formatDate(record.importedAt)]
+      ['Attribution',record.attributionRequired ? (record.attributionText || 'Erforderlich') : 'Nicht erforderlich'],['Importiert',formatDate(record.importedAt)],
+      ['Bisher genutzt',`${record.usageCount ?? 0}×`],['Zuletzt genutzt',formatDate(record.lastUsedAt)],['Projekte',(record.usedInProjects ?? []).map(label).join(', ') || '–'],['Plattformen',(record.usedOnPlatforms ?? []).map(label).join(', ') || '–']
     ])
   );
   if (record.technical) {
@@ -153,7 +155,7 @@ function definitionList(entries){const list=document.createElement('dl');for(con
 function populateFilter(select,counts){for(const[value,count]of Object.entries(counts)){if(count===0)continue;const option=document.createElement('option');option.value=value;option.textContent=`${label(value)} (${count})`;select.append(option);}}
 function restoreUrlState(){const params=new URLSearchParams(location.search);for(const key of ['query','type','category','orientation','style','status','license','usage','sort'])if(params.has(key))state[key]=params.get(key)||'';state.favoritesOnly=params.get('favorites')==='1';elements.search.value=state.query;elements.type.value=state.type;elements.category.value=state.category;elements.orientation.value=state.orientation;elements.style.value=state.style;elements.status.value=state.status;elements.license.value=state.license;elements.usage.value=state.usage;elements.sort.value=state.sort;elements.favoritesFilter.checked=state.favoritesOnly;}
 function syncUrlState(){const params=new URLSearchParams();for(const key of ['query','type','category','orientation','style','status','license','usage','sort']){const value=state[key];if(value&&!(key==='sort'&&value==='quality'))params.set(key,value);}if(state.favoritesOnly)params.set('favorites','1');history.replaceState({},'',`${location.pathname}${params.size?`?${params}`:''}`);}
-function sortRecords(a,b){if(state.sort==='title')return a.title.localeCompare(b.title,'de');if(state.sort==='category')return a.category.localeCompare(b.category)||a.title.localeCompare(b.title,'de');if(state.sort==='newest')return Date.parse(b.importedAt)-Date.parse(a.importedAt)||a.title.localeCompare(b.title,'de');return b.qualityRating-a.qualityRating||a.title.localeCompare(b.title,'de');}
+function sortRecords(a,b){if(state.sort==='title')return a.title.localeCompare(b.title,'de');if(state.sort==='category')return a.category.localeCompare(b.category)||a.title.localeCompare(b.title,'de');if(state.sort==='newest')return Date.parse(b.importedAt)-Date.parse(a.importedAt)||a.title.localeCompare(b.title,'de');if(state.sort==='most-used')return (b.usageCount??0)-(a.usageCount??0)||b.qualityRating-a.qualityRating||a.title.localeCompare(b.title,'de');return b.qualityRating-a.qualityRating||a.title.localeCompare(b.title,'de');}
 function normalize(value){return value.normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();}
 function resolveAssetUrl(value){if(/^https?:\/\//i.test(value))return value;return`../${value.replace(/^\.\//,'')}`;}
 function label(value){return String(value??'').replaceAll('-',' ').replace(/\b\w/g,(character)=>character.toUpperCase());}
