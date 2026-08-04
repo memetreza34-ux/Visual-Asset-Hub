@@ -2,7 +2,7 @@ name: Catalog Check
 
 on:
   push:
-    branches: [main, "codex/**"]
+    branches: [main, "agent/**", "codex/**"]
   pull_request:
 
 permissions:
@@ -17,19 +17,23 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Checkout metadata and code
+      - name: Repository laden
         uses: actions/checkout@v4
         with:
           lfs: false
           persist-credentials: false
-
-      - name: Use Node.js 22
+      - name: Node.js 22 verwenden
         uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Validate, build index and test
+        with: { node-version: 22 }
+      - name: Syntax, Katalog, Index und Tests prüfen
         run: npm run check
-
-      - name: Verify generated index is committed
+      - name: Generierten Index prüfen
         run: git diff --exit-code -- catalog/search-index.json
+      - name: Katalogbericht erzeugen
+        run: npm run report
+      - name: Bericht bereitstellen
+        uses: actions/upload-artifact@v4
+        with:
+          name: katalogbericht-${{ github.run_id }}
+          path: reports/
+          retention-days: 7
