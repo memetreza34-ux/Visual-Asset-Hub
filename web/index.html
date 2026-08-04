@@ -7,6 +7,7 @@
   <title>Visual Asset Hub</title>
   <link rel="stylesheet" href="./styles.css" />
   <script type="module" src="./app.js"></script>
+  <script type="module" src="./selection-tools.js"></script>
 </head>
 <body>
   <header class="hero">
@@ -36,6 +37,14 @@
       <label><span>Sortierung</span><select id="sort-filter"><option value="quality">Beste Qualität</option><option value="newest">Neu importiert</option><option value="most-used">Am häufigsten genutzt</option><option value="title">Titel A–Z</option><option value="category">Kategorie</option></select></label>
       <label class="favorite-filter"><input id="favorites-filter" type="checkbox" /><span>Nur Favoriten</span></label>
       <button id="reset" type="button">Filter zurücksetzen</button>
+    </section>
+
+    <section class="selection-bar" aria-label="Aktuelle Asset-Auswahl">
+      <span><strong id="favorite-selection-count">0</strong> Favoriten in der Auswahl</span>
+      <div>
+        <button id="export-favorites" type="button">Auswahl exportieren</button>
+        <button id="clear-favorites" type="button">Auswahl leeren</button>
+      </div>
     </section>
 
     <section class="result-bar" aria-live="polite"><strong id="result-count">0 Assets</strong><span id="catalog-date"></span></section>
