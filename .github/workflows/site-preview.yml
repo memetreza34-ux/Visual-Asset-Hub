@@ -1,0 +1,37 @@
+name: Katalog-Testversion bauen
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "web/**"
+      - "catalog/**"
+      - "assets/**"
+      - "previews/**"
+      - "scripts/build-site.mjs"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: { lfs: false }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm run check
+      - run: npm run report
+      - run: npm run site:build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: visual-asset-hub-testversion
+          path: dist/
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: katalogbericht
+          path: reports/
+          retention-days: 7
