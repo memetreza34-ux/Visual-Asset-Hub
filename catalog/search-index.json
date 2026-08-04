@@ -1,16 +1,16 @@
 {
   "indexVersion": 3,
   "catalogVersion": 1,
-  "catalogUpdatedAt": "2026-08-02T14:30:00.000Z",
+  "catalogUpdatedAt": "2026-08-04T09:35:00.000Z",
   "usageUpdatedAt": "2026-08-04T09:14:00.000Z",
-  "assetCount": 0,
-  "reviewCount": 0,
+  "assetCount": 3,
+  "reviewCount": 3,
   "approvedCount": 0,
   "usedAssetCount": 0,
   "totalUsageCount": 0,
   "facets": {
     "types": {
-      "video": 0,
+      "video": 3,
       "image": 0,
       "animation": 0,
       "overlay": 0,
@@ -22,7 +22,7 @@
     "categories": {
       "people-lifestyle": 0,
       "business-work": 0,
-      "technology-ai": 0,
+      "technology-ai": 3,
       "money-finance": 0,
       "education-learning": 0,
       "health-fitness": 0,
@@ -42,7 +42,7 @@
       "culture-entertainment": 0
     },
     "orientations": {
-      "vertical": 0,
+      "vertical": 3,
       "horizontal": 0,
       "square": 0,
       "portrait": 0,
@@ -51,7 +51,7 @@
       "mixed": 0
     },
     "styles": {
-      "realistic": 0,
+      "realistic": 3,
       "cinematic": 0,
       "documentary": 0,
       "studio": 0,
@@ -68,14 +68,14 @@
     },
     "statuses": {
       "inbox": 0,
-      "review": 0,
+      "review": 3,
       "approved": 0,
       "restricted": 0,
       "archived": 0
     },
     "licenseStatuses": {
       "owned": 0,
-      "licensed": 0,
+      "licensed": 3,
       "public-domain": 0,
       "cc0": 0,
       "cc-by": 0,
@@ -84,10 +84,10 @@
       "unknown": 0
     },
     "usageScopes": {
-      "organic-social": 0,
+      "organic-social": 3,
       "paid-ads": 0,
-      "youtube": 0,
-      "website": 0,
+      "youtube": 3,
+      "website": 3,
       "app": 0,
       "presentation": 0,
       "client-work": 0,
@@ -95,5 +95,188 @@
       "internal-only": 0
     }
   },
-  "records": []
+  "records": [
+    {
+      "id": "VAH-P6153727",
+      "filename": "brl-technology-ai-robotic-hand-opening-hand-cu-vertical-0001.mp4",
+      "title": "Robotische Hand in Bewegung",
+      "description": "Vertikales Pexels-Video einer technologischen beziehungsweise robotischen Hand in Bewegung. Der vollständige Inhalt muss vor der Freigabe visuell geprüft werden.",
+      "type": "video",
+      "category": "technology-ai",
+      "secondaryCategories": [
+        "science-engineering"
+      ],
+      "tags": [
+        "robotic-hand",
+        "technology",
+        "artificial-intelligence",
+        "future",
+        "pexels"
+      ],
+      "searchAliases": [
+        "Roboterhand",
+        "künstliche Hand",
+        "robotic hand",
+        "future technology"
+      ],
+      "subject": "robotic-hand",
+      "action": "opening-hand",
+      "orientation": "vertical",
+      "shotType": "cu",
+      "cameraMovement": "mixed",
+      "style": "realistic",
+      "status": "review",
+      "qualityRating": 4,
+      "usageScopes": [
+        "organic-social",
+        "youtube",
+        "website"
+      ],
+      "licenseStatus": "licensed",
+      "attributionRequired": false,
+      "attributionText": "Video von cottonbro studio auf Pexels",
+      "sourceName": "Pexels",
+      "sourcePage": "https://www.pexels.com/de-de/video/hand-technologie-offen-schau-6153727/",
+      "licenseUrl": "https://www.pexels.com/license/",
+      "preview": null,
+      "source": "https://videos.pexels.com/video-files/6153727/6153727-hd_720_1366_25fps.mp4",
+      "storageKind": "external",
+      "technical": {
+        "width": 720,
+        "height": 1366,
+        "durationSeconds": 11,
+        "fps": 25,
+        "codec": "h264/mp4"
+      },
+      "importedAt": "2026-08-04T09:35:00.000Z",
+      "createdAt": "2026-08-04T09:35:00.000Z",
+      "usageCount": 0,
+      "lastUsedAt": null,
+      "usedInProjects": [],
+      "usedOnPlatforms": [],
+      "searchableText": "vah p6153727 brl technology ai robotic hand opening hand cu vertical 0001 mp4 robotische hand in bewegung vertikales pexels video einer technologischen beziehungsweise robotischen hand in bewegung der vollstandige inhalt muss vor der freigabe visuell gepruft werden video technology ai science engineering robotic hand technology artificial intelligence future pexels roboterhand kunstliche hand robotic hand future technology robotic hand opening hand vertical cu mixed realistic licensed pexels organic social youtube website"
+    },
+    {
+      "id": "VAH-P8087308",
+      "filename": "brl-technology-ai-humanoid-robot-holding-ms-vertical-0001.mp4",
+      "title": "Person hält humanoides Technologieobjekt",
+      "description": "Vertikales Pexels-Video mit einer Person und einem humanoiden Technologieobjekt. Eignung, sichtbare Personen und mögliche Marken müssen vor der Freigabe geprüft werden.",
+      "type": "video",
+      "category": "technology-ai",
+      "secondaryCategories": [
+        "science-engineering",
+        "people-lifestyle"
+      ],
+      "tags": [
+        "humanoid-robot",
+        "technology",
+        "artificial-intelligence",
+        "person",
+        "pexels"
+      ],
+      "searchAliases": [
+        "humanoider Roboter",
+        "AI robot",
+        "Mensch und Roboter",
+        "future technology"
+      ],
+      "subject": "humanoid-robot",
+      "action": "holding",
+      "orientation": "vertical",
+      "shotType": "ms",
+      "cameraMovement": "mixed",
+      "style": "realistic",
+      "status": "review",
+      "qualityRating": 4,
+      "usageScopes": [
+        "organic-social",
+        "youtube",
+        "website"
+      ],
+      "licenseStatus": "licensed",
+      "attributionRequired": false,
+      "attributionText": "Video von Pavel Danilyuk auf Pexels",
+      "sourceName": "Pexels",
+      "sourcePage": "https://www.pexels.com/de-de/video/mann-person-technologie-festhalten-8087308/",
+      "licenseUrl": "https://www.pexels.com/license/",
+      "preview": null,
+      "source": "https://videos.pexels.com/video-files/8087308/8087308-hd_720_1280_25fps.mp4",
+      "storageKind": "external",
+      "technical": {
+        "width": 720,
+        "height": 1280,
+        "durationSeconds": 9,
+        "fps": 25,
+        "codec": "h264/mp4"
+      },
+      "importedAt": "2026-08-04T09:35:00.000Z",
+      "createdAt": "2026-08-04T09:35:00.000Z",
+      "usageCount": 0,
+      "lastUsedAt": null,
+      "usedInProjects": [],
+      "usedOnPlatforms": [],
+      "searchableText": "vah p8087308 brl technology ai humanoid robot holding ms vertical 0001 mp4 person halt humanoides technologieobjekt vertikales pexels video mit einer person und einem humanoiden technologieobjekt eignung sichtbare personen und mogliche marken mussen vor der freigabe gepruft werden video technology ai science engineering people lifestyle humanoid robot technology artificial intelligence person pexels humanoider roboter ai robot mensch und roboter future technology humanoid robot holding vertical ms mixed realistic licensed pexels organic social youtube website"
+    },
+    {
+      "id": "VAH-P8328141",
+      "filename": "brl-technology-ai-robot-companion-drinking-coffee-ms-vertical-0001.mp4",
+      "title": "Person mit Roboter und Getränk",
+      "description": "Vertikales Pexels-Video einer Person in einer Alltagsszene mit einem robotischen Technologieobjekt und einem Getränk. Der vollständige Inhalt muss vor der Freigabe geprüft werden.",
+      "type": "video",
+      "category": "technology-ai",
+      "secondaryCategories": [
+        "people-lifestyle",
+        "culture-entertainment"
+      ],
+      "tags": [
+        "robot-companion",
+        "technology",
+        "artificial-intelligence",
+        "coffee",
+        "pexels"
+      ],
+      "searchAliases": [
+        "Roboter im Alltag",
+        "coffee with robot",
+        "robot companion",
+        "future lifestyle"
+      ],
+      "subject": "robot-companion",
+      "action": "drinking-coffee",
+      "orientation": "vertical",
+      "shotType": "ms",
+      "cameraMovement": "mixed",
+      "style": "realistic",
+      "status": "review",
+      "qualityRating": 4,
+      "usageScopes": [
+        "organic-social",
+        "youtube",
+        "website"
+      ],
+      "licenseStatus": "licensed",
+      "attributionRequired": false,
+      "attributionText": "Video von Pavel Danilyuk auf Pexels",
+      "sourceName": "Pexels",
+      "sourcePage": "https://www.pexels.com/de-de/video/mann-technologie-trinken-drinnen-8328141/",
+      "licenseUrl": "https://www.pexels.com/license/",
+      "preview": null,
+      "source": "https://videos.pexels.com/video-files/8328141/8328141-hd_720_1280_25fps.mp4",
+      "storageKind": "external",
+      "technical": {
+        "width": 720,
+        "height": 1280,
+        "durationSeconds": 36,
+        "fps": 25,
+        "codec": "h264/mp4"
+      },
+      "importedAt": "2026-08-04T09:35:00.000Z",
+      "createdAt": "2026-08-04T09:35:00.000Z",
+      "usageCount": 0,
+      "lastUsedAt": null,
+      "usedInProjects": [],
+      "usedOnPlatforms": [],
+      "searchableText": "vah p8328141 brl technology ai robot companion drinking coffee ms vertical 0001 mp4 person mit roboter und getrank vertikales pexels video einer person in einer alltagsszene mit einem robotischen technologieobjekt und einem getrank der vollstandige inhalt muss vor der freigabe gepruft werden video technology ai people lifestyle culture entertainment robot companion technology artificial intelligence coffee pexels roboter im alltag coffee with robot robot companion future lifestyle robot companion drinking coffee vertical ms mixed realistic licensed pexels organic social youtube website"
+    }
+  ]
 }
