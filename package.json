@@ -11,6 +11,7 @@
     "attribution:export": "node scripts/export-attribution.mjs",
     "backup": "node scripts/catalog-backup.mjs",
     "beta:verify": "node scripts/beta-verify.mjs",
+    "links:check": "node scripts/check-external-links.mjs",
     "pexels:search": "node scripts/pexels-search.mjs",
     "pexels:gallery": "node scripts/pexels-gallery.mjs",
     "pexels:import": "node scripts/pexels-batch-import.mjs",
