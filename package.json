@@ -10,6 +10,7 @@
     "usage:add": "node scripts/record-usage.mjs",
     "attribution:export": "node scripts/export-attribution.mjs",
     "backup": "node scripts/catalog-backup.mjs",
+    "beta:verify": "node scripts/beta-verify.mjs",
     "pexels:search": "node scripts/pexels-search.mjs",
     "pexels:gallery": "node scripts/pexels-gallery.mjs",
     "pexels:import": "node scripts/pexels-batch-import.mjs",
