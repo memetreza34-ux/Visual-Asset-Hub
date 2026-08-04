@@ -205,7 +205,9 @@ function requireText(value, label, min, max) {
   if (typeof value !== 'string') throw new Error(`${label} muss Text sein.`);
   const text = value.trim();
   if (text.length < min || text.length > max) throw new Error(`${label} muss zwischen ${min} und ${max} Zeichen lang sein.`);
-  if (/\0|[\r\n]{3,}/.test(text)) throw new Error(`${label} enthält ungültige Zeichen.`);
+  if (text.startsWith('--') || /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/.test(text) || /[\r\n]{3,}/.test(text)) {
+    throw new Error(`${label} enthält ungültige oder mehrdeutige Zeichen.`);
+  }
   return text;
 }
 
