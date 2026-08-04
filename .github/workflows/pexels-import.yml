@@ -125,7 +125,7 @@ jobs:
           - Anzahl: ${INPUT_COUNT}
           - Status: review
 
-          Originaldateien bleiben extern. Nur kleine Vorschaubilder werden gespeichert. Vor dem Merge jedes Asset visuell und rechtlich im konkreten Kontext prüfen.
+          Originaldateien und Vorschaubilder bleiben standardmäßig extern verlinkt. Vor dem Merge jedes Asset vollständig visuell und im konkreten Nutzungskontext prüfen.
           TEXT
           )
           if ! gh pr create --base main --head "$BRANCH" --title "Pexels-Import: ${INPUT_QUERY}" --body "$BODY"; then
