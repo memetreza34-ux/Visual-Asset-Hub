@@ -23,31 +23,21 @@ if %NODE_MAJOR% LSS 22 (
   exit /b 1
 )
 
-echo [1/4] API-Keys, Syntax, Katalog und Tests werden geprueft...
-call npm run check
+echo [1/3] Vollstaendige Beta-Bereitschaft wird geprueft...
+call npm run beta:verify
 if errorlevel 1 (
   echo.
-  echo [FEHLER] Die Projektpruefung ist fehlgeschlagen. Es wurde kein Server gestartet.
+  echo [FEHLER] Die technische Beta-Pruefung ist fehlgeschlagen. Es wurde kein Server gestartet.
+  echo Details stehen in reports\beta-readiness.md, falls der Bericht erzeugt werden konnte.
   pause
   exit /b 1
 )
 
-echo [2/4] Katalogbericht und Testwebsite werden erzeugt...
-call npm run report
-if errorlevel 1 goto :build_error
-call npm run site:build
-if errorlevel 1 goto :build_error
-
-echo [3/4] Browser wird nach dem Serverstart automatisch geoeffnet...
+echo [2/3] Browser wird nach dem Serverstart automatisch geoeffnet...
 start "Visual Asset Hub Browser" cmd /c "timeout /t 2 /nobreak >nul & start \"\" http://127.0.0.1:4173"
 
-echo [4/4] Visual Asset Hub laeuft. Dieses Fenster offen lassen.
+echo [3/3] Visual Asset Hub laeuft mit lokaler Verwaltung.
+echo Review, Freigabe, Nutzung, Attribution und Backup koennen im Browser gespeichert werden.
 echo Zum Beenden STRG+C druecken.
 call npm run serve
 exit /b %errorlevel%
-
-:build_error
-echo.
-echo [FEHLER] Bericht oder statische Testversion konnte nicht erzeugt werden.
-pause
-exit /b 1
