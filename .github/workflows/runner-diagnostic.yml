@@ -10,8 +10,12 @@ permissions:
 jobs:
   diagnostic:
     if: github.head_ref == 'agent/beta-release'
-    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, windows-latest]
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 5
     steps:
       - name: Runner gestartet
-        run: echo "GitHub Runner funktioniert"
+        run: echo "GitHub Runner funktioniert auf ${{ matrix.os }}"
