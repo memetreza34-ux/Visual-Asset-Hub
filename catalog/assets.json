@@ -1,6 +1,6 @@
 {
   "catalogVersion": 1,
-  "updatedAt": "2026-08-04T09:40:00.000Z",
+  "updatedAt": "2026-08-04T10:50:00.000Z",
   "assets": [
     {
       "id": "VAH-P6153727",
@@ -136,6 +136,126 @@
       "importedAt": "2026-08-04T09:35:00.000Z",
       "createdBy": "chatgpt-assisted-review-import",
       "notes": "Pexels Asset-ID 8328141. Aus dem erfolgreich ausgeführten API-Verbindungstest ausgewählt; Status bleibt review."
+    },
+    {
+      "id": "VAH-GAINET01",
+      "filename": "gfx-abstract-backgrounds-ai-network-background-not-applicable-horizontal-0001.svg",
+      "title": "Abstraktes KI-Netzwerk",
+      "description": "Originale horizontale Vektorgrafik mit leuchtendem Netzwerk, Knoten und zentralem Mikrochip für KI-, Technologie- und Zukunftsinhalte.",
+      "type": "graphic",
+      "category": "abstract-backgrounds",
+      "secondaryCategories": ["technology-ai", "science-engineering"],
+      "tags": ["ai-network", "microchip", "technology", "future", "background"],
+      "searchAliases": ["KI Netzwerk", "künstliche Intelligenz Hintergrund", "AI network", "technology background"],
+      "subject": "ai-network",
+      "action": "background",
+      "orientation": "horizontal",
+      "shotType": "not-applicable",
+      "cameraMovement": "static",
+      "style": "illustration-2d",
+      "status": "review",
+      "qualityRating": 4,
+      "technical": {
+        "width": 1600,
+        "height": 900,
+        "codec": "svg"
+      },
+      "storage": {
+        "kind": "repository",
+        "path": "assets/graphics/original/gfx-abstract-backgrounds-ai-network-background-not-applicable-horizontal-0001.svg"
+      },
+      "rights": {
+        "licenseStatus": "owned",
+        "sourceName": "Visual Asset Hub Original",
+        "usageScopes": ["organic-social", "paid-ads", "youtube", "website", "app", "presentation", "client-work", "internal-only"],
+        "attributionRequired": false,
+        "attributionText": "Originalgrafik aus Visual Asset Hub",
+        "notes": "Eigenständig für Visual Asset Hub erstellte Vektorgrafik. Vor Freigabe Darstellung und gewünschten Einsatzkontext visuell prüfen."
+      },
+      "createdAt": "2026-08-04T10:45:00.000Z",
+      "importedAt": "2026-08-04T10:50:00.000Z",
+      "createdBy": "visual-asset-hub-original-generator",
+      "notes": "Kostenloses Original-Testasset ohne externe Stock-Abhängigkeit; Status bleibt bis zur Sichtprüfung review."
+    },
+    {
+      "id": "VAH-GBIZGR01",
+      "filename": "gfx-business-work-growth-chart-background-not-applicable-horizontal-0001.svg",
+      "title": "Business-Wachstum und Aufwärtstrend",
+      "description": "Originale horizontale Vektorgrafik mit steigenden Balken, Kurve und Aufwärtspfeil für Business-, Finanz-, Marketing- und Erfolgsthemen.",
+      "type": "graphic",
+      "category": "business-work",
+      "secondaryCategories": ["money-finance", "social-media-creator"],
+      "tags": ["growth-chart", "business", "finance", "success", "background"],
+      "searchAliases": ["Wachstum Grafik", "Umsatz steigt", "business growth", "upward chart"],
+      "subject": "growth-chart",
+      "action": "background",
+      "orientation": "horizontal",
+      "shotType": "not-applicable",
+      "cameraMovement": "static",
+      "style": "illustration-2d",
+      "status": "review",
+      "qualityRating": 4,
+      "technical": {
+        "width": 1600,
+        "height": 900,
+        "codec": "svg"
+      },
+      "storage": {
+        "kind": "repository",
+        "path": "assets/graphics/original/gfx-business-work-growth-chart-background-not-applicable-horizontal-0001.svg"
+      },
+      "rights": {
+        "licenseStatus": "owned",
+        "sourceName": "Visual Asset Hub Original",
+        "usageScopes": ["organic-social", "paid-ads", "youtube", "website", "app", "presentation", "client-work", "internal-only"],
+        "attributionRequired": false,
+        "attributionText": "Originalgrafik aus Visual Asset Hub",
+        "notes": "Eigenständig für Visual Asset Hub erstellte Vektorgrafik. Vor Freigabe Darstellung und gewünschten Einsatzkontext visuell prüfen."
+      },
+      "createdAt": "2026-08-04T10:46:00.000Z",
+      "importedAt": "2026-08-04T10:50:00.000Z",
+      "createdBy": "visual-asset-hub-original-generator",
+      "notes": "Kostenloses Original-Testasset ohne externe Stock-Abhängigkeit; Status bleibt bis zur Sichtprüfung review."
+    },
+    {
+      "id": "VAH-GCIRCU01",
+      "filename": "gfx-industry-trades-circuit-blueprint-background-not-applicable-horizontal-0001.svg",
+      "title": "Technischer Schaltplan-Hintergrund",
+      "description": "Originale horizontale Vektorgrafik im technischen Blueprint-Stil mit Leiterbahnen, Mikrochip und Schaltsymbolen für Industrie und Elektrotechnik.",
+      "type": "graphic",
+      "category": "industry-trades",
+      "secondaryCategories": ["science-engineering", "technology-ai"],
+      "tags": ["circuit-blueprint", "electronics", "industry", "engineering", "background"],
+      "searchAliases": ["Schaltplan Hintergrund", "Elektrotechnik Grafik", "circuit board", "technical blueprint"],
+      "subject": "circuit-blueprint",
+      "action": "background",
+      "orientation": "horizontal",
+      "shotType": "not-applicable",
+      "cameraMovement": "static",
+      "style": "illustration-2d",
+      "status": "review",
+      "qualityRating": 4,
+      "technical": {
+        "width": 1600,
+        "height": 900,
+        "codec": "svg"
+      },
+      "storage": {
+        "kind": "repository",
+        "path": "assets/graphics/original/gfx-industry-trades-circuit-blueprint-background-not-applicable-horizontal-0001.svg"
+      },
+      "rights": {
+        "licenseStatus": "owned",
+        "sourceName": "Visual Asset Hub Original",
+        "usageScopes": ["organic-social", "paid-ads", "youtube", "website", "app", "presentation", "client-work", "internal-only"],
+        "attributionRequired": false,
+        "attributionText": "Originalgrafik aus Visual Asset Hub",
+        "notes": "Eigenständig für Visual Asset Hub erstellte Vektorgrafik. Vor Freigabe Darstellung und gewünschten Einsatzkontext visuell prüfen."
+      },
+      "createdAt": "2026-08-04T10:47:00.000Z",
+      "importedAt": "2026-08-04T10:50:00.000Z",
+      "createdBy": "visual-asset-hub-original-generator",
+      "notes": "Kostenloses Original-Testasset ohne externe Stock-Abhängigkeit; Status bleibt bis zur Sichtprüfung review."
     }
   ]
 }
