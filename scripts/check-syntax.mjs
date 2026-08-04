@@ -7,7 +7,7 @@ const root = process.cwd();
 const files = [
   ...collect(path.join(root, 'scripts'), (file) => file.endsWith('.mjs')),
   ...collect(path.join(root, 'tests'), (file) => file.endsWith('.mjs')),
-  path.join(root, 'web/app.js')
+  ...collect(path.join(root, 'web'), (file) => file.endsWith('.js'))
 ].sort();
 
 const failures = [];
