@@ -10,6 +10,7 @@
     "usage:add": "node scripts/record-usage.mjs",
     "attribution:export": "node scripts/export-attribution.mjs",
     "backup": "node scripts/catalog-backup.mjs",
+    "restore": "node scripts/catalog-restore.mjs",
     "beta:verify": "node scripts/beta-verify.mjs",
     "links:check": "node scripts/check-external-links.mjs",
     "pexels:search": "node scripts/pexels-search.mjs",
