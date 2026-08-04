@@ -14,6 +14,11 @@ const platforms = new Set(['tiktok', 'instagram', 'youtube', 'facebook', 'snapch
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const secretParamPattern = /(token|signature|sig|secret|api[-_]?key|access[-_]?key|credential|expires|x-amz|x-goog|policy)/i;
 
+for (const asset of assets) {
+  if (asset.storage?.previewUrl) validateSafeUrl(asset.storage.previewUrl, `${asset.id}.storage.previewUrl`);
+  if (asset.storage?.previewUrl && asset.storage?.previewPath) errors.push(`${asset.id}: previewUrl und previewPath dürfen nicht gleichzeitig gesetzt sein.`);
+}
+
 validateEnvelope(reviews, 'reviews', 'decisions');
 validateEnvelope(usage, 'usage', 'uses');
 
