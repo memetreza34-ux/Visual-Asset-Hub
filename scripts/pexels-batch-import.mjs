@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { spawnSync } from 'node:child_process';
+import { pathToFileURL } from 'node:url';
 import { searchPexels } from './lib/pexels.mjs';
 
 export function slug(value) {
@@ -234,6 +235,8 @@ function escapeRegExp(value){return value.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 function truncate(value,max){const text=String(value);return text.length<=max?text:`${text.slice(0,max-1)}…`;}
 function readJson(file){return JSON.parse(fs.readFileSync(file,'utf8'));}
 function runNode(root,script){const run=spawnSync(process.execPath,[script],{cwd:root,encoding:'utf8'});if(run.status!==0)throw new Error(run.stderr||run.stdout||`${script} fehlgeschlagen.`);if(run.stdout)process.stdout.write(run.stdout);}
-function printHelp(){console.log(`Pexels direkt als externe Katalogeinträge importieren.\n\nBeispiel:\n  npm run pexels:import -- --query "KI Technologie" --type video --category technology-ai --orientation vertical --count 5 --tags ai,zukunft\n\nDie Einträge erhalten Status review. Kleine Vorschaubilder werden lokal gespeichert; Originale bleiben extern und verursachen keine Speicherkosten.`);}
+function printHelp(){console.log(`Pexels direkt als externe Katalogeinträge importieren.\n\nBeispiel:\n  npm run pexels:import -- --query "KI Technologie" --type video --category technology-ai --orientation vertical --count 5 --tags ai,zukunft\n\nOriginale bleiben extern; kleine Vorschaubilder werden gespeichert. Alle Einträge erhalten Status review.`);}
 
-if(import.meta.url===`file://${process.argv[1]}`){main().catch(error=>{console.error(error instanceof Error?error.message:String(error));process.exitCode=1;});}
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch(error=>{console.error(error instanceof Error?error.message:String(error));process.exitCode=1;});
+}
