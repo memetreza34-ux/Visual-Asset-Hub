@@ -1,0 +1,50 @@
+name: Beta Live-Test
+
+on:
+  push:
+    branches: ["agent/beta-release"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: beta-live-test
+  cancel-in-progress: true
+
+jobs:
+  end-to-end:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PEXELS_API_KEY: ${{ secrets.PEXELS_API || secrets.PEXELS_API_KEY }}
+    steps:
+      - name: Repository laden
+        uses: actions/checkout@v4
+        with: { lfs: false }
+      - name: Node.js 22 verwenden
+        uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Secret prüfen
+        run: test -n "$PEXELS_API_KEY" || (echo "PEXELS_API fehlt" && exit 1)
+      - name: Reale Pexels-Suche
+        run: npm run pexels:search -- --query "artificial intelligence technology" --type video --orientation vertical --per-page 10 --output .local-storage/pexels-search/results.json
+      - name: Visuelle Galerie bauen
+        run: npm run pexels:gallery -- --input .local-storage/pexels-search/results.json --output .local-storage/pexels-search/gallery.html
+      - name: Einen Treffer in den Testkatalog importieren
+        run: npm run pexels:import -- --query "artificial intelligence technology" --type video --category technology-ai --orientation vertical --count 1 --tags ai,technology,beta-test --scopes organic-social,youtube,website
+      - name: Gesamte Prüfung ausführen
+        run: npm run check
+      - name: Bericht und Testwebsite bauen
+        run: npm run report && npm run site:build
+      - name: Live-Test-Artefakt bereitstellen
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-asset-hub-beta-live-test
+          path: |
+            .local-storage/pexels-search/
+            catalog/assets.json
+            catalog/search-index.json
+            previews/pexels/
+            reports/
+            dist/
+          retention-days: 7
