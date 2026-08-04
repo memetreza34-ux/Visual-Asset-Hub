@@ -7,6 +7,7 @@ const catalog = readJson(path.join(root, 'catalog/assets.json'));
 const taxonomy = readJson(path.join(root, 'catalog/taxonomy.json'));
 const usage = readOptional(path.join(root, 'catalog/usage.json'), { uses: [] });
 const usesByAsset = new Map();
+const staticTypes = new Set(['image', 'graphic', 'icon', 'mockup']);
 for (const entry of usage.uses ?? []) {
   const entries = usesByAsset.get(entry.assetId) ?? [];
   entries.push(entry);
@@ -17,6 +18,8 @@ const records = [...catalog.assets]
   .sort((a, b) => a.id.localeCompare(b.id))
   .map((asset) => {
     const uses = (usesByAsset.get(asset.id) ?? []).sort((a, b) => Date.parse(b.usedAt) - Date.parse(a.usedAt));
+    const source = asset.storage.kind === 'external' ? asset.storage.externalUrl ?? null : asset.storage.path ?? null;
+    const preview = asset.storage.previewPath ?? asset.storage.previewUrl ?? (staticTypes.has(asset.type) ? source : null);
     return {
       id: asset.id,
       filename: asset.filename,
@@ -42,8 +45,8 @@ const records = [...catalog.assets]
       sourceName: asset.rights.sourceName,
       sourcePage: asset.rights.sourceUrl ?? null,
       licenseUrl: asset.rights.licenseUrl ?? null,
-      preview: asset.storage.previewPath ?? asset.storage.previewUrl ?? null,
-      source: asset.storage.kind === 'external' ? asset.storage.externalUrl ?? null : asset.storage.path ?? null,
+      preview,
+      source,
       storageKind: asset.storage.kind,
       technical: asset.technical ?? null,
       importedAt: asset.importedAt,
@@ -63,7 +66,7 @@ const records = [...catalog.assets]
   });
 
 const index = {
-  indexVersion: 3,
+  indexVersion: 4,
   catalogVersion: catalog.catalogVersion,
   catalogUpdatedAt: catalog.updatedAt,
   usageUpdatedAt: usage.updatedAt ?? null,
