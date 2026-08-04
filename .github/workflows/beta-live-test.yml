@@ -1,21 +1,13 @@
 name: Beta Live-Test
 
 on:
-  push:
-    branches: ["agent/beta-release"]
-  pull_request:
-    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
-concurrency:
-  group: beta-live-test-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   end-to-end:
-    if: github.event_name == 'push' || github.head_ref == 'agent/beta-release'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
