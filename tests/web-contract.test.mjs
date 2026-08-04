@@ -9,6 +9,7 @@ const webRoot = path.join(root, 'web');
 const indexHtml = fs.readFileSync(path.join(webRoot, 'index.html'), 'utf8');
 const selectionTools = fs.readFileSync(path.join(webRoot, 'selection-tools.js'), 'utf8');
 const localAdmin = fs.readFileSync(path.join(webRoot, 'local-admin.js'), 'utf8');
+const releaseStatus = fs.readFileSync(path.join(webRoot, 'release-status.js'), 'utf8');
 const server = fs.readFileSync(path.join(root, 'scripts/serve.mjs'), 'utf8');
 
 function referencedFiles(html, attribute) {
@@ -50,6 +51,14 @@ test('lokale No-Code-Verwaltung ist vollständig verknüpft', () => {
   for (const endpoint of ['/api/health', '/api/review', '/api/usage', '/api/backup', '/api/attribution']) {
     assert.ok(localAdmin.includes(endpoint) || server.includes(endpoint), `API-Verknüpfung fehlt: ${endpoint}`);
   }
+});
+
+test('Beta-Fortschritt und Testbericht sind in der Oberfläche verknüpft', () => {
+  assert.match(indexHtml, /id="release-status"/);
+  assert.match(indexHtml, /release-status\.js/);
+  assert.match(indexHtml, /release-status\.css/);
+  assert.match(releaseStatus, /beta-readiness\.json/);
+  assert.match(releaseStatus, /nextActions/);
 });
 
 test('lokaler Server ist auf Loopback und strikte Browser-Sicherheit ausgelegt', () => {
