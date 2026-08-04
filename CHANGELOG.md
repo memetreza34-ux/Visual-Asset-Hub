@@ -11,7 +11,10 @@
 - Attributionsexport und Katalog-Backup direkt aus der Oberfläche
 - automatischer Beta-Fortschritt mit technischer Quote, Realtest-Quote und offenen Aufgaben
 - Bereitschaftsbericht als Markdown und JSON direkt aus der Anwendung erreichbar
-- neue Tests für API-Eingaben, Browser-Verknüpfung und lokale Serversicherheit
+- verifizierte Backup-Wiederherstellung mit Manifest-, Dateigrößen- und SHA-256-Prüfung
+- geführte Windows-Wiederherstellung über `RESTORE-BACKUP.cmd`
+- automatisches Sicherheitsbackup und Rollback bei einem fehlerhaften Restore
+- neue Tests für API-Eingaben, HTTP-Schutz, Browser-Verknüpfung, Restore und lokale Serversicherheit
 
 ### Sicherheit
 
@@ -21,12 +24,14 @@
 - maximale Request-Größe und strikte Feld-, URL-, Plattform- und Asset-ID-Validierung
 - Content-Security-Policy, Frame-Schutz, Referrer-Schutz und restriktive Permissions-Policy
 - kein Shell-Aufruf bei benutzerdefinierten Eingaben
+- Restore akzeptiert nur verifizierte JSON-Dateien innerhalb des lokalen Backup-Ordners
 
 ### Verbessert
 
 - `START-HERE.cmd` erzeugt vor dem Start automatisch den vollständigen Beta-Bereitschaftsbericht
 - das statische Testpaket enthält den aktuellen Bereitschaftsbericht
 - der reale Test kann vollständig ohne Konsole durchgeführt werden
+- für die vollständige Abnahme müssen alle sechs Testassets eine dokumentierte Entscheidung besitzen
 - Version auf `0.3.0-beta.3` erhöht
 
 ## 0.3.0-beta.2 – 2026-08-04
