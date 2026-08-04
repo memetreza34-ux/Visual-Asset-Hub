@@ -21,6 +21,8 @@ tmp/
 .local-storage/
 preview-cache/
 
-# Automatisch erzeugte Testversionen und Berichte.
+# Automatisch erzeugte Testversionen, Berichte und lokale Sicherungen.
 dist/
 reports/
+exports/
+backups/
