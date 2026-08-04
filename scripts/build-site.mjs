@@ -6,7 +6,7 @@ const root = process.cwd();
 const output = path.resolve(root, process.env.SITE_OUTPUT || 'dist');
 fs.rmSync(output, { recursive: true, force: true });
 fs.mkdirSync(output, { recursive: true });
-for (const directory of ['web', 'catalog', 'previews', 'assets']) {
+for (const directory of ['web', 'catalog', 'previews', 'assets', 'reports']) {
   const source = path.join(root, directory);
   if (fs.existsSync(source)) fs.cpSync(source, path.join(output, directory), { recursive: true });
 }
