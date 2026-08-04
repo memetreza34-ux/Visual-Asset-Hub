@@ -15,7 +15,7 @@
     "site:build": "node scripts/build-site.mjs",
     "serve": "node scripts/serve.mjs",
     "test": "node --test tests/*.test.mjs",
-    "syntax": "node --check scripts/*.mjs && node --check scripts/lib/*.mjs && node --check web/app.js",
+    "syntax": "node scripts/check-syntax.mjs",
     "check": "npm run syntax && npm run validate && npm run index && npm run test"
   }
 }
