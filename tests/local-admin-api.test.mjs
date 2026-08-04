@@ -43,6 +43,15 @@ test('Asset-ID und Entscheidung werden streng geprüft', () => {
   }), /approve, restrict/);
 });
 
+test('optionsähnliche und kontrollierte Eingaben werden blockiert', () => {
+  assert.throws(() => validateReviewPayload({
+    assetId: 'VAH-GAINET01', decision: 'archive', reviewer: '--force'
+  }), /mehrdeutige Zeichen/);
+  assert.throws(() => validateUsagePayload({
+    assetId: 'VAH-GAINET01', project: '--allow-unapproved', platform: 'youtube'
+  }), /mehrdeutige Zeichen/);
+});
+
 test('reale Nutzung akzeptiert nur unterstützte Plattformen und HTTP-Links', () => {
   const value = validateUsagePayload({
     assetId: 'VAH-GAINET01',
