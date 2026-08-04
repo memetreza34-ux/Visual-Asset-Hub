@@ -22,6 +22,9 @@ const reviews = reviewsText ? JSON.parse(reviewsText) : { version: 1, updatedAt:
 const index = catalog.assets.findIndex((asset) => asset.id === args.id);
 if (index < 0) fail(`Asset nicht gefunden: ${args.id}`);
 const previous = catalog.assets[index];
+if (args.decision === 'approve' && previous.status !== 'review' && args.force !== 'true') {
+  fail(`Freigabe ist nur aus dem Status review erlaubt. Aktuell: ${previous.status}.`);
+}
 const next = structuredClone(previous);
 next.status = nextStatus;
 if (args.quality) next.qualityRating = integer(args.quality, 1, 5, 'quality');
