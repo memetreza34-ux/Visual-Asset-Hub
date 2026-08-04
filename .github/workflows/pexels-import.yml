@@ -1,0 +1,133 @@
+name: Pexels in Katalog importieren
+
+on:
+  workflow_dispatch:
+    inputs:
+      query:
+        description: "Suchthema"
+        required: true
+        type: string
+      media_type:
+        description: "Fotos oder Videos"
+        required: true
+        default: video
+        type: choice
+        options: [video, photo]
+      category:
+        description: "Hauptkategorie"
+        required: true
+        default: technology-ai
+        type: choice
+        options:
+          - people-lifestyle
+          - business-work
+          - technology-ai
+          - money-finance
+          - education-learning
+          - health-fitness
+          - food-drink
+          - travel-places
+          - nature-environment
+          - industry-trades
+          - vehicles-transport
+          - home-architecture
+          - social-media-creator
+          - objects-products
+          - news-events
+          - emotions-reactions
+          - abstract-backgrounds
+          - ui-apps
+          - science-engineering
+          - culture-entertainment
+      orientation:
+        description: "Format"
+        required: true
+        default: vertical
+        type: choice
+        options: [vertical, horizontal, square, any]
+      count:
+        description: "Wie viele Review-Einträge?"
+        required: true
+        default: "5"
+        type: choice
+        options: ["1", "3", "5", "10"]
+      tags:
+        description: "Zusätzliche Tags, mit Komma getrennt"
+        required: false
+        default: ""
+        type: string
+      scopes:
+        description: "Nutzung, mit Komma getrennt"
+        required: true
+        default: "organic-social,youtube,website"
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PEXELS_API_KEY: ${{ secrets.PEXELS_API || secrets.PEXELS_API_KEY }}
+      GH_TOKEN: ${{ github.token }}
+      INPUT_QUERY: ${{ inputs.query }}
+      INPUT_TYPE: ${{ inputs.media_type }}
+      INPUT_CATEGORY: ${{ inputs.category }}
+      INPUT_ORIENTATION: ${{ inputs.orientation }}
+      INPUT_COUNT: ${{ inputs.count }}
+      INPUT_TAGS: ${{ inputs.tags }}
+      INPUT_SCOPES: ${{ inputs.scopes }}
+    steps:
+      - name: Repository laden
+        uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Node.js 22 verwenden
+        uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: API-Schlüssel prüfen
+        run: test -n "$PEXELS_API_KEY" || (echo "GitHub Secret PEXELS_API fehlt" && exit 1)
+      - name: Pexels-Ergebnisse als Review importieren
+        run: |
+          npm run pexels:import -- \
+            --query "$INPUT_QUERY" \
+            --type "$INPUT_TYPE" \
+            --category "$INPUT_CATEGORY" \
+            --orientation "$INPUT_ORIENTATION" \
+            --count "$INPUT_COUNT" \
+            --tags "$INPUT_TAGS" \
+            --scopes "$INPUT_SCOPES"
+      - name: Katalog prüfen
+        run: npm run check
+      - name: Import-PR erstellen
+        shell: bash
+        run: |
+          if git diff --quiet -- catalog/assets.json catalog/search-index.json previews/; then
+            echo "Keine neuen Assets; es wird kein Pull Request erstellt."
+            exit 0
+          fi
+          BRANCH="pexels-import/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add catalog/assets.json catalog/search-index.json previews/
+          git commit -m "import: Pexels ${INPUT_QUERY}"
+          git push origin "$BRANCH"
+          BODY=$(cat <<TEXT
+          Automatischer kostenloser Pexels-Import.
+
+          - Suche: ${INPUT_QUERY}
+          - Typ: ${INPUT_TYPE}
+          - Kategorie: ${INPUT_CATEGORY}
+          - Format: ${INPUT_ORIENTATION}
+          - Anzahl: ${INPUT_COUNT}
+          - Status: review
+
+          Originaldateien bleiben extern. Nur kleine Vorschaubilder werden gespeichert. Vor dem Merge jedes Asset visuell und rechtlich im konkreten Kontext prüfen.
+          TEXT
+          )
+          if ! gh pr create --base main --head "$BRANCH" --title "Pexels-Import: ${INPUT_QUERY}" --body "$BODY"; then
+            echo "::warning::Branch wurde gepusht, aber GitHub durfte keinen Pull Request automatisch erstellen."
+          fi
