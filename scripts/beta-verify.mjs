@@ -24,6 +24,8 @@ const reviews = readJson('catalog/reviews.json');
 const assets = catalog.assets ?? [];
 const videos = assets.filter((asset) => asset.type === 'video');
 const images = assets.filter((asset) => asset.type === 'image');
+const graphics = assets.filter((asset) => asset.type === 'graphic');
+const staticVisuals = assets.filter((asset) => ['image', 'graphic'].includes(asset.type));
 const approved = assets.filter((asset) => asset.status === 'approved');
 const pending = assets.filter((asset) => ['inbox', 'review'].includes(asset.status));
 const approvedRightsRisks = approved.filter((asset) => ['unknown', 'restricted', 'editorial-only'].includes(asset.rights?.licenseStatus));
@@ -41,7 +43,7 @@ const technicalPercentage = Math.round(100 * Object.values(technicalChecks).filt
 
 const realTestChecks = {
   threeVideos: videos.length >= 3,
-  threeImages: images.length >= 3,
+  threeStaticVisuals: staticVisuals.length >= 3,
   reviewRecorded: reviewCount >= 1,
   approvedAsset: approved.length >= 1,
   realUsageRecorded: usageCount >= 1
@@ -52,7 +54,7 @@ const overallPercentage = Math.round(technicalPercentage * 0.75 + realTestPercen
 
 const nextActions = [];
 if (videos.length < 3) nextActions.push(`${3 - videos.length} weitere geprüfte B-Roll-Videos importieren.`);
-if (images.length < 3) nextActions.push(`${3 - images.length} geprüfte Bilder importieren.`);
+if (staticVisuals.length < 3) nextActions.push(`${3 - staticVisuals.length} weitere statische Bilder oder Grafiken importieren.`);
 if (reviewCount < 1) nextActions.push('Mindestens ein Asset vollständig ansehen und eine Review-Entscheidung protokollieren.');
 if (approved.length < 1) nextActions.push('Mindestens ein geprüftes Asset freigeben.');
 if (usageCount < 1) nextActions.push('Ein freigegebenes Asset in einem echten Content-Projekt verwenden und dokumentieren.');
@@ -71,6 +73,8 @@ const report = {
     assets: assets.length,
     videos: videos.length,
     images: images.length,
+    graphics: graphics.length,
+    staticVisuals: staticVisuals.length,
     pending: pending.length,
     approved: approved.length,
     reviews: reviewCount,
@@ -91,7 +95,7 @@ const md = [
   `- Realtest vollständig: **${realTestComplete ? 'ja' : 'nein'}**`,
   `- Realtest-Stand: **${realTestPercentage} %**`,
   `- Gesamtstand: **${overallPercentage} %**`,
-  `- Assets: **${assets.length}** (${videos.length} Videos, ${images.length} Bilder)`,
+  `- Assets: **${assets.length}** (${videos.length} Videos, ${staticVisuals.length} statische Bilder/Grafiken)`,
   `- Freigegeben: **${approved.length}**`,
   `- Reviews: **${reviewCount}**`,
   `- Nutzungen: **${usageCount}**`, '',
