@@ -8,7 +8,7 @@ const reviews = readOptional(path.join(root, 'catalog/reviews.json'), { version:
 const usage = readOptional(path.join(root, 'catalog/usage.json'), { version: 1, uses: [] });
 const errors = [];
 const assetIds = new Set(assets.map((asset) => asset.id));
-const statuses = new Set(['review', 'approved', 'restricted', 'archived']);
+const statuses = new Set(['inbox', 'review', 'approved', 'restricted', 'archived']);
 const decisions = new Set(['approve', 'restrict', 'archive', 'send-back']);
 const platforms = new Set(['tiktok', 'instagram', 'youtube', 'facebook', 'snapchat', 'website', 'app', 'presentation', 'client-work', 'other']);
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
