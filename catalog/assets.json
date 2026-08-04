@@ -1,6 +1,6 @@
 {
   "catalogVersion": 1,
-  "updatedAt": "2026-08-04T09:35:00.000Z",
+  "updatedAt": "2026-08-04T09:40:00.000Z",
   "assets": [
     {
       "id": "VAH-P6153727",
@@ -29,6 +29,7 @@
       },
       "storage": {
         "kind": "external",
+        "previewUrl": "https://images.pexels.com/videos/6153727/pexels-photo-6153727.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1200&w=630",
         "externalUrl": "https://videos.pexels.com/video-files/6153727/6153727-hd_720_1366_25fps.mp4"
       },
       "rights": {
@@ -73,6 +74,7 @@
       },
       "storage": {
         "kind": "external",
+        "previewUrl": "https://images.pexels.com/videos/8087308/adult-android-art-artificial-intelligence-8087308.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1200&w=630",
         "externalUrl": "https://videos.pexels.com/video-files/8087308/8087308-hd_720_1280_25fps.mp4"
       },
       "rights": {
@@ -117,6 +119,7 @@
       },
       "storage": {
         "kind": "external",
+        "previewUrl": "https://images.pexels.com/videos/8328141/coffee-with-a-robot-flower-invention-robot-8328141.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1200&w=630",
         "externalUrl": "https://videos.pexels.com/video-files/8328141/8328141-hd_720_1280_25fps.mp4"
       },
       "rights": {
