@@ -46,51 +46,59 @@ function buildAdminPanel(record) {
   panel.className = 'local-admin-panel';
   panel.append(heading('Lokale Prüfung und Verwaltung'));
 
-  if (['review', 'inbox', 'restricted'].includes(record.status)) {
-    panel.append(buildReviewForm(record));
-  } else if (record.status === 'approved') {
-    panel.append(message('Dieses Asset ist freigegeben. Du kannst die reale Verwendung jetzt direkt dokumentieren.', 'success'));
-  } else {
-    panel.append(message(`Dieses Asset hat den Status „${record.status}“ und ist nicht für eine neue Freigabe vorgesehen.`, 'warning'));
+  if (record.status === 'archived') {
+    panel.append(message('Dieses Asset ist archiviert. Eine erneute Aktivierung erfolgt bewusst über den Konsolen- oder GitHub-Ablauf.', 'warning'));
+    return panel;
   }
 
+  if (record.status === 'approved') {
+    panel.append(message('Dieses Asset ist freigegeben. Bei einem später entdeckten Problem kann es hier eingeschränkt oder archiviert werden.', 'success'));
+  }
+  panel.append(buildStatusForm(record));
   if (record.status === 'approved') panel.append(buildUsageForm(record));
   return panel;
 }
 
-function buildReviewForm(record) {
+function buildStatusForm(record) {
   const form = document.createElement('form');
   form.className = 'admin-form';
-  const reviewer = field('Prüfer', 'text', localStorage.getItem(reviewerKey) || '', { required: true, maxlength: 120, placeholder: 'z. B. Arman' });
+  const reviewer = field('Prüfer', 'text', localStorage.getItem(reviewerKey) || '', { required: true, maxLength: 120, placeholder: 'z. B. Arman' });
   const quality = selectField('Qualität', [1, 2, 3, 4, 5], String(record.qualityRating || 3));
   const notes = textareaField('Notiz oder Begründung', 'Was wurde geprüft? Sind Personen, Marken oder Einschränkungen sichtbar?', 2000);
-  const checklist = document.createElement('fieldset');
-  checklist.className = 'review-checklist';
-  checklist.innerHTML = '<legend>Pflichtprüfung vor einer Freigabe</legend>';
   const checks = [
     ['contentViewed', 'Asset vollständig angesehen'],
     ['peopleAndBrandsChecked', 'Personen, Logos und Marken geprüft'],
     ['rightsChecked', 'Quelle, Lizenz und erlaubte Nutzung geprüft'],
     ['contextChecked', 'Einsatzkontext des geplanten Contents geprüft']
   ];
-  for (const [name, label] of checks) checklist.append(checkbox(name, label));
+
+  const parts = [reviewer.wrapper, quality.wrapper, notes.wrapper];
+  if (record.status === 'review') {
+    const checklist = document.createElement('fieldset');
+    checklist.className = 'review-checklist';
+    checklist.innerHTML = '<legend>Pflichtprüfung vor einer Freigabe</legend>';
+    for (const [name, label] of checks) checklist.append(checkbox(name, label));
+    parts.push(checklist);
+  }
 
   const actions = document.createElement('div');
   actions.className = 'admin-actions';
-  actions.append(
-    submitButton('Freigeben', 'approve', 'approve'),
-    submitButton('Einschränken', 'restrict', 'restrict'),
-    submitButton('Zur Prüfung zurück', 'send-back'),
-    submitButton('Archivieren', 'archive')
-  );
+  if (record.status === 'review') {
+    actions.append(submitButton('Freigeben', 'approve', 'approve'), submitButton('Einschränken', 'restrict', 'restrict'), submitButton('Archivieren', 'archive'));
+  } else if (record.status === 'approved') {
+    actions.append(submitButton('Nachträglich einschränken', 'restrict', 'restrict'), submitButton('Archivieren', 'archive'));
+  } else {
+    actions.append(submitButton('Zur Prüfung zurück', 'send-back'), submitButton('Archivieren', 'archive'));
+  }
+
   const result = message('', 'neutral');
   result.hidden = true;
-
-  form.append(reviewer.wrapper, quality.wrapper, notes.wrapper, checklist, actions, result);
+  form.append(...parts, actions, result);
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const decision = event.submitter?.dataset.decision;
     if (!decision) return;
+    if (decision === 'archive' && !window.confirm(`${record.id} wirklich archivieren?`)) return;
     const reviewerValue = reviewer.input.value.trim();
     localStorage.setItem(reviewerKey, reviewerValue);
     const checklistValues = Object.fromEntries(checks.map(([name]) => [name, Boolean(form.elements[name]?.checked)]));
@@ -112,10 +120,10 @@ function buildUsageForm(record) {
   section.append(heading('Echte Verwendung dokumentieren', 3));
   const form = document.createElement('form');
   form.className = 'admin-form compact';
-  const project = field('Projekt-ID', 'text', '', { required: true, maxlength: 120, placeholder: 'z. B. elektro-klar-reel-01' });
-  const title = field('Projektname', 'text', '', { maxlength: 160, placeholder: 'z. B. Reel über Schutzschalter' });
+  const project = field('Projekt-ID', 'text', '', { required: true, maxLength: 120, placeholder: 'z. B. elektro-klar-reel-01' });
+  const title = field('Projektname', 'text', '', { maxLength: 160, placeholder: 'z. B. Reel über Schutzschalter' });
   const platform = selectField('Plattform', ['tiktok', 'instagram', 'youtube', 'facebook', 'snapchat', 'website', 'app', 'presentation', 'client-work', 'other'], 'tiktok');
-  const url = field('Veröffentlichungslink', 'url', '', { maxlength: 2000, placeholder: 'optional' });
+  const url = field('Veröffentlichungslink', 'url', '', { maxLength: 2000, placeholder: 'optional' });
   const notes = textareaField('Nutzungsnotiz', 'Welche Szene oder welcher Abschnitt nutzt dieses Asset?', 1000);
   const actions = document.createElement('div');
   actions.className = 'admin-actions';
@@ -145,7 +153,7 @@ function buildUsageForm(record) {
   });
   attribution.addEventListener('click', async () => {
     const projectValue = project.input.value.trim();
-    if (!projectValue) return showResult(result, 'Bitte zuerst eine Projekt-ID eintragen.', false);
+    if (!projectValue) return setMessage(result, 'Bitte zuerst eine Projekt-ID eintragen.', 'error');
     await performAction(form, result, '/api/attribution', { project: projectValue }, 'Attributionsdateien wurden im Ordner exports erzeugt.', false);
   });
   section.append(form);
@@ -171,15 +179,16 @@ async function createBackup() {
 async function performAction(form, result, endpoint, payload, successText, reload = true) {
   const buttons = [...form.querySelectorAll('button')];
   buttons.forEach((button) => { button.disabled = true; });
-  showResult(result, 'Wird gespeichert …', true);
+  setMessage(result, 'Wird gespeichert …', 'neutral');
   try {
     const data = await apiPost(endpoint, payload);
-    showResult(result, successText, true);
+    setMessage(result, successText, 'success');
     if (data.health) health = data.health;
     updateStatusText();
     if (reload) setTimeout(() => location.reload(), 650);
+    else buttons.forEach((button) => { button.disabled = false; });
   } catch (error) {
-    showResult(result, error.message, false);
+    setMessage(result, error.message, 'error');
     buttons.forEach((button) => { button.disabled = false; });
   }
 }
@@ -212,14 +221,14 @@ function field(labelText, type, value, attributes = {}) {
   return { wrapper, input };
 }
 
-function textareaField(labelText, placeholder, maxlength) {
+function textareaField(labelText, placeholder, maxLength) {
   const wrapper = document.createElement('label');
   wrapper.className = 'admin-field full';
   const label = document.createElement('span');
   label.textContent = labelText;
   const input = document.createElement('textarea');
   input.placeholder = placeholder;
-  input.maxLength = maxlength;
+  input.maxLength = maxLength;
   input.rows = 3;
   wrapper.append(label, input);
   return { wrapper, input };
@@ -275,9 +284,9 @@ function message(text, type) {
   return element;
 }
 
-function showResult(element, text, success) {
+function setMessage(element, text, type) {
   element.hidden = false;
-  element.className = `admin-message ${success ? 'success' : 'error'}`;
+  element.className = `admin-message ${type}`;
   element.textContent = text;
 }
 
