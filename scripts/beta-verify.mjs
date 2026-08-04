@@ -91,7 +91,9 @@ const report = {
 };
 
 fs.mkdirSync(outputDir, { recursive: true });
-fs.writeFileSync(path.join(outputDir, 'beta-readiness.json'), `${JSON.stringify(report, null, 2)}\n`);
+const jsonPath = path.join(outputDir, 'beta-readiness.json');
+const markdownPath = path.join(outputDir, 'beta-readiness.md');
+fs.writeFileSync(jsonPath, `${JSON.stringify(report, null, 2)}\n`);
 const md = [
   '# Beta Readiness', '',
   `Erzeugt: ${report.generatedAt}`, '',
@@ -112,10 +114,17 @@ const md = [
   '## Nächste Schritte',
   ...(nextActions.length ? nextActions.map((entry) => `- ${entry}`) : ['- Beta-Abnahme vollständig.'])
 ].join('\n');
-fs.writeFileSync(path.join(outputDir, 'beta-readiness.md'), `${md}\n`);
+fs.writeFileSync(markdownPath, `${md}\n`);
+syncFinalReport([jsonPath, markdownPath]);
 console.log(md);
 if (!technicalReady) process.exitCode = 1;
 
+function syncFinalReport(files) {
+  const target = path.join(root, 'dist', 'reports');
+  if (!fs.existsSync(path.join(root, 'dist'))) return;
+  fs.mkdirSync(target, { recursive: true });
+  for (const file of files) fs.copyFileSync(file, path.join(target, path.basename(file)));
+}
 function npmCommand() { return process.platform === 'win32' ? 'npm.cmd' : 'npm'; }
 function readJson(relative) { return JSON.parse(fs.readFileSync(path.join(root, relative), 'utf8')); }
 function truncate(value, max) { const text = String(value); return text.length <= max ? text : `${text.slice(0, max)}…`; }
