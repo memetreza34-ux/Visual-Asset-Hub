@@ -2,90 +2,102 @@
 
 ## Ziel
 
-Der komplette kostenlose Ablauf wird getestet:
+Der komplette kostenlose Ablauf wird real geprüft:
 
-1. Pexels durchsuchen
-2. Ergebnisse als visuelle Galerie prüfen
-3. konkrete Pexels-IDs auswählen
-4. ausgewählte Treffer als `review`-Assets importieren
-5. Asset visuell und rechtlich prüfen
-6. Asset freigeben oder einschränken
-7. Verwendung in einem realen Content-Projekt dokumentieren
-8. Quellen-/Attributionsdatei exportieren
-9. Katalog-Backup erzeugen
-10. Weboberfläche und statische Testversion prüfen
+1. Visual Asset Hub unter Windows starten
+2. drei Pexels-Videos und drei Originalgrafiken ansehen
+3. Suche, Schnellfilter, Favoriten und Auswahl-Export testen
+4. mindestens ein geeignetes Asset protokolliert freigeben
+5. dieses Asset in einem echten Content-Projekt einsetzen
+6. Nutzung und Quellen-/Attributionsdatei dokumentieren
 
-## Test A – vertikale KI-B-Rolls
+## Vorhandene Testmedien
 
-- Suche: `artificial intelligence technology`
-- Typ: `video`
-- Kategorie: `technology-ai`
-- Format: `vertical`
-- Suchergebnisse: `10`
-- davon gezielt importieren: `3`
+### Vertikale Pexels-Videos
 
-Erwartet:
+- `VAH-P6153727` – robotische Hand
+- `VAH-P8087308` – Person mit humanoidem Technologieobjekt
+- `VAH-P8328141` – Alltagsszene mit Roboter und Getränk
 
-- exakt die ausgewählten Pexels-IDs werden importiert
-- Status immer `review`
-- kleine Vorschaubilder
-- externe MP4-Dateien statt großer GitHub-Dateien
-- Pexels-Quellseite und Lizenzseite gespeichert
-- keine doppelten Pexels-Quellen
+Alle drei Videos besitzen Status `review`. Sie dürfen vor der vollständigen Sichtprüfung nicht als freigegeben behandelt werden.
 
-## Test B – horizontale Industriebilder
+### Eigene statische Originalgrafiken
 
-- Suche: `modern factory automation`
-- Typ: `photo`
-- Kategorie: `industry-trades`
-- Format: `horizontal`
-- Suchergebnisse: `10`
-- davon gezielt importieren: `3`
+- `VAH-GAINET01` – abstraktes KI-Netzwerk
+- `VAH-GBIZGR01` – Business-Wachstum
+- `VAH-GCIRCU01` – technischer Schaltplan-Hintergrund
 
-## Test C – Freigabe und reale Verwendung
+Die SVG-Grafiken liegen vollständig im Repository und besitzen dokumentierte eigene Rechte. Auch sie starten für den Bedienungstest mit Status `review`.
 
-1. Ein passendes Asset aus Test A vollständig prüfen.
-2. Mit `asset:review` freigeben.
-3. Mit `usage:add` einem echten Reel-, YouTube- oder Webseitenprojekt zuordnen.
-4. Mit `attribution:export` Markdown und CSV erzeugen.
-5. Mit `backup` eine lokale Sicherung erzeugen.
+## Test A – Windows und Weboberfläche
 
-Erwartet:
-
-- Review-Entscheidung steht in `catalog/reviews.json`
-- Asset-Status ist `approved`
-- Nutzung steht in `catalog/usage.json`
-- Weboberfläche zeigt Nutzungshäufigkeit, Projekt und Plattform
-- Quellenexport enthält Quelle, Lizenzseite und Attribution
-- Backup enthält Manifest und SHA-256-Prüfsummen
-
-## Test D – einfacher Windows-Start
-
-1. Repository als ZIP herunterladen und entpacken.
+1. Branch `agent/beta-release` herunterladen und entpacken.
 2. `START-HERE.cmd` doppelklicken.
-3. Prüfen, ob Browser und lokaler Server automatisch starten.
+3. Prüfen, ob der Browser unter `http://127.0.0.1:4173` geöffnet wird.
+4. Kontrollieren, ob sechs Assets sichtbar sind.
+5. Schnellfilter `B-Rolls`, `Hochformat`, `Zu prüfen` und die drei aktiven Kategorien testen.
+6. Suche mit `Roboter`, `Business`, `Schaltplan` und `KI Netzwerk` testen.
+7. Ein Video öffnen und vollständig abspielen.
+8. Eine Originalgrafik öffnen und in voller Größe ansehen.
+
+## Test B – Auswahl und Übergabe
+
+1. Zwei Assets als Favoriten markieren.
+2. `Auswahl exportieren` drücken.
+3. JSON-Datei öffnen.
+4. Prüfen, ob Asset-ID, Status, Quelle, Lizenz, Nutzungsbereiche und Attribution enthalten sind.
+5. Sicherstellen, dass bei Review-Assets eine Warnung enthalten ist.
+
+## Test C – Review und Freigabe
+
+Ein Asset darf nur freigegeben werden, wenn Inhalt, Qualität, Personen, Marken, Rechte und geplanter Einsatz vollständig geprüft wurden.
+
+Beispiel lokal:
+
+```bash
+npm run asset:review -- --id VAH-GCIRCU01 --decision approve --reviewer Arman --notes "Grafik vollständig geprüft; keine Personen oder Marken; für Elektro-Content geeignet"
+```
+
+Danach prüfen:
+
+- Status steht auf `approved`
+- Review ist in `catalog/reviews.json` protokolliert
+- Weboberfläche zeigt `Freigegeben`
+- `npm run check` bleibt erfolgreich
+
+## Test D – echter Content-Einsatz
+
+1. Das freigegebene Asset in einem echten Reel, Short, Video, einer Website oder Präsentation verwenden.
+2. Nutzung dokumentieren:
+
+```bash
+npm run usage:add -- --asset VAH-GCIRCU01 --project elektro-klar-test-01 --title "Elektro Klar Test 01" --platform tiktok
+```
+
+3. Attribution exportieren:
+
+```bash
+npm run attribution:export -- --project elektro-klar-test-01
+```
+
+4. Prüfen, ob die Nutzung in der Weboberfläche erscheint.
+
+## Abschlussprüfung
+
+```bash
+npm run links:check -- --strict true
+npm run beta:verify
+```
 
 ## Abnahmekriterien
 
-- `npm run check` ist lokal erfolgreich
-- API-Schlüssel erscheint nirgends im Code oder Protokoll
-- Suchergebnis enthält `gallery.html` und `results.json`
-- nur ausgewählte IDs werden importiert
-- Vorschaubilder werden angezeigt
-- externe Bild- und Videodateien lassen sich öffnen
-- Filter, Suche, Favoriten, Nutzungssortierung und „Mehr anzeigen“ funktionieren
-- Katalogbericht enthält korrekte Review- und Nutzungszahlen
-- kein Pexels-Asset wird automatisch auf `approved` gesetzt
-- Nutzung eines nicht freigegebenen Assets wird blockiert
-- doppelte Pexels-Quellseiten werden übersprungen
-- Review- und Nutzungsdaten bestehen die Betriebsdatenprüfung
-- Quellenexport und Backup funktionieren
+- technische Projektprüfung erfolgreich
+- sechs Testassets sichtbar und korrekt kategorisiert
+- alle drei Videos und alle drei Grafiken visuell geprüft
+- mindestens eine Review-Entscheidung protokolliert
+- mindestens ein Asset freigegeben
+- mindestens eine echte Nutzung dokumentiert
+- Auswahl- und Attributions-Export funktionieren
+- keine API-Schlüssel oder vertraulichen URLs im Repository
 
-## Noch nicht Teil dieses Beta-Tests
-
-- dauerhaftes eigenes Hosting sämtlicher Originaldateien
-- Belastungstest mit zehntausenden Assets
-- automatische KI-Erkennung von Motiven, Marken oder Personen
-- rechtliche Einzelfallfreigabe ohne menschliche Sichtprüfung
-
-Die Beta gilt als bestanden, sobald Test A bis D erfolgreich durchlaufen wurden und ein echtes Content-Projekt mindestens ein freigegebenes Asset verwendet hat.
+Die Beta gilt als **real getestet**, sobald alle Kriterien erfüllt sind. Ein Merge in `main` erfolgt erst danach.
