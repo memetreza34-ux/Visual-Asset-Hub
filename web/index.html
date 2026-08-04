@@ -10,11 +10,13 @@
   <link rel="stylesheet" href="./quick-filters.css" />
   <link rel="stylesheet" href="./status-indicators.css" />
   <link rel="stylesheet" href="./local-admin.css" />
+  <link rel="stylesheet" href="./release-status.css" />
   <script type="module" src="./app.js"></script>
   <script type="module" src="./selection-tools.js"></script>
   <script type="module" src="./quick-filters.js"></script>
   <script type="module" src="./status-indicators.js"></script>
   <script type="module" src="./local-admin.js"></script>
+  <script type="module" src="./release-status.js"></script>
 </head>
 <body>
   <header class="hero">
@@ -51,6 +53,7 @@
       <button id="local-backup" type="button">Katalog-Backup erstellen</button>
     </section>
 
+    <section id="release-status" class="release-status" hidden aria-label="Beta-Fortschritt"></section>
     <section id="review-warning" class="review-warning" hidden></section>
 
     <section class="quick-filter-section" aria-label="Schnellfilter">
