@@ -34,6 +34,9 @@ test('Einschränkung benötigt eine Begründung', () => {
 test('Asset-ID und Entscheidung werden streng geprüft', () => {
   assert.throws(() => validateReviewPayload({
     assetId: 'falsch', decision: 'archive', reviewer: 'Arman'
+  }), /assetId/);
+  assert.throws(() => validateReviewPayload({
+    assetId: 'VAH-!!!!!!!!', decision: 'archive', reviewer: 'Arman'
   }), /Format VAH/);
   assert.throws(() => validateReviewPayload({
     assetId: 'VAH-GAINET01', decision: 'delete', reviewer: 'Arman'
