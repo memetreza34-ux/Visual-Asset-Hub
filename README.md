@@ -22,9 +22,11 @@ Visual Asset Hub ist eine universelle, kostenlose Medienbibliothek für **B-Roll
 - sichtbare Statuskennzeichnung für Review, Freigabe und Einschränkung
 - exportierbare Favoriten-Auswahl zur Übergabe an andere Content-Projekte
 - Video-Wiedergabe direkt in der Detailansicht
-- Katalogbericht und statische Testversion
+- automatischer Beta-Fortschritt mit offener Abnahmeliste
+- sichere lokale Verwaltungs-API ausschließlich auf `127.0.0.1`
+- Review, Freigabe, Einschränkung, Nutzung, Attribution und Backup direkt im Browser
 - Secret-Scanner sowie automatische Prüfungen für Katalog-, Vorschau-, Betriebs- und Webdaten
-- drei reale vertikale Pexels-Videos als ungeprüfte Beta-Testassets
+- sechs reale Beta-Testassets: drei vertikale Pexels-Videos und drei eigene horizontale SVG-Grafiken
 
 ## Schnellster Start unter Windows
 
@@ -32,7 +34,29 @@ Visual Asset Hub ist eine universelle, kostenlose Medienbibliothek für **B-Roll
 2. Node.js 22 oder neuer installieren.
 3. `START-HERE.cmd` doppelklicken.
 
-Die Datei prüft API-Key-Leaks, Syntax, Katalog und Tests, erzeugt Bericht und Testwebsite, startet den Server und öffnet Visual Asset Hub unter `http://127.0.0.1:4173`.
+Die Startdatei führt die vollständige Beta-Prüfung aus, erzeugt den Bereitschaftsbericht und das statische Testpaket, startet den lokalen Server und öffnet Visual Asset Hub unter:
+
+```text
+http://127.0.0.1:4173
+```
+
+Das Konsolenfenster muss während der Verwendung geöffnet bleiben.
+
+## Realtest vollständig im Browser
+
+Nach dem Start ist oben die Leiste **„Lokale Verwaltung aktiv“** sichtbar. Dann kann der komplette Test ohne Befehle erfolgen:
+
+1. Asset öffnen und vollständig ansehen.
+2. Quelle und Lizenzseite öffnen.
+3. Die vier Pflichtprüfungen bestätigen.
+4. Prüfer, Qualitätsbewertung und Notiz eintragen.
+5. **Freigeben**, **Einschränken**, **Zur Prüfung zurück** oder **Archivieren** wählen.
+6. Bei einem freigegebenen Asset Projekt und Plattform eintragen.
+7. **Nutzung speichern** drücken.
+8. Attribution direkt exportieren.
+9. Über die obere Leiste ein Katalog-Backup erzeugen.
+
+Jede Änderung wird durch dieselben Validatoren geprüft wie der Konsolenablauf. Bei einem Fehler werden Katalog-, Review- oder Nutzungsänderungen zurückgerollt.
 
 ## Sicherer Arbeitsablauf
 
@@ -47,7 +71,7 @@ Die Datei prüft API-Key-Leaks, Syntax, Katalog und Tests, erzeugt Bericht und T
 
 ## Nutzung ohne Befehle über GitHub Actions
 
-Sobald GitHub Actions im Repository wieder Runner startet, stehen folgende manuelle Abläufe bereit:
+Sobald GitHub Actions im Repository wieder Runner startet, stehen zusätzlich folgende manuelle Abläufe bereit:
 
 - **Pexels suchen** – Ergebnisdatei und visuelle Galerie erzeugen
 - **Pexels in Katalog importieren** – Treffer als Review-Assets aufnehmen
@@ -63,6 +87,7 @@ Sobald GitHub Actions im Repository wieder Runner startet, stehen folgende manue
 - Favoriten als temporäre Projektauswahl
 - JSON-Export der Auswahl mit Quelle, Lizenz, Status und Attribution
 - deutliche Warnung, wenn die Auswahl nicht freigegebene Medien enthält
+- sichtbarer technischer Fortschritt, Realtest-Stand und nächste Abnahmeschritte
 
 ## Wichtige Befehle
 
@@ -84,6 +109,9 @@ npm run serve
 - API-Schlüssel liegen ausschließlich in `.env` oder GitHub Secrets.
 - `npm run check` scannt das Repository auf offensichtliche API-Keys und Tokens.
 - Externe Vorschau-URLs werden auf unsichere oder signierte Parameter geprüft.
+- Die lokale Verwaltungs-API bindet standardmäßig ausschließlich an `127.0.0.1`.
+- Schreibaktionen benötigen ein zufälliges Sitzungstoken und denselben Browser-Ursprung.
+- Der Server setzt Content-Security-Policy, Frame-Schutz und weitere Sicherheitsheader.
 - Pexels-Importe starten immer mit Status `review`.
 - Vor Freigabe müssen erkennbare Personen, Marken, sensible Themen und der konkrete Nutzungskontext geprüft werden.
 - Quelle, Lizenzseite und Urheberhinweis werden pro Asset dokumentiert.
@@ -93,7 +121,7 @@ npm run serve
 
 ## Bekannter externer Blocker
 
-GitHub Actions stellt im Repository derzeit keinen Runner bereit. Selbst minimale Linux- und Windows-Diagnosejobs scheitern vor ihrem ersten Step und erzeugen keine Logs. Der Anwendungscode kann lokal getestet werden; die automatische GitHub-Abnahme bleibt bis zur Korrektur der Repository-/Kontoeinstellung blockiert.
+GitHub Actions stellt im Repository derzeit keinen Runner bereit. Selbst minimale Linux- und Windows-Diagnosejobs scheitern vor ihrem ersten Step und erzeugen keine Logs. Der vollständige lokale Browser-Test ist davon unabhängig; die automatische GitHub-Abnahme bleibt bis zur Korrektur der Repository-/Kontoeinstellung blockiert.
 
 ## Dokumentation
 
