@@ -1,7 +1,7 @@
 {
   "indexVersion": 3,
   "catalogVersion": 1,
-  "catalogUpdatedAt": "2026-08-04T09:35:00.000Z",
+  "catalogUpdatedAt": "2026-08-04T09:40:00.000Z",
   "usageUpdatedAt": "2026-08-04T09:14:00.000Z",
   "assetCount": 3,
   "reviewCount": 3,
@@ -138,7 +138,7 @@
       "sourceName": "Pexels",
       "sourcePage": "https://www.pexels.com/de-de/video/hand-technologie-offen-schau-6153727/",
       "licenseUrl": "https://www.pexels.com/license/",
-      "preview": null,
+      "preview": "https://images.pexels.com/videos/6153727/pexels-photo-6153727.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1200&w=630",
       "source": "https://videos.pexels.com/video-files/6153727/6153727-hd_720_1366_25fps.mp4",
       "storageKind": "external",
       "technical": {
@@ -199,7 +199,7 @@
       "sourceName": "Pexels",
       "sourcePage": "https://www.pexels.com/de-de/video/mann-person-technologie-festhalten-8087308/",
       "licenseUrl": "https://www.pexels.com/license/",
-      "preview": null,
+      "preview": "https://images.pexels.com/videos/8087308/adult-android-art-artificial-intelligence-8087308.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1200&w=630",
       "source": "https://videos.pexels.com/video-files/8087308/8087308-hd_720_1280_25fps.mp4",
       "storageKind": "external",
       "technical": {
@@ -260,7 +260,7 @@
       "sourceName": "Pexels",
       "sourcePage": "https://www.pexels.com/de-de/video/mann-technologie-trinken-drinnen-8328141/",
       "licenseUrl": "https://www.pexels.com/license/",
-      "preview": null,
+      "preview": "https://images.pexels.com/videos/8328141/coffee-with-a-robot-flower-invention-robot-8328141.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1200&w=630",
       "source": "https://videos.pexels.com/video-files/8328141/8328141-hd_720_1280_25fps.mp4",
       "storageKind": "external",
       "technical": {
