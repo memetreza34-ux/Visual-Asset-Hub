@@ -7,8 +7,10 @@
   <title>Visual Asset Hub</title>
   <link rel="stylesheet" href="./styles.css" />
   <link rel="stylesheet" href="./selection-tools.css" />
+  <link rel="stylesheet" href="./quick-filters.css" />
   <script type="module" src="./app.js"></script>
   <script type="module" src="./selection-tools.js"></script>
+  <script type="module" src="./quick-filters.js"></script>
 </head>
 <body>
   <header class="hero">
@@ -38,6 +40,11 @@
       <label><span>Sortierung</span><select id="sort-filter"><option value="quality">Beste Qualität</option><option value="newest">Neu importiert</option><option value="most-used">Am häufigsten genutzt</option><option value="title">Titel A–Z</option><option value="category">Kategorie</option></select></label>
       <label class="favorite-filter"><input id="favorites-filter" type="checkbox" /><span>Nur Favoriten</span></label>
       <button id="reset" type="button">Filter zurücksetzen</button>
+    </section>
+
+    <section class="quick-filter-section" aria-label="Schnellfilter">
+      <span>Schnell finden</span>
+      <div id="quick-filters" class="quick-filters"></div>
     </section>
 
     <section class="selection-bar" aria-label="Aktuelle Asset-Auswahl">
