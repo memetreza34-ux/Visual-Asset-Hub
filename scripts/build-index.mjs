@@ -42,7 +42,7 @@ const records = [...catalog.assets]
       sourceName: asset.rights.sourceName,
       sourcePage: asset.rights.sourceUrl ?? null,
       licenseUrl: asset.rights.licenseUrl ?? null,
-      preview: asset.storage.previewPath ?? null,
+      preview: asset.storage.previewPath ?? asset.storage.previewUrl ?? null,
       source: asset.storage.kind === 'external' ? asset.storage.externalUrl ?? null : asset.storage.path ?? null,
       storageKind: asset.storage.kind,
       technical: asset.technical ?? null,
