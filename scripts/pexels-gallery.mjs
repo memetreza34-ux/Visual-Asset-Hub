@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import { pathToFileURL } from 'node:url';
 
 export function renderGallery(result) {
   const cards = result.assets.map((asset) => renderCard(asset)).join('\n');
@@ -59,6 +60,6 @@ function main() {
   console.log(`Pexels-Galerie erzeugt: ${output}`);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   try { main(); } catch (error) { console.error(error instanceof Error ? error.message : String(error)); process.exitCode = 1; }
 }
