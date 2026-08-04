@@ -107,6 +107,7 @@
             "kind": { "enum": ["repository", "git-lfs", "external"] },
             "path": { "type": "string", "maxLength": 500 },
             "previewPath": { "type": "string", "maxLength": 500 },
+            "previewUrl": { "type": "string", "format": "uri", "maxLength": 2000 },
             "externalUrl": { "type": "string", "format": "uri", "maxLength": 2000 }
           },
           "additionalProperties": false
