@@ -23,7 +23,7 @@ if %NODE_MAJOR% LSS 22 (
   exit /b 1
 )
 
-echo [1/3] Vollstaendige Beta-Bereitschaft wird geprueft...
+echo [1/4] Vollstaendige Beta-Bereitschaft wird geprueft...
 call npm run beta:verify
 if errorlevel 1 (
   echo.
@@ -33,10 +33,18 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo [2/3] Browser wird nach dem Serverstart automatisch geoeffnet...
+echo [2/4] Testpaket wird mit dem aktuellen Bereitschaftsbericht aktualisiert...
+call npm run site:build
+if errorlevel 1 (
+  echo [FEHLER] Das statische Testpaket konnte nicht aktualisiert werden.
+  pause
+  exit /b 1
+)
+
+echo [3/4] Browser wird nach dem Serverstart automatisch geoeffnet...
 start "Visual Asset Hub Browser" cmd /c "timeout /t 2 /nobreak >nul & start \"\" http://127.0.0.1:4173"
 
-echo [3/3] Visual Asset Hub laeuft mit lokaler Verwaltung.
+echo [4/4] Visual Asset Hub laeuft mit lokaler Verwaltung.
 echo Review, Freigabe, Nutzung, Attribution und Backup koennen im Browser gespeichert werden.
 echo Zum Beenden STRG+C druecken.
 call npm run serve
