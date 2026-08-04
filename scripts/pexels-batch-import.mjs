@@ -67,7 +67,9 @@ export function buildImportPlans({ result, catalog, taxonomy, options, now = new
     const title = truncate(sourceAsset.title?.startsWith('Pexels Video')
       ? `${options.query} – B-Roll von ${creator}`
       : sourceAsset.title || `${options.query} von ${creator}`, 160);
-    const previewPath = sourceAsset.preview_url ? `previews/pexels/${sourceAsset.provider_id}.jpg` : undefined;
+    const storePreviews = options.storePreviews === true;
+    const previewPath = storePreviews && sourceAsset.preview_url ? `previews/pexels/${sourceAsset.provider_id}.jpg` : undefined;
+    const previewUrl = !storePreviews ? sourceAsset.preview_url : undefined;
 
     const asset = compact({
       id: createAssetId(new Set(currentAssets.map((entry) => entry.id))),
@@ -94,7 +96,7 @@ export function buildImportPlans({ result, catalog, taxonomy, options, now = new
         fps: selected.fps,
         codec: type === 'video' ? 'h264/mp4' : selected.extension
       }),
-      storage: compact({ kind: 'external', externalUrl: selected.url, previewPath }),
+      storage: compact({ kind: 'external', externalUrl: selected.url, previewPath, previewUrl }),
       rights: {
         licenseStatus: 'licensed',
         sourceName: 'Pexels',
@@ -111,7 +113,7 @@ export function buildImportPlans({ result, catalog, taxonomy, options, now = new
       notes: `Pexels Asset-ID ${sourceAsset.provider_id}. Automatisch aus Suche „${options.query}“ importiert; Status bleibt bis zur Sichtprüfung auf review.`
     });
 
-    plans.push({ asset, previewUrl: sourceAsset.preview_url, previewPath });
+    plans.push({ asset, previewUrl: storePreviews ? sourceAsset.preview_url : undefined, previewPath });
     existingSourceUrls.add(sourceAsset.source_url);
   }
   return plans;
@@ -168,6 +170,7 @@ async function main() {
     };
     fs.writeFileSync(catalogPath, `${JSON.stringify(nextCatalog, null, 2)}\n`);
     runNode(root, 'scripts/validate-catalog.mjs');
+    runNode(root, 'scripts/validate-operations.mjs');
     runNode(root, 'scripts/build-index.mjs');
     console.log(`${plans.length} Pexels-Assets wurden als externe review-Einträge aufgenommen.`);
   } catch (error) {
@@ -215,6 +218,7 @@ function normalizeOptions(args, taxonomy) {
     shot: args.shot, movement: args.movement,
     quality: integer(args.quality || '3', 1, 5, 'quality'),
     createdBy: args['created-by'] || 'github-actions/pexels-import',
+    storePreviews: args['store-previews'] === 'true',
     dryRun: args['dry-run'] === 'true'
   };
 }
@@ -235,7 +239,7 @@ function escapeRegExp(value){return value.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 function truncate(value,max){const text=String(value);return text.length<=max?text:`${text.slice(0,max-1)}…`;}
 function readJson(file){return JSON.parse(fs.readFileSync(file,'utf8'));}
 function runNode(root,script){const run=spawnSync(process.execPath,[script],{cwd:root,encoding:'utf8'});if(run.status!==0)throw new Error(run.stderr||run.stdout||`${script} fehlgeschlagen.`);if(run.stdout)process.stdout.write(run.stdout);}
-function printHelp(){console.log(`Pexels direkt als externe Katalogeinträge importieren.\n\nBeispiel:\n  npm run pexels:import -- --query "KI Technologie" --type video --category technology-ai --orientation vertical --count 5 --tags ai,zukunft\n\nOriginale bleiben extern; kleine Vorschaubilder werden gespeichert. Alle Einträge erhalten Status review.`);}
+function printHelp(){console.log(`Pexels direkt als externe Katalogeinträge importieren.\n\nBeispiel:\n  npm run pexels:import -- --query "KI Technologie" --type video --category technology-ai --orientation vertical --count 5 --tags ai,zukunft\n\nOriginale und Vorschaubilder bleiben standardmäßig extern. Mit --store-previews true werden kleine Vorschaubilder lokal gespeichert. Alle Einträge erhalten Status review.`);}
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   main().catch(error=>{console.error(error instanceof Error?error.message:String(error));process.exitCode=1;});
