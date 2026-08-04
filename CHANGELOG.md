@@ -1,5 +1,34 @@
 # Changelog
 
+## 0.3.0-beta.3 – 2026-08-04
+
+### Neu
+
+- sichere lokale Verwaltungs-API ausschließlich für Loopback-Verbindungen
+- Review, Freigabe, Einschränkung, Rückgabe und Archivierung direkt in der Detailansicht
+- verpflichtende Vier-Punkte-Prüfung vor jeder Browser-Freigabe
+- reale Nutzung eines freigegebenen Assets direkt im Browser dokumentierbar
+- Attributionsexport und Katalog-Backup direkt aus der Oberfläche
+- automatischer Beta-Fortschritt mit technischer Quote, Realtest-Quote und offenen Aufgaben
+- Bereitschaftsbericht als Markdown und JSON direkt aus der Anwendung erreichbar
+- neue Tests für API-Eingaben, Browser-Verknüpfung und lokale Serversicherheit
+
+### Sicherheit
+
+- zufälliges Sitzungstoken für alle lokalen Schreibaktionen
+- Same-Origin-Prüfung und ausschließlich lokale Client-Verbindungen
+- Schreibsperre gegen parallele Katalogänderungen
+- maximale Request-Größe und strikte Feld-, URL-, Plattform- und Asset-ID-Validierung
+- Content-Security-Policy, Frame-Schutz, Referrer-Schutz und restriktive Permissions-Policy
+- kein Shell-Aufruf bei benutzerdefinierten Eingaben
+
+### Verbessert
+
+- `START-HERE.cmd` erzeugt vor dem Start automatisch den vollständigen Beta-Bereitschaftsbericht
+- das statische Testpaket enthält den aktuellen Bereitschaftsbericht
+- der reale Test kann vollständig ohne Konsole durchgeführt werden
+- Version auf `0.3.0-beta.3` erhöht
+
 ## 0.3.0-beta.2 – 2026-08-04
 
 ### Neu
