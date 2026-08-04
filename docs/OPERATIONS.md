@@ -1,14 +1,23 @@
 # Praktischer Betrieb
 
-## Sicherer Ablauf
+## Schnellstart
 
-1. Pexels durchsuchen und die erzeugte `gallery.html` ansehen.
-2. Nur passende Pexels-IDs gezielt importieren.
-3. Importierte Assets bleiben auf `review`.
-4. Inhalt, Qualität, erkennbare Personen, Marken und Nutzungskontext prüfen.
-5. Asset freigeben oder einschränken.
-6. Jede reale Nutzung dokumentieren.
-7. Für jedes Projekt eine Quellen-/Attributionsdatei exportieren.
+Unter Windows `START-HERE.cmd` doppelklicken. Danach steht die Anwendung unter `http://127.0.0.1:4173` bereit.
+
+Während der Nutzung muss das Konsolenfenster geöffnet bleiben. Zum Beenden `STRG+C` drücken.
+
+## Sicherer Ablauf im Browser
+
+1. Asset öffnen und vollständig ansehen.
+2. Quelle und Lizenzseite kontrollieren.
+3. Die vier Pflichtprüfungen bestätigen.
+4. Asset freigeben, einschränken, zurückgeben oder archivieren.
+5. Nur freigegebene Assets real verwenden.
+6. Projekt und Plattform direkt im Browser dokumentieren.
+7. Attribution exportieren.
+8. Regelmäßig ein Backup erzeugen.
+
+Die Leiste **Lokale Verwaltung aktiv** bestätigt, dass Schreibaktionen verfügbar sind. Fehlt diese Leiste, läuft nur die statische Ansicht und es werden keine Änderungen gespeichert.
 
 ## Gezielter Pexels-Import
 
@@ -21,7 +30,9 @@ npm run pexels:select -- \
   --scopes organic-social,youtube,website
 ```
 
-## Review
+## Review über die Konsole
+
+Der Browser ist der empfohlene Weg. Optional stehen weiterhin Befehle bereit:
 
 ```bash
 npm run asset:review -- --id VAH-XXXXXXXX --decision approve --reviewer Arman
@@ -50,8 +61,38 @@ Die Dateien erscheinen unter `exports/` als Markdown und CSV.
 
 ## Backup
 
+Im Browser oben **Katalog-Backup erstellen** drücken oder:
+
 ```bash
 npm run backup
 ```
 
-Backups werden lokal unter `backups/` abgelegt und nicht automatisch zu GitHub übertragen.
+Backups werden lokal unter `backups/` abgelegt und nicht automatisch zu GitHub übertragen. Jedes Backup besitzt ein Manifest mit Dateigröße und SHA-256-Prüfsumme.
+
+## Backup wiederherstellen
+
+Empfohlen unter Windows:
+
+1. `RESTORE-BACKUP.cmd` doppelklicken.
+2. Backup-Ordner auswählen.
+3. Prüflauf abwarten.
+4. Wiederherstellung ausdrücklich bestätigen.
+5. Danach `START-HERE.cmd` erneut starten.
+
+Alternativ:
+
+```bash
+npm run restore -- --backup backups/DEIN-BACKUP --dry-run true
+npm run restore -- --backup backups/DEIN-BACKUP
+```
+
+Der Restore akzeptiert nur Ordner innerhalb von `backups/`. Vor der Wiederherstellung werden Manifest, JSON, Dateigrößen und SHA-256-Prüfsummen geprüft. Anschließend wird automatisch ein Sicherheitsbackup des aktuellen Zustands erstellt. Schlägt eine Validierung fehl, wird der vorherige Zustand wiederhergestellt.
+
+## Regelmäßige Wartung
+
+- vor größeren Importen Backup erstellen
+- nach Änderungen `npm run beta:verify` ausführen
+- externe Links regelmäßig mit `npm run links:check -- --strict true` prüfen
+- Review-Assets nicht in echte Projekte übernehmen
+- ungenutzte oder veraltete Medien archivieren
+- Exportdateien und Backups nicht dauerhaft unverschlüsselt in öffentliche Cloud-Ordner legen
