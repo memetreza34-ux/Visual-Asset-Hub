@@ -8,9 +8,11 @@
   <link rel="stylesheet" href="./styles.css" />
   <link rel="stylesheet" href="./selection-tools.css" />
   <link rel="stylesheet" href="./quick-filters.css" />
+  <link rel="stylesheet" href="./status-indicators.css" />
   <script type="module" src="./app.js"></script>
   <script type="module" src="./selection-tools.js"></script>
   <script type="module" src="./quick-filters.js"></script>
+  <script type="module" src="./status-indicators.js"></script>
 </head>
 <body>
   <header class="hero">
@@ -41,6 +43,8 @@
       <label class="favorite-filter"><input id="favorites-filter" type="checkbox" /><span>Nur Favoriten</span></label>
       <button id="reset" type="button">Filter zurücksetzen</button>
     </section>
+
+    <section id="review-warning" class="review-warning" hidden></section>
 
     <section class="quick-filter-section" aria-label="Schnellfilter">
       <span>Schnell finden</span>
