@@ -29,42 +29,39 @@ const records = [...catalog.assets]
     usageScopes: asset.rights.usageScopes,
     licenseStatus: asset.rights.licenseStatus,
     attributionRequired: asset.rights.attributionRequired,
+    attributionText: asset.rights.attributionText ?? null,
+    sourceName: asset.rights.sourceName,
+    sourcePage: asset.rights.sourceUrl ?? null,
+    licenseUrl: asset.rights.licenseUrl ?? null,
     preview: asset.storage.previewPath ?? null,
     source: asset.storage.kind === 'external' ? asset.storage.externalUrl ?? null : asset.storage.path ?? null,
+    storageKind: asset.storage.kind,
     technical: asset.technical ?? null,
+    importedAt: asset.importedAt,
+    createdAt: asset.createdAt,
     searchableText: normalize([
-      asset.id,
-      asset.filename,
-      asset.title,
-      asset.description,
-      asset.type,
-      asset.category,
-      ...(asset.secondaryCategories ?? []),
-      ...asset.tags,
-      ...(asset.searchAliases ?? []),
-      asset.subject,
-      asset.action,
-      asset.orientation,
-      asset.shotType,
-      asset.cameraMovement,
-      asset.style,
-      asset.rights.licenseStatus,
-      ...asset.rights.usageScopes
+      asset.id, asset.filename, asset.title, asset.description, asset.type, asset.category,
+      ...(asset.secondaryCategories ?? []), ...asset.tags, ...(asset.searchAliases ?? []),
+      asset.subject, asset.action, asset.orientation, asset.shotType, asset.cameraMovement,
+      asset.style, asset.rights.licenseStatus, asset.rights.sourceName, ...asset.rights.usageScopes
     ].join(' '))
   }));
 
 const index = {
-  indexVersion: 1,
+  indexVersion: 2,
   catalogVersion: catalog.catalogVersion,
   catalogUpdatedAt: catalog.updatedAt,
   assetCount: records.length,
+  reviewCount: records.filter((record) => record.status === 'review').length,
+  approvedCount: records.filter((record) => record.status === 'approved').length,
   facets: {
     types: count(records, 'type', taxonomy.assetTypes),
     categories: count(records, 'category', taxonomy.categories),
     orientations: count(records, 'orientation', taxonomy.orientations),
     styles: count(records, 'style', taxonomy.styles),
     statuses: count(records, 'status', taxonomy.lifecycleStatuses),
-    licenseStatuses: count(records, 'licenseStatus', taxonomy.licenseStatuses)
+    licenseStatuses: count(records, 'licenseStatus', taxonomy.licenseStatuses),
+    usageScopes: count(records, 'usageScopes', taxonomy.usageScopes)
   },
   records
 };
@@ -74,14 +71,8 @@ fs.writeFileSync(outputPath, `${JSON.stringify(index, null, 2)}\n`);
 console.log(`Suchindex erzeugt: ${records.length} Assets in ${path.relative(root, outputPath)}.`);
 
 function normalize(value) {
-  return value
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim();
+  return value.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 }
-
 function count(records, field, knownValues) {
   const result = Object.fromEntries(knownValues.map((value) => [value, 0]));
   for (const record of records) {
