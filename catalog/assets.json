@@ -1,5 +1,138 @@
 {
   "catalogVersion": 1,
-  "updatedAt": "2026-08-02T14:30:00.000Z",
-  "assets": []
+  "updatedAt": "2026-08-04T09:35:00.000Z",
+  "assets": [
+    {
+      "id": "VAH-P6153727",
+      "filename": "brl-technology-ai-robotic-hand-opening-hand-cu-vertical-0001.mp4",
+      "title": "Robotische Hand in Bewegung",
+      "description": "Vertikales Pexels-Video einer technologischen beziehungsweise robotischen Hand in Bewegung. Der vollständige Inhalt muss vor der Freigabe visuell geprüft werden.",
+      "type": "video",
+      "category": "technology-ai",
+      "secondaryCategories": ["science-engineering"],
+      "tags": ["robotic-hand", "technology", "artificial-intelligence", "future", "pexels"],
+      "searchAliases": ["Roboterhand", "künstliche Hand", "robotic hand", "future technology"],
+      "subject": "robotic-hand",
+      "action": "opening-hand",
+      "orientation": "vertical",
+      "shotType": "cu",
+      "cameraMovement": "mixed",
+      "style": "realistic",
+      "status": "review",
+      "qualityRating": 4,
+      "technical": {
+        "width": 720,
+        "height": 1366,
+        "durationSeconds": 11,
+        "fps": 25,
+        "codec": "h264/mp4"
+      },
+      "storage": {
+        "kind": "external",
+        "externalUrl": "https://videos.pexels.com/video-files/6153727/6153727-hd_720_1366_25fps.mp4"
+      },
+      "rights": {
+        "licenseStatus": "licensed",
+        "sourceName": "Pexels",
+        "sourceUrl": "https://www.pexels.com/de-de/video/hand-technologie-offen-schau-6153727/",
+        "licenseUrl": "https://www.pexels.com/license/",
+        "usageScopes": ["organic-social", "youtube", "website"],
+        "attributionRequired": false,
+        "attributionText": "Video von cottonbro studio auf Pexels",
+        "notes": "Pexels-Lizenz dokumentiert. Vor Freigabe vollständigen Clip, erkennbare Marken und Nutzungskontext prüfen."
+      },
+      "createdAt": "2026-08-04T09:35:00.000Z",
+      "importedAt": "2026-08-04T09:35:00.000Z",
+      "createdBy": "chatgpt-assisted-review-import",
+      "notes": "Pexels Asset-ID 6153727. Aus dem erfolgreich ausgeführten API-Verbindungstest ausgewählt; Status bleibt review."
+    },
+    {
+      "id": "VAH-P8087308",
+      "filename": "brl-technology-ai-humanoid-robot-holding-ms-vertical-0001.mp4",
+      "title": "Person hält humanoides Technologieobjekt",
+      "description": "Vertikales Pexels-Video mit einer Person und einem humanoiden Technologieobjekt. Eignung, sichtbare Personen und mögliche Marken müssen vor der Freigabe geprüft werden.",
+      "type": "video",
+      "category": "technology-ai",
+      "secondaryCategories": ["science-engineering", "people-lifestyle"],
+      "tags": ["humanoid-robot", "technology", "artificial-intelligence", "person", "pexels"],
+      "searchAliases": ["humanoider Roboter", "AI robot", "Mensch und Roboter", "future technology"],
+      "subject": "humanoid-robot",
+      "action": "holding",
+      "orientation": "vertical",
+      "shotType": "ms",
+      "cameraMovement": "mixed",
+      "style": "realistic",
+      "status": "review",
+      "qualityRating": 4,
+      "technical": {
+        "width": 720,
+        "height": 1280,
+        "durationSeconds": 9,
+        "fps": 25,
+        "codec": "h264/mp4"
+      },
+      "storage": {
+        "kind": "external",
+        "externalUrl": "https://videos.pexels.com/video-files/8087308/8087308-hd_720_1280_25fps.mp4"
+      },
+      "rights": {
+        "licenseStatus": "licensed",
+        "sourceName": "Pexels",
+        "sourceUrl": "https://www.pexels.com/de-de/video/mann-person-technologie-festhalten-8087308/",
+        "licenseUrl": "https://www.pexels.com/license/",
+        "usageScopes": ["organic-social", "youtube", "website"],
+        "attributionRequired": false,
+        "attributionText": "Video von Pavel Danilyuk auf Pexels",
+        "notes": "Pexels-Lizenz dokumentiert. Vor Freigabe vollständigen Clip, erkennbare Person, Marken und Nutzungskontext prüfen."
+      },
+      "createdAt": "2026-08-04T09:35:00.000Z",
+      "importedAt": "2026-08-04T09:35:00.000Z",
+      "createdBy": "chatgpt-assisted-review-import",
+      "notes": "Pexels Asset-ID 8087308. Aus dem erfolgreich ausgeführten API-Verbindungstest ausgewählt; Status bleibt review."
+    },
+    {
+      "id": "VAH-P8328141",
+      "filename": "brl-technology-ai-robot-companion-drinking-coffee-ms-vertical-0001.mp4",
+      "title": "Person mit Roboter und Getränk",
+      "description": "Vertikales Pexels-Video einer Person in einer Alltagsszene mit einem robotischen Technologieobjekt und einem Getränk. Der vollständige Inhalt muss vor der Freigabe geprüft werden.",
+      "type": "video",
+      "category": "technology-ai",
+      "secondaryCategories": ["people-lifestyle", "culture-entertainment"],
+      "tags": ["robot-companion", "technology", "artificial-intelligence", "coffee", "pexels"],
+      "searchAliases": ["Roboter im Alltag", "coffee with robot", "robot companion", "future lifestyle"],
+      "subject": "robot-companion",
+      "action": "drinking-coffee",
+      "orientation": "vertical",
+      "shotType": "ms",
+      "cameraMovement": "mixed",
+      "style": "realistic",
+      "status": "review",
+      "qualityRating": 4,
+      "technical": {
+        "width": 720,
+        "height": 1280,
+        "durationSeconds": 36,
+        "fps": 25,
+        "codec": "h264/mp4"
+      },
+      "storage": {
+        "kind": "external",
+        "externalUrl": "https://videos.pexels.com/video-files/8328141/8328141-hd_720_1280_25fps.mp4"
+      },
+      "rights": {
+        "licenseStatus": "licensed",
+        "sourceName": "Pexels",
+        "sourceUrl": "https://www.pexels.com/de-de/video/mann-technologie-trinken-drinnen-8328141/",
+        "licenseUrl": "https://www.pexels.com/license/",
+        "usageScopes": ["organic-social", "youtube", "website"],
+        "attributionRequired": false,
+        "attributionText": "Video von Pavel Danilyuk auf Pexels",
+        "notes": "Pexels-Lizenz dokumentiert. Vor Freigabe vollständigen Clip, erkennbare Person, Marken und Nutzungskontext prüfen."
+      },
+      "createdAt": "2026-08-04T09:35:00.000Z",
+      "importedAt": "2026-08-04T09:35:00.000Z",
+      "createdBy": "chatgpt-assisted-review-import",
+      "notes": "Pexels Asset-ID 8328141. Aus dem erfolgreich ausgeführten API-Verbindungstest ausgewählt; Status bleibt review."
+    }
+  ]
 }
