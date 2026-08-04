@@ -1,8 +1,10 @@
 {
-  "indexVersion": 1,
+  "indexVersion": 2,
   "catalogVersion": 1,
   "catalogUpdatedAt": "2026-08-02T14:30:00.000Z",
   "assetCount": 0,
+  "reviewCount": 0,
+  "approvedCount": 0,
   "facets": {
     "types": {
       "video": 0,
@@ -77,6 +79,17 @@
       "editorial-only": 0,
       "restricted": 0,
       "unknown": 0
+    },
+    "usageScopes": {
+      "organic-social": 0,
+      "paid-ads": 0,
+      "youtube": 0,
+      "website": 0,
+      "app": 0,
+      "presentation": 0,
+      "client-work": 0,
+      "editorial": 0,
+      "internal-only": 0
     }
   },
   "records": []
