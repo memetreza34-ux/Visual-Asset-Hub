@@ -1,15 +1,13 @@
 name: Runner-Diagnose
 
 on:
-  pull_request:
-    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   diagnostic:
-    if: github.head_ref == 'agent/beta-release'
     strategy:
       fail-fast: false
       matrix:
