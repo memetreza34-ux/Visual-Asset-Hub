@@ -20,3 +20,7 @@ tmp/
 # Lokale Storage- und Vorschaudaten.
 .local-storage/
 preview-cache/
+
+# Automatisch erzeugte Testversionen und Berichte.
+dist/
+reports/
