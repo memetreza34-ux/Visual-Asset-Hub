@@ -30,8 +30,9 @@ function render(report) {
   const reviewed = report.counts?.reviewedAssets ?? 0;
   const required = report.counts?.requiredReviewedAssets ?? 11;
   const packs = report.counts?.validMediaPacks ?? 0;
+  const plans = report.counts?.validScriptPlans ?? 0;
   const inbox = report.counts?.inboxAssets ?? 0;
-  description.textContent = `Technik ${technical} % · Realtest ${realTest} % · geprüft ${reviewed}/${required} · eigene Medien ${inbox} · Pakete ${packs}`;
+  description.textContent = `Technik ${technical} % · Realtest ${realTest} % · Skriptpläne ${plans} · geprüft ${reviewed}/${required} · eigene Medien ${inbox} · Pakete ${packs}`;
   text.append(eyebrow, title, description);
 
   const links = document.createElement('div');
@@ -86,6 +87,7 @@ function reportLink(text, href, download = false) {
 function checkLabel(key) {
   return ({
     starterMediaPresent: 'Startermedien vorhanden',
+    scriptPlanGenerated: 'Skript- und Shotlist-Test erstellt',
     starterAssetsReviewed: 'alle Starterassets entschieden',
     fourChannelsRepresented: 'alle 4 Kanäle mit Assets',
     ownedInboxAssetImported: 'eigenes Medium importiert',
