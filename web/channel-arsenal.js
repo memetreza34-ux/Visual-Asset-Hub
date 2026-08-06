@@ -27,10 +27,24 @@ function render(channels, records) {
   const totalCollections = channels.reduce((sum, channel) => sum + channel.collections.length, 0);
   const totalQueries = channels.reduce((sum, channel) => sum + channel.collections.reduce((inner, collection) => inner + collection.queries.length, 0), 0);
   const arsenalAssets = records.filter((record) => record.tags.some((tag) => tag.startsWith('channel-')));
+  const approvedAssets = arsenalAssets.filter((record) => record.status === 'approved');
   const recommendedTarget = totalCollections * recommendedPerCollection;
+  const collectionRows = buildCollectionRows(channels, records);
+
   const header = document.createElement('div');
   header.className = 'arsenal-header';
-  header.innerHTML = `<div><span class="eyebrow">Kanal-Arsenal</span><h2>${totalCollections} Sammlungen für deine vier Kanäle</h2><p>${totalQueries} vorbereitete Suchbegriffe. Aktuell sind ${arsenalAssets.length} von empfohlenen ${recommendedTarget} Kanal-Assets katalogisiert.</p></div>`;
+  const heading = document.createElement('div');
+  const eyebrow = document.createElement('span');
+  eyebrow.className = 'eyebrow';
+  eyebrow.textContent = 'Kanal-Arsenal';
+  const title = document.createElement('h2');
+  title.textContent = `${totalCollections} Sammlungen für deine vier Kanäle`;
+  const description = document.createElement('p');
+  description.textContent = `${totalQueries} vorbereitete Suchbegriffe · ${arsenalAssets.length} Kandidaten · ${approvedAssets.length} freigegeben · Ziel ${recommendedTarget}.`;
+  heading.append(eyebrow, title, description);
+  header.append(heading);
+
+  const recommendations = createRecommendations(collectionRows);
 
   const controls = document.createElement('div');
   controls.className = 'arsenal-controls';
@@ -40,7 +54,26 @@ function render(channels, records) {
   search.setAttribute('aria-label', 'Kanal-Sammlungen durchsuchen');
   const tabs = document.createElement('div');
   tabs.className = 'arsenal-tabs';
-  controls.append(search, tabs);
+  const options = document.createElement('div');
+  options.className = 'arsenal-options';
+  const sort = document.createElement('select');
+  sort.setAttribute('aria-label', 'Sammlungen sortieren');
+  for (const [value, text] of [['gaps', 'Größte Lücken zuerst'], ['approved', 'Meiste Freigaben'], ['review', 'Meiste Reviews'], ['alphabetical', 'Alphabetisch']]) {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = text;
+    sort.append(option);
+  }
+  const gapsOnly = document.createElement('label');
+  gapsOnly.className = 'arsenal-gap-filter';
+  const gapCheckbox = document.createElement('input');
+  gapCheckbox.type = 'checkbox';
+  gapCheckbox.checked = true;
+  const gapText = document.createElement('span');
+  gapText.textContent = 'Nur unvollständige Sammlungen';
+  gapsOnly.append(gapCheckbox, gapText);
+  options.append(sort, gapsOnly);
+  controls.append(search, tabs, options);
 
   const grid = document.createElement('div');
   grid.className = 'arsenal-grid';
@@ -63,24 +96,72 @@ function render(channels, records) {
   }
 
   search.addEventListener('input', () => { query = normalize(search.value); renderCards(); });
-  section.replaceChildren(header, controls, grid);
+  sort.addEventListener('change', renderCards);
+  gapCheckbox.addEventListener('change', renderCards);
+  section.replaceChildren(header, recommendations, controls, grid);
   renderCards();
 
   function renderCards() {
-    const cards = [];
-    for (const channel of channels) {
-      if (activeChannel !== 'all' && activeChannel !== channel.id) continue;
-      for (const collection of channel.collections) {
-        const searchable = normalize([channel.label, collection.label, collection.id, ...collection.tags, ...collection.queries].join(' '));
-        if (query && !query.split(' ').every((term) => searchable.includes(term))) continue;
-        const collectionTag = `collection-${collection.id}`;
-        const matching = records.filter((record) => record.tags.includes(channel.channelTag) && record.tags.includes(collectionTag));
-        cards.push(createCard(channel, collection, matching));
-      }
-    }
-    grid.replaceChildren(...cards);
-    if (!cards.length) grid.append(message('Keine passende Sammlung gefunden.'));
+    const visible = collectionRows.filter((row) => {
+      if (activeChannel !== 'all' && activeChannel !== row.channel.id) return false;
+      if (gapCheckbox.checked && row.approved >= recommendedPerCollection) return false;
+      const searchable = normalize([row.channel.label, row.collection.label, row.collection.id, ...row.collection.tags, ...row.collection.queries].join(' '));
+      return !query || query.split(' ').every((term) => searchable.includes(term));
+    });
+    visible.sort(rowSorter(sort.value));
+    grid.replaceChildren(...visible.map((row) => createCard(row.channel, row.collection, row.matching)));
+    if (!visible.length) grid.append(message('Keine passende oder offene Sammlung gefunden.'));
   }
+}
+
+function buildCollectionRows(channels, records) {
+  const rows = [];
+  for (const channel of channels) {
+    for (const collection of channel.collections) {
+      const collectionTag = `collection-${collection.id}`;
+      const matching = records.filter((record) => record.tags.includes(channel.channelTag) && record.tags.includes(collectionTag));
+      rows.push({
+        channel,
+        collection,
+        matching,
+        approved: matching.filter((record) => record.status === 'approved').length,
+        pending: matching.filter((record) => ['inbox', 'review'].includes(record.status)).length
+      });
+    }
+  }
+  return rows;
+}
+
+function createRecommendations(rows) {
+  const wrapper = document.createElement('section');
+  wrapper.className = 'arsenal-recommendations';
+  const top = document.createElement('div');
+  const title = document.createElement('h3');
+  title.textContent = 'Als Nächstes ausbauen';
+  const description = document.createElement('p');
+  description.textContent = 'Die Sammlungen mit der geringsten Zahl freigegebener Assets. Ein Klick stellt den Arsenal Builder automatisch ein.';
+  top.append(title, description);
+  const list = document.createElement('div');
+  list.className = 'arsenal-recommendation-list';
+  const weakest = [...rows].filter((row) => row.approved < recommendedPerCollection).sort(rowSorter('gaps')).slice(0, 8);
+  for (const row of weakest) {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = `arsenal-recommendation channel-${row.channel.id}`;
+    const names = document.createElement('span');
+    const channelName = document.createElement('small');
+    channelName.textContent = row.channel.label;
+    const collectionName = document.createElement('strong');
+    collectionName.textContent = row.collection.label;
+    names.append(channelName, collectionName);
+    const count = document.createElement('b');
+    count.textContent = `${row.approved}/${recommendedPerCollection}`;
+    item.append(names, count);
+    item.addEventListener('click', () => selectInBuilder(row.channel.id, row.collection.id));
+    list.append(item);
+  }
+  wrapper.append(top, list);
+  return wrapper;
 }
 
 function createCard(channel, collection, matching) {
@@ -88,23 +169,24 @@ function createCard(channel, collection, matching) {
   article.className = `arsenal-card channel-${channel.id}`;
   const approved = matching.filter((record) => record.status === 'approved').length;
   const pending = matching.filter((record) => ['inbox', 'review'].includes(record.status)).length;
-  const coverage = Math.min(100, Math.round((matching.length / recommendedPerCollection) * 100));
+  const restricted = matching.filter((record) => record.status === 'restricted').length;
+  const approvedCoverage = Math.min(100, Math.round((approved / recommendedPerCollection) * 100));
+  const candidateCoverage = Math.min(100, Math.round((matching.length / recommendedPerCollection) * 100));
   const top = document.createElement('div');
   top.className = 'arsenal-card-top';
   const channelLabel = document.createElement('span');
   channelLabel.className = 'arsenal-channel-label';
   channelLabel.textContent = channel.label;
   const count = document.createElement('span');
-  count.textContent = `${matching.length}/${recommendedPerCollection} Assets · ${approved} frei · ${pending} Review`;
+  count.textContent = `${matching.length} Kandidaten · ${approved} frei · ${pending} Review${restricted ? ` · ${restricted} gesperrt` : ''}`;
   top.append(channelLabel, count);
   const title = document.createElement('h3');
   title.textContent = collection.label;
-  const progress = document.createElement('div');
-  progress.className = 'arsenal-coverage';
-  progress.title = `${coverage} % der empfohlenen Grundabdeckung`;
-  const progressBar = document.createElement('span');
-  progressBar.style.width = `${coverage}%`;
-  progress.append(progressBar);
+
+  const progressGroup = document.createElement('div');
+  progressGroup.className = 'arsenal-progress-group';
+  progressGroup.append(progressLine('Freigegeben', approvedCoverage, 'approved'), progressLine('Kandidaten', candidateCoverage, 'candidates'));
+
   const tags = document.createElement('div');
   tags.className = 'arsenal-tags';
   for (const tag of collection.tags.slice(0, 6)) {
@@ -141,6 +223,10 @@ function createCard(channel, collection, matching) {
     search.dispatchEvent(new Event('input', { bubbles: true }));
     document.querySelector('#asset-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
+  const builder = document.createElement('button');
+  builder.type = 'button';
+  builder.textContent = approved >= recommendedPerCollection ? 'Weitere Varianten suchen' : 'Lücke mit Pexels füllen';
+  builder.addEventListener('click', () => selectInBuilder(channel.id, collection.id));
   const copyPack = document.createElement('button');
   copyPack.type = 'button';
   copyPack.textContent = 'Suchpaket kopieren';
@@ -150,8 +236,8 @@ function createCard(channel, collection, matching) {
     catch { copyPack.textContent = 'Nicht möglich'; }
     setTimeout(() => { copyPack.textContent = 'Suchpaket kopieren'; }, 1200);
   });
-  actions.append(searchInventory, copyPack);
-  article.append(top, title, progress, tags, queries, actions);
+  actions.append(searchInventory, builder, copyPack);
+  article.append(top, title, progressGroup, tags, queries, actions);
   if (collection.reviewNotes) {
     const note = document.createElement('p');
     note.className = 'arsenal-note';
@@ -159,6 +245,40 @@ function createCard(channel, collection, matching) {
     article.append(note);
   }
   return article;
+}
+
+function progressLine(name, percentage, kind) {
+  const wrapper = document.createElement('div');
+  wrapper.className = `arsenal-progress-line ${kind}`;
+  const labelElement = document.createElement('span');
+  labelElement.textContent = name;
+  const progress = document.createElement('div');
+  progress.className = 'arsenal-coverage';
+  progress.setAttribute('role', 'progressbar');
+  progress.setAttribute('aria-valuemin', '0');
+  progress.setAttribute('aria-valuemax', '100');
+  progress.setAttribute('aria-valuenow', String(percentage));
+  const bar = document.createElement('span');
+  bar.style.width = `${percentage}%`;
+  progress.append(bar);
+  const number = document.createElement('b');
+  number.textContent = `${percentage}%`;
+  wrapper.append(labelElement, progress, number);
+  return wrapper;
+}
+
+function selectInBuilder(channel, collection) {
+  window.dispatchEvent(new CustomEvent('vah:arsenal-select', { detail: { channel, collection } }));
+  document.querySelector('#arsenal-builder')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function rowSorter(mode) {
+  return (a, b) => {
+    if (mode === 'approved') return b.approved - a.approved || b.matching.length - a.matching.length || a.collection.label.localeCompare(b.collection.label, 'de');
+    if (mode === 'review') return b.pending - a.pending || a.approved - b.approved || a.collection.label.localeCompare(b.collection.label, 'de');
+    if (mode === 'alphabetical') return a.collection.label.localeCompare(b.collection.label, 'de');
+    return a.approved - b.approved || a.matching.length - b.matching.length || a.channel.label.localeCompare(b.channel.label, 'de') || a.collection.label.localeCompare(b.collection.label, 'de');
+  };
 }
 
 function message(text) { const element = document.createElement('p'); element.className = 'arsenal-empty'; element.textContent = text; return element; }
