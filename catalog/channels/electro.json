@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "id": "electro",
+  "label": "Elektrotechnik",
+  "description": "B-Rolls und Bilder für Elektriker, Industrie, Anlagen, Messungen, Schutztechnik und Ausbildung.",
+  "primaryCategory": "electrical-engineering",
+  "channelTag": "channel-electro",
+  "defaultOrientations": ["vertical", "horizontal"],
+  "collections": [
+    {"id":"electrician-work","label":"Elektriker bei der Arbeit","queries":["electrician working control panel","industrial electrician maintenance","electrician installing wiring"],"tags":["electrician","work","maintenance","wiring","technician"]},
+    {"id":"tools-measurement","label":"Werkzeuge & Messgeräte","queries":["multimeter electrical measurement close up","electrician tools workbench","voltage tester hands"],"tags":["multimeter","tools","measurement","voltage-tester","workbench"]},
+    {"id":"wiring-cables","label":"Leitungen & Kabel","queries":["electrical wires cables close up","electrician connecting wires","cable tray industrial"],"tags":["wires","cables","connecting","cable-tray","installation"]},
+    {"id":"control-cabinets","label":"Schaltschränke","queries":["electrical control cabinet industrial","technician wiring control panel","switchgear cabinet close up"],"tags":["control-cabinet","switchgear","wiring","industrial","panel"]},
+    {"id":"industrial-maintenance","label":"Industrielle Instandhaltung","queries":["industrial maintenance technician machine","factory electrician inspection","technician repairing industrial equipment"],"tags":["industrial-maintenance","factory","inspection","repair","technician"]},
+    {"id":"motors-drives","label":"Motoren & Antriebe","queries":["electric motor industrial close up","variable frequency drive control","technician checking motor"],"tags":["electric-motor","drive","vfd","motor","industrial"]},
+    {"id":"plc-automation","label":"SPS & Automatisierung","queries":["PLC automation control panel","industrial automation programming","factory control system screen"],"tags":["plc","automation","control-system","programming","factory"]},
+    {"id":"relays-contactors","label":"Relais & Schütze","queries":["electrical contactor relay close up","relay control circuit","industrial electrical components"],"tags":["relay","contactor","control-circuit","components","industrial"]},
+    {"id":"circuit-breakers-rcd","label":"LS, RCD & Schutzgeräte","queries":["circuit breaker panel close up","residual current device electrical","electrician testing breaker box"],"tags":["circuit-breaker","rcd","breaker-panel","protection","testing"]},
+    {"id":"power-distribution","label":"Energieverteilung","queries":["power distribution board industrial","electrical subpanel wiring","switchboard technician"],"tags":["power-distribution","switchboard","panel","wiring","technician"]},
+    {"id":"renewable-energy-solar","label":"Photovoltaik","queries":["solar panels electrician installation","photovoltaic inverter technician","solar energy maintenance"],"tags":["solar","photovoltaic","inverter","installation","renewable-energy"]},
+    {"id":"wind-energy","label":"Windenergie","queries":["wind turbine maintenance technician","wind farm aerial","wind turbine electrical equipment"],"tags":["wind-energy","wind-turbine","maintenance","renewable","aerial"]},
+    {"id":"transformers-substations","label":"Transformatoren & Umspannwerke","queries":["electrical substation transformer","high voltage transformer station","power grid substation aerial"],"tags":["transformer","substation","high-voltage","power-grid","aerial"],"reviewNotes":"Sicherheitsabstände und realistische Arbeitsdarstellung beachten."},
+    {"id":"railway-electrical","label":"Bahntechnik & Schienenfahrzeuge","queries":["train electrical maintenance workshop","railway technician working train","electric train depot maintenance"],"tags":["railway","train","electrical-maintenance","depot","technician"],"reviewNotes":"Logos, Fahrzeugnummern und sicherheitskritische Bereiche prüfen."},
+    {"id":"building-installation","label":"Gebäudeinstallation","queries":["electrician installing wall socket","residential electrical wiring","electrical installation construction site"],"tags":["building-installation","socket","residential","construction","wiring"]},
+    {"id":"safety-ppe","label":"Arbeitssicherheit & PSA","queries":["electrician personal protective equipment","electrical safety gloves helmet","lockout tagout electrician"],"tags":["safety","ppe","helmet","gloves","lockout-tagout"]},
+    {"id":"testing-inspection","label":"Prüfen & Messen","queries":["electrical inspection multimeter","electrician testing installation","thermal camera electrical panel"],"tags":["inspection","testing","multimeter","thermal-camera","measurement"]},
+    {"id":"electronics-components","label":"Elektronikbauteile","queries":["electronic components circuit board macro","resistor capacitor close up","soldering electronics workbench"],"tags":["electronics","components","circuit-board","resistor","soldering"]},
+    {"id":"smart-home-electrical","label":"Smart Home Elektro","queries":["smart home electrical installation","home automation control panel","smart switch electrician"],"tags":["smart-home","home-automation","smart-switch","installation","control"]},
+    {"id":"apprentice-training","label":"Ausbildung & Lernen","queries":["electrical apprentice training workshop","student learning wiring circuit","vocational training electrician"],"tags":["apprentice","training","workshop","student","learning"]}
+  ]
+}
