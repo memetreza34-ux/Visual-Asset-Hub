@@ -3,6 +3,7 @@ import http from 'node:http';
 import path from 'node:path';
 import process from 'node:process';
 import { createLocalAdminApi } from './local-admin-api.mjs';
+import { createLocalArsenalApi } from './local-arsenal-api.mjs';
 
 const root = process.cwd();
 const host = process.env.HOST || '127.0.0.1';
@@ -37,9 +38,11 @@ const mimeTypes = {
 };
 
 const adminApi = createLocalAdminApi({ root });
+const arsenalApi = createLocalArsenalApi({ root, token: adminApi.token });
 const server = http.createServer(async (request, response) => {
   try {
     const url = new URL(request.url || '/', `http://${request.headers.host || `${host}:${port}`}`);
+    if (await arsenalApi.handle(request, response, url)) return;
     if (await adminApi.handle(request, response, url)) return;
 
     if (!['GET', 'HEAD'].includes(request.method || 'GET')) {
@@ -93,7 +96,7 @@ const server = http.createServer(async (request, response) => {
 
 server.listen(port, host, () => {
   console.log(`Visual Asset Hub: http://${host}:${port}`);
-  console.log('Lokale Verwaltung aktiv: Review, Freigabe, Nutzung und Backup können direkt im Browser gespeichert werden.');
+  console.log('Lokale Verwaltung aktiv: Review, Freigabe, Nutzung, Backup und Arsenal-Suche können direkt im Browser ausgeführt werden.');
 });
 
 function setSecurityHeaders(response, pathname) {
