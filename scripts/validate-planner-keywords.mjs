@@ -12,8 +12,7 @@ const channels = Object.fromEntries(channelFiles.map((file) => {
 const errors = [];
 
 if (config.version !== 1) errors.push('planner-keywords.json: version muss 1 sein.');
-if (!Array.isArray(config.stopWords) || config.stopWords.length < 40) errors.push('planner-keywords.json: zu wenige Stopwörter.');
-if (new Set(config.stopWords.map(normalize)).size !== config.stopWords.length) errors.push('planner-keywords.json: Stopwörter enthalten Duplikate.');
+if (!Array.isArray(config.stopWords) || new Set(config.stopWords.map(normalize)).size < 40) errors.push('planner-keywords.json: zu wenige eindeutige Stopwörter.');
 
 for (const [channelId, channel] of Object.entries(channels)) {
   const rules = config.channels?.[channelId];
@@ -53,7 +52,8 @@ if (errors.length) {
 
 const ruleCount = Object.values(config.channels).reduce((sum, rules) => sum + rules.length, 0);
 const termCount = Object.values(config.channels).reduce((sum, rules) => sum + rules.reduce((inner, rule) => inner + rule.terms.length, 0), 0);
-console.log(`Planerlexikon gültig: ${Object.keys(channels).length} Kanäle, ${ruleCount} Regeln, ${termCount} Begriffe.`);
+const stopWordCount = new Set(config.stopWords.map(normalize)).size;
+console.log(`Planerlexikon gültig: ${Object.keys(channels).length} Kanäle, ${ruleCount} Regeln, ${termCount} Begriffe, ${stopWordCount} Stopwörter.`);
 
 function readJson(relative) {
   return JSON.parse(fs.readFileSync(path.join(root, relative), 'utf8'));
