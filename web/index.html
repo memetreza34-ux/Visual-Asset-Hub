@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="./status-indicators.css" />
   <link rel="stylesheet" href="./local-admin.css" />
   <link rel="stylesheet" href="./release-status.css" />
+  <link rel="stylesheet" href="./arsenal-builder.css" />
   <link rel="stylesheet" href="./channel-arsenal.css" />
   <script type="module" src="./app.js"></script>
   <script type="module" src="./selection-tools.js"></script>
@@ -18,6 +19,7 @@
   <script type="module" src="./status-indicators.js"></script>
   <script type="module" src="./local-admin.js"></script>
   <script type="module" src="./release-status.js"></script>
+  <script type="module" src="./arsenal-builder.js"></script>
   <script type="module" src="./channel-arsenal.js"></script>
 </head>
 <body>
@@ -56,6 +58,7 @@
     </section>
 
     <section id="release-status" class="release-status" hidden aria-label="Beta-Fortschritt"></section>
+    <section id="arsenal-builder" class="arsenal-builder" hidden aria-label="Pexels Arsenal Builder"></section>
     <section id="channel-arsenal" class="channel-arsenal" hidden aria-label="Kanal-Arsenal für Finanzen, KI, Elektrotechnik und Kampfsport"></section>
     <section id="review-warning" class="review-warning" hidden></section>
 
@@ -75,7 +78,7 @@
     <section class="result-bar" aria-live="polite"><strong id="result-count">0 Assets</strong><span id="catalog-date"></span></section>
     <section id="asset-grid" class="asset-grid" aria-label="Gefundene Assets"></section>
     <button id="load-more" class="load-more" type="button" hidden>Mehr anzeigen</button>
-    <section id="empty-state" class="empty-state" hidden><h2>Keine Assets gefunden</h2><p>Filter ändern oder über die Pexels-Suche neue Assets als Review-Entwurf importieren.</p></section>
+    <section id="empty-state" class="empty-state" hidden><h2>Keine Assets gefunden</h2><p>Filter ändern oder über den Arsenal Builder neue Pexels-Assets als Review-Entwurf importieren.</p></section>
   </main>
 
   <dialog id="asset-dialog"><button class="dialog-close" type="button" aria-label="Detailansicht schließen">×</button><div id="dialog-content"></div></dialog>
