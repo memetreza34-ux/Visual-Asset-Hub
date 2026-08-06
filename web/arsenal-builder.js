@@ -32,8 +32,11 @@ function render({ health, channelIndex, channels }) {
   form.className = 'builder-form';
   const apiKey = field('Pexels API-Key', 'password', { required: true, minlength: 20, maxlength: 300, autocomplete: 'off', placeholder: 'Nur lokal für diese Suche' });
   const channel = selectField('Kanal');
+  channel.input.id = 'arsenal-builder-channel';
   const collection = selectField('Sammlung');
+  collection.input.id = 'arsenal-builder-collection';
   const variant = selectField('Format');
+  variant.input.id = 'arsenal-builder-variant';
   const queryIndex = selectField('Suchvariante');
   const perPage = field('Treffer', 'number', { min: 1, max: 20, value: '12', required: true });
   const submit = document.createElement('button');
@@ -46,6 +49,7 @@ function render({ health, channelIndex, channels }) {
   for (const item of channels) addOption(channel.input, item.id, item.label);
   for (const item of channelIndex.variants ?? []) addOption(variant.input, item.id, variantLabel(item));
   for (let index = 0; index < 3; index += 1) addOption(queryIndex.input, String(index), `Suchbegriff ${index + 1}`);
+  variant.input.value = 'video-vertical';
   updateCollections();
   channel.input.addEventListener('change', updateCollections);
 
@@ -53,6 +57,21 @@ function render({ health, channelIndex, channels }) {
   const resultArea = document.createElement('div');
   resultArea.className = 'builder-results';
   section.replaceChildren(header, form, resultArea);
+
+  window.addEventListener('vah:arsenal-select', (event) => {
+    const detail = event.detail ?? {};
+    const selectedChannel = channels.find((item) => item.id === detail.channel);
+    if (!selectedChannel) return;
+    channel.input.value = selectedChannel.id;
+    updateCollections();
+    if (selectedChannel.collections.some((item) => item.id === detail.collection)) collection.input.value = detail.collection;
+    variant.input.value = 'video-vertical';
+    queryIndex.input.value = '0';
+    const selectedCollection = selectedChannel.collections.find((item) => item.id === collection.input.value);
+    showStatus(status, `${selectedChannel.label} / ${selectedCollection?.label ?? collection.input.value} wurde vorbereitet.`, true);
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTimeout(() => apiKey.input.focus({ preventScroll: true }), 500);
+  });
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
