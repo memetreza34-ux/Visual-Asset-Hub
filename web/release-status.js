@@ -29,7 +29,9 @@ function render(report) {
   const description = document.createElement('p');
   const reviewed = report.counts?.reviewedAssets ?? 0;
   const required = report.counts?.requiredReviewedAssets ?? 11;
-  description.textContent = `Technik ${technical} % · Realtest ${realTest} % · geprüft ${reviewed}/${required} · ${report.counts?.assets ?? 0} Testassets`;
+  const packs = report.counts?.validMediaPacks ?? 0;
+  const inbox = report.counts?.inboxAssets ?? 0;
+  description.textContent = `Technik ${technical} % · Realtest ${realTest} % · geprüft ${reviewed}/${required} · eigene Medien ${inbox} · Pakete ${packs}`;
   text.append(eyebrow, title, description);
 
   const links = document.createElement('div');
@@ -83,10 +85,12 @@ function reportLink(text, href, download = false) {
 
 function checkLabel(key) {
   return ({
-    threeVideos: '3 Videos vorhanden',
-    threeStaticVisuals: '3 Bilder/Grafiken vorhanden',
+    starterMediaPresent: 'Startermedien vorhanden',
     starterAssetsReviewed: 'alle Starterassets entschieden',
+    fourChannelsRepresented: 'alle 4 Kanäle mit Assets',
+    ownedInboxAssetImported: 'eigenes Medium importiert',
     approvedAsset: 'Asset freigegeben',
+    verifiedMediaPackCreated: 'Schnittpaket erzeugt',
     realUsageRecorded: 'echte Nutzung dokumentiert'
   })[key] || key.replace(/([a-z])([A-Z])/g, '$1 $2');
 }
