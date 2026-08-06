@@ -3,9 +3,18 @@
 ## API-Schlüssel
 
 - Pexels-Schlüssel niemals in Quellcode, README, Issues, Pull Requests oder Screenshots eintragen.
-- Lokal nur `.env` verwenden; die Datei ist über `.gitignore` ausgeschlossen.
+- Lokal kann `.env` verwendet werden; die Datei ist über `.gitignore` ausgeschlossen.
 - In GitHub ausschließlich Repository Secrets verwenden.
 - Bei versehentlicher Veröffentlichung den Schlüssel sofort bei Pexels widerrufen und neu erzeugen.
+
+### Arsenal Builder im Browser
+
+- Der eingegebene Pexels-Key wird ausschließlich vom lokalen Browser an `127.0.0.1` übertragen.
+- Der Key wird nur für die aktuelle Pexels-Anfrage verwendet.
+- Der Key wird nicht in Katalog, Suchergebnis, Local Storage, Session Storage, Bericht oder Logdatei gespeichert.
+- Das Eingabefeld wird nach erfolgreicher oder fehlgeschlagener Suche geleert.
+- Suchergebnisse enthalten nur Pexels-Metadaten, Vorschauen, Quellen und die gewählte Kanalzuordnung.
+- Den Builder nur auf dem eigenen Computer verwenden und das Konsolenfenster nach der Arbeit schließen.
 
 ## Lokale Verwaltungsoberfläche
 
@@ -25,6 +34,20 @@
 - Lizenz- und Quellseite beim Import dokumentieren.
 - Ein Asset mit unbekannten oder eingeschränkten Rechten darf nicht als `approved` markiert werden.
 - Die Bibliothek ersetzt keine rechtliche Einzelfallprüfung für Werbung, Kundenarbeit oder sensible Themen.
+
+## Kampfsportmaterial
+
+Nicht automatisch freigeben:
+
+- UFC- oder Veranstalterlogos
+- Broadcast-, TV- oder Pay-per-View-Ausschnitte
+- reale Kampfausschnitte ohne belegte Nutzungserlaubnis
+- geschützte Gürtel-, Käfig- oder Eventdesigns
+- sichtbare Sponsorengrafiken ohne Prüfung
+- grafische Verletzungen
+- gefährliche Weight-Cut-Darstellungen
+
+Generische Trainings-, Gym-, Ring-, Käfig-, Pratzen-, Boxsack- und Konditionsaufnahmen bevorzugen.
 
 ## Datenintegrität
 
