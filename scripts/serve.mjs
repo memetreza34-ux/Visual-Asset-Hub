@@ -53,6 +53,15 @@ let activeWriteAction = null;
 const server = http.createServer(async (request, response) => {
   try {
     const url = new URL(request.url || '/', `http://${request.headers.host || `${host}:${port}`}`);
+
+    if (url.pathname === '/') {
+      response.writeHead(302, {
+        Location: '/web/',
+        'Cache-Control': 'no-store'
+      });
+      return response.end();
+    }
+
     const isApiRequest = apiPrefixes.some((prefix) => url.pathname.startsWith(prefix));
     const isWriteRequest = isApiRequest && request.method === 'POST';
 
@@ -80,7 +89,7 @@ const server = http.createServer(async (request, response) => {
       return send(response, 405, 'Methode nicht erlaubt.');
     }
 
-    const pathname = url.pathname === '/' ? '/web/index.html' : decodeURIComponent(url.pathname);
+    const pathname = url.pathname === '/web/' ? '/web/index.html' : decodeURIComponent(url.pathname);
     if (pathname.includes('\0') || pathname.split('/').some((part) => part === '..' || part.startsWith('.'))) {
       return send(response, 400, 'Ungültiger Pfad.');
     }
