@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "description": "Stabile deutsche Benchmark-Fälle für die Sammlungserkennung des lokalen Skript-Planers.",
+  "cases": [
+    {"id":"fin-cash","channel":"finance","text":"Die Person zählt Bargeld, Euro-Geldscheine und Münzen.","expected":["cash-money"]},
+    {"id":"fin-budget","channel":"finance","text":"Mit einem Budget und Sparplan lassen sich monatliche Ausgaben kontrollieren.","expected":["budgeting-saving"]},
+    {"id":"fin-stocks","channel":"finance","text":"Aktien, ETFs und Dividenden gehören in ein langfristiges Depot.","expected":["investing-stocks"]},
+    {"id":"fin-trading","channel":"finance","text":"Der Trader analysiert Candlestick-Charts und den aktuellen Kursverlauf.","expected":["trading-charts"]},
+    {"id":"fin-crypto","channel":"finance","text":"Bitcoin und Blockchain sind zentrale Begriffe bei Kryptowährungen.","expected":["crypto-blockchain"]},
+    {"id":"fin-inflation","channel":"finance","text":"Inflation und steigende Lebenshaltungskosten senken die Kaufkraft.","expected":["inflation-cost-of-living"]},
+    {"id":"fin-debt","channel":"finance","text":"Schulden, Kredite und hohe Zinsen können zur finanziellen Belastung werden.","expected":["debt-credit"]},
+    {"id":"fin-tax","channel":"finance","text":"Für die Steuererklärung werden Belege und Rechnungen beim Finanzamt benötigt.","expected":["taxes-accounting"]},
+    {"id":"fin-retirement","channel":"finance","text":"Rente und Altersvorsorge sollten frühzeitig geplant werden.","expected":["retirement-pension"]},
+
+    {"id":"ai-robot","channel":"ai","text":"Ein humanoider Roboter bewegt seine Roboterhand im Labor.","expected":["humanoid-robots"]},
+    {"id":"ai-ml","channel":"ai","text":"Machine Learning trainiert einen Algorithmus mit großen Datenmengen.","expected":["machine-learning-data"]},
+    {"id":"ai-code","channel":"ai","text":"Ein Entwickler schreibt Code und programmiert neue Software.","expected":["coding-development"]},
+    {"id":"ai-automation","channel":"ai","text":"Automatisierung übernimmt wiederkehrende Workflows und Prozesse.","expected":["automation-workflows"]},
+    {"id":"ai-chatbot","channel":"ai","text":"Ein Chatbot beantwortet Kundenfragen als digitaler Assistent.","expected":["chatbots-assistants"]},
+    {"id":"ai-cloud","channel":"ai","text":"Im Rechenzentrum stehen Serverracks für Cloud- und GPU-Anwendungen.","expected":["data-centers-cloud"]},
+    {"id":"ai-security","channel":"ai","text":"Cybersecurity schützt Passwörter und persönliche Daten vor Hackern.","expected":["cybersecurity"]},
+    {"id":"ai-ethics","channel":"ai","text":"Gesichtserkennung und Überwachung werfen Fragen zu Datenschutz und KI-Ethik auf.","expected":["ai-ethics-surveillance"]},
+    {"id":"ai-car","channel":"ai","text":"Ein autonomes Auto nutzt Sensoren und fährt ohne menschlichen Fahrer.","expected":["autonomous-vehicles"]},
+    {"id":"ai-content","channel":"ai","text":"Creator erstellen mit KI Videos, Bilder und Social-Media-Content.","expected":["content-creation-ai","generative-ai-art"]},
+
+    {"id":"el-tools","channel":"electro","text":"Die Elektrofachkraft misst mit Multimeter, Duspol und Spannungsprüfer.","expected":["tools-measurement","testing-inspection"]},
+    {"id":"el-wiring","channel":"electro","text":"Leitungen, Kabel und einzelne Adern werden fachgerecht verdrahtet.","expected":["wiring-cables"]},
+    {"id":"el-cabinet","channel":"electro","text":"Im Schaltschrank wird eine neue Unterverteilung aufgebaut.","expected":["control-cabinets","power-distribution"]},
+    {"id":"el-motor","channel":"electro","text":"Der Drehstrommotor wird über einen Frequenzumrichter angetrieben.","expected":["motors-drives"]},
+    {"id":"el-plc","channel":"electro","text":"Die SPS wird programmiert und steuert die industrielle Automatisierung.","expected":["plc-automation"]},
+    {"id":"el-relay","channel":"electro","text":"Relais und Schütze schalten den Steuerstromkreis mit Selbsthaltung.","expected":["relays-contactors"]},
+    {"id":"el-rcd","channel":"electro","text":"RCD, FI-Schalter und Leitungsschutzschalter erfüllen wichtige Schutzaufgaben.","expected":["circuit-breakers-rcd"]},
+    {"id":"el-test","channel":"electro","text":"Isolationsmessung, Schleifenimpedanz und Netzimpedanz werden dokumentiert.","expected":["testing-inspection"]},
+    {"id":"el-training","channel":"electro","text":"Der Azubi lernt für AP1 und übt in der Berufsschule Elektrotechnik.","expected":["apprentice-training"]},
+
+    {"id":"cs-boxing","channel":"combat-sports","text":"Der Boxer trainiert Jab, Cross und Haken beim Boxtraining.","expected":["boxing-training"]},
+    {"id":"cs-bag","channel":"combat-sports","text":"Am Boxsack und Heavy Bag übt der Kämpfer harte Kombinationen.","expected":["punching-bag"]},
+    {"id":"cs-pads","channel":"combat-sports","text":"Der Trainer hält Pratzen und Schlagpolster für schnelle Kombinationen.","expected":["pads-mitts"]},
+    {"id":"cs-sparring","channel":"combat-sports","text":"Im Sparring testet der Athlet Timing und Distanz mit einem Trainingspartner.","expected":["sparring"]},
+    {"id":"cs-wrestling","channel":"combat-sports","text":"Beim Ringen setzt der Kämpfer einen Double-Leg-Takedown an.","expected":["wrestling"]},
+    {"id":"cs-bjj","channel":"combat-sports","text":"Im BJJ und Grappling trainiert er Armbar und Submission.","expected":["grappling-bjj"]},
+    {"id":"cs-faceoff","channel":"combat-sports","text":"Beim Staredown und Face-off stehen sich beide Kämpfer gegenüber.","expected":["face-off"]},
+    {"id":"cs-ko","channel":"combat-sports","text":"Nach dem Knockout reagiert das Publikum auf den Niederschlag.","expected":["knockout-reaction"]},
+    {"id":"cs-recovery","channel":"combat-sports","text":"Regeneration, Stretching und Eisbad helfen nach dem Training.","expected":["mobility-recovery"]},
+    {"id":"cs-belt","channel":"combat-sports","text":"Der Champion gewinnt den Gürtel im Titelkampf.","expected":["belt-championship","victory-celebration"]}
+  ]
+}
