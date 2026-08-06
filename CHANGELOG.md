@@ -1,5 +1,45 @@
 # Changelog
 
+## 0.4.0-beta.2 – 2026-08-06
+
+### Neu
+
+- schnelle Review-Warteschlange für die nacheinander folgende Prüfung großer Bestände
+- Kanal- und Medientypfilter innerhalb der Review-Warteschlange
+- automatischer Wechsel zum nächsten Asset nach Freigabe, Einschränkung oder Archivierung
+- Lückenempfehlungen für die acht derzeit schwächsten Sammlungen
+- Sortierung nach Freigaben, Reviews, Alphabet oder größtem Ausbaubedarf
+- direkte Übergabe einer empfohlenen Sammlung an den Arsenal Builder
+- getrennte Fortschrittsbalken für Kandidaten und tatsächlich freigegebene Assets
+- verifizierte lokale Medienpakete für den Videoschnitt
+- Download oder Kopie ausschließlich freigegebener Favoriten
+- Manifest mit SHA-256, Quellen, Lizenzstatus, Attribution und Dateigrößen
+- Schutz vor privaten Downloadzielen, zu großen Dateien und unsicheren Weiterleitungen
+- lokaler Inbox-Import für eigene Videos, Bilder, Grafiken und Animationen
+- automatische Zuordnung eigener Dateien zu Kanal und Sammlung
+- automatische Erkennung von Auflösung, Ausrichtung und Videodauer im Browser
+- ausdrückliche Rechtebestätigung vor jedem Import eigener Dateien
+- feste Arbeitsbereich-Navigation für Bibliothek, Inbox, Review, Pexels und Kategorien
+
+### Verbessert
+
+- Version auf `0.4.0-beta.2` erhöht
+- Favoriten können jetzt entweder als JSON-Auswahl oder als vollständiges Schnittpaket exportiert werden
+- das Kanal-Arsenal bewertet Vollständigkeit nach freigegebenen Assets statt nur nach Kandidaten
+- eigene große Binärdateien werden für Git LFS vorbereitet
+- zusätzliche lokale Medienformate werden korrekt ausgeliefert
+- temporäre Suchdateien werden automatisch bereinigt
+
+### Sicherheit
+
+- Medienpakete blockieren jedes Asset ohne Status `approved`
+- externe Downloads besitzen Datei- und Gesamtgrößenlimits
+- lokale, private und Loopback-Downloadziele werden blockiert
+- Inbox-Dateinamen werden gegen Pfadmanipulation geprüft
+- eigene Dateien werden ausschließlich über die lokale Loopback-API verarbeitet
+- der Inbox-Inhalt bleibt durch `.gitignore` lokal
+- fehlerhafte Katalogimporte werden durch den bestehenden Import-Rollback zurückgesetzt
+
 ## 0.4.0-beta.1 – 2026-08-06
 
 ### Neu
