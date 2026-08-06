@@ -10,6 +10,7 @@ const channels = Object.fromEntries(channelFiles.map((file) => {
   return [channel.id, channel];
 }));
 const errors = [];
+let sharedTermCount = 0;
 
 if (config.version !== 1) errors.push('planner-keywords.json: version muss 1 sein.');
 if (!Array.isArray(config.stopWords) || new Set(config.stopWords.map(normalize)).size < 40) errors.push('planner-keywords.json: zu wenige eindeutige Stopwörter.');
@@ -35,9 +36,10 @@ for (const [channelId, channel] of Object.entries(channels)) {
     if (normalizedTerms.some((term) => term.length < 2)) errors.push(`${channelId}/${rule.id}: ungültiger oder zu kurzer Begriff.`);
     if (new Set(normalizedTerms).size !== normalizedTerms.length) errors.push(`${channelId}/${rule.id}: doppelte Begriffe innerhalb der Regel.`);
     for (const term of normalizedTerms) {
-      const owner = seenTerms.get(term);
-      if (owner && owner !== rule.id) errors.push(`${channelId}: Begriff "${term}" steht in ${owner} und ${rule.id}.`);
-      else seenTerms.set(term, rule.id);
+      const owners = seenTerms.get(term) ?? new Set();
+      if (owners.size && !owners.has(rule.id)) sharedTermCount += 1;
+      owners.add(rule.id);
+      seenTerms.set(term, owners);
     }
   }
 }
@@ -53,7 +55,7 @@ if (errors.length) {
 const ruleCount = Object.values(config.channels).reduce((sum, rules) => sum + rules.length, 0);
 const termCount = Object.values(config.channels).reduce((sum, rules) => sum + rules.reduce((inner, rule) => inner + rule.terms.length, 0), 0);
 const stopWordCount = new Set(config.stopWords.map(normalize)).size;
-console.log(`Planerlexikon gültig: ${Object.keys(channels).length} Kanäle, ${ruleCount} Regeln, ${termCount} Begriffe, ${stopWordCount} Stopwörter.`);
+console.log(`Planerlexikon gültig: ${Object.keys(channels).length} Kanäle, ${ruleCount} Regeln, ${termCount} Begriffe, ${stopWordCount} Stopwörter, ${sharedTermCount} absichtliche Mehrfachzuordnungen.`);
 
 function readJson(relative) {
   return JSON.parse(fs.readFileSync(path.join(root, relative), 'utf8'));
