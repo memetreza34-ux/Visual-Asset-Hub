@@ -10,6 +10,8 @@ function fixture() {
   fs.mkdirSync(path.join(root, 'inbox'), { recursive: true });
   fs.mkdirSync(path.join(root, 'catalog', 'channels'), { recursive: true });
   fs.writeFileSync(path.join(root, 'inbox', 'my-clip.mp4'), 'video-bytes');
+  fs.writeFileSync(path.join(root, 'inbox', 'my-image.png'), 'image-bytes');
+  fs.writeFileSync(path.join(root, 'inbox', 'my-vector.svg'), '<svg xmlns="http://www.w3.org/2000/svg"></svg>');
   fs.writeFileSync(path.join(root, 'inbox', 'README.md'), 'ignore');
   fs.writeFileSync(path.join(root, 'inbox', 'unsupported.exe'), 'ignore');
   fs.writeFileSync(path.join(root, 'catalog', 'channels', 'index.json'), JSON.stringify({ files: ['catalog/channels/finance.json'] }));
@@ -23,14 +25,32 @@ function fixture() {
   return root;
 }
 
+function payload(filename) {
+  return {
+    filename,
+    channel: 'finance',
+    collection: 'budgeting-saving',
+    title: 'Eigenes Budget Asset',
+    description: 'Eigene Aufnahme eines neutralen Budgetmotivs für Social Media.',
+    orientation: 'vertical',
+    tags: 'geld,planung',
+    aliases: 'Budget Clip, Geld planen',
+    rightsOwned: true,
+    width: 1080,
+    height: 1920,
+    duration: 8.5
+  };
+}
+
 test('Inbox-Liste zeigt nur unterstützte lokale Medien', () => {
   const root = fixture();
   try {
     const files = listInboxFiles(root);
-    assert.equal(files.length, 1);
-    assert.equal(files[0].filename, 'my-clip.mp4');
-    assert.equal(files[0].type, 'video');
-    assert.equal(files[0].previewUrl, '/inbox/my-clip.mp4');
+    assert.equal(files.length, 3);
+    assert.deepEqual(files.map((file) => file.filename).sort(), ['my-clip.mp4', 'my-image.png', 'my-vector.svg']);
+    assert.equal(files.find((file) => file.filename === 'my-clip.mp4').type, 'video');
+    assert.equal(files.find((file) => file.filename === 'my-image.png').type, 'image');
+    assert.equal(files.find((file) => file.filename === 'my-vector.svg').type, 'graphic');
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }
@@ -39,20 +59,7 @@ test('Inbox-Liste zeigt nur unterstützte lokale Medien', () => {
 test('gültiger eigener Import übernimmt Kanal und Sammlung', () => {
   const root = fixture();
   try {
-    const value = validateInboxImportPayload({
-      filename: 'my-clip.mp4',
-      channel: 'finance',
-      collection: 'budgeting-saving',
-      title: 'Eigener Budget Clip',
-      description: 'Eigene Aufnahme eines neutralen Budgetmotivs für Social Media.',
-      orientation: 'vertical',
-      tags: 'geld,planung',
-      aliases: 'Budget Clip, Geld planen',
-      rightsOwned: true,
-      width: 1080,
-      height: 1920,
-      duration: 8.5
-    }, root);
+    const value = validateInboxImportPayload(payload('my-clip.mp4'), root);
     assert.equal(value.type, 'video');
     assert.equal(value.category, 'finance-investing');
     assert.equal(value.storage, 'git-lfs');
@@ -64,19 +71,37 @@ test('gültiger eigener Import übernimmt Kanal und Sammlung', () => {
   }
 });
 
-test('Inbox blockiert Traversal, fehlende Rechte und unbekannte Sammlung', () => {
+test('binäre Bilder nutzen LFS, SVG-Grafiken bleiben im Repository', () => {
   const root = fixture();
-  const base = {
-    filename: 'my-clip.mp4', channel: 'finance', collection: 'budgeting-saving', title: 'Eigener Budget Clip',
-    description: 'Eigene Aufnahme eines neutralen Budgetmotivs für Social Media.', orientation: 'vertical'
-  };
   try {
-    assert.throws(() => validateInboxImportPayload({ ...base, filename: '../my-clip.mp4', rightsOwned: true }, root), /filename/);
-    assert.throws(() => validateInboxImportPayload({ ...base, rightsOwned: false }, root), /Nutzungsrechte/);
-    assert.throws(() => validateInboxImportPayload({ ...base, collection: 'unknown', rightsOwned: true }, root), /Unbekannte Sammlung/);
+    const image = validateInboxImportPayload({ ...payload('my-image.png'), duration: undefined }, root);
+    const graphic = validateInboxImportPayload({ ...payload('my-vector.svg'), duration: undefined }, root);
+    assert.equal(image.type, 'image');
+    assert.equal(image.storage, 'git-lfs');
+    assert.equal(graphic.type, 'graphic');
+    assert.equal(graphic.storage, 'repository');
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }
+});
+
+test('Inbox blockiert Traversal, fehlende Rechte und unbekannte Sammlung', () => {
+  const root = fixture();
+  const base = payload('my-clip.mp4');
+  try {
+    assert.throws(() => validateInboxImportPayload({ ...base, filename: '../my-clip.mp4' }, root), /filename/);
+    assert.throws(() => validateInboxImportPayload({ ...base, rightsOwned: false }, root), /Nutzungsrechte/);
+    assert.throws(() => validateInboxImportPayload({ ...base, collection: 'unknown' }, root), /Unbekannte Sammlung/);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('erfolgreicher Import behandelt ein späteres Löschproblem nur als Warnung', () => {
+  const source = fs.readFileSync(path.join(process.cwd(), 'scripts', 'local-inbox-api.mjs'), 'utf8');
+  assert.match(source, /cleanupWarning/);
+  assert.match(source, /erfolgreich katalogisiert/);
+  assert.doesNotMatch(source, /if \(input\.removeAfterImport\) fs\.rmSync/);
 });
 
 test('Weboberfläche bindet den lokalen Inbox-Import ein', () => {
