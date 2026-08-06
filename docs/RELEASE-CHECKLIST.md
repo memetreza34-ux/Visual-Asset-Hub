@@ -4,7 +4,7 @@
 
 - [ ] `npm run check` läuft ohne Fehler
 - [ ] `npm run beta:verify` meldet technisch bereit
-- [ ] `npm run arsenal:validate` bestätigt alle Kanaldateien
+- [ ] `npm run arsenal:validate` bestätigt Kanaldateien und Planerlexikon
 - [ ] `npm run arsenal:plan` erzeugt JSON und CSV
 - [ ] `npm run arsenal:report` erzeugt den Abdeckungsbericht
 - [ ] `npm run links:check -- --strict true` prüft externe Medien- und Quelllinks
@@ -16,6 +16,23 @@
 - [ ] gemeinsame Schreibsperre blockiert parallele Änderungen mit HTTP 409
 - [ ] keine Secrets oder signierten URLs befinden sich im Repository
 - [ ] Katalog und Suchindex enthalten dieselben Asset-IDs
+
+## Reel- und Skript-Planer
+
+- [x] Planer ist für Finanzen, KI, Elektrotechnik und Kampfsport definiert
+- [x] Fachbegriffe und Synonyme werden gegen vorhandene Sammlungen validiert
+- [ ] Navigation **Skript planen** öffnet den Planer
+- [ ] deutsches Skript wird sinnvoll in Szenen zerlegt
+- [ ] letzter Zeitwert entspricht exakt der gewählten Zieldauer
+- [ ] passende Sammlungen werden für alle vier Kanäle erkannt
+- [ ] vorhandene Assets werden mit Status und Qualität vorgeschlagen
+- [ ] Modus **Nur freigegebene Assets** schließt Review-Assets aus
+- [ ] fehlende Motive liefern einen Pexels-Suchbegriff
+- [ ] **Motiv suchen** konfiguriert den Arsenal Builder korrekt
+- [ ] Planer-Favoriten aktualisieren die Projektauswahl
+- [ ] JSON-, CSV- und Markdown-Export im Browser funktionieren
+- [ ] CLI erzeugt JSON, CSV, Markdown, SRT und Skriptkopie
+- [ ] Skripttext wird nicht automatisch gespeichert oder extern übertragen
 
 ## Kanal-Arsenal
 
@@ -99,11 +116,11 @@
 
 ## Release
 
-- [x] Changelog ist für `0.4.0-beta.2` aktuell
+- [x] Changelog ist für `0.4.0-beta.3` aktuell
 - [ ] Pull Request ist nicht mehr Draft
 - [ ] alle verfügbaren Checks sind grün
 - [ ] GitHub-Actions-Runner-Blocker ist geklärt oder die lokale Abnahme ist dokumentiert
 - [ ] `realTestComplete` ist `true`
 - [ ] Beta-Tag oder Release wurde erstellt
 
-Die Beta darf erst als **real getestet** gelten, wenn alle elf Starterassets geprüft wurden, mindestens ein eigener Inbox-Import und vier Pexels-Suchen erfolgreich waren und ein freigegebenes Asset über ein Medienpaket in einem echten Content-Projekt eingesetzt wurde.
+Die Beta darf erst als **real getestet** gelten, wenn ein echtes Skript geplant, alle elf Starterassets geprüft, mindestens ein eigener Inbox-Import und vier Pexels-Suchen erfolgreich waren und ein freigegebenes Asset über ein Medienpaket in einem echten Content-Projekt eingesetzt wurde.
