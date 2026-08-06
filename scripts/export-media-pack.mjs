@@ -40,8 +40,8 @@ export async function createMediaPack({
   const tempDirectory = path.join(root, 'exports', `.tmp-media-pack-${randomBytes(6).toString('hex')}`);
   const filesDirectory = path.join(tempDirectory, 'media');
   const plan = assets.map((asset) => ({ id: asset.id, filename: asset.filename, storageKind: asset.storage.kind, source: sourceFor(asset) }));
-
   if (dryRun) return { dryRun: true, name: safeName, assetCount: assets.length, plan };
+
   fs.mkdirSync(filesDirectory, { recursive: true });
   const manifest = {
     format: 'visual-asset-hub-media-pack',
@@ -59,14 +59,7 @@ export async function createMediaPack({
       const target = path.join(filesDirectory, asset.filename);
       let result;
       if (asset.storage.kind === 'external') {
-        result = await downloadVerified({
-          url: asset.storage.externalUrl,
-          target,
-          maxBytes: maxFileBytes,
-          expectedType: asset.type,
-          fetchImpl,
-          resolveHost
-        });
+        result = await downloadVerified({ url: asset.storage.externalUrl, target, maxBytes: maxFileBytes, expectedType: asset.type, fetchImpl, resolveHost });
       } else {
         const source = safeLocalPath(root, asset.storage.path);
         if (!fs.existsSync(source) || !fs.statSync(source).isFile()) throw new Error(`${asset.id}: lokale Originaldatei fehlt.`);
@@ -208,10 +201,11 @@ function isIpLiteral(value) {
 
 function isBlockedAddress(value) {
   const address = normalizeHost(value);
-  if (address.startsWith('::ffff:')) return isBlockedAddress(address.slice('::ffff:'.length));
+  const mappedIpv4 = mappedIpv4Address(address);
+  if (mappedIpv4) return isBlockedAddress(mappedIpv4);
   const family = isIP(address);
   if (family === 6) {
-    return address === '::' || address === '::1' || /^f[cd]/.test(address) || /^fe[89ab]/.test(address) || address.startsWith('2001:db8:') || address.startsWith('2001:10:');
+    return address === '::' || address === '::1' || /^f[cd][0-9a-f]{2}:/i.test(address) || /^fe[89ab][0-9a-f]:/i.test(address) || /^ff/i.test(address) || address.startsWith('100:') || address.startsWith('2001:db8:') || address.startsWith('2001:10:') || address.startsWith('2001:20:');
   }
   if (family !== 4) return false;
   const octets = address.split('.').map(Number);
@@ -223,21 +217,28 @@ function isBlockedAddress(value) {
     (a === 172 && b >= 16 && b <= 31) ||
     (a === 192 && b === 168) ||
     (a === 192 && b === 0) ||
-    (a === 192 && b === 0 && c === 2) ||
     (a === 198 && [18, 19].includes(b)) ||
     (a === 198 && b === 51 && c === 100) ||
     (a === 203 && b === 0 && c === 113);
 }
 
+function mappedIpv4Address(value) {
+  const address = normalizeHost(value);
+  if (!address.startsWith('::ffff:')) return null;
+  const tail = address.slice('::ffff:'.length);
+  if (isIP(tail) === 4) return tail;
+  const parts = tail.split(':');
+  if (parts.length !== 2 || parts.some((part) => !/^[0-9a-f]{1,4}$/i.test(part))) return null;
+  const high = Number.parseInt(parts[0], 16);
+  const low = Number.parseInt(parts[1], 16);
+  return `${high >>> 8}.${high & 255}.${low >>> 8}.${low & 255}`;
+}
+
 function validateContentType(contentType, expectedType) {
   if (!contentType) return;
   if (rejectedContentTypes.has(contentType) || contentType.startsWith('text/')) throw new Error(`Download lieferte keinen Medieninhalt, sondern ${contentType}.`);
-  if (['video', 'animation'].includes(expectedType) && !contentType.startsWith('video/') && contentType !== 'application/octet-stream') {
-    throw new Error(`Unerwarteter Inhaltstyp für Video: ${contentType}.`);
-  }
-  if (['image', 'graphic', 'icon', 'mockup'].includes(expectedType) && !contentType.startsWith('image/') && contentType !== 'application/octet-stream') {
-    throw new Error(`Unerwarteter Inhaltstyp für Bild: ${contentType}.`);
-  }
+  if (['video', 'animation'].includes(expectedType) && !contentType.startsWith('video/') && contentType !== 'application/octet-stream') throw new Error(`Unerwarteter Inhaltstyp für Video: ${contentType}.`);
+  if (['image', 'graphic', 'icon', 'mockup'].includes(expectedType) && !contentType.startsWith('image/') && contentType !== 'application/octet-stream') throw new Error(`Unerwarteter Inhaltstyp für Bild: ${contentType}.`);
 }
 
 function normalizeContentType(value) {
