@@ -1,5 +1,39 @@
 # Changelog
 
+## 0.4.0-beta.3 – 2026-08-06
+
+### Neu
+
+- lokaler Reel- und Skript-Planer für Finanzen, KI, Elektrotechnik und Kampfsport
+- automatische Zerlegung deutscher Sprechtexte in bis zu 20 Szenen
+- proportionale Zeitplanung für Reels, Shorts, YouTube und Präsentationen
+- Zuordnung jeder Szene zu passenden Kanal-Sammlungen
+- bis zu drei vorhandene Asset-Vorschläge pro Szene
+- sichtbare Trennung zwischen freigegebenen und ungeprüften Vorschlägen
+- direkter Wechsel vom Szenenvorschlag zum Pexels Arsenal Builder
+- direkte Übernahme vorgeschlagener Assets in Favoriten und Medienpakete
+- Bibliotheks- und Freigabeabdeckung pro Shotlist
+- Export als JSON, CSV und Markdown im Browser
+- Kommandozeilen-Export als JSON, CSV, Markdown und SRT
+- deutsches und englisches Synonymlexikon mit Fachbegriffen aller vier Kanäle
+- automatische Prüfung aller Lexikonregeln gegen die 90 vorhandenen Sammlungen
+
+### Verbessert
+
+- Version auf `0.4.0-beta.3` erhöht
+- Arbeitsbereich-Navigation um **Skript planen** ergänzt
+- Favoriten aus dem Skript-Planer aktualisieren sofort die Projektauswahl
+- fehlende Szenenmotive liefern konkrete Pexels-Suchbegriffe
+- Skripttexte bleiben lokal und werden nicht automatisch gespeichert oder übertragen
+
+### Sicherheit
+
+- der Browser-Planer benötigt keine externe KI-API
+- Skriptdateien für den CLI-Planer sind auf 1 MB begrenzt
+- CLI-Ausgabeordner müssen innerhalb des Projektverzeichnisses liegen
+- Review-Assets werden im freigegebenen Modus vollständig ausgeschlossen
+- jeder ungeprüfte Vorschlag erhält eine deutliche Veröffentlichungswarnung
+
 ## 0.4.0-beta.2 – 2026-08-06
 
 ### Neu
