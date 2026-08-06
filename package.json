@@ -20,6 +20,7 @@
     "arsenal:validate": "node scripts/validate-channel-library.mjs",
     "arsenal:plan": "node scripts/build-arsenal-plan.mjs",
     "arsenal:search": "node scripts/pexels-arsenal-search.mjs",
+    "arsenal:import": "node scripts/arsenal-import-selected.mjs",
     "secrets:scan": "node scripts/scan-secrets.mjs",
     "validate": "node scripts/validate-catalog.mjs && node scripts/validate-channel-library.mjs && node scripts/validate-preview-urls.mjs && node scripts/validate-operations.mjs",
     "index": "node scripts/build-index.mjs",
