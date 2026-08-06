@@ -46,13 +46,7 @@ jobs:
 
           remaining=$(awk 'BEGIN{IGNORECASE=1} /^x-ratelimit-remaining:/ {gsub("\r", "", $2); print $2}' /tmp/unsplash-headers.txt | tail -n 1)
           limit=$(awk 'BEGIN{IGNORECASE=1} /^x-ratelimit-limit:/ {gsub("\r", "", $2); print $2}' /tmp/unsplash-headers.txt | tail -n 1)
-          count=$(python3 - <<'PY'
-import json
-with open('/tmp/unsplash-response.json', encoding='utf-8') as handle:
-    payload = json.load(handle)
-print(len(payload) if isinstance(payload, list) else 0)
-PY
-          )
+          count=$(python3 -c "import json; payload=json.load(open('/tmp/unsplash-response.json', encoding='utf-8')); print(len(payload) if isinstance(payload, list) else 0)")
 
           if [ "$count" -lt 1 ]; then
             echo "Unsplash antwortete, aber ohne Fotoergebnis."
