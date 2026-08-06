@@ -5,14 +5,15 @@
 Der komplette kostenlose Ablauf wird real geprüft:
 
 1. Visual Asset Hub unter Windows starten
-2. elf Starterassets ansehen und entscheiden
-3. die vier Kanalbibliotheken und 90 Sammlungen durchsuchen
-4. eine Pexels-Suche pro Kanal durchführen
-5. eine eigene lokale Datei über `inbox` importieren
-6. mindestens ein Asset freigeben
-7. ein verifiziertes Medienpaket für den Schnitt erzeugen
-8. ein Asset in einem echten Content-Projekt verwenden
-9. Nutzung, Attribution und Backup dokumentieren
+2. ein echtes Kanalskript in eine Shotlist umwandeln
+3. elf Starterassets ansehen und entscheiden
+4. die vier Kanalbibliotheken und 90 Sammlungen durchsuchen
+5. eine Pexels-Suche pro Kanal durchführen
+6. eine eigene lokale Datei über `inbox` importieren
+7. mindestens ein Asset freigeben
+8. ein verifiziertes Medienpaket für den Schnitt erzeugen
+9. ein Asset in einem echten Content-Projekt verwenden
+10. Nutzung, Attribution und Backup dokumentieren
 
 ## Starterbibliothek nach dem ersten Start
 
@@ -53,6 +54,7 @@ Keines dieser Medien darf vor vollständiger Sichtprüfung als freigegeben behan
 7. Kontrollieren, ob Beta-Fortschritt und offene Aufgaben angezeigt werden.
 8. Die feste Navigation testen:
    - Bibliothek
+   - Skript planen
    - Eigene Dateien
    - Prüfen
    - Pexels suchen
@@ -226,10 +228,46 @@ Der Abdeckungsbericht muss das Ziel von 720 freigegebenen Kanal-Assets anzeigen.
 4. `RESTORE-BACKUP.cmd` testweise bis zum Dry-Run verwenden.
 5. Keine echte Wiederherstellung durchführen, solange kein Testbackup ausgewählt wurde.
 
+## Test K – Reel- und Skript-Planer
+
+1. Navigation **Skript planen** öffnen.
+2. Nacheinander mindestens zwei verschiedene Kanäle testen.
+3. Für einen vollständigen Realtest ein echtes Skript mit mindestens vier Sätzen einfügen.
+4. Zieldauer und Format wählen.
+5. Shotlist erzeugen.
+6. Kontrollieren:
+   - Szenen wurden sinnvoll getrennt
+   - letzter Zeitwert entspricht der Zieldauer
+   - erkannte Sammlungen passen zum Sprechtext
+   - vorhandene Assets besitzen Statusangaben
+   - ungeprüfte Assets zeigen eine Warnung
+   - fehlende Motive zeigen einen Pexels-Suchbegriff
+7. Bei einem fehlenden Motiv **Motiv suchen** drücken.
+8. Prüfen, ob der Arsenal Builder auf den richtigen Kanal und die richtige Sammlung springt.
+9. Ein vorgeschlagenes Asset als Favorit markieren.
+10. JSON, CSV und Markdown exportieren.
+11. Zusätzlich einen CLI-Test durchführen:
+
+```bash
+npm run script:plan -- \
+  --channel electro \
+  --file ./mein-testskript.txt \
+  --duration 45 \
+  --orientation vertical
+```
+
+12. Unter `reports/shot-plans` prüfen:
+   - `shotlist.json`
+   - `shotlist.csv`
+   - `shotlist.md`
+   - `shotlist.srt`
+   - `script.txt`
+
 ## Optionale Abschlussprüfung
 
 ```bash
 npm run links:check -- --strict true
+npm run script:plan -- --channel finance --file ./mein-testskript.txt --duration 45
 npm run arsenal:validate
 npm run arsenal:report
 npm run beta:verify
@@ -242,6 +280,8 @@ npm run check
 - elf Starterassets sichtbar
 - alle elf Starterassets mit einer Entscheidung protokolliert
 - feste Arbeitsbereich-Navigation funktioniert
+- Skript-Planer erzeugt eine plausible Shotlist
+- Shotlist-Exporte als JSON, CSV, Markdown und SRT wurden geprüft
 - vier Kanalbibliotheken und 90 Sammlungen sichtbar
 - Lückenempfehlung konfiguriert den Arsenal Builder korrekt
 - vier kleine Pexels-Suchen erfolgreich
