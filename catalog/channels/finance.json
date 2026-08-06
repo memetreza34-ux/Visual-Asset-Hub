@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "id": "finance",
+  "label": "Finanzen",
+  "description": "B-Rolls und Bilder für Geld, Investments, Wirtschaft, Business und Online-Einkommen.",
+  "primaryCategory": "finance-investing",
+  "channelTag": "channel-finance",
+  "defaultOrientations": ["vertical", "horizontal"],
+  "collections": [
+    {"id":"cash-money","label":"Bargeld & Geldscheine","queries":["counting cash money close up","euro banknotes hands","coins falling slow motion"],"tags":["cash","money","banknotes","coins","euro"]},
+    {"id":"budgeting-saving","label":"Budget & Sparen","queries":["budget planning notebook calculator","saving money jar coins","monthly expenses spreadsheet"],"tags":["budget","saving","calculator","expenses","planning"]},
+    {"id":"banking-cards","label":"Banking & Karten","queries":["contactless payment card terminal","mobile banking smartphone","credit card close up"],"tags":["banking","credit-card","payment","smartphone","fintech"]},
+    {"id":"investing-stocks","label":"Aktien & Investieren","queries":["stock market chart investor laptop","investment portfolio analysis","bull market finance"],"tags":["stocks","investing","portfolio","market","growth"]},
+    {"id":"trading-charts","label":"Trading & Charts","queries":["trader multiple screens charts","candlestick chart trading","financial chart screen close up"],"tags":["trading","charts","candlestick","screens","market"]},
+    {"id":"crypto-blockchain","label":"Krypto & Blockchain","queries":["cryptocurrency bitcoin digital animation","blockchain network technology","crypto trading phone"],"tags":["crypto","bitcoin","blockchain","digital","trading"]},
+    {"id":"real-estate-investing","label":"Immobilien-Investment","queries":["real estate investment house keys","apartment building investment","property finance calculator"],"tags":["real-estate","property","house","investment","keys"]},
+    {"id":"business-entrepreneurship","label":"Business & Unternehmertum","queries":["entrepreneur working laptop office","startup team business meeting","small business owner planning"],"tags":["business","entrepreneur","startup","office","planning"]},
+    {"id":"ecommerce-online-income","label":"E-Commerce & Online-Einkommen","queries":["online shop orders laptop","ecommerce packaging products","digital entrepreneur working from home"],"tags":["ecommerce","online-income","orders","laptop","shipping"]},
+    {"id":"taxes-accounting","label":"Steuern & Buchhaltung","queries":["tax documents calculator desk","accountant working spreadsheets","invoice bookkeeping close up"],"tags":["taxes","accounting","invoice","calculator","documents"]},
+    {"id":"inflation-cost-of-living","label":"Inflation & Lebenshaltungskosten","queries":["grocery prices supermarket receipt","expensive groceries inflation","fuel price cost of living"],"tags":["inflation","prices","groceries","receipt","cost-of-living"]},
+    {"id":"debt-credit","label":"Schulden & Kredit","queries":["debt bills stressed person","credit score financial stress","loan documents signing"],"tags":["debt","credit","loan","bills","stress"]},
+    {"id":"salary-payday","label":"Gehalt & Zahltag","queries":["salary paycheck bank app","payday money notification","employee receiving salary"],"tags":["salary","payday","income","bank-app","employee"]},
+    {"id":"economy-macroeconomics","label":"Wirtschaft & Makroökonomie","queries":["city economy business district timelapse","shipping containers global economy","factory production economy"],"tags":["economy","macroeconomics","industry","trade","city"]},
+    {"id":"retirement-pension","label":"Rente & Altersvorsorge","queries":["retirement planning elderly couple","pension savings calculator","senior financial planning"],"tags":["retirement","pension","savings","senior","planning"]},
+    {"id":"insurance-protection","label":"Versicherung & Absicherung","queries":["insurance contract signing","family protection insurance","house car insurance documents"],"tags":["insurance","protection","contract","family","risk"]},
+    {"id":"financial-technology","label":"FinTech & digitale Zahlungen","queries":["fintech mobile payment app","digital wallet smartphone","contactless payment technology"],"tags":["fintech","digital-wallet","payment","mobile","technology"]},
+    {"id":"financial-stress","label":"Finanzielle Sorgen","queries":["financial stress unpaid bills","empty wallet close up","person worried about money"],"tags":["financial-stress","bills","empty-wallet","worry","debt"]},
+    {"id":"luxury-wealth","label":"Luxus & Vermögen","queries":["luxury lifestyle city penthouse","wealth success businessman","luxury watch money"],"tags":["luxury","wealth","success","premium","lifestyle"],"reviewNotes":"Marken, Kennzeichen und Logos vor Verwendung prüfen."},
+    {"id":"scams-risk","label":"Betrug & finanzielles Risiko","queries":["online scam warning computer","phishing fraud credit card","investment risk red warning"],"tags":["scam","fraud","phishing","risk","warning"],"reviewNotes":"Keine realen persönlichen Daten oder Kontoinformationen zeigen."}
+  ]
+}
