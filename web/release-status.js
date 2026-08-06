@@ -28,7 +28,7 @@ function render(report) {
   title.textContent = `${percentage} % fertig`;
   const description = document.createElement('p');
   const reviewed = report.counts?.reviewedAssets ?? 0;
-  const required = report.counts?.requiredReviewedAssets ?? 6;
+  const required = report.counts?.requiredReviewedAssets ?? 11;
   description.textContent = `Technik ${technical} % · Realtest ${realTest} % · geprüft ${reviewed}/${required} · ${report.counts?.assets ?? 0} Testassets`;
   text.append(eyebrow, title, description);
 
@@ -85,7 +85,7 @@ function checkLabel(key) {
   return ({
     threeVideos: '3 Videos vorhanden',
     threeStaticVisuals: '3 Bilder/Grafiken vorhanden',
-    sixAssetsReviewed: 'alle 6 Testassets entschieden',
+    starterAssetsReviewed: 'alle Starterassets entschieden',
     approvedAsset: 'Asset freigegeben',
     realUsageRecorded: 'echte Nutzung dokumentiert'
   })[key] || key.replace(/([a-z])([A-Z])/g, '$1 $2');
