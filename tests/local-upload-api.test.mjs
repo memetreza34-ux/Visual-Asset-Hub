@@ -60,7 +60,7 @@ test('umbenannte oder unvollständige Binärdateien werden blockiert', () => {
 });
 
 test('sicheres SVG wird akzeptiert, aktive oder externe Inhalte werden blockiert', () => {
-  const safe = tempFile('.svg', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="10" height="10"/></svg>');
+  const safe = tempFile('.svg', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><defs><linearGradient id="g"/></defs><rect width="10" height="10" fill="url(#g)"/></svg>');
   try { assert.equal(validateUploadedFile(safe.file, '.svg'), true); }
   finally { fs.rmSync(safe.directory, { recursive: true, force: true }); }
 
@@ -68,6 +68,9 @@ test('sicheres SVG wird akzeptiert, aktive oder externe Inhalte werden blockiert
     '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>',
     '<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"></svg>',
     '<svg xmlns="http://www.w3.org/2000/svg"><image href="https://example.com/a.png"/></svg>',
+    '<svg xmlns="http://www.w3.org/2000/svg"><style>@import url(https://example.com/a.css)</style></svg>',
+    '<svg xmlns="http://www.w3.org/2000/svg"><rect style="fill:url(https://example.com/a.svg)"/></svg>',
+    '<?xml-stylesheet href="https://example.com/a.css"?><svg xmlns="http://www.w3.org/2000/svg"></svg>',
     '<svg xmlns="http://www.w3.org/2000/svg"><foreignObject>HTML</foreignObject></svg>',
     '<!DOCTYPE svg><svg xmlns="http://www.w3.org/2000/svg"></svg>'
   ];
