@@ -34,6 +34,11 @@ const reviewedAssetIds = new Set(decisions.map((entry) => entry.assetId).filter(
 const reviewedAssets = assets.filter((asset) => reviewedAssetIds.has(asset.id));
 const requiredReviewCount = Math.min(11, assets.length);
 const usageCount = (usage.uses ?? []).length;
+const requiredChannels = ['channel-finance', 'channel-ai', 'channel-electro', 'channel-combat-sports'];
+const channelCounts = Object.fromEntries(requiredChannels.map((tag) => [tag, assets.filter((asset) => asset.tags?.includes(tag)).length]));
+const allChannelsRepresented = requiredChannels.every((tag) => channelCounts[tag] > 0);
+const inboxAssets = assets.filter((asset) => asset.createdBy === 'local-inbox-browser');
+const mediaPacks = findValidMediaPacks(path.join(root, 'exports', 'media-packs'));
 
 const technicalChecks = {
   projectCheck: Boolean(results.find((entry) => entry.name === 'Projektprüfung')?.success),
@@ -45,21 +50,28 @@ const technicalReady = Object.values(technicalChecks).every(Boolean);
 const technicalPercentage = Math.round(100 * Object.values(technicalChecks).filter(Boolean).length / Object.keys(technicalChecks).length);
 
 const realTestChecks = {
-  threeVideos: videos.length >= 3,
-  threeStaticVisuals: staticVisuals.length >= 3,
+  starterMediaPresent: videos.length >= 3 && staticVisuals.length >= 3,
   starterAssetsReviewed: assets.length >= requiredReviewCount && reviewedAssets.length >= requiredReviewCount,
+  fourChannelsRepresented: allChannelsRepresented,
+  ownedInboxAssetImported: inboxAssets.length >= 1,
   approvedAsset: approved.length >= 1,
+  verifiedMediaPackCreated: mediaPacks.length >= 1,
   realUsageRecorded: usageCount >= 1
 };
 const realTestComplete = technicalReady && Object.values(realTestChecks).every(Boolean);
 const realTestPercentage = Math.round(100 * Object.values(realTestChecks).filter(Boolean).length / Object.keys(realTestChecks).length);
-const overallPercentage = Math.round(technicalPercentage * 0.75 + realTestPercentage * 0.25);
+const overallPercentage = Math.round(technicalPercentage * 0.7 + realTestPercentage * 0.3);
 
 const nextActions = [];
-if (videos.length < 3) nextActions.push(`${3 - videos.length} weitere geprüfte B-Roll-Videos importieren.`);
-if (staticVisuals.length < 3) nextActions.push(`${3 - staticVisuals.length} weitere statische Bilder oder Grafiken importieren.`);
+if (videos.length < 3 || staticVisuals.length < 3) nextActions.push('Mindestens drei Videos und drei statische Bilder oder Grafiken bereitstellen.');
 if (reviewedAssets.length < requiredReviewCount) nextActions.push(`${requiredReviewCount - reviewedAssets.length} weitere Starterassets vollständig prüfen und eine Entscheidung speichern.`);
+if (!allChannelsRepresented) {
+  const missing = requiredChannels.filter((tag) => channelCounts[tag] === 0).map(channelLabel);
+  nextActions.push(`Mindestens einen ausgewählten Kandidaten für diese Kanäle importieren: ${missing.join(', ')}.`);
+}
+if (inboxAssets.length < 1) nextActions.push('Eine eigene Datei über den lokalen Inbox-Importer als Review-Asset aufnehmen.');
 if (approved.length < 1) nextActions.push('Mindestens ein geprüftes Asset freigeben.');
+if (mediaPacks.length < 1) nextActions.push('Aus freigegebenen Favoriten ein verifiziertes Medienpaket erstellen.');
 if (usageCount < 1) nextActions.push('Ein freigegebenes Asset in einem echten Content-Projekt verwenden und dokumentieren.');
 if (!technicalReady) nextActions.unshift('Fehlgeschlagene technische Prüfschritte beheben.');
 
@@ -84,8 +96,12 @@ const report = {
     reviewedAssets: reviewedAssets.length,
     requiredReviewedAssets: requiredReviewCount,
     usages: usageCount,
-    approvedRightsRisks: approvedRightsRisks.length
+    approvedRightsRisks: approvedRightsRisks.length,
+    inboxAssets: inboxAssets.length,
+    validMediaPacks: mediaPacks.length,
+    channelCounts
   },
+  mediaPacks,
   steps: results,
   nextActions
 };
@@ -105,8 +121,11 @@ const md = [
   `- Assets: **${assets.length}** (${videos.length} Videos, ${staticVisuals.length} statische Bilder/Grafiken)`,
   `- Dokumentiert geprüft: **${reviewedAssets.length}/${requiredReviewCount}**`,
   `- Freigegeben: **${approved.length}**`,
-  `- Review-Entscheidungen: **${decisions.length}**`,
+  `- Eigene Inbox-Assets: **${inboxAssets.length}**`,
+  `- Verifizierte Medienpakete: **${mediaPacks.length}**`,
   `- Nutzungen: **${usageCount}**`, '',
+  '## Kanalabdeckung',
+  ...requiredChannels.map((tag) => `- ${channelLabel(tag)}: **${channelCounts[tag]} Assets**`), '',
   '## Prüfschritte',
   ...results.map((entry) => `- ${entry.success ? 'OK' : 'FEHLER'} – ${entry.name}`), '',
   '## Realtest-Kriterien',
@@ -118,6 +137,40 @@ fs.writeFileSync(markdownPath, `${md}\n`);
 syncFinalReport([jsonPath, markdownPath]);
 console.log(md);
 if (!technicalReady) process.exitCode = 1;
+
+function findValidMediaPacks(directory) {
+  if (!fs.existsSync(directory)) return [];
+  const packs = [];
+  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    if (!entry.isDirectory() || entry.name.startsWith('.')) continue;
+    const rootPath = path.join(directory, entry.name);
+    const manifestPath = path.join(rootPath, 'manifest.json');
+    if (!fs.existsSync(manifestPath)) continue;
+    try {
+      const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+      const entries = Array.isArray(manifest.assets) ? manifest.assets : [];
+      if (manifest.format !== 'visual-asset-hub-media-pack' || entries.length < 1) continue;
+      const filesExist = entries.every((asset) => {
+        if (typeof asset.localPath !== 'string' || asset.localPath.includes('..') || path.isAbsolute(asset.localPath)) return false;
+        const file = path.resolve(rootPath, ...asset.localPath.split('/'));
+        return file.startsWith(`${path.resolve(rootPath)}${path.sep}`) && fs.existsSync(file) && fs.statSync(file).isFile() && /^[a-f0-9]{64}$/.test(asset.sha256 ?? '');
+      });
+      if (filesExist) packs.push({ name: manifest.name ?? entry.name, directory: path.relative(root, rootPath), assets: entries.length, totalBytes: manifest.totalBytes ?? null });
+    } catch {
+      // Ungültige oder unvollständige Pakete zählen nicht für die Abnahme.
+    }
+  }
+  return packs;
+}
+
+function channelLabel(tag) {
+  return ({
+    'channel-finance': 'Finanzen',
+    'channel-ai': 'Künstliche Intelligenz',
+    'channel-electro': 'Elektrotechnik',
+    'channel-combat-sports': 'Kampfsport'
+  })[tag] ?? tag;
+}
 
 function syncFinalReport(files) {
   const target = path.join(root, 'dist', 'reports');
