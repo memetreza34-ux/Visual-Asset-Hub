@@ -33,8 +33,24 @@ export function createLocalInboxApi({ root = process.cwd(), token } = {}) {
         const input = validateInboxImportPayload(payload, root);
         const args = buildArgs(input);
         const output = runScript(root, 'scripts/add-asset.mjs', args);
-        if (input.removeAfterImport) fs.rmSync(input.absolutePath, { force: true });
-        return sendJson(response, 200, { ok: true, imported: input.filename, removedFromInbox: input.removeAfterImport, output });
+        let removedFromInbox = false;
+        let cleanupWarning = '';
+        if (input.removeAfterImport) {
+          try {
+            fs.rmSync(input.absolutePath, { force: true });
+            removedFromInbox = !fs.existsSync(input.absolutePath);
+            if (!removedFromInbox) cleanupWarning = 'Die Datei wurde katalogisiert, blieb aber im Inbox-Ordner erhalten.';
+          } catch (error) {
+            cleanupWarning = `Die Datei wurde erfolgreich katalogisiert, konnte aber nicht aus inbox entfernt werden: ${error instanceof Error ? error.message : String(error)}`;
+          }
+        }
+        return sendJson(response, 200, {
+          ok: true,
+          imported: input.filename,
+          removedFromInbox,
+          cleanupWarning: cleanupWarning || null,
+          output
+        });
       } catch (error) {
         return sendJson(response, 400, { error: error instanceof Error ? error.message : String(error) });
       } finally {
@@ -124,7 +140,7 @@ export function validateInboxImportPayload(payload, root = process.cwd()) {
     shot: type === 'graphic' ? 'not-applicable' : 'mixed',
     movement: ['video', 'animation'].includes(type) ? 'mixed' : 'static',
     style: type === 'graphic' ? 'illustration-2d' : 'realistic',
-    storage: ['video', 'animation'].includes(type) ? 'git-lfs' : 'repository'
+    storage: type === 'graphic' ? 'repository' : 'git-lfs'
   };
 }
 
