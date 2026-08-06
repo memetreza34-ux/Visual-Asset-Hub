@@ -13,6 +13,7 @@
     "attribution:export": "node scripts/export-attribution.mjs",
     "media:pack": "node scripts/export-media-pack.mjs",
     "script:plan": "node scripts/plan-script.mjs",
+    "script:benchmark": "node scripts/benchmark-script-planner.mjs",
     "backup": "node scripts/catalog-backup.mjs",
     "restore": "node scripts/catalog-restore.mjs",
     "beta:verify": "node scripts/beta-verify.mjs",
@@ -34,6 +35,6 @@
     "serve": "node scripts/serve.mjs",
     "test": "node --test",
     "syntax": "node scripts/check-syntax.mjs",
-    "check": "npm run secrets:scan && npm run syntax && npm run validate && npm run index && npm run test"
+    "check": "npm run secrets:scan && npm run syntax && npm run validate && npm run index && npm run script:benchmark && npm run test"
   }
 }
