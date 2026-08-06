@@ -39,7 +39,11 @@ const options = {
 };
 
 const rawPlans = buildImportPlans({ result: { ...input, assets: selected }, catalog, taxonomy, options });
-const plans = rawPlans.map((plan, index) => transformPlan(plan, selected[index], options));
+const plans = rawPlans.map((plan) => {
+  const sourceAsset = selected.find((asset) => asset.source_url === plan.asset.rights.sourceUrl);
+  if (!sourceAsset) fail(`Pixabay-Quelldatensatz fehlt: ${plan.asset.rights.sourceUrl}`);
+  return transformPlan(plan, sourceAsset, options);
+});
 if (plans.length !== selected.length) console.warn(`${selected.length - plans.length} bereits vorhandene Quellen wurden übersprungen.`);
 console.log(JSON.stringify(plans.map(({ asset }) => ({ id: asset.id, pixabay: asset.rights.sourceUrl, title: asset.title })), null, 2));
 if (args['dry-run'] === 'true') { console.log('Dry-Run: keine Dateien verändert.'); process.exit(0); }
