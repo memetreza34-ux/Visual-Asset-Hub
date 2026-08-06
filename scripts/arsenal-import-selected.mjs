@@ -15,14 +15,18 @@ const job = wrapper.arsenalJob;
 const result = wrapper.result;
 if (!job || !result || !Array.isArray(result.assets)) fail('Die Datei ist kein gültiges Arsenal-Suchergebnis.');
 const provider = wrapper.provider ?? result.provider ?? 'pexels';
-if (!['pexels', 'pixabay'].includes(provider)) fail(`Nicht unterstützte Quelle: ${provider}`);
+if (!['pexels', 'pixabay', 'unsplash'].includes(provider)) fail(`Nicht unterstützte Quelle: ${provider}`);
 
 const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'vah-arsenal-import-'));
 const tempInput = path.join(tempDirectory, `${provider}-result.json`);
 fs.writeFileSync(tempInput, `${JSON.stringify(result, null, 2)}\n`);
-const importer = provider === 'pixabay' ? 'scripts/pixabay-import-selected.mjs' : 'scripts/pexels-import-selected.mjs';
+const importers = {
+  pexels: 'scripts/pexels-import-selected.mjs',
+  pixabay: 'scripts/pixabay-import-selected.mjs',
+  unsplash: 'scripts/unsplash-import-selected.mjs'
+};
 const childArgs = [
-  importer,
+  importers[provider],
   '--input', tempInput,
   '--ids', args.ids,
   '--category', job.category,
@@ -39,11 +43,17 @@ if (args.shot) childArgs.push('--shot', args.shot);
 if (args.movement) childArgs.push('--movement', args.movement);
 if (args['dry-run'] === 'true') childArgs.push('--dry-run', 'true');
 
-console.log(`Quelle: ${provider === 'pixabay' ? 'Pixabay' : 'Pexels'}`);
+console.log(`Quelle: ${provider === 'pixabay' ? 'Pixabay' : provider === 'unsplash' ? 'Unsplash' : 'Pexels'}`);
 console.log(`Kanal: ${job.channelLabel} · Sammlung: ${job.collectionLabel}`);
 console.log(`Kategorie: ${job.category} · Tags: ${(job.tags ?? []).join(', ')}`);
 if (job.reviewNotes) console.log(`Review-Hinweis: ${job.reviewNotes}`);
-const run = spawnSync(process.execPath, childArgs, { cwd: root, encoding: 'utf8', shell: false, maxBuffer: 8 * 1024 * 1024 });
+const run = spawnSync(process.execPath, childArgs, {
+  cwd: root,
+  encoding: 'utf8',
+  shell: false,
+  maxBuffer: 8 * 1024 * 1024,
+  env: process.env
+});
 fs.rmSync(tempDirectory, { recursive: true, force: true });
 if (run.stdout) process.stdout.write(run.stdout);
 if (run.stderr) process.stderr.write(run.stderr);
