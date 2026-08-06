@@ -5,15 +5,17 @@ import { validateImportPayload, validateSearchPayload } from '../scripts/local-a
 
 const root = process.cwd();
 
-test('lokale Arsenal-Suche löst Kanal, Sammlung und Format kontrolliert auf', () => {
+test('lokale Arsenal-Suche löst Quelle, Kanal, Sammlung und Format kontrolliert auf', () => {
   const value = validateSearchPayload({
-    apiKey: 'test-pexels-key-1234567890',
+    provider: 'pixabay',
+    apiKey: 'test-pixabay-key-1234567890',
     channel: 'combat-sports',
     collection: 'boxing-training',
     variant: 'video-vertical',
     queryIndex: 1,
     perPage: 12
   }, root);
+  assert.equal(value.provider, 'pixabay');
   assert.equal(value.job.channel, 'combat-sports');
   assert.equal(value.job.collection, 'boxing-training');
   assert.equal(value.job.type, 'video');
@@ -23,15 +25,26 @@ test('lokale Arsenal-Suche löst Kanal, Sammlung und Format kontrolliert auf', (
   assert.ok(value.job.tags.includes('collection-boxing-training'));
 });
 
-test('lokale Suche blockiert unbekannte Kanäle, Sammlungen und zu große Batches', () => {
-  const base = { apiKey: 'test-pexels-key-1234567890', channel: 'finance', collection: 'cash-money', variant: 'video-vertical' };
+test('Pexels bleibt die Standardquelle für bestehende Aufrufe', () => {
+  const value = validateSearchPayload({
+    apiKey: 'test-pexels-key-1234567890',
+    channel: 'finance',
+    collection: 'cash-money',
+    variant: 'video-vertical'
+  }, root);
+  assert.equal(value.provider, 'pexels');
+});
+
+test('lokale Suche blockiert unbekannte Quellen, Kanäle, Sammlungen und zu große Batches', () => {
+  const base = { provider: 'pixabay', apiKey: 'test-pixabay-key-1234567890', channel: 'finance', collection: 'cash-money', variant: 'video-vertical' };
+  assert.throws(() => validateSearchPayload({ ...base, provider: 'unknown' }, root), /provider/);
   assert.throws(() => validateSearchPayload({ ...base, channel: 'unknown' }, root), /Unbekannter Kanal/);
   assert.throws(() => validateSearchPayload({ ...base, collection: 'unknown' }, root), /Unbekannte Sammlung/);
   assert.throws(() => validateSearchPayload({ ...base, perPage: 21 }, root), /perPage/);
-  assert.throws(() => validateSearchPayload({ ...base, apiKey: 'zu-kurz' }, root), /apiKey/);
+  assert.throws(() => validateSearchPayload({ ...base, apiKey: 'kurz' }, root), /apiKey/);
 });
 
-test('Import akzeptiert nur kontrollierte Such- und Pexels-IDs', () => {
+test('Import akzeptiert nur kontrollierte Such- und Medien-IDs', () => {
   const value = validateImportPayload({ searchId: 'ARS-1234567890ABCDEF', ids: ['12345', '67890'] });
   assert.deepEqual(value.ids, ['12345', '67890']);
   assert.throws(() => validateImportPayload({ searchId: '../catalog/assets', ids: ['12345'] }), /searchId/);
