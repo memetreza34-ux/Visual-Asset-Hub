@@ -5,6 +5,7 @@
   "type": "module",
   "engines": { "node": ">=22" },
   "scripts": {
+    "cleanup:local": "node scripts/cleanup-local-searches.mjs",
     "starter:import": "node scripts/tag-existing-channel-assets.mjs && node scripts/import-channel-starter-pack.mjs",
     "asset:add": "node scripts/add-asset.mjs",
     "asset:review": "node scripts/review-asset.mjs",
