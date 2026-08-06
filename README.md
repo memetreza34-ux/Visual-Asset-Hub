@@ -41,6 +41,17 @@ Elektrikerarbeit, Messgeräte, Leitungen, Schaltschränke, Instandhaltung, Motor
 
 MMA, generischer Käfig, Boxring, Boxtraining, Kickboxen, Muay Thai, Ringen, BJJ, Boxsack, Pratzen, Schattenboxen, Sparring, Wiegen, Face-off, Walkout, Bandagen, Ringrichter, Scorecards, Arena, Sieg, Erholung, Krafttraining und Regeneration.
 
+## Starterbibliothek
+
+Im Branch liegen sechs Grundassets. Beim ersten Start ergänzt `START-HERE.cmd` idempotent fünf weitere bereits bekannte Pexels-B-Rolls. Die lokale Testbibliothek enthält danach:
+
+- acht Pexels-Videos
+- drei eigene SVG-Grafiken
+- insgesamt elf reale Starterassets
+- Status aller Assets zunächst `review`
+
+Die fünf zusätzlichen Starter-B-Rolls decken Finanzen, mobile KI, bionische Technik, Labor und Robotik ab. Es wird dafür beim Start keine neue Pexels-API-Anfrage benötigt.
+
 ## Aktueller Funktionsumfang
 
 - 24 universelle und spezialisierte Hauptkategorien
@@ -69,12 +80,13 @@ MMA, generischer Käfig, Boxring, Boxtraining, Kickboxen, Muay Thai, Ringen, BJJ
 
 Die Startdatei:
 
-1. prüft Code, Katalog und Tests
-2. erzeugt den Beta-Bericht
-3. erzeugt den vollständigen Arsenal-Suchplan
-4. erzeugt den Kanal-Abdeckungsbericht
-5. baut das Testpaket
-6. startet die Bibliothek unter `http://127.0.0.1:4173`
+1. ergänzt die lokale Starterbibliothek sicher auf elf Assets
+2. prüft Code, Katalog und Tests
+3. erzeugt den Beta-Bericht
+4. erzeugt den vollständigen Arsenal-Suchplan
+5. erzeugt den Kanal-Abdeckungsbericht
+6. baut das Testpaket
+7. startet die Bibliothek unter `http://127.0.0.1:4173`
 
 Das Konsolenfenster muss geöffnet bleiben.
 
@@ -156,6 +168,8 @@ Nach dem Start erscheint **„Lokale Verwaltung aktiv“**. Dort können Assets 
 - als Attributionsliste exportiert werden
 - über ein Katalog-Backup gesichert werden
 
+Für die aktuelle Beta-Abnahme müssen alle elf Starterassets eine dokumentierte Entscheidung besitzen.
+
 ## Besondere Rechte-Regeln für MMA/UFC-Content
 
 Die Bibliothek verwendet generische Kampfsport-Stockaufnahmen. Nicht automatisch freigeben:
@@ -171,6 +185,7 @@ Die Bibliothek verwendet generische Kampfsport-Stockaufnahmen. Nicht automatisch
 ## Wichtige Befehle
 
 ```bash
+npm run starter:import
 npm run arsenal:validate
 npm run arsenal:plan
 npm run arsenal:search -- --max-jobs 20
