@@ -23,7 +23,15 @@ if %NODE_MAJOR% LSS 22 (
   exit /b 1
 )
 
-echo [1/6] Finanz- und KI-Starterpaket wird sicher als Review importiert...
+echo [1/7] Abgelaufene lokale Pexels-Suchergebnisse werden bereinigt...
+call npm run cleanup:local
+if errorlevel 1 (
+  echo [FEHLER] Lokale Suchdateien konnten nicht bereinigt werden.
+  pause
+  exit /b 1
+)
+
+echo [2/7] Starterassets werden Kanal-Sammlungen zugeordnet und sicher importiert...
 call npm run starter:import
 if errorlevel 1 (
   echo [FEHLER] Das Starterpaket konnte nicht importiert werden.
@@ -31,7 +39,7 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo [2/6] Vollstaendige Beta-Bereitschaft wird geprueft...
+echo [3/7] Vollstaendige Beta-Bereitschaft wird geprueft...
 call npm run beta:verify
 if errorlevel 1 (
   echo.
@@ -41,7 +49,7 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo [3/6] Arsenal-Plan und Abdeckungsbericht werden erzeugt...
+echo [4/7] Arsenal-Plan und Abdeckungsbericht werden erzeugt...
 call npm run arsenal:plan
 if errorlevel 1 (
   echo [FEHLER] Der Kanal-Arsenal-Plan konnte nicht erzeugt werden.
@@ -55,7 +63,7 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo [4/6] Testpaket wird mit den aktuellen Berichten aktualisiert...
+echo [5/7] Testpaket wird mit den aktuellen Berichten aktualisiert...
 call npm run site:build
 if errorlevel 1 (
   echo [FEHLER] Das statische Testpaket konnte nicht aktualisiert werden.
@@ -63,10 +71,11 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo [5/6] Browser wird nach dem Serverstart automatisch geoeffnet...
+echo [6/7] Browser wird nach dem Serverstart automatisch geoeffnet...
 start "Visual Asset Hub Browser" cmd /c "timeout /t 2 /nobreak >nul & start \"\" http://127.0.0.1:4173"
 
-echo [6/6] Visual Asset Hub laeuft mit lokaler Verwaltung.
+echo [7/7] Visual Asset Hub laeuft mit lokaler Verwaltung und Arsenal Builder.
+echo Pexels kann direkt im Browser durchsucht werden; der Key wird nicht gespeichert.
 echo Review, Freigabe, Nutzung, Attribution und Backup koennen im Browser gespeichert werden.
 echo Suchplan: reports\arsenal-plan.json und reports\arsenal-plan.csv
 echo Abdeckung: reports\channel-coverage.md und reports\channel-coverage.json
