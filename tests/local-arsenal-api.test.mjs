@@ -30,7 +30,7 @@ test('Unsplash akzeptiert Fotoformate und blockiert Videoformate', () => {
     provider: 'unsplash',
     apiKey: 'test-unsplash-key-1234567890',
     channel: 'ai',
-    collection: 'robotics',
+    collection: 'humanoid-robots',
     variant: 'photo-vertical'
   }, root);
   assert.equal(photo.provider, 'unsplash');
@@ -39,7 +39,7 @@ test('Unsplash akzeptiert Fotoformate und blockiert Videoformate', () => {
     provider: 'unsplash',
     apiKey: 'test-unsplash-key-1234567890',
     channel: 'ai',
-    collection: 'robotics',
+    collection: 'humanoid-robots',
     variant: 'video-vertical'
   }, root), /nur Bilder/);
 });
