@@ -4,6 +4,7 @@ import path from 'node:path';
 import process from 'node:process';
 import { createLocalAdminApi } from './local-admin-api.mjs';
 import { createLocalArsenalApi } from './local-arsenal-api.mjs';
+import { createLocalInboxApi } from './local-inbox-api.mjs';
 
 const root = process.cwd();
 const host = process.env.HOST || '127.0.0.1';
@@ -32,16 +33,22 @@ const mimeTypes = {
   '.jpeg': 'image/jpeg',
   '.webp': 'image/webp',
   '.avif': 'image/avif',
+  '.gif': 'image/gif',
+  '.tif': 'image/tiff',
+  '.tiff': 'image/tiff',
   '.mp4': 'video/mp4',
   '.webm': 'video/webm',
-  '.mov': 'video/quicktime'
+  '.mov': 'video/quicktime',
+  '.mkv': 'video/x-matroska'
 };
 
 const adminApi = createLocalAdminApi({ root });
 const arsenalApi = createLocalArsenalApi({ root, token: adminApi.token });
+const inboxApi = createLocalInboxApi({ root, token: adminApi.token });
 const server = http.createServer(async (request, response) => {
   try {
     const url = new URL(request.url || '/', `http://${request.headers.host || `${host}:${port}`}`);
+    if (await inboxApi.handle(request, response, url)) return;
     if (await arsenalApi.handle(request, response, url)) return;
     if (await adminApi.handle(request, response, url)) return;
 
@@ -96,7 +103,7 @@ const server = http.createServer(async (request, response) => {
 
 server.listen(port, host, () => {
   console.log(`Visual Asset Hub: http://${host}:${port}`);
-  console.log('Lokale Verwaltung aktiv: Review, Freigabe, Nutzung, Backup und Arsenal-Suche können direkt im Browser ausgeführt werden.');
+  console.log('Lokale Verwaltung aktiv: Review, Freigabe, Nutzung, Medienpakete, Inbox und Arsenal-Suche können direkt im Browser ausgeführt werden.');
 });
 
 function setSecurityHeaders(response, pathname) {
@@ -105,7 +112,7 @@ function setSecurityHeaders(response, pathname) {
   response.setHeader('X-Frame-Options', 'DENY');
   response.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
   response.setHeader('Content-Security-Policy', "default-src 'self'; img-src 'self' https: data:; media-src 'self' https:; style-src 'self'; script-src 'self'; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
-  response.setHeader('Cache-Control', pathname.includes('/catalog/') ? 'no-store' : 'public, max-age=300');
+  response.setHeader('Cache-Control', pathname.includes('/catalog/') || pathname.includes('/inbox/') ? 'no-store' : 'public, max-age=300');
 }
 
 function send(response, status, text) {
