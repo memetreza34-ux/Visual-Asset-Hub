@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "assetTypes": [
     "video",
     "image",
@@ -20,7 +20,12 @@
     "icon": "ico",
     "mockup": "mck"
   },
+  "channelIds": ["finance", "ai", "electro", "combat-sports"],
   "categories": [
+    "finance-investing",
+    "artificial-intelligence",
+    "electrical-engineering",
+    "combat-sports",
     "people-lifestyle",
     "business-work",
     "technology-ai",
