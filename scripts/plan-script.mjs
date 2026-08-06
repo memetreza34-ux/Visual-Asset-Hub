@@ -1,3 +1,4 @@
+import { createHash, randomBytes } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
@@ -51,14 +52,47 @@ fs.writeFileSync(files.markdown, planToMarkdown(plan));
 fs.writeFileSync(files.srt, planToSrt(plan));
 fs.writeFileSync(files.source, `${script.trim()}\n`);
 
+const evidenceRecorded = boolean(args['record-evidence'], true);
+if (evidenceRecorded) recordEvidence({ plan, script, directory });
+
 console.log(JSON.stringify({
   directory: path.relative(root, directory),
   channel: plan.channel,
   scenes: plan.summary.sceneCount,
   coveragePercentage: plan.summary.coveragePercentage,
   approvedCoveragePercentage: plan.summary.approvedCoveragePercentage,
+  evidenceRecorded,
   files: Object.fromEntries(Object.entries(files).map(([key, file]) => [key, path.relative(root, file)]))
 }, null, 2));
+
+function recordEvidence({ plan: value, script: source, directory: output }) {
+  const evidencePath = path.join(root, '.local-storage', 'operations', 'script-plans.json');
+  fs.mkdirSync(path.dirname(evidencePath), { recursive: true });
+  let evidence = { version: 1, updatedAt: new Date(0).toISOString(), plans: [] };
+  if (fs.existsSync(evidencePath)) {
+    try { evidence = JSON.parse(fs.readFileSync(evidencePath, 'utf8')); }
+    catch { fail('Vorhandener Skriptplan-Nachweis ist beschädigt und wurde nicht überschrieben.'); }
+  }
+  const generatedAt = new Date().toISOString();
+  const record = {
+    id: `PLAN-${randomBytes(6).toString('hex').toUpperCase()}`,
+    generatedAt,
+    channel: value.channel.id,
+    sceneCount: value.summary.sceneCount,
+    durationSeconds: value.settings.durationSeconds,
+    orientation: value.settings.orientation,
+    approvedOnly: value.settings.approvedOnly,
+    coveragePercentage: value.summary.coveragePercentage,
+    approvedCoveragePercentage: value.summary.approvedCoveragePercentage,
+    uniquePrimaryAssetCount: value.summary.uniquePrimaryAssetCount ?? 0,
+    outputDirectory: path.relative(root, output).replaceAll('\\', '/'),
+    scriptSha256: createHash('sha256').update(source.trim(), 'utf8').digest('hex')
+  };
+  evidence.version = 1;
+  evidence.updatedAt = generatedAt;
+  evidence.plans = [...(Array.isArray(evidence.plans) ? evidence.plans : []), record].slice(-100);
+  fs.writeFileSync(evidencePath, `${JSON.stringify(evidence, null, 2)}\n`, { mode: 0o600 });
+}
 
 function readScriptFile(value) {
   const file = path.resolve(root, value);
@@ -132,5 +166,5 @@ function fail(message) {
 }
 
 function printHelp() {
-  console.log(`Visual Asset Hub Skript-Planer\n\nBeispiele:\n  npm run script:plan -- --channel finance --file ./mein-reel.txt --duration 45\n  npm run script:plan -- --channel electro --text "RCD prüfen. Messung dokumentieren." --duration 30 --approved-only true\n\nAusgaben: shotlist.json, shotlist.csv, shotlist.md, shotlist.srt und script.txt unter reports/shot-plans/.`);
+  console.log(`Visual Asset Hub Skript-Planer\n\nBeispiele:\n  npm run script:plan -- --channel finance --file ./mein-reel.txt --duration 45\n  npm run script:plan -- --channel electro --text "RCD prüfen. Messung dokumentieren." --duration 30 --approved-only true\n\nAusgaben: shotlist.json, shotlist.csv, shotlist.md, shotlist.srt und script.txt unter reports/shot-plans/.\nDer Standard speichert zusätzlich einen lokalen Nachweis ohne Sprechtext. Mit --record-evidence false wird dieser deaktiviert.`);
 }
