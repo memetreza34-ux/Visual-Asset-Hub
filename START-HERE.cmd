@@ -23,7 +23,7 @@ if %NODE_MAJOR% LSS 22 (
   exit /b 1
 )
 
-echo [1/4] Vollstaendige Beta-Bereitschaft wird geprueft...
+echo [1/5] Vollstaendige Beta-Bereitschaft wird geprueft...
 call npm run beta:verify
 if errorlevel 1 (
   echo.
@@ -33,7 +33,15 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo [2/4] Testpaket wird mit dem aktuellen Bereitschaftsbericht aktualisiert...
+echo [2/5] Arsenal-Plan fuer Finanzen, KI, Elektro und Kampfsport wird erzeugt...
+call npm run arsenal:plan
+if errorlevel 1 (
+  echo [FEHLER] Der Kanal-Arsenal-Plan konnte nicht erzeugt werden.
+  pause
+  exit /b 1
+)
+
+echo [3/5] Testpaket wird mit den aktuellen Berichten aktualisiert...
 call npm run site:build
 if errorlevel 1 (
   echo [FEHLER] Das statische Testpaket konnte nicht aktualisiert werden.
@@ -41,11 +49,12 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo [3/4] Browser wird nach dem Serverstart automatisch geoeffnet...
+echo [4/5] Browser wird nach dem Serverstart automatisch geoeffnet...
 start "Visual Asset Hub Browser" cmd /c "timeout /t 2 /nobreak >nul & start \"\" http://127.0.0.1:4173"
 
-echo [4/4] Visual Asset Hub laeuft mit lokaler Verwaltung.
+echo [5/5] Visual Asset Hub laeuft mit lokaler Verwaltung.
 echo Review, Freigabe, Nutzung, Attribution und Backup koennen im Browser gespeichert werden.
+echo Der komplette Suchplan liegt unter reports\arsenal-plan.json und reports\arsenal-plan.csv.
 echo Zum Beenden STRG+C druecken.
 call npm run serve
 exit /b %errorlevel%
