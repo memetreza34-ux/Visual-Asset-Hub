@@ -72,6 +72,12 @@ export function createLocalAdminApi({ root = process.cwd(), token = randomBytes(
           return sendJson(response, 200, { ok: true, action: 'backup', output: result });
         }
 
+        if (url.pathname === '/api/media-pack') {
+          const input = validateMediaPackPayload(payload);
+          const result = runScript(root, 'scripts/export-media-pack.mjs', ['--ids', input.ids.join(','), '--name', input.name]);
+          return sendJson(response, 200, { ok: true, action: 'media-pack', output: result });
+        }
+
         if (url.pathname === '/api/attribution') {
           const project = requireText(payload?.project, 'project', 1, 120);
           const result = runScript(root, 'scripts/export-attribution.mjs', ['--project', project]);
@@ -118,6 +124,16 @@ export function validateUsagePayload(payload) {
   const url = optionalText(payload?.url, 'url', 2000);
   if (url) validateHttpUrl(url);
   return { assetId, project, platform, title, notes, url };
+}
+
+export function validateMediaPackPayload(payload) {
+  if (!Array.isArray(payload?.ids) || payload.ids.length < 1 || payload.ids.length > 20) throw new Error('ids benötigt 1 bis 20 Asset-IDs.');
+  const ids = payload.ids.map((value) => requireAssetId(String(value)));
+  if (new Set(ids).size !== ids.length) throw new Error('ids enthält Duplikate.');
+  const rawName = requireText(payload?.name ?? 'media-pack', 'name', 2, 80);
+  const name = rawName.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80);
+  if (name.length < 2) throw new Error('name enthält keine gültige Bezeichnung.');
+  return { ids, name };
 }
 
 function readHealth(root, token) {
