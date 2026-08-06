@@ -48,8 +48,8 @@ test('gültiges PNG wird über lokale HTTP-Verbindung atomar in inbox gespeicher
       },
       body
     });
-    assert.equal(response.status, 201, await response.text());
     const result = await response.json();
+    assert.equal(response.status, 201, result.error || JSON.stringify(result));
     assert.equal(result.storedFilename, 'Eigene Grafik.png');
     assert.equal(result.bytes, body.length);
     assert.deepEqual(fs.readFileSync(path.join(env.root, 'inbox', result.storedFilename)), body);
@@ -63,6 +63,7 @@ test('gleiche Dateinamen werden umbenannt statt überschrieben', async () => {
   const env = await fixture();
   const body = Buffer.from('89504e470d0a1a0a00000000', 'hex');
   try {
+    const names = [];
     for (let index = 0; index < 2; index += 1) {
       const response = await fetch(`${env.origin}/upload-api/file`, {
         method: 'POST',
@@ -75,8 +76,11 @@ test('gleiche Dateinamen werden umbenannt statt überschrieben', async () => {
         },
         body
       });
-      assert.equal(response.status, 201, await response.text());
+      const result = await response.json();
+      assert.equal(response.status, 201, result.error || JSON.stringify(result));
+      names.push(result.storedFilename);
     }
+    assert.deepEqual(names, ['bild.png', 'bild-2.png']);
     assert.deepEqual(fs.readdirSync(path.join(env.root, 'inbox')).sort(), ['bild-2.png', 'bild.png']);
   } finally {
     await env.close();
@@ -93,6 +97,7 @@ test('falsche Signatur, falsches Token und fremder Ursprung werden blockiert', a
       body: fake
     });
     assert.equal(badSignature.status, 400);
+    assert.match((await badSignature.json()).error, /PNG-Signatur/);
     assert.equal(fs.existsSync(path.join(env.root, 'inbox', 'fake.png')), false);
 
     const png = Buffer.from('89504e470d0a1a0a00000000', 'hex');
