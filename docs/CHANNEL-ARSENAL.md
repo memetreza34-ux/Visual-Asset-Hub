@@ -19,6 +19,15 @@ Pro Sammlung sind vier Grundvarianten geplant:
 
 Der vollständige Plan erzeugt **360 Suchaufträge** und kann bis zu **5.850 Kandidaten** abrufen. Kandidaten sind noch keine freigegebenen Assets. Nur visuell ausgewählte Treffer werden als `review` importiert.
 
+## Starterpaket
+
+Im Repository liegen sechs Grundassets. Beim ersten Windows-Start ergänzt `npm run starter:import` fünf weitere bereits bekannte Pexels-Treffer ohne neue API-Anfrage:
+
+- ein Finanzvideo mit Taschenrechner
+- vier KI-/Technologievideos zu Smartphone, bionischem Arm, Labor und Robotik
+
+Danach enthält die lokale Testbibliothek elf reale Assets. Der Import ist idempotent, erkennt vorhandene IDs und Quellen und setzt alle neuen Treffer ausschließlich auf `review`.
+
 ## Kanaldateien
 
 - `catalog/channels/finance.json`
