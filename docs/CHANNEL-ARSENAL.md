@@ -19,6 +19,41 @@ Pro Sammlung sind vier Grundvarianten geplant:
 
 Der vollständige Plan erzeugt **360 Suchaufträge** und kann bis zu **5.850 Kandidaten** abrufen. Kandidaten sind noch keine freigegebenen Assets. Nur visuell ausgewählte Treffer werden als `review` importiert.
 
+## Intelligenter Ausbau
+
+Die Weboberfläche bewertet jede Sammlung getrennt nach:
+
+- vorhandenen Kandidaten
+- offenen Reviews
+- eingeschränkten Assets
+- tatsächlich freigegebenen Assets
+- Fortschritt bis zum Ziel von acht Freigaben
+
+Unter **Als Nächstes ausbauen** erscheinen automatisch die acht schwächsten Sammlungen. Ein Klick stellt den Arsenal Builder auf den richtigen Kanal, die richtige Sammlung und vertikales Video ein.
+
+Sortierungen:
+
+- größte Lücken zuerst
+- meiste Freigaben
+- meiste offene Reviews
+- alphabetisch
+
+Mit **Nur unvollständige Sammlungen** werden bereits vollständig abgedeckte Sammlungen ausgeblendet.
+
+## Drei Quellen für das Arsenal
+
+### Pexels
+
+Der Arsenal Builder durchsucht Pexels lokal und importiert nur markierte Treffer als `review`.
+
+### Eigene Medien
+
+Eigene Videos, Bilder oder Grafiken können nach `inbox` kopiert und im Browser einer Sammlung zugeordnet werden. Der Import verlangt eine ausdrückliche Rechtebestätigung.
+
+### Bereits freigegebene Pakete
+
+Freigegebene Favoriten können als Schnittpaket unter `exports/media-packs` ausgegeben werden. Diese Pakete verändern den Katalog nicht, sondern stellen projektfertige Kopien mit Manifest und Attribution bereit.
+
 ## Starterpaket
 
 Im Repository liegen sechs Grundassets. Beim ersten Windows-Start ergänzt `npm run starter:import` fünf weitere bereits bekannte Pexels-Treffer ohne neue API-Anfrage:
@@ -105,17 +140,6 @@ Der Import übernimmt automatisch:
 - Review-Status
 
 Kein Treffer wird automatisch freigegeben.
-
-## Abdeckung in der Weboberfläche
-
-Die Kanalbibliothek zeigt pro Sammlung:
-
-- aktuelle Assetanzahl
-- empfohlenes Ziel von acht Assets
-- Anzahl freigegebener Assets
-- Anzahl offener Reviews
-- Fortschrittsbalken
-- alle vorbereiteten Suchbegriffe
 
 ## Rechte-Regeln für Kampfsport
 
