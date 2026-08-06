@@ -4,7 +4,7 @@ Visual Asset Hub ist eine universelle, kostenlose Medienbibliothek für **B-Roll
 
 ## Spezialisierte Kanalbibliotheken
 
-Die Version `0.4.0-beta.2` enthält ein großes Arsenal für vier Content-Kanäle:
+Die Version `0.4.0-beta.3` enthält ein großes Arsenal für vier Content-Kanäle:
 
 | Kanal | Sammlungen | Suchbegriffe | empfohlenes Ausbauziel |
 |---|---:|---:|---:|
@@ -22,6 +22,41 @@ Jede Sammlung ist für vier Grundformate vorbereitet:
 - horizontales Foto
 
 Der vollständige Suchplan umfasst **360 Pexels-Suchaufträge** und kann bis zu **5.850 Kandidaten** liefern. Kandidaten werden niemals automatisch freigegeben.
+
+## Reel- und Skript-Planer
+
+Ein deutscher Sprechtext kann direkt im lokalen Browser in eine Shotlist umgewandelt werden:
+
+1. Kanal auswählen.
+2. Reel, YouTube oder Präsentation auswählen.
+3. Zieldauer festlegen.
+4. Sprechtext einfügen.
+5. Shotlist erzeugen.
+
+Der Planer erstellt automatisch:
+
+- Szenen und Zeitbereiche
+- empfohlenen Medientyp
+- passende Kanal-Sammlungen
+- passende vorhandene Assets
+- Status- und Rechtewarnungen
+- Pexels-Suchbegriffe für fehlende Motive
+- Abdeckung mit vorhandenen und freigegebenen Assets
+- Exporte als JSON, CSV und Markdown
+
+Das Matching verwendet ein geprüftes Lexikon mit deutschen und englischen Fachbegriffen für Finanzen, KI, Elektrotechnik und Kampfsport. Der Text bleibt lokal und wird nicht an eine KI-API oder Pexels übertragen.
+
+Für Textdateien steht zusätzlich ein Kommandozeilen-Export mit SRT-Markern zur Verfügung:
+
+```bash
+npm run script:plan -- \
+  --channel electro \
+  --file ./mein-reel.txt \
+  --duration 45 \
+  --orientation vertical
+```
+
+Ausgabe: JSON, CSV, Markdown, SRT und eine Kopie des Skripts unter `reports/shot-plans/`.
 
 ## Drei Quellenwege
 
@@ -75,6 +110,9 @@ Im Branch liegen sechs Grundassets. Beim ersten Start ergänzt `START-HERE.cmd` 
 - 24 universelle und spezialisierte Hauptkategorien
 - 90 klar benannte Kanal-Sammlungen
 - 270 englische Pexels-Suchbegriffe
+- deutsches Skript-Matching mit kanalbezogenen Synonymen
+- lokale Shotlist-Planung mit Zeitbereichen und Asset-Vorschlägen
+- Shotlist-Export als JSON, CSV, Markdown und SRT
 - automatische Suchplanung als JSON und CSV
 - Pexels-Suche im Browser und in sicheren Batches
 - lokale Inbox für eigene Medien
@@ -142,6 +180,7 @@ Nicht automatisch freigeben:
 ```bash
 npm run starter:import
 npm run cleanup:local
+npm run script:plan -- --channel finance --file ./mein-reel.txt --duration 45
 npm run arsenal:validate
 npm run arsenal:plan
 npm run arsenal:search -- --max-jobs 20
@@ -161,6 +200,7 @@ npm run serve
 ## Sicherheit
 
 - API-Schlüssel liegen nur in `.env` oder GitHub Secrets.
+- Skripttexte bleiben lokal und werden nicht automatisch gespeichert oder übertragen.
 - alle automatischen Importe starten auf `review`.
 - eigene Inbox-Dateien benötigen eine ausdrückliche Rechtebestätigung.
 - Nicht freigegebene Assets können nicht als Medienpaket exportiert werden.
@@ -176,6 +216,7 @@ GitHub Actions startet in diesem Repository momentan keinen Runner und bricht vo
 ## Dokumentation
 
 - [`docs/REAL-TEST-QUICKSTART.md`](docs/REAL-TEST-QUICKSTART.md)
+- [`docs/SCRIPT-PLANNER.md`](docs/SCRIPT-PLANNER.md)
 - [`docs/CHANNEL-ARSENAL.md`](docs/CHANNEL-ARSENAL.md)
 - [`docs/OPERATIONS.md`](docs/OPERATIONS.md)
 - [`docs/BETA-TEST.md`](docs/BETA-TEST.md)
