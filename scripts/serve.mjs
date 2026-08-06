@@ -10,6 +10,7 @@ const root = process.cwd();
 const host = process.env.HOST || '127.0.0.1';
 const port = Number(process.env.PORT || 4173);
 const allowedHosts = new Set(['127.0.0.1', 'localhost', '::1']);
+const apiPrefixes = ['/api/', '/arsenal-api/', '/inbox-api/'];
 
 if (!Number.isInteger(port) || port < 1 || port > 65535) {
   console.error('PORT muss zwischen 1 und 65535 liegen.');
@@ -45,12 +46,30 @@ const mimeTypes = {
 const adminApi = createLocalAdminApi({ root });
 const arsenalApi = createLocalArsenalApi({ root, token: adminApi.token });
 const inboxApi = createLocalInboxApi({ root, token: adminApi.token });
+let activeWriteAction = null;
+
 const server = http.createServer(async (request, response) => {
   try {
     const url = new URL(request.url || '/', `http://${request.headers.host || `${host}:${port}`}`);
-    if (await inboxApi.handle(request, response, url)) return;
-    if (await arsenalApi.handle(request, response, url)) return;
-    if (await adminApi.handle(request, response, url)) return;
+    const isApiRequest = apiPrefixes.some((prefix) => url.pathname.startsWith(prefix));
+    const isWriteRequest = isApiRequest && request.method === 'POST';
+
+    if (isWriteRequest && activeWriteAction) {
+      return sendJson(response, 409, {
+        error: `Eine andere lokale Schreibaktion läuft bereits: ${activeWriteAction}. Bitte danach erneut versuchen.`
+      });
+    }
+
+    if (isApiRequest) {
+      if (isWriteRequest) activeWriteAction = url.pathname;
+      try {
+        if (await inboxApi.handle(request, response, url)) return;
+        if (await arsenalApi.handle(request, response, url)) return;
+        if (await adminApi.handle(request, response, url)) return;
+      } finally {
+        if (isWriteRequest) activeWriteAction = null;
+      }
+    }
 
     if (!['GET', 'HEAD'].includes(request.method || 'GET')) {
       response.setHeader('Allow', 'GET, HEAD');
@@ -113,6 +132,16 @@ function setSecurityHeaders(response, pathname) {
   response.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
   response.setHeader('Content-Security-Policy', "default-src 'self'; img-src 'self' https: data:; media-src 'self' https:; style-src 'self'; script-src 'self'; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
   response.setHeader('Cache-Control', pathname.includes('/catalog/') || pathname.includes('/inbox/') ? 'no-store' : 'public, max-age=300');
+}
+
+function sendJson(response, status, value) {
+  response.writeHead(status, {
+    'Content-Type': 'application/json; charset=utf-8',
+    'X-Content-Type-Options': 'nosniff',
+    'Cache-Control': 'no-store',
+    'Referrer-Policy': 'no-referrer'
+  });
+  response.end(`${JSON.stringify(value, null, 2)}\n`);
 }
 
 function send(response, status, text) {
