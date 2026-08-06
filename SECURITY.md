@@ -23,8 +23,34 @@
 - Eine entfernte Bindung ist nur mit `VAH_ALLOW_REMOTE=true` möglich und für den normalen Betrieb ausdrücklich nicht vorgesehen.
 - Schreibaktionen benötigen ein zufälliges Sitzungstoken, denselben Browser-Ursprung und eine lokale Verbindung.
 - Der Server verarbeitet JSON mit einer maximalen Größe von 64 KB und führt Benutzerwerte niemals über eine Shell aus.
+- Eine gemeinsame Server-Sperre erlaubt nur eine Schreibaktion gleichzeitig. Parallele Review-, Inbox-, Pexels- oder Paketaktionen erhalten HTTP 409.
 - Während Visual Asset Hub läuft, darf das Konsolenfenster nicht mit unbekannten Personen oder über Remote-Desktop geteilt werden.
 - Nach der Verwendung den Server mit `STRG+C` beenden.
+
+## Eigene Dateien und Inbox
+
+- `inbox` ist ausschließlich ein lokaler Eingang und wird durch `.gitignore` ausgeschlossen.
+- Nur Dateien importieren, die selbst erstellt wurden oder für die nachweisbare Nutzungsrechte bestehen.
+- Der Browser verlangt vor dem Import eine ausdrückliche Rechtebestätigung.
+- Dateinamen werden gegen absolute Pfade, Traversal und versteckte Dateien geprüft.
+- Nicht unterstützte Dateitypen und Dateien über 2 GB werden blockiert.
+- Binäre Videos und Rasterbilder werden für Git LFS eingeordnet.
+- SVG-Grafiken dürfen im normalen Repository liegen, müssen aber vor Veröffentlichung auf fremden eingebetteten Inhalt geprüft werden.
+- Scheitert nach erfolgreichem Import nur das Entfernen der Inbox-Datei, bleibt der Katalogimport gültig und es wird lediglich eine Warnung ausgegeben.
+- Private Kundenmedien nicht in ein öffentliches Repository committen, auch wenn sie technisch über Git LFS gespeichert werden könnten.
+
+## Medienpakete
+
+- Medienpakete akzeptieren ausschließlich Assets mit Status `approved`.
+- Pro Paket sind höchstens 20 Assets vorgesehen.
+- Standardgrenzen: 300 MB pro Datei und 1,5 GB insgesamt.
+- Externe Downloads akzeptieren ausschließlich HTTP(S).
+- URLs mit Zugangsdaten sowie lokale und private Netzadressen werden blockiert.
+- DNS-Ziele werden vor dem Download geprüft; Weiterleitungen werden erneut validiert und begrenzt.
+- Größen werden sowohl über `Content-Length` als auch während des Streams kontrolliert.
+- Dateien werden mit SHA-256 in `manifest.json` dokumentiert.
+- Bei einem Fehler wird der temporäre Paketordner vollständig entfernt.
+- Die Paketdateien liegen lokal unter `exports/media-packs` und werden nicht automatisch zu GitHub übertragen.
 
 ## Medien und Rechte
 
@@ -67,7 +93,7 @@ Der lokale Server setzt unter anderem:
 - `X-Content-Type-Options: nosniff`
 - restriktive Permissions-Policy
 - `Referrer-Policy: no-referrer`
-- `Cache-Control: no-store` für Katalog- und API-Daten
+- `Cache-Control: no-store` für Katalog-, Inbox- und API-Daten
 
 ## Sicherheitsproblem melden
 
