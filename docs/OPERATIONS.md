@@ -1,38 +1,94 @@
 # Praktischer Betrieb
 
-## Schnellstart
+## Normaler Start
 
-Unter Windows `START-HERE.cmd` doppelklicken. Danach steht die Anwendung unter `http://127.0.0.1:4173` bereit.
+Unter Windows `START-HERE.cmd` doppelklicken. Der Start führt automatisch aus:
 
-Während der Nutzung muss das Konsolenfenster geöffnet bleiben. Zum Beenden `STRG+C` drücken.
+1. idempotenter Import des Finanz-/KI-Starterpakets
+2. technische Beta-Prüfung
+3. Erzeugung des Arsenal-Suchplans
+4. Erzeugung des Kanal-Abdeckungsberichts
+5. statischer Website-Build
+6. Start der lokalen Bibliothek unter `http://127.0.0.1:4173`
 
-## Sicherer Ablauf im Browser
+## Sicherer Arbeitsablauf
 
-1. Asset öffnen und vollständig ansehen.
-2. Quelle und Lizenzseite kontrollieren.
-3. Die vier Pflichtprüfungen bestätigen.
-4. Asset freigeben, einschränken, zurückgeben oder archivieren.
-5. Nur freigegebene Assets real verwenden.
-6. Projekt und Plattform direkt im Browser dokumentieren.
-7. Attribution exportieren.
-8. Regelmäßig ein Backup erzeugen.
+1. Kanal und Sammlung auswählen.
+2. Suchbegriffe prüfen oder den Arsenal-Plan erzeugen.
+3. Pexels in kleinen Batches durchsuchen.
+4. Nur visuell passende Treffer auswählen.
+5. Treffer als `review` importieren.
+6. Inhalt, Qualität, Personen, Marken und Rechte prüfen.
+7. Asset freigeben oder einschränken.
+8. Jede reale Nutzung dokumentieren.
+9. Attribution exportieren.
+10. Regelmäßig ein Backup erzeugen.
 
-Die Leiste **Lokale Verwaltung aktiv** bestätigt, dass Schreibaktionen verfügbar sind. Fehlt diese Leiste, läuft nur die statische Ansicht und es werden keine Änderungen gespeichert.
+## Kanal-Arsenal
 
-## Gezielter Pexels-Import
+Gesamten Plan erzeugen:
+
+```bash
+npm run arsenal:plan
+```
+
+Einzelnen Kanal planen:
+
+```bash
+npm run arsenal:plan -- --channel finance
+npm run arsenal:plan -- --channel ai
+npm run arsenal:plan -- --channel electro
+npm run arsenal:plan -- --channel combat-sports
+```
+
+Kleinen Batch vorbereiten:
+
+```bash
+npm run arsenal:plan -- --channel combat-sports --max-collections 5
+npm run arsenal:search -- --max-jobs 20
+```
+
+Echte Pexels-Suche starten:
+
+```bash
+npm run arsenal:search -- --execute true --max-jobs 20
+```
+
+Nur ausgewählte Treffer importieren:
+
+```bash
+npm run arsenal:import -- --input <arsenal-suchergebnis.json> --ids 12345,67890
+```
+
+Abdeckung prüfen:
+
+```bash
+npm run arsenal:report
+```
+
+Berichte:
+
+```text
+reports/arsenal-plan.json
+reports/arsenal-plan.csv
+reports/channel-coverage.json
+reports/channel-coverage.md
+```
+
+## Normaler Pexels-Einzelimport
 
 ```bash
 npm run pexels:select -- \
   --input .local-storage/pexels-search/results.json \
   --ids 12345,67890 \
-  --category technology-ai \
+  --category artificial-intelligence \
   --tags ai,technik \
   --scopes organic-social,youtube,website
 ```
 
-## Review über die Konsole
+## Review
 
-Der Browser ist der empfohlene Weg. Optional stehen weiterhin Befehle bereit:
+Bevorzugt direkt in der lokalen Weboberfläche durchführen. Alternativ:
 
 ```bash
 npm run asset:review -- --id VAH-XXXXXXXX --decision approve --reviewer Arman
@@ -42,6 +98,8 @@ npm run asset:review -- --id VAH-XXXXXXXX --decision restrict --notes "Marke sic
 Automatische Importe dürfen nie direkt `approved` werden.
 
 ## Nutzung dokumentieren
+
+Bevorzugt direkt im Browser. Alternativ:
 
 ```bash
 npm run usage:add -- \
@@ -61,38 +119,32 @@ Die Dateien erscheinen unter `exports/` als Markdown und CSV.
 
 ## Backup
 
-Im Browser oben **Katalog-Backup erstellen** drücken oder:
-
 ```bash
 npm run backup
 ```
 
-Backups werden lokal unter `backups/` abgelegt und nicht automatisch zu GitHub übertragen. Jedes Backup besitzt ein Manifest mit Dateigröße und SHA-256-Prüfsumme.
+Backups werden unter `backups/` abgelegt und nicht automatisch zu GitHub übertragen.
 
-## Backup wiederherstellen
+## Wiederherstellung
 
-Empfohlen unter Windows:
-
-1. `RESTORE-BACKUP.cmd` doppelklicken.
-2. Backup-Ordner auswählen.
-3. Prüflauf abwarten.
-4. Wiederherstellung ausdrücklich bestätigen.
-5. Danach `START-HERE.cmd` erneut starten.
-
-Alternativ:
+Unter Windows `RESTORE-BACKUP.cmd` verwenden oder zunächst einen Dry-Run ausführen:
 
 ```bash
-npm run restore -- --backup backups/DEIN-BACKUP --dry-run true
-npm run restore -- --backup backups/DEIN-BACKUP
+npm run restore -- --backup backups/<zeitstempel> --dry-run true
 ```
 
-Der Restore akzeptiert nur Ordner innerhalb von `backups/`. Vor der Wiederherstellung werden Manifest, JSON, Dateigrößen und SHA-256-Prüfsummen geprüft. Anschließend wird automatisch ein Sicherheitsbackup des aktuellen Zustands erstellt. Schlägt eine Validierung fehl, wird der vorherige Zustand wiederhergestellt.
+Erst nach erfolgreichem Dry-Run die Wiederherstellung bestätigen.
 
-## Regelmäßige Wartung
+## Kampfsport-Rechte
 
-- vor größeren Importen Backup erstellen
-- nach Änderungen `npm run beta:verify` ausführen
-- externe Links regelmäßig mit `npm run links:check -- --strict true` prüfen
-- Review-Assets nicht in echte Projekte übernehmen
-- ungenutzte oder veraltete Medien archivieren
-- Exportdateien und Backups nicht dauerhaft unverschlüsselt in öffentliche Cloud-Ordner legen
+Bei UFC-, MMA-, Box- und Kickboxmaterial besonders prüfen:
+
+- Event- und Veranstalterlogos
+- Broadcast- oder Pay-per-View-Ausschnitte
+- geschützte Gürtel- und Käfigdesigns
+- Sponsorenlogos
+- Pressekonferenzhintergründe
+- grafische Verletzungen
+- gefährliche Weight-Cut-Darstellungen
+
+Generische Training-, Gym-, Boxsack-, Pratzen-, Ring- und Konditionsaufnahmen bevorzugen.
