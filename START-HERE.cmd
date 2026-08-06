@@ -74,9 +74,10 @@ if errorlevel 1 (
 echo [6/7] Browser wird nach dem Serverstart automatisch geoeffnet...
 start "Visual Asset Hub Browser" cmd /c "timeout /t 2 /nobreak >nul & start \"\" http://127.0.0.1:4173"
 
-echo [7/7] Visual Asset Hub laeuft mit lokaler Verwaltung und Arsenal Builder.
-echo Pexels kann direkt im Browser durchsucht werden; der Key wird nicht gespeichert.
-echo Review, Freigabe, Nutzung, Attribution und Backup koennen im Browser gespeichert werden.
+echo [7/7] Visual Asset Hub v0.4.0-beta.2 laeuft lokal.
+echo Arbeitsbereiche: Bibliothek, eigene Inbox-Dateien, Schnellpruefung, Pexels Builder und 90 Kategorien.
+echo Pexels-Key wird nur fuer die lokale Suchanfrage verwendet und nicht gespeichert.
+echo Freigegebene Favoriten koennen als Medienpaket unter exports\media-packs ausgegeben werden.
 echo Suchplan: reports\arsenal-plan.json und reports\arsenal-plan.csv
 echo Abdeckung: reports\channel-coverage.md und reports\channel-coverage.json
 echo Zum Beenden STRG+C druecken.
