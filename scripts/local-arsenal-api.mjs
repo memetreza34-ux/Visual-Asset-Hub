@@ -5,9 +5,10 @@ import process from 'node:process';
 import { spawnSync } from 'node:child_process';
 import { searchPexels } from './lib/pexels.mjs';
 import { searchPixabay } from './lib/pixabay.mjs';
+import { searchUnsplash } from './lib/unsplash.mjs';
 
 const searchIdPattern = /^ARS-[A-F0-9]{16}$/;
-const providerIdPattern = /^\d{1,20}$/;
+const providerIdPattern = /^[A-Za-z0-9_-]{1,64}$/;
 const PIXABAY_CACHE_MS = 24 * 60 * 60 * 1000;
 
 export function createLocalArsenalApi({ root = process.cwd(), token } = {}) {
@@ -20,7 +21,9 @@ export function createLocalArsenalApi({ root = process.cwd(), token } = {}) {
       if (!url.pathname.startsWith('/arsenal-api/')) return false;
       setHeaders(response);
       if (!isLoopback(request.socket.remoteAddress)) return sendJson(response, 403, { error: 'Die Arsenal-API ist ausschließlich lokal erreichbar.' });
-      if (request.method === 'GET' && url.pathname === '/arsenal-api/health') return sendJson(response, 200, { ok: true, local: true, providers: ['pexels', 'pixabay'] });
+      if (request.method === 'GET' && url.pathname === '/arsenal-api/health') {
+        return sendJson(response, 200, { ok: true, local: true, providers: ['pexels', 'pixabay', 'unsplash'] });
+      }
       if (request.method !== 'POST') return sendJson(response, 405, { error: 'Nur POST ist für diese Aktion erlaubt.' });
       if (!sameOrigin(request)) return sendJson(response, 403, { error: 'Ungültiger Ursprung.' });
       if (request.headers['x-vah-token'] !== token) return sendJson(response, 403, { error: 'Ungültiges lokales Verwaltungstoken.' });
@@ -43,28 +46,40 @@ export function createLocalArsenalApi({ root = process.cwd(), token } = {}) {
             return sendJson(response, 200, responsePayload(wrapper, true));
           }
 
-          const result = input.provider === 'pixabay'
-            ? await searchPixabay({
-                apiKey: input.apiKey,
-                query: input.job.query,
-                type: input.job.type,
-                orientation: input.job.orientation,
-                locale: 'de',
-                page: 1,
-                perPage: input.job.perPage
-              })
-            : await searchPexels({
-                apiKey: input.apiKey,
-                query: input.job.query,
-                type: input.job.type,
-                orientation: input.job.orientation,
-                locale: 'de-DE',
-                page: 1,
-                perPage: input.job.perPage
-              });
+          let result;
+          if (input.provider === 'pixabay') {
+            result = await searchPixabay({
+              apiKey: input.apiKey,
+              query: input.job.query,
+              type: input.job.type,
+              orientation: input.job.orientation,
+              locale: 'de',
+              page: 1,
+              perPage: input.job.perPage
+            });
+          } else if (input.provider === 'unsplash') {
+            result = await searchUnsplash({
+              apiKey: input.apiKey,
+              query: input.job.query,
+              orientation: input.job.orientation,
+              page: 1,
+              perPage: input.job.perPage,
+              contentFilter: 'high'
+            });
+          } else {
+            result = await searchPexels({
+              apiKey: input.apiKey,
+              query: input.job.query,
+              type: input.job.type,
+              orientation: input.job.orientation,
+              locale: 'de-DE',
+              page: 1,
+              perPage: input.job.perPage
+            });
+          }
 
           const wrapper = {
-            version: 2,
+            version: 3,
             searchId,
             provider: input.provider,
             searchedAt: new Date().toISOString(),
@@ -83,8 +98,17 @@ export function createLocalArsenalApi({ root = process.cwd(), token } = {}) {
           const relative = path.relative(root, file);
           if (relative.startsWith('..') || path.isAbsolute(relative)) throw new Error('Ungültiger Suchergebnis-Pfad.');
           const wrapper = readJson(file);
-          const output = runScript(root, 'scripts/arsenal-import-selected.mjs', ['--input', relative, '--ids', input.ids.join(',')]);
-          return sendJson(response, 200, { ok: true, provider: wrapper.provider ?? wrapper.result?.provider ?? 'pexels', imported: input.ids.length, output });
+          const provider = wrapper.provider ?? wrapper.result?.provider ?? 'pexels';
+          const env = provider === 'unsplash'
+            ? { UNSPLASH_ACCESS_KEY: requireText(input.apiKey, 'apiKey', 8, 300) }
+            : {};
+          const output = runScript(
+            root,
+            'scripts/arsenal-import-selected.mjs',
+            ['--input', relative, '--ids', input.ids.join(',')],
+            env
+          );
+          return sendJson(response, 200, { ok: true, provider, imported: input.ids.length, output });
         }
 
         return sendJson(response, 404, { error: 'Arsenal-Aktion nicht gefunden.' });
@@ -99,7 +123,7 @@ export function createLocalArsenalApi({ root = process.cwd(), token } = {}) {
 
 export function validateSearchPayload(payload, root = process.cwd()) {
   const apiKey = requireText(payload?.apiKey, 'apiKey', 8, 300);
-  const provider = requireMember(payload?.provider ?? 'pexels', ['pexels', 'pixabay'], 'provider');
+  const provider = requireMember(payload?.provider ?? 'pexels', ['pexels', 'pixabay', 'unsplash'], 'provider');
   const channelId = requireSlug(payload?.channel, 'channel');
   const collectionId = requireSlug(payload?.collection, 'collection');
   const variantId = requireSlug(payload?.variant, 'variant');
@@ -113,6 +137,9 @@ export function validateSearchPayload(payload, root = process.cwd()) {
   if (!collection) throw new Error(`Unbekannte Sammlung: ${channelId}/${collectionId}`);
   const variant = (index.variants ?? []).find((entry) => entry.id === variantId);
   if (!variant) throw new Error(`Unbekannte Variante: ${variantId}`);
+  if (provider === 'unsplash' && variant.type !== 'photo') {
+    throw new Error('Unsplash bietet in diesem Builder nur Bilder an. Bitte ein Fotoformat wählen.');
+  }
   const query = collection.queries[queryIndex % collection.queries.length];
   const perPage = Math.min(20, Math.max(3, perPageRequested ?? variant.perPage ?? 15));
   return {
@@ -138,15 +165,21 @@ export function validateSearchPayload(payload, root = process.cwd()) {
 export function validateImportPayload(payload) {
   const searchId = requireText(payload?.searchId, 'searchId', 20, 20);
   if (!searchIdPattern.test(searchId)) throw new Error('Ungültige searchId.');
-  if (!Array.isArray(payload?.ids) || payload.ids.length < 1 || payload.ids.length > 20) throw new Error('ids benötigt 1 bis 20 ausgewählte Medien-IDs.');
+  if (!Array.isArray(payload?.ids) || payload.ids.length < 1 || payload.ids.length > 20) {
+    throw new Error('ids benötigt 1 bis 20 ausgewählte Medien-IDs.');
+  }
   const ids = [...new Set(payload.ids.map((value) => String(value).trim()))];
-  if (ids.length !== payload.ids.length || ids.some((id) => !providerIdPattern.test(id))) throw new Error('ids enthält Duplikate oder ungültige Medien-IDs.');
-  return { searchId, ids };
+  if (ids.length !== payload.ids.length || ids.some((id) => !providerIdPattern.test(id))) {
+    throw new Error('ids enthält Duplikate oder ungültige Medien-IDs.');
+  }
+  return { searchId, ids, apiKey: payload?.apiKey };
 }
 
 function createSearchId(provider, job) {
   if (provider === 'pixabay') {
-    const digest = createHash('sha256').update(JSON.stringify({ provider, query: job.query, type: job.type, orientation: job.orientation, perPage: job.perPage })).digest('hex');
+    const digest = createHash('sha256')
+      .update(JSON.stringify({ provider, query: job.query, type: job.type, orientation: job.orientation, perPage: job.perPage }))
+      .digest('hex');
     return `ARS-${digest.slice(0, 16).toUpperCase()}`;
   }
   return `ARS-${randomBytes(8).toString('hex').toUpperCase()}`;
@@ -171,12 +204,19 @@ function responsePayload(wrapper, cached) {
     searchId: wrapper.searchId,
     job: wrapper.arsenalJob,
     totalResults: wrapper.result.total_results,
+    rateLimit: wrapper.result.rate_limit ?? null,
     assets: wrapper.result.assets
   };
 }
 
-function runScript(root, script, args) {
-  const result = spawnSync(process.execPath, [script, ...args], { cwd: root, encoding: 'utf8', shell: false, maxBuffer: 4 * 1024 * 1024 });
+function runScript(root, script, args, envOverrides = {}) {
+  const result = spawnSync(process.execPath, [script, ...args], {
+    cwd: root,
+    encoding: 'utf8',
+    shell: false,
+    maxBuffer: 4 * 1024 * 1024,
+    env: { ...process.env, ...envOverrides }
+  });
   const output = `${result.stdout || ''}${result.stderr || ''}`.trim();
   if (result.status !== 0) throw new Error(output || `${script} ist fehlgeschlagen.`);
   return output.slice(-10000);
