@@ -33,10 +33,16 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo [2/5] Arsenal-Plan fuer Finanzen, KI, Elektro und Kampfsport wird erzeugt...
+echo [2/5] Arsenal-Plan und Abdeckungsbericht werden erzeugt...
 call npm run arsenal:plan
 if errorlevel 1 (
   echo [FEHLER] Der Kanal-Arsenal-Plan konnte nicht erzeugt werden.
+  pause
+  exit /b 1
+)
+call npm run arsenal:report
+if errorlevel 1 (
+  echo [FEHLER] Der Kanal-Abdeckungsbericht konnte nicht erzeugt werden.
   pause
   exit /b 1
 )
@@ -54,7 +60,8 @@ start "Visual Asset Hub Browser" cmd /c "timeout /t 2 /nobreak >nul & start \"\"
 
 echo [5/5] Visual Asset Hub laeuft mit lokaler Verwaltung.
 echo Review, Freigabe, Nutzung, Attribution und Backup koennen im Browser gespeichert werden.
-echo Der komplette Suchplan liegt unter reports\arsenal-plan.json und reports\arsenal-plan.csv.
+echo Suchplan: reports\arsenal-plan.json und reports\arsenal-plan.csv
+echo Abdeckung: reports\channel-coverage.md und reports\channel-coverage.json
 echo Zum Beenden STRG+C druecken.
 call npm run serve
 exit /b %errorlevel%
