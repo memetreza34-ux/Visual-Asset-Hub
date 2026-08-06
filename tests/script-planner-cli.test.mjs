@@ -8,6 +8,7 @@ import test from 'node:test';
 import { planToSrt, toSrtTime } from '../web/script-planner-srt.js';
 
 const root = process.cwd();
+const evidencePath = path.join(root, '.local-storage', 'operations', 'script-plans.json');
 
 test('SRT-Zeitformat und Markerinhalt sind schnittgeeignet', () => {
   assert.equal(toSrtTime(0), '00:00:00,000');
@@ -17,11 +18,13 @@ test('SRT-Zeitformat und Markerinhalt sind schnittgeeignet', () => {
   assert.match(srt, /VISUAL: VAH-TEST0001/);
 });
 
-test('CLI erzeugt vollständigen Shotlist-Ordner', () => {
+test('CLI erzeugt vollständigen Shotlist-Ordner und datensparsamen Nachweis', () => {
   const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'vah-script-plan-'));
   const scriptFile = path.join(temp, 'finance-reel.txt');
   const outputRelative = path.relative(root, path.join(root, 'reports', `test-shot-plans-${path.basename(temp)}`)).replaceAll('\\', '/');
-  fs.writeFileSync(scriptFile, 'Aktien und ETFs können langfristig wachsen. Inflation senkt die Kaufkraft.');
+  const originalEvidence = fs.existsSync(evidencePath) ? fs.readFileSync(evidencePath, 'utf8') : null;
+  const scriptText = 'Aktien und ETFs können langfristig wachsen. Inflation senkt die Kaufkraft.';
+  fs.writeFileSync(scriptFile, scriptText);
   const run = spawnSync(process.execPath, [
     'scripts/plan-script.mjs',
     '--channel', 'finance',
@@ -34,14 +37,50 @@ test('CLI erzeugt vollständigen Shotlist-Ordner', () => {
     assert.equal(run.status, 0, run.stderr || run.stdout);
     const result = JSON.parse(run.stdout);
     const directory = path.join(root, result.directory);
+    assert.equal(result.evidenceRecorded, true);
     for (const file of ['shotlist.json', 'shotlist.csv', 'shotlist.md', 'shotlist.srt', 'script.txt']) assert.ok(fs.existsSync(path.join(directory, file)), file);
     const plan = JSON.parse(fs.readFileSync(path.join(directory, 'shotlist.json'), 'utf8'));
     assert.equal(plan.channel.id, 'finance');
     assert.equal(plan.settings.durationSeconds, 30);
     assert.ok(plan.scenes.length >= 2);
     assert.match(fs.readFileSync(path.join(directory, 'shotlist.srt'), 'utf8'), /VISUAL/);
+
+    const evidence = JSON.parse(fs.readFileSync(evidencePath, 'utf8'));
+    const latest = evidence.plans.at(-1);
+    assert.equal(latest.channel, 'finance');
+    assert.equal(latest.sceneCount, plan.summary.sceneCount);
+    assert.match(latest.scriptSha256, /^[a-f0-9]{64}$/);
+    assert.ok(!JSON.stringify(latest).includes(scriptText));
+    assert.ok(!Object.hasOwn(latest, 'script'));
+    assert.ok(!Object.hasOwn(latest, 'text'));
   } finally {
     fs.rmSync(temp, { recursive: true, force: true });
+    fs.rmSync(path.join(root, outputRelative), { recursive: true, force: true });
+    if (originalEvidence === null) fs.rmSync(evidencePath, { force: true });
+    else {
+      fs.mkdirSync(path.dirname(evidencePath), { recursive: true });
+      fs.writeFileSync(evidencePath, originalEvidence);
+    }
+  }
+});
+
+test('CLI kann Nachweis bewusst deaktivieren', () => {
+  const outputRelative = `reports/test-shot-plans-no-evidence-${Date.now()}`;
+  const existedBefore = fs.existsSync(evidencePath);
+  const previous = existedBefore ? fs.readFileSync(evidencePath, 'utf8') : null;
+  const run = spawnSync(process.execPath, [
+    'scripts/plan-script.mjs',
+    '--channel', 'ai',
+    '--text', 'Ein Chatbot beantwortet Kundenfragen und automatisiert wiederkehrende Aufgaben.',
+    '--output', outputRelative,
+    '--record-evidence', 'false'
+  ], { cwd: root, encoding: 'utf8' });
+  try {
+    assert.equal(run.status, 0, run.stderr || run.stdout);
+    assert.equal(JSON.parse(run.stdout).evidenceRecorded, false);
+    if (existedBefore) assert.equal(fs.readFileSync(evidencePath, 'utf8'), previous);
+    else assert.equal(fs.existsSync(evidencePath), false);
+  } finally {
     fs.rmSync(path.join(root, outputRelative), { recursive: true, force: true });
   }
 });
