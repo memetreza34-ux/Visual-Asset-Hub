@@ -32,7 +32,7 @@ const approvedRightsRisks = approved.filter((asset) => ['unknown', 'restricted',
 const decisions = reviews.decisions ?? [];
 const reviewedAssetIds = new Set(decisions.map((entry) => entry.assetId).filter(Boolean));
 const reviewedAssets = assets.filter((asset) => reviewedAssetIds.has(asset.id));
-const requiredReviewCount = Math.min(6, assets.length);
+const requiredReviewCount = Math.min(11, assets.length);
 const usageCount = (usage.uses ?? []).length;
 
 const technicalChecks = {
@@ -47,7 +47,7 @@ const technicalPercentage = Math.round(100 * Object.values(technicalChecks).filt
 const realTestChecks = {
   threeVideos: videos.length >= 3,
   threeStaticVisuals: staticVisuals.length >= 3,
-  sixAssetsReviewed: assets.length >= 6 && reviewedAssets.length >= requiredReviewCount,
+  starterAssetsReviewed: assets.length >= requiredReviewCount && reviewedAssets.length >= requiredReviewCount,
   approvedAsset: approved.length >= 1,
   realUsageRecorded: usageCount >= 1
 };
@@ -58,7 +58,7 @@ const overallPercentage = Math.round(technicalPercentage * 0.75 + realTestPercen
 const nextActions = [];
 if (videos.length < 3) nextActions.push(`${3 - videos.length} weitere geprüfte B-Roll-Videos importieren.`);
 if (staticVisuals.length < 3) nextActions.push(`${3 - staticVisuals.length} weitere statische Bilder oder Grafiken importieren.`);
-if (reviewedAssets.length < requiredReviewCount) nextActions.push(`${requiredReviewCount - reviewedAssets.length} weitere Testassets vollständig prüfen und eine Entscheidung speichern.`);
+if (reviewedAssets.length < requiredReviewCount) nextActions.push(`${requiredReviewCount - reviewedAssets.length} weitere Starterassets vollständig prüfen und eine Entscheidung speichern.`);
 if (approved.length < 1) nextActions.push('Mindestens ein geprüftes Asset freigeben.');
 if (usageCount < 1) nextActions.push('Ein freigegebenes Asset in einem echten Content-Projekt verwenden und dokumentieren.');
 if (!technicalReady) nextActions.unshift('Fehlgeschlagene technische Prüfschritte beheben.');
