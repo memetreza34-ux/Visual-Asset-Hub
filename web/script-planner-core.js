@@ -30,8 +30,8 @@ export function createShotPlan({
 
     for (const collection of preparedCollections) {
       let score = tokenOverlap(tokens, collection.tokens) * 1.4;
-      if (normalized.includes(collection.labelNormalized)) score += 7;
-      for (const phrase of collection.phrases) if (phrase.length >= 4 && normalized.includes(phrase)) score += 2.5;
+      if (containsPhrase(normalized, collection.labelNormalized)) score += 7;
+      for (const phrase of collection.phrases) if (phrase.length >= 4 && containsPhrase(normalized, phrase)) score += 2.5;
       if (score > 0) collectionScores.set(collection.id, score);
     }
 
@@ -55,7 +55,7 @@ export function createShotPlan({
       const fallback = preparedCollections
         .map((collection) => ({ collection: collectionById.get(collection.id), score: tokenOverlap(tokens, collection.tokens) }))
         .sort((a, b) => b.score - a.score)[0];
-      if (fallback?.collection) collections.push({ collection: fallback.collection, score: round(fallback.score, 2) });
+      if (fallback?.collection && fallback.score > 0) collections.push({ collection: fallback.collection, score: round(fallback.score, 2) });
     }
 
     const topCollectionIds = collections.map((item) => item.collection.id);
@@ -102,6 +102,8 @@ export function createShotPlan({
       })),
       assets,
       approvedAssets,
+      primaryAssetId: null,
+      reusedPrimary: false,
       needsSearch: assets.length === 0 || approvedAssets === 0,
       suggestedPexelsQuery: primaryCollection?.queries?.[0] ?? buildFallbackQuery(tokens, channelData.label),
       warning: assets.some((asset) => asset.status !== 'approved')
@@ -110,12 +112,14 @@ export function createShotPlan({
     };
   });
 
+  applyPrimaryDiversity(plannedScenes);
   const matchedScenes = plannedScenes.filter((scene) => scene.assets.length > 0).length;
   const approvedScenes = plannedScenes.filter((scene) => scene.approvedAssets > 0).length;
   const missingCollections = unique(plannedScenes.filter((scene) => scene.needsSearch).flatMap((scene) => scene.collections.slice(0, 1).map((item) => item.id)));
+  const primaryAssetIds = plannedScenes.map((scene) => scene.primaryAssetId).filter(Boolean);
   return {
     format: 'visual-asset-hub-shot-plan',
-    version: 1,
+    version: 2,
     createdAt: new Date().toISOString(),
     channel: { id: channelData.id, label: channelData.label },
     settings: { durationSeconds: duration, orientation, approvedOnly, maxAssetsPerScene: assetLimit },
@@ -126,7 +130,9 @@ export function createShotPlan({
       coveragePercentage: Math.round(100 * matchedScenes / plannedScenes.length),
       approvedCoveragePercentage: Math.round(100 * approvedScenes / plannedScenes.length),
       missingSceneCount: plannedScenes.length - matchedScenes,
-      missingCollections
+      missingCollections,
+      uniquePrimaryAssetCount: new Set(primaryAssetIds).size,
+      reusedPrimaryCount: plannedScenes.filter((scene) => scene.reusedPrimary).length
     },
     scenes: plannedScenes
   };
@@ -200,16 +206,18 @@ export function planToMarkdown(plan) {
     `- Szenen: **${plan.summary?.sceneCount ?? 0}**`,
     `- Bibliotheksabdeckung: **${plan.summary?.coveragePercentage ?? 0} %**`,
     `- Freigegebene Abdeckung: **${plan.summary?.approvedCoveragePercentage ?? 0} %**`,
-    `- Zieldauer: **${plan.settings?.durationSeconds ?? 0} Sekunden**`, ''
+    `- Zieldauer: **${plan.settings?.durationSeconds ?? 0} Sekunden**`,
+    `- Unterschiedliche Hauptassets: **${plan.summary?.uniquePrimaryAssetCount ?? 0}**`, ''
   ];
   for (const scene of plan.scenes ?? []) {
     lines.push(`## Szene ${scene.scene} · ${scene.startSeconds}–${scene.endSeconds} s`, '', `**Sprechtext:** ${scene.text}`, '', `**Empfohlen:** ${scene.recommendedMediaType} · ${scene.recommendedOrientation}`, '');
     if (scene.collections?.length) lines.push(`**Sammlung:** ${scene.collections.map((item) => item.label).join(', ')}`, '');
     if (scene.assets?.length) {
       lines.push('**Asset-Vorschläge:**');
-      for (const asset of scene.assets) lines.push(`- ${asset.id} – ${asset.title} (${asset.status})`);
+      for (const asset of scene.assets) lines.push(`- ${asset.id} – ${asset.title} (${asset.status})${asset.id === scene.primaryAssetId ? ' · Hauptvorschlag' : ''}`);
       lines.push('');
     } else lines.push(`**Fehlendes Motiv:** Pexels-Suche \`${scene.suggestedPexelsQuery}\``, '');
+    if (scene.reusedPrimary) lines.push('> Hauptasset wird bereits in einer früheren Szene verwendet; möglichst Alternative suchen.', '');
     if (scene.warning) lines.push(`> ${scene.warning}`, '');
   }
   return `${lines.join('\n')}\n`;
@@ -252,16 +260,37 @@ function scoreAsset(prepared, { tokens, normalized, orientation, channelData, to
   else if (record.status === 'review') score += 1;
   else if (record.status === 'restricted' || record.status === 'archived') score -= 10;
   score += Math.max(0, Number(record.qualityRating) || 0) * 0.45;
-  if (normalized.length > 5 && prepared.normalized.includes(normalized)) score += 4;
+  if (normalized.length > 5 && containsPhrase(prepared.normalized, normalized)) score += 4;
   return score;
 }
 
 function phraseMatches(sceneNormalized, sceneTokens, term) {
   const phrase = normalize(term);
   if (!phrase) return false;
-  if (sceneNormalized.includes(phrase)) return true;
   const terms = phrase.split(' ').filter(Boolean);
-  return terms.length > 1 && terms.every((token) => sceneTokens.includes(token));
+  if (terms.length === 1) return sceneTokens.includes(terms[0]);
+  return containsPhrase(sceneNormalized, phrase) || terms.every((token) => sceneTokens.includes(token));
+}
+
+function containsPhrase(haystack, phrase) {
+  if (!haystack || !phrase) return false;
+  return ` ${haystack} `.includes(` ${phrase} `);
+}
+
+function applyPrimaryDiversity(scenes) {
+  const used = new Set();
+  for (const scene of scenes) {
+    if (!scene.assets.length) continue;
+    const unusedIndex = scene.assets.findIndex((asset) => !used.has(asset.id));
+    if (unusedIndex > 0) {
+      const [candidate] = scene.assets.splice(unusedIndex, 1);
+      scene.assets.unshift(candidate);
+    }
+    const primary = scene.assets[0];
+    scene.primaryAssetId = primary.id;
+    scene.reusedPrimary = used.has(primary.id);
+    used.add(primary.id);
+  }
 }
 
 function contentTokens(value, stopWords) {
