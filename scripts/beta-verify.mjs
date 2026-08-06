@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
@@ -39,6 +40,7 @@ const channelCounts = Object.fromEntries(requiredChannels.map((tag) => [tag, ass
 const allChannelsRepresented = requiredChannels.every((tag) => channelCounts[tag] > 0);
 const inboxAssets = assets.filter((asset) => asset.createdBy === 'local-inbox-browser');
 const mediaPacks = findValidMediaPacks(path.join(root, 'exports', 'media-packs'));
+const scriptPlans = findValidScriptPlans(path.join(root, '.local-storage', 'operations', 'script-plans.json'));
 
 const technicalChecks = {
   projectCheck: Boolean(results.find((entry) => entry.name === 'Projektprüfung')?.success),
@@ -51,6 +53,7 @@ const technicalPercentage = Math.round(100 * Object.values(technicalChecks).filt
 
 const realTestChecks = {
   starterMediaPresent: videos.length >= 3 && staticVisuals.length >= 3,
+  scriptPlanGenerated: scriptPlans.length >= 1,
   starterAssetsReviewed: assets.length >= requiredReviewCount && reviewedAssets.length >= requiredReviewCount,
   fourChannelsRepresented: allChannelsRepresented,
   ownedInboxAssetImported: inboxAssets.length >= 1,
@@ -64,6 +67,7 @@ const overallPercentage = Math.round(technicalPercentage * 0.7 + realTestPercent
 
 const nextActions = [];
 if (videos.length < 3 || staticVisuals.length < 3) nextActions.push('Mindestens drei Videos und drei statische Bilder oder Grafiken bereitstellen.');
+if (scriptPlans.length < 1) nextActions.push('Ein echtes Kanalskript mit dem CLI-Planer verarbeiten und die erzeugte Shotlist prüfen.');
 if (reviewedAssets.length < requiredReviewCount) nextActions.push(`${requiredReviewCount - reviewedAssets.length} weitere Starterassets vollständig prüfen und eine Entscheidung speichern.`);
 if (!allChannelsRepresented) {
   const missing = requiredChannels.filter((tag) => channelCounts[tag] === 0).map(channelLabel);
@@ -99,8 +103,10 @@ const report = {
     approvedRightsRisks: approvedRightsRisks.length,
     inboxAssets: inboxAssets.length,
     validMediaPacks: mediaPacks.length,
+    validScriptPlans: scriptPlans.length,
     channelCounts
   },
+  scriptPlans,
   mediaPacks,
   steps: results,
   nextActions
@@ -121,6 +127,7 @@ const md = [
   `- Assets: **${assets.length}** (${videos.length} Videos, ${staticVisuals.length} statische Bilder/Grafiken)`,
   `- Dokumentiert geprüft: **${reviewedAssets.length}/${requiredReviewCount}**`,
   `- Freigegeben: **${approved.length}**`,
+  `- Verifizierte Skriptpläne: **${scriptPlans.length}**`,
   `- Eigene Inbox-Assets: **${inboxAssets.length}**`,
   `- Verifizierte Medienpakete: **${mediaPacks.length}**`,
   `- Nutzungen: **${usageCount}**`, '',
@@ -137,6 +144,46 @@ fs.writeFileSync(markdownPath, `${md}\n`);
 syncFinalReport([jsonPath, markdownPath]);
 console.log(md);
 if (!technicalReady) process.exitCode = 1;
+
+function findValidScriptPlans(evidencePath) {
+  if (!fs.existsSync(evidencePath)) return [];
+  try {
+    const evidence = JSON.parse(fs.readFileSync(evidencePath, 'utf8'));
+    if (evidence.version !== 1 || !Array.isArray(evidence.plans)) return [];
+    const allowedChannels = new Set(['finance', 'ai', 'electro', 'combat-sports']);
+    const valid = [];
+    for (const entry of evidence.plans.slice(-100)) {
+      if (!/^PLAN-[A-F0-9]{12}$/.test(entry.id ?? '')) continue;
+      if (!allowedChannels.has(entry.channel)) continue;
+      if (!Number.isInteger(entry.sceneCount) || entry.sceneCount < 1 || entry.sceneCount > 20) continue;
+      if (!Number.isInteger(entry.durationSeconds) || entry.durationSeconds < 10 || entry.durationSeconds > 600) continue;
+      if (!['vertical', 'horizontal'].includes(entry.orientation)) continue;
+      if (!/^[a-f0-9]{64}$/.test(entry.scriptSha256 ?? '')) continue;
+      if (typeof entry.outputDirectory !== 'string' || entry.outputDirectory.includes('..') || path.isAbsolute(entry.outputDirectory)) continue;
+      const directory = path.resolve(root, ...entry.outputDirectory.split('/'));
+      if (!directory.startsWith(`${path.resolve(root)}${path.sep}`)) continue;
+      const required = ['shotlist.json', 'shotlist.csv', 'shotlist.md', 'shotlist.srt', 'script.txt'];
+      if (!required.every((file) => fs.existsSync(path.join(directory, file)) && fs.statSync(path.join(directory, file)).isFile())) continue;
+      const plan = JSON.parse(fs.readFileSync(path.join(directory, 'shotlist.json'), 'utf8'));
+      if (plan.format !== 'visual-asset-hub-shot-plan' || plan.channel?.id !== entry.channel || plan.summary?.sceneCount !== entry.sceneCount) continue;
+      const scriptHash = createHash('sha256').update(fs.readFileSync(path.join(directory, 'script.txt'), 'utf8').trim(), 'utf8').digest('hex');
+      if (scriptHash !== entry.scriptSha256) continue;
+      valid.push({
+        id: entry.id,
+        generatedAt: entry.generatedAt,
+        channel: entry.channel,
+        sceneCount: entry.sceneCount,
+        durationSeconds: entry.durationSeconds,
+        coveragePercentage: entry.coveragePercentage,
+        approvedCoveragePercentage: entry.approvedCoveragePercentage,
+        outputDirectory: entry.outputDirectory
+      });
+    }
+    return valid;
+  } catch {
+    return [];
+  }
+}
 
 function findValidMediaPacks(directory) {
   if (!fs.existsSync(directory)) return [];
