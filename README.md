@@ -4,7 +4,7 @@ Visual Asset Hub ist eine universelle, kostenlose Medienbibliothek für **B-Roll
 
 ## Spezialisierte Kanalbibliotheken
 
-Die Version `0.4.0-beta.1` enthält ein großes Arsenal für vier Content-Kanäle:
+Die Version `0.4.0-beta.2` enthält ein großes Arsenal für vier Content-Kanäle:
 
 | Kanal | Sammlungen | Suchbegriffe | empfohlenes Ausbauziel |
 |---|---:|---:|---:|
@@ -22,6 +22,49 @@ Jede Sammlung ist für vier Grundformate vorbereitet:
 - horizontales Foto
 
 Der vollständige Suchplan umfasst **360 Pexels-Suchaufträge** und kann bis zu **5.850 Kandidaten** liefern. Kandidaten werden niemals automatisch freigegeben.
+
+## Drei Quellenwege
+
+### 1. Pexels Arsenal Builder
+
+Direkt im lokalen Browser:
+
+1. Kanal auswählen.
+2. Sammlung auswählen.
+3. Video oder Foto sowie Hoch- oder Querformat wählen.
+4. Pexels-Key nur für diese eine lokale Anfrage eingeben.
+5. Vorschauen ansehen.
+6. passende Treffer markieren.
+7. nur ausgewählte Treffer als `review` importieren.
+
+Der Key wird nicht gespeichert und nach jeder Anfrage aus dem Feld entfernt.
+
+### 2. Eigene Dateien über `inbox`
+
+Eigene MP4-, MOV-, WEBM-, MKV-, JPG-, PNG-, WEBP-, AVIF-, SVG-, GIF- und weitere unterstützte Dateien können in den lokalen Ordner `inbox` kopiert werden. Die Weboberfläche erkennt diese Dateien, zeigt eine Vorschau und ermöglicht:
+
+- Kanal- und Sammlungszuordnung
+- Titel und Beschreibung
+- zusätzliche Tags und Suchbegriffe
+- Erkennung von Auflösung, Ausrichtung und Videodauer
+- ausdrückliche Rechtebestätigung
+- sicheren Import als `review`
+
+Der Inhalt von `inbox` ist über `.gitignore` ausgeschlossen und wird nicht automatisch veröffentlicht.
+
+### 3. Freigegebene Medienpakete
+
+Favoriten können als vollständiges Schnittpaket unter `exports/media-packs` ausgegeben werden. Enthalten sind:
+
+- heruntergeladene oder kopierte Originaldateien
+- standardisierte Dateinamen
+- `manifest.json`
+- SHA-256-Prüfsummen
+- Quellen- und Lizenzinformationen
+- `ATTRIBUTION.md`
+- Paket-README
+
+Nicht freigegebene Assets werden strikt blockiert. Pro Paket sind höchstens 20 Assets vorgesehen.
 
 ## Beispiele aus den Kanalpaketen
 
@@ -60,15 +103,20 @@ Die fünf zusätzlichen Starter-B-Rolls decken Finanzen, mobile KI, bionische Te
 - automatische Suchplanung als JSON und CSV
 - sichere Batch-Suche zur Schonung des kostenlosen API-Kontingents
 - Import ausgewählter Treffer mit automatischer Kanal- und Sammlungszuordnung
+- lokale Inbox für eigene Medien
 - einheitliche Dateinamen und stabile Asset-IDs
 - Rechte-, Quellen- und Lizenzverwaltung
 - Dublettenprüfung
 - Pexels-Foto- und Videosuche
 - Webbibliothek mit Suche, Filtern, Favoriten und Video-Vorschau
-- sichtbarer Fortschritt pro Kanal und Sammlung
+- feste Navigation zwischen allen Arbeitsbereichen
+- Lückenempfehlungen für unvollständige Sammlungen
+- getrennte Kandidaten- und Freigabefortschritte
+- schnelle Review-Warteschlange
 - Review, Freigabe, Einschränkung und Archivierung direkt im Browser
 - Nutzungshistorie nach Projekt und Plattform
 - Attributions-Export
+- verifizierte Medienpakete für den Schnitt
 - Backup und verifizierte Wiederherstellung
 - Secret-Scanner und automatische Datenprüfungen
 
@@ -81,14 +129,31 @@ Die fünf zusätzlichen Starter-B-Rolls decken Finanzen, mobile KI, bionische Te
 Die Startdatei:
 
 1. ergänzt die lokale Starterbibliothek sicher auf elf Assets
-2. prüft Code, Katalog und Tests
-3. erzeugt den Beta-Bericht
-4. erzeugt den vollständigen Arsenal-Suchplan
-5. erzeugt den Kanal-Abdeckungsbericht
-6. baut das Testpaket
-7. startet die Bibliothek unter `http://127.0.0.1:4173`
+2. bereinigt alte temporäre Suchdateien
+3. prüft Code, Katalog und Tests
+4. erzeugt den Beta-Bericht
+5. erzeugt den vollständigen Arsenal-Suchplan
+6. erzeugt den Kanal-Abdeckungsbericht
+7. baut das Testpaket
+8. startet die Bibliothek unter `http://127.0.0.1:4173`
 
 Das Konsolenfenster muss geöffnet bleiben.
+
+## Schnelle Review-Warteschlange
+
+Die Warteschlange zeigt ausschließlich offene `review`- und `inbox`-Assets. Sie kann nach Kanal und Medientyp gefiltert werden. Pro Asset stehen zur Verfügung:
+
+- vollständige Video- oder Bildvorschau
+- Quelle und Lizenzseite
+- Metadaten und Tags
+- Qualitätsbewertung
+- vier verpflichtende Prüfpunkte
+- Freigeben und weiter
+- Einschränken und weiter
+- Archivieren und weiter
+- Überspringen
+
+Eine Freigabe bleibt immer eine einzelne menschliche Entscheidung. Es gibt keine blinde Sammelfreigabe.
 
 ## Arsenal planen
 
@@ -157,16 +222,33 @@ Der Import übernimmt automatisch:
 - Ausrichtung
 - Status `review`
 
+## Medienpaket über die Konsole
+
+```bash
+npm run media:pack -- \
+  --ids VAH-XXXXXXXX,VAH-YYYYYYYY \
+  --name elektro-reel-01
+```
+
+Nur `approved`-Assets werden exportiert. Standardlimits:
+
+- maximal 20 Assets
+- maximal 300 MB pro Datei
+- maximal 1,5 GB pro Paket
+
 ## Realtest im Browser
 
-Nach dem Start erscheint **„Lokale Verwaltung aktiv“**. Dort können Assets ohne Konsolenbefehle:
+Nach dem Start erscheint **„Lokale Verwaltung aktiv“**. Der Test umfasst:
 
-- vollständig angesehen werden
-- freigegeben oder eingeschränkt werden
-- mit Qualitätsbewertung und Notiz protokolliert werden
-- einem echten Projekt und einer Plattform zugeordnet werden
-- als Attributionsliste exportiert werden
-- über ein Katalog-Backup gesichert werden
+- elf Starterassets ansehen und entscheiden
+- eigene Testdatei über `inbox` importieren
+- Pexels-Suche für jeden Kanal ausführen
+- mindestens ein Asset freigeben
+- Favoriten-Auswahl exportieren
+- freigegebenes Medienpaket erzeugen
+- Asset in einem echten Content-Projekt verwenden
+- Nutzung und Attribution dokumentieren
+- Backup erstellen
 
 Für die aktuelle Beta-Abnahme müssen alle elf Starterassets eine dokumentierte Entscheidung besitzen.
 
@@ -186,6 +268,7 @@ Die Bibliothek verwendet generische Kampfsport-Stockaufnahmen. Nicht automatisch
 
 ```bash
 npm run starter:import
+npm run cleanup:local
 npm run arsenal:validate
 npm run arsenal:plan
 npm run arsenal:search -- --max-jobs 20
@@ -194,6 +277,7 @@ npm run arsenal:report
 npm run asset:review -- --id VAH-XXXXXXXX --decision approve --reviewer Arman
 npm run usage:add -- --asset VAH-XXXXXXXX --project projekt-01 --platform tiktok
 npm run attribution:export -- --project projekt-01
+npm run media:pack -- --ids VAH-XXXXXXXX --name projekt-01
 npm run backup
 npm run restore -- --backup backups/<zeitstempel> --dry-run true
 npm run beta:verify
@@ -205,8 +289,10 @@ npm run serve
 
 - API-Schlüssel liegen nur in `.env` oder GitHub Secrets.
 - Pexels-Importe starten immer als `review`.
-- Nicht freigegebene Assets können nicht normal als reale Nutzung dokumentiert werden.
-- Die lokale Verwaltungs-API bindet nur an `127.0.0.1`.
+- eigene Inbox-Dateien benötigen eine ausdrückliche Rechtebestätigung.
+- Nicht freigegebene Assets können nicht als Medienpaket exportiert werden.
+- externe Paketdownloads blockieren lokale und private Netzadressen.
+- die lokale Verwaltungs-API bindet nur an `127.0.0.1`.
 - Schreibaktionen benötigen ein zufälliges Sitzungstoken und denselben Ursprung.
 - Unbekannte oder eingeschränkte Rechte verhindern eine Freigabe.
 - Fehlerhafte Import-, Review-, Nutzungs- und Restore-Schritte werden zurückgerollt.
