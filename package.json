@@ -5,7 +5,7 @@
   "type": "module",
   "engines": { "node": ">=22" },
   "scripts": {
-    "starter:import": "node scripts/import-channel-starter-pack.mjs",
+    "starter:import": "node scripts/tag-existing-channel-assets.mjs && node scripts/import-channel-starter-pack.mjs",
     "asset:add": "node scripts/add-asset.mjs",
     "asset:review": "node scripts/review-asset.mjs",
     "usage:add": "node scripts/record-usage.mjs",
