@@ -67,3 +67,9 @@ test('lokaler Server ist auf Loopback und strikte Browser-Sicherheit ausgelegt',
   assert.match(server, /X-Frame-Options/);
   assert.match(server, /VAH_ALLOW_REMOTE/);
 });
+
+test('Startseite leitet auf stabilen Web-Basispfad um', () => {
+  assert.match(server, /url\.pathname === '\/'/);
+  assert.match(server, /Location: '\/web\/'/);
+  assert.match(server, /url\.pathname === '\/web\/' \? '\/web\/index\.html'/);
+});
