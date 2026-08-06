@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { lookup } from 'node:dns/promises';
 import fs from 'node:fs';
+import { isIP } from 'node:net';
 import path from 'node:path';
 import process from 'node:process';
 import { Readable, Transform } from 'node:stream';
@@ -8,6 +9,7 @@ import { pipeline } from 'node:stream/promises';
 import { pathToFileURL } from 'node:url';
 
 const assetIdPattern = /^VAH-[A-Z0-9]{8}$/;
+const rejectedContentTypes = new Set(['text/html', 'text/plain', 'application/json', 'application/xml', 'text/xml']);
 
 export async function createMediaPack({
   root = process.cwd(),
@@ -61,6 +63,7 @@ export async function createMediaPack({
           url: asset.storage.externalUrl,
           target,
           maxBytes: maxFileBytes,
+          expectedType: asset.type,
           fetchImpl,
           resolveHost
         });
@@ -70,7 +73,7 @@ export async function createMediaPack({
         const bytes = fs.statSync(source).size;
         if (bytes > maxFileBytes) throw new Error(`${asset.id}: Datei überschreitet das Limit von ${formatBytes(maxFileBytes)}.`);
         fs.copyFileSync(source, target, fs.constants.COPYFILE_EXCL);
-        result = { bytes, sha256: sha256File(target), finalUrl: null };
+        result = { bytes, sha256: sha256File(target), finalUrl: null, contentType: localContentType(asset.filename) };
       }
       manifest.totalBytes += result.bytes;
       if (manifest.totalBytes > maxTotalBytes) throw new Error(`Medienpaket überschreitet das Gesamtlimit von ${formatBytes(maxTotalBytes)}.`);
@@ -83,6 +86,7 @@ export async function createMediaPack({
         tags: asset.tags,
         bytes: result.bytes,
         sha256: result.sha256,
+        contentType: result.contentType,
         sourceName: asset.rights.sourceName,
         sourcePage: asset.rights.sourceUrl ?? null,
         licenseStatus: asset.rights.licenseStatus,
@@ -119,9 +123,9 @@ export function validatePublicHttpUrl(value) {
   catch { throw new Error('Download-URL ist ungültig.'); }
   if (!['https:', 'http:'].includes(url.protocol)) throw new Error('Download-URL muss HTTP(S) verwenden.');
   if (url.username || url.password) throw new Error('Download-URL darf keine Zugangsdaten enthalten.');
-  const hostname = url.hostname.toLowerCase().replace(/^\[|\]$/g, '');
+  const hostname = normalizeHost(url.hostname);
   if (!hostname || hostname === 'localhost' || hostname.endsWith('.localhost') || hostname.endsWith('.local')) throw new Error('Lokale Download-Ziele sind nicht erlaubt.');
-  if (isBlockedAddress(hostname)) throw new Error('Private oder lokale Download-Ziele sind nicht erlaubt.');
+  if (isBlockedAddress(hostname)) throw new Error('Private, reservierte oder lokale Download-Ziele sind nicht erlaubt.');
   return url;
 }
 
@@ -133,7 +137,7 @@ export function validateIds(value) {
   return ids;
 }
 
-async function downloadVerified({ url, target, maxBytes, fetchImpl, resolveHost }) {
+async function downloadVerified({ url, target, maxBytes, expectedType, fetchImpl, resolveHost }) {
   if (typeof fetchImpl !== 'function') throw new Error('Download-Funktion ist nicht verfügbar.');
   let current = validatePublicHttpUrl(url);
   let response;
@@ -150,7 +154,10 @@ async function downloadVerified({ url, target, maxBytes, fetchImpl, resolveHost 
     break;
   }
   if (!response?.ok || !response.body) throw new Error(`Download fehlgeschlagen: HTTP ${response?.status ?? '?'}.`);
+  const contentType = normalizeContentType(response.headers.get('content-type'));
+  validateContentType(contentType, expectedType);
   const declared = Number(response.headers.get('content-length') || 0);
+  if (declared && (!Number.isFinite(declared) || declared < 0)) throw new Error('Ungültige Content-Length-Angabe.');
   if (declared && declared > maxBytes) throw new Error(`Datei überschreitet das Limit von ${formatBytes(maxBytes)}.`);
   const hash = createHash('sha256');
   let bytes = 0;
@@ -168,35 +175,82 @@ async function downloadVerified({ url, target, maxBytes, fetchImpl, resolveHost 
     fs.rmSync(target, { force: true });
     throw error;
   }
-  if (!bytes) throw new Error('Heruntergeladene Datei ist leer.');
-  return { bytes, sha256: hash.digest('hex'), finalUrl: current.toString() };
+  if (!bytes) {
+    fs.rmSync(target, { force: true });
+    throw new Error('Heruntergeladene Datei ist leer.');
+  }
+  return { bytes, sha256: hash.digest('hex'), finalUrl: current.toString(), contentType };
 }
 
 async function assertResolvedPublic(hostname, resolveHost) {
-  if (isIpLiteral(hostname)) return;
+  const normalized = normalizeHost(hostname);
+  if (isIpLiteral(normalized)) {
+    if (isBlockedAddress(normalized)) throw new Error(`Private, reservierte oder lokale Adresse ist nicht erlaubt: ${normalized}`);
+    return;
+  }
   let addresses;
-  try { addresses = await resolveHost(hostname); }
-  catch { throw new Error(`Hostname konnte nicht sicher aufgelöst werden: ${hostname}`); }
-  if (!addresses.length || addresses.some((entry) => isBlockedAddress(entry.address ?? entry))) throw new Error(`Hostname verweist auf eine private oder lokale Adresse: ${hostname}`);
+  try { addresses = await resolveHost(normalized); }
+  catch { throw new Error(`Hostname konnte nicht sicher aufgelöst werden: ${normalized}`); }
+  if (!addresses.length || addresses.some((entry) => isBlockedAddress(entry.address ?? entry))) throw new Error(`Hostname verweist auf eine private, reservierte oder lokale Adresse: ${normalized}`);
 }
 
 async function defaultResolveHost(hostname) {
   return lookup(hostname, { all: true, verbatim: true });
 }
 
+function normalizeHost(value) {
+  return String(value ?? '').trim().toLowerCase().replace(/^\[|\]$/g, '');
+}
+
 function isIpLiteral(value) {
-  return /^\d{1,3}(?:\.\d{1,3}){3}$/.test(value) || value.includes(':');
+  return isIP(normalizeHost(value)) !== 0;
 }
 
 function isBlockedAddress(value) {
-  const address = String(value).toLowerCase();
-  if (address === '::1' || address === '::' || address.startsWith('fe80:') || address.startsWith('fc') || address.startsWith('fd')) return true;
-  const match = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(address);
-  if (!match) return false;
-  const octets = match.slice(1).map(Number);
-  if (octets.some((part) => part < 0 || part > 255)) return true;
-  const [a, b] = octets;
-  return a === 0 || a === 10 || a === 127 || a >= 224 || (a === 100 && b >= 64 && b <= 127) || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 198 && [18, 19].includes(b));
+  const address = normalizeHost(value);
+  if (address.startsWith('::ffff:')) return isBlockedAddress(address.slice('::ffff:'.length));
+  const family = isIP(address);
+  if (family === 6) {
+    return address === '::' || address === '::1' || /^f[cd]/.test(address) || /^fe[89ab]/.test(address) || address.startsWith('2001:db8:') || address.startsWith('2001:10:');
+  }
+  if (family !== 4) return false;
+  const octets = address.split('.').map(Number);
+  if (octets.length !== 4 || octets.some((part) => !Number.isInteger(part) || part < 0 || part > 255)) return true;
+  const [a, b, c] = octets;
+  return a === 0 || a === 10 || a === 127 || a >= 224 ||
+    (a === 100 && b >= 64 && b <= 127) ||
+    (a === 169 && b === 254) ||
+    (a === 172 && b >= 16 && b <= 31) ||
+    (a === 192 && b === 168) ||
+    (a === 192 && b === 0) ||
+    (a === 192 && b === 0 && c === 2) ||
+    (a === 198 && [18, 19].includes(b)) ||
+    (a === 198 && b === 51 && c === 100) ||
+    (a === 203 && b === 0 && c === 113);
+}
+
+function validateContentType(contentType, expectedType) {
+  if (!contentType) return;
+  if (rejectedContentTypes.has(contentType) || contentType.startsWith('text/')) throw new Error(`Download lieferte keinen Medieninhalt, sondern ${contentType}.`);
+  if (['video', 'animation'].includes(expectedType) && !contentType.startsWith('video/') && contentType !== 'application/octet-stream') {
+    throw new Error(`Unerwarteter Inhaltstyp für Video: ${contentType}.`);
+  }
+  if (['image', 'graphic', 'icon', 'mockup'].includes(expectedType) && !contentType.startsWith('image/') && contentType !== 'application/octet-stream') {
+    throw new Error(`Unerwarteter Inhaltstyp für Bild: ${contentType}.`);
+  }
+}
+
+function normalizeContentType(value) {
+  return String(value ?? '').split(';')[0].trim().toLowerCase();
+}
+
+function localContentType(filename) {
+  const extension = path.extname(filename).toLowerCase();
+  return ({
+    '.mp4': 'video/mp4', '.mov': 'video/quicktime', '.webm': 'video/webm', '.mkv': 'video/x-matroska',
+    '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp', '.avif': 'image/avif',
+    '.svg': 'image/svg+xml', '.gif': 'image/gif', '.tif': 'image/tiff', '.tiff': 'image/tiff'
+  })[extension] ?? 'application/octet-stream';
 }
 
 function safeLocalPath(root, relative) {
@@ -237,7 +291,7 @@ function buildReadme(manifest) {
     `Assets: **${manifest.assetCount}**`,
     `Größe: **${formatBytes(manifest.totalBytes)}**`, '',
     'Alle enthaltenen Medien waren beim Export im Status `approved`.',
-    'Das Manifest enthält SHA-256-Prüfsummen, Quellen, Lizenzstatus und lokale Dateipfade.',
+    'Das Manifest enthält SHA-256-Prüfsummen, Inhaltstypen, Quellen, Lizenzstatus und lokale Dateipfade.',
     'Vor einer Veröffentlichung weiterhin den konkreten Einsatzkontext und sichtbare Marken prüfen.', ''
   ].join('\n');
 }
