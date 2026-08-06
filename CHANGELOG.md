@@ -1,5 +1,46 @@
 # Changelog
 
+## 0.4.0-beta.1 – 2026-08-06
+
+### Neu
+
+- vier spezialisierte Kanalbibliotheken für Finanzen, KI, Elektrotechnik und Kampfsport
+- 90 klar benannte Sammlungen mit 270 vorbereiteten Pexels-Suchbegriffen
+- vier Suchvarianten pro Sammlung: Video/Bild und vertikal/horizontal
+- vollständiger Arsenal-Plan mit 360 Suchaufträgen und bis zu 5.850 Kandidaten
+- empfohlene Zielgröße von 720 freigegebenen Kanal-Assets
+- automatische Validierung aller Kanal-, Sammlungs-, Tag- und Suchdaten
+- Batch-Suche zur Schonung des kostenlosen Pexels-Kontingents
+- automatischer Import ausgewählter Treffer mit Kanal- und Sammlungs-Tags
+- Kanal-Arsenal direkt in der Weboberfläche
+- Volltextsuche über Sammlungen und Suchpakete
+- Fortschrittsanzeige pro Sammlung mit Freigabe- und Review-Zahlen
+- automatischer Kanal-Abdeckungsbericht als Markdown und JSON
+- manueller GitHub-Workflow für kanalweise Pexels-Suchbatches
+- ausführliche Rechte-Regeln für generischen MMA-, UFC-, Box- und Kickbox-Content
+
+### Kategorien
+
+- `finance-investing`
+- `artificial-intelligence`
+- `electrical-engineering`
+- `combat-sports`
+
+### Zielstruktur
+
+- Finanzen: 20 Sammlungen und 160 Zielassets
+- KI: 20 Sammlungen und 160 Zielassets
+- Elektrotechnik: 20 Sammlungen und 160 Zielassets
+- Kampfsport: 30 Sammlungen und 240 Zielassets
+
+### Sicherheit
+
+- kein Suchtreffer wird automatisch in den Katalog importiert
+- kein Import wird automatisch freigegeben
+- UFC-Logos, Veranstaltergrafiken und Broadcastmaterial müssen ausgeschlossen oder separat lizenziert werden
+- Batchgröße ist standardmäßig begrenzt
+- Kanal- und Sammlungsmetadaten werden vor jeder technischen Prüfung validiert
+
 ## 0.3.0-beta.3 – 2026-08-04
 
 ### Neu
