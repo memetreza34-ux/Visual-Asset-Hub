@@ -12,6 +12,7 @@ async function initWorkspaceNavigation() {
   const inbox = inboxResponse?.ok ? await inboxResponse.json() : { files: [] };
   const items = [
     { id: 'library', label: 'Bibliothek', count: index.assetCount ?? index.records?.length ?? 0, target: '#asset-grid' },
+    { id: 'planner', label: 'Skript planen', count: null, target: '#script-planner' },
     { id: 'inbox', label: 'Eigene Dateien', count: inbox.files?.length ?? 0, target: '#inbox-importer' },
     { id: 'review', label: 'Prüfen', count: index.reviewCount ?? 0, target: '#review-queue' },
     { id: 'pexels', label: 'Pexels suchen', count: null, target: '#arsenal-builder' },
