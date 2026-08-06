@@ -66,6 +66,16 @@ test('KI-Text erkennt Chatbots und Automatisierung', () => {
   assert.ok(plan.scenes[1].collections.some((item) => item.id === 'automation-workflows'));
 });
 
+test('Kurze Kürzel treffen nur ganze Wörter und keine Teilwörter', () => {
+  const combat = planFor('combat-sports', 'Die Kombination aus sauberer Beinarbeit und guter Deckung verbessert das Boxtraining.', []);
+  assert.ok(combat.scenes[0].collections.some((item) => item.id === 'boxing-training'));
+  assert.ok(!combat.scenes[0].collections.some((item) => item.id === 'knockout-reaction'));
+
+  const ai = planFor('ai', 'Im Kino läuft ein Film über moderne Softwareentwicklung.', []);
+  assert.ok(!ai.scenes[0].collections.some((item) => item.id === 'ai-general'));
+  assert.ok(ai.scenes[0].collections.some((item) => item.id === 'coding-development'));
+});
+
 test('Nur-freigegeben-Modus blockiert Review-Assets', () => {
   const assets = [record({ id: 'VAH-TEST1002', title: 'Aktienchart', tags: ['channel-finance', 'collection-investing-stocks', 'stocks'], text: 'Aktien und Investment', status: 'review' })];
   const openPlan = planFor('finance', 'Aktien können langfristig wachsen.', assets, false);
@@ -73,6 +83,20 @@ test('Nur-freigegeben-Modus blockiert Review-Assets', () => {
   assert.equal(openPlan.scenes[0].assets[0].id, 'VAH-TEST1002');
   assert.equal(safePlan.scenes[0].assets.length, 0);
   assert.equal(safePlan.scenes[0].needsSearch, true);
+});
+
+test('Hauptvorschläge werden über Szenen möglichst nicht wiederholt', () => {
+  const sharedTags = ['channel-finance', 'collection-investing-stocks', 'collection-inflation-cost-of-living', 'stocks', 'inflation'];
+  const assets = [
+    record({ id: 'VAH-TEST2001', title: 'Finanzmotiv Eins', tags: sharedTags, text: 'Aktien und Inflation' }),
+    record({ id: 'VAH-TEST2002', title: 'Finanzmotiv Zwei', tags: sharedTags, text: 'Aktien und Inflation' })
+  ];
+  const plan = planFor('finance', 'Aktien können langfristig wachsen. Inflation senkt die Kaufkraft.', assets);
+  assert.equal(plan.version, 2);
+  assert.equal(plan.scenes.length, 2);
+  assert.notEqual(plan.scenes[0].primaryAssetId, plan.scenes[1].primaryAssetId);
+  assert.equal(plan.summary.uniquePrimaryAssetCount, 2);
+  assert.equal(plan.summary.reusedPrimaryCount, 0);
 });
 
 test('Shotlist exportiert JSON-kompatible Struktur, CSV und Markdown', () => {
