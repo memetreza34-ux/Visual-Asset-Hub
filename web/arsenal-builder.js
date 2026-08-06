@@ -24,7 +24,9 @@ function render({ health, channelIndex, channels }) {
   section.hidden = false;
   const header = document.createElement('div');
   header.className = 'builder-header';
-  header.innerHTML = '<div><span class="eyebrow">Arsenal Builder</span><h2>Pexels direkt im Browser durchsuchen</h2><p>Der API-Key wird nur für die aktuelle lokale Anfrage verwendet, nicht gespeichert und nicht in den Katalog geschrieben.</p></div>';
+  const headerContent = document.createElement('div');
+  headerContent.append(textElement('span', 'Arsenal Builder', 'eyebrow'), textElement('h2', 'Pexels direkt im Browser durchsuchen'), textElement('p', 'Der API-Key wird nur für die aktuelle lokale Anfrage verwendet, nicht gespeichert und nicht in den Katalog geschrieben.'));
+  header.append(headerContent);
 
   const form = document.createElement('form');
   form.className = 'builder-form';
@@ -38,8 +40,7 @@ function render({ health, channelIndex, channels }) {
   submit.type = 'submit';
   submit.className = 'builder-primary';
   submit.textContent = 'Pexels durchsuchen';
-  const status = document.createElement('p');
-  status.className = 'builder-status';
+  const status = textElement('p', '', 'builder-status');
   status.hidden = true;
 
   for (const item of channels) addOption(channel.input, item.id, item.label);
@@ -53,7 +54,6 @@ function render({ health, channelIndex, channels }) {
   resultArea.className = 'builder-results';
   section.replaceChildren(header, form, resultArea);
 
-  let lastSearch = null;
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     submit.disabled = true;
@@ -69,10 +69,10 @@ function render({ health, channelIndex, channels }) {
         perPage: Number(perPage.input.value)
       }, health.token);
       apiKey.input.value = '';
-      lastSearch = data;
       showStatus(status, `${data.assets.length} Treffer geladen · insgesamt ${data.totalResults} bei Pexels.`, true);
-      renderResults(resultArea, data, health.token, () => { lastSearch = null; });
+      renderResults(resultArea, data, health.token);
     } catch (error) {
+      apiKey.input.value = '';
       showStatus(status, error.message, false);
     } finally {
       submit.disabled = false;
@@ -86,27 +86,21 @@ function render({ health, channelIndex, channels }) {
   }
 }
 
-function renderResults(container, data, token, onImported) {
+function renderResults(container, data, token) {
   const tools = document.createElement('div');
   tools.className = 'builder-result-tools';
   const summary = document.createElement('div');
-  summary.innerHTML = `<strong>${escapeText(data.job.channelLabel)} / ${escapeText(data.job.collectionLabel)}</strong><span>${escapeText(data.job.query)} · ${escapeText(data.job.type)} · ${escapeText(data.job.orientation)}</span>`;
+  summary.append(textElement('strong', `${data.job.channelLabel} / ${data.job.collectionLabel}`), textElement('span', `${data.job.query} · ${data.job.type} · ${data.job.orientation}`));
   const actions = document.createElement('div');
-  const selectAll = document.createElement('button');
-  selectAll.type = 'button';
-  selectAll.textContent = 'Alle auswählen';
-  const importButton = document.createElement('button');
-  importButton.type = 'button';
-  importButton.className = 'builder-primary';
-  importButton.textContent = 'Ausgewählte als Review importieren';
+  const selectAll = button('Alle auswählen');
+  const importButton = button('Ausgewählte als Review importieren', 'builder-primary');
   actions.append(selectAll, importButton);
   tools.append(summary, actions);
 
   const grid = document.createElement('div');
   grid.className = 'builder-result-grid';
   for (const asset of data.assets) grid.append(resultCard(asset));
-  const importStatus = document.createElement('p');
-  importStatus.className = 'builder-status';
+  const importStatus = textElement('p', '', 'builder-status');
   importStatus.hidden = true;
   container.replaceChildren(tools, grid, importStatus);
 
@@ -125,7 +119,6 @@ function renderResults(container, data, token, onImported) {
     try {
       const response = await post('/arsenal-api/import', { searchId: data.searchId, ids }, token);
       showStatus(importStatus, `${response.imported} Treffer wurden importiert. Die Seite wird neu geladen.`, true);
-      onImported();
       setTimeout(() => location.reload(), 900);
     } catch (error) {
       showStatus(importStatus, error.message, false);
@@ -151,12 +144,9 @@ function resultCard(asset) {
   }
   const body = document.createElement('div');
   body.className = 'builder-result-body';
-  const title = document.createElement('strong');
-  title.textContent = asset.title || `Pexels ${asset.provider_id}`;
-  const meta = document.createElement('span');
-  meta.textContent = `${asset.type === 'video' ? 'Video' : 'Foto'} · ${asset.width ?? '?'} × ${asset.height ?? '?'}${asset.duration_seconds ? ` · ${asset.duration_seconds} s` : ''}`;
-  const creator = document.createElement('span');
-  creator.textContent = asset.creator ? `von ${asset.creator}` : 'Pexels';
+  const title = textElement('strong', asset.title || `Pexels ${asset.provider_id}`);
+  const meta = textElement('span', `${asset.type === 'video' ? 'Video' : 'Foto'} · ${asset.width ?? '?'} × ${asset.height ?? '?'}${asset.duration_seconds ? ` · ${asset.duration_seconds} s` : ''}`);
+  const creator = textElement('span', asset.creator ? `von ${asset.creator}` : 'Pexels');
   const link = document.createElement('a');
   link.href = asset.source_url;
   link.target = '_blank';
@@ -169,37 +159,15 @@ function resultCard(asset) {
 }
 
 async function post(endpoint, payload, token) {
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-VAH-Token': token },
-    body: JSON.stringify(payload)
-  });
+  const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-VAH-Token': token }, body: JSON.stringify(payload) });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
   return data;
 }
-
-function field(labelText, type, attributes = {}) {
-  const wrapper = document.createElement('label');
-  wrapper.className = 'builder-field';
-  const text = document.createElement('span');
-  text.textContent = labelText;
-  const input = document.createElement('input');
-  input.type = type;
-  for (const [key, value] of Object.entries(attributes)) input.setAttribute(key, String(value));
-  wrapper.append(text, input);
-  return { wrapper, input };
-}
-function selectField(labelText) {
-  const wrapper = document.createElement('label');
-  wrapper.className = 'builder-field';
-  const text = document.createElement('span');
-  text.textContent = labelText;
-  const input = document.createElement('select');
-  wrapper.append(text, input);
-  return { wrapper, input };
-}
+function field(labelText, type, attributes = {}) { const wrapper = document.createElement('label'); wrapper.className = 'builder-field'; const text = textElement('span', labelText); const input = document.createElement('input'); input.type = type; for (const [key, value] of Object.entries(attributes)) input.setAttribute(key, String(value)); wrapper.append(text, input); return { wrapper, input }; }
+function selectField(labelText) { const wrapper = document.createElement('label'); wrapper.className = 'builder-field'; const text = textElement('span', labelText); const input = document.createElement('select'); wrapper.append(text, input); return { wrapper, input }; }
 function addOption(select, value, text) { const option = document.createElement('option'); option.value = value; option.textContent = text; select.append(option); }
 function variantLabel(item) { return `${item.type === 'video' ? 'Video' : 'Foto'} · ${item.orientation === 'vertical' ? 'Hochformat' : item.orientation === 'horizontal' ? 'Querformat' : item.orientation}`; }
 function showStatus(element, text, success) { element.hidden = false; element.className = `builder-status ${success ? 'success' : 'error'}`; element.textContent = text; }
-function escapeText(value) { return String(value ?? ''); }
+function textElement(tag, text, className = '') { const element = document.createElement(tag); element.textContent = text; if (className) element.className = className; return element; }
+function button(text, className = '') { const element = document.createElement('button'); element.type = 'button'; element.textContent = text; element.className = className; return element; }
