@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "updatedAt": "2026-08-06T09:45:00.000Z",
+  "files": [
+    "catalog/channels/finance.json",
+    "catalog/channels/ai.json",
+    "catalog/channels/electro.json",
+    "catalog/channels/combat-sports.json"
+  ],
+  "variants": [
+    {"id":"video-vertical","type":"video","orientation":"vertical","perPage":20},
+    {"id":"video-horizontal","type":"video","orientation":"horizontal","perPage":15},
+    {"id":"photo-vertical","type":"photo","orientation":"vertical","perPage":15},
+    {"id":"photo-horizontal","type":"photo","orientation":"horizontal","perPage":15}
+  ],
+  "goals": {
+    "minimumApprovedPerCollection": 4,
+    "recommendedApprovedPerCollection": 8,
+    "minimumVideosPerCollection": 2,
+    "minimumPhotosPerCollection": 2
+  },
+  "rules": [
+    "Jeder Pexels-Import startet im Status review.",
+    "Nur ausgewählte Treffer werden in den Katalog übernommen.",
+    "UFC- und Eventlogos, TV-Broadcastmaterial und fremde Marken werden nicht automatisch freigegeben.",
+    "Personen, Kennzeichen, medizinische Inhalte und sensible Daten benötigen eine Sichtprüfung.",
+    "Für Reels wird vertikales Material priorisiert; horizontales Material bleibt für YouTube und Webseiten erhalten."
+  ]
+}
