@@ -118,8 +118,22 @@ function validateSvg(file, size) {
   const source = fs.readFileSync(file, 'utf8');
   const compact = source.replace(/^\uFEFF/, '').trim().toLowerCase();
   if (!compact.includes('<svg')) throw new Error('Datei enthält kein SVG-Wurzelelement.');
-  const blocked = [/<script\b/, /<foreignobject\b/, /<!doctype\b/, /<!entity\b/, /javascript\s*:/, /\bon[a-z]+\s*=/, /(?:href|src)\s*=\s*["']\s*(?:https?:|data:|\/\/)/];
+  const blocked = [
+    /<script\b/,
+    /<foreignobject\b/,
+    /<iframe\b/,
+    /<!doctype\b/,
+    /<!entity\b/,
+    /<\?xml-stylesheet\b/,
+    /javascript\s*:/,
+    /\bon[a-z]+\s*=/,
+    /@import\b/,
+    /url\s*\(\s*["']?\s*(?!#)/
+  ];
   if (blocked.some((pattern) => pattern.test(compact))) throw new Error('SVG enthält aktive oder externe Inhalte und wurde blockiert.');
+  for (const match of compact.matchAll(/(?:href|src)\s*=\s*["']([^"']+)["']/g)) {
+    if (!match[1].trim().startsWith('#')) throw new Error('SVG enthält aktive oder externe Inhalte und wurde blockiert.');
+  }
 }
 
 async function streamRequestToFile(request, target, expectedSize) {
@@ -132,6 +146,7 @@ async function streamRequestToFile(request, target, expectedSize) {
       settled = true;
       request.unpipe(output);
       output.destroy();
+      if (error && !request.destroyed) request.resume();
       if (error) reject(error); else resolve(bytes);
     };
     request.on('data', (chunk) => {
