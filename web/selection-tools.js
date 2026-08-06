@@ -26,6 +26,7 @@ if (elements.count && elements.exportButton && elements.clearButton && elements.
   document.addEventListener('click', (event) => {
     if (event.target.closest('.favorite-button')) setTimeout(syncSelectionState, 0);
   });
+  document.addEventListener('vah:favorites-changed', syncSelectionState);
   window.addEventListener('storage', syncSelectionState);
 }
 
