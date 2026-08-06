@@ -1,135 +1,210 @@
 # Visual Asset Hub
 
-Visual Asset Hub ist eine universelle, kostenlose Medienbibliothek für **B-Rolls, Bilder, Animationen, Overlays, Screen-Recordings, Grafiken, Icons und Mockups**. Sie ist nicht an ein einzelnes Content-Projekt gebunden und kann für Reels, Shorts, YouTube, Werbung, Webseiten, Apps, Präsentationen und Kundenprojekte genutzt werden.
+Visual Asset Hub ist eine universelle, kostenlose Medienbibliothek für **B-Rolls, Bilder, Animationen, Grafiken, Overlays, Screen-Recordings, Icons und Mockups**. Sie kann für Reels, Shorts, YouTube, Webseiten, Apps, Präsentationen und Kundenprojekte verwendet werden.
+
+## Spezialisierte Kanalbibliotheken
+
+Die Version `0.4.0-beta.1` enthält ein großes Arsenal für vier Content-Kanäle:
+
+| Kanal | Sammlungen | Suchbegriffe | empfohlenes Ausbauziel |
+|---|---:|---:|---:|
+| Finanzen | 20 | 60 | 160 freigegebene Assets |
+| Künstliche Intelligenz | 20 | 60 | 160 freigegebene Assets |
+| Elektrotechnik | 20 | 60 | 160 freigegebene Assets |
+| Kampfsport | 30 | 90 | 240 freigegebene Assets |
+| **Gesamt** | **90** | **270** | **720 freigegebene Assets** |
+
+Jede Sammlung ist für vier Grundformate vorbereitet:
+
+- vertikales B-Roll-Video
+- horizontales B-Roll-Video
+- vertikales Foto
+- horizontales Foto
+
+Der vollständige Suchplan umfasst **360 Pexels-Suchaufträge** und kann bis zu **5.850 Kandidaten** liefern. Kandidaten werden niemals automatisch freigegeben.
+
+## Beispiele aus den Kanalpaketen
+
+### Finanzen
+
+Bargeld, Sparen, Banking, Aktien, Trading, Krypto, Immobilien, E-Commerce, Steuern, Inflation, Schulden, Gehalt, Wirtschaft, Versicherungen, FinTech und Betrugswarnungen.
+
+### Künstliche Intelligenz
+
+KI allgemein, humanoide Roboter, Machine Learning, Coding, Automatisierung, generative KI, Chatbots, neuronale Netze, Rechenzentren, Cybersecurity, Smart Home, Medizin-KI, Bildungs-KI, KI-Ethik und Content-Erstellung.
+
+### Elektrotechnik
+
+Elektrikerarbeit, Messgeräte, Leitungen, Schaltschränke, Instandhaltung, Motoren, SPS, Relais, Schütze, LS/RCD, Energieverteilung, Photovoltaik, Windenergie, Transformatoren, Bahntechnik, Gebäudeinstallation, PSA, Prüfung und Ausbildung.
+
+### Kampfsport
+
+MMA, generischer Käfig, Boxring, Boxtraining, Kickboxen, Muay Thai, Ringen, BJJ, Boxsack, Pratzen, Schattenboxen, Sparring, Wiegen, Face-off, Walkout, Bandagen, Ringrichter, Scorecards, Arena, Sieg, Erholung, Krafttraining und Regeneration.
 
 ## Aktueller Funktionsumfang
 
-- 20 feste Hauptkategorien und kontrollierte Metadaten
+- 24 universelle und spezialisierte Hauptkategorien
+- 90 klar benannte Kanal-Sammlungen
+- 270 englische Pexels-Suchbegriffe
+- automatische Suchplanung als JSON und CSV
+- sichere Batch-Suche zur Schonung des kostenlosen API-Kontingents
+- Import ausgewählter Treffer mit automatischer Kanal- und Sammlungszuordnung
 - einheitliche Dateinamen und stabile Asset-IDs
-- Rechte-, Quellen- und Lizenzprüfung
-- Dublettenprüfung über ID, Dateiname, Hash und Pexels-Quellseite
-- Pexels-Suche für Fotos und Videos
-- visuelle HTML-Galerie für Suchergebnisse
-- gezielter Import ausgewählter Pexels-IDs
-- automatische Pexels-Importe ausschließlich als `review`
-- externe Vorschauen und Originaldateien ohne kostenpflichtigen Massenspeicher
-- transaktionale Freigabe, Einschränkung und Archivierung
-- vollständiges Review-Protokoll
-- Nutzungshistorie pro Asset, Projekt und Plattform
-- Quellen- und Attributions-Export als Markdown und CSV
-- lokale Katalog-Backups mit SHA-256-Manifest
-- responsive Websuche mit Filtern, Schnellfiltern, Favoriten, Pagination und Detailansicht
-- sichtbare Statuskennzeichnung für Review, Freigabe und Einschränkung
-- exportierbare Favoriten-Auswahl zur Übergabe an andere Content-Projekte
-- Video-Wiedergabe direkt in der Detailansicht
-- automatischer Beta-Fortschritt mit offener Abnahmeliste
-- sichere lokale Verwaltungs-API ausschließlich auf `127.0.0.1`
-- Review, Freigabe, Einschränkung, Nutzung, Attribution und Backup direkt im Browser
-- Secret-Scanner sowie automatische Prüfungen für Katalog-, Vorschau-, Betriebs- und Webdaten
-- sechs reale Beta-Testassets: drei vertikale Pexels-Videos und drei eigene horizontale SVG-Grafiken
+- Rechte-, Quellen- und Lizenzverwaltung
+- Dublettenprüfung
+- Pexels-Foto- und Videosuche
+- Webbibliothek mit Suche, Filtern, Favoriten und Video-Vorschau
+- sichtbarer Fortschritt pro Kanal und Sammlung
+- Review, Freigabe, Einschränkung und Archivierung direkt im Browser
+- Nutzungshistorie nach Projekt und Plattform
+- Attributions-Export
+- Backup und verifizierte Wiederherstellung
+- Secret-Scanner und automatische Datenprüfungen
 
-## Schnellster Start unter Windows
+## Schnellstart unter Windows
 
-1. Den Branch `agent/beta-release` als ZIP herunterladen und entpacken.
+1. Branch `agent/beta-release` als ZIP herunterladen und entpacken.
 2. Node.js 22 oder neuer installieren.
 3. `START-HERE.cmd` doppelklicken.
 
-Die Startdatei führt die vollständige Beta-Prüfung aus, erzeugt den Bereitschaftsbericht und das statische Testpaket, startet den lokalen Server und öffnet Visual Asset Hub unter:
+Die Startdatei:
 
-```text
-http://127.0.0.1:4173
+1. prüft Code, Katalog und Tests
+2. erzeugt den Beta-Bericht
+3. erzeugt den vollständigen Arsenal-Suchplan
+4. erzeugt den Kanal-Abdeckungsbericht
+5. baut das Testpaket
+6. startet die Bibliothek unter `http://127.0.0.1:4173`
+
+Das Konsolenfenster muss geöffnet bleiben.
+
+## Arsenal planen
+
+Alle vier Kanäle:
+
+```bash
+npm run arsenal:plan
 ```
 
-Das Konsolenfenster muss während der Verwendung geöffnet bleiben.
+Nur Kampfsport:
 
-## Realtest vollständig im Browser
+```bash
+npm run arsenal:plan -- --channel combat-sports
+```
 
-Nach dem Start ist oben die Leiste **„Lokale Verwaltung aktiv“** sichtbar. Dann kann der komplette Test ohne Befehle erfolgen:
+Nur fünf Elektro-Sammlungen:
 
-1. Asset öffnen und vollständig ansehen.
-2. Quelle und Lizenzseite öffnen.
-3. Die vier Pflichtprüfungen bestätigen.
-4. Prüfer, Qualitätsbewertung und Notiz eintragen.
-5. **Freigeben**, **Einschränken**, **Zur Prüfung zurück** oder **Archivieren** wählen.
-6. Bei einem freigegebenen Asset Projekt und Plattform eintragen.
-7. **Nutzung speichern** drücken.
-8. Attribution direkt exportieren.
-9. Über die obere Leiste ein Katalog-Backup erzeugen.
+```bash
+npm run arsenal:plan -- --channel electro --max-collections 5
+```
 
-Jede Änderung wird durch dieselben Validatoren geprüft wie der Konsolenablauf. Bei einem Fehler werden Katalog-, Review- oder Nutzungsänderungen zurückgerollt.
+Ausgaben:
 
-## Sicherer Arbeitsablauf
+```text
+reports/arsenal-plan.json
+reports/arsenal-plan.csv
+reports/channel-coverage.json
+reports/channel-coverage.md
+```
 
-1. **Suchen:** Pexels nach einem konkreten Motiv durchsuchen.
-2. **Auswählen:** `gallery.html` ansehen und nur passende Pexels-IDs notieren.
-3. **Importieren:** Nur ausgewählte IDs als `review` übernehmen.
-4. **Prüfen:** Vollständigen Clip, sichtbare Personen, Marken, Inhalt und Rechte kontrollieren.
-5. **Entscheiden:** Asset freigeben, einschränken, zurückgeben oder archivieren.
-6. **Verwenden:** Nur ein freigegebenes Asset in einem echten Projekt einsetzen.
-7. **Dokumentieren:** Projekt, Plattform und optionale Veröffentlichungs-URL speichern.
-8. **Exportieren:** Auswahl sowie Quellen-/Attributionsdateien an das Editing- oder Content-Projekt übergeben.
+## Pexels-Suchbatch
 
-## Nutzung ohne Befehle über GitHub Actions
+Zuerst Dry-Run:
 
-Sobald GitHub Actions im Repository wieder Runner startet, stehen zusätzlich folgende manuelle Abläufe bereit:
+```bash
+npm run arsenal:search -- --max-jobs 20
+```
 
-- **Pexels suchen** – Ergebnisdatei und visuelle Galerie erzeugen
-- **Pexels in Katalog importieren** – Treffer als Review-Assets aufnehmen
-- **Asset prüfen und entscheiden** – Freigabe oder Einschränkung als Pull Request protokollieren
-- **Asset-Nutzung dokumentieren** – reale Verwendung als Pull Request speichern
-- **Katalogpaket exportieren** – Website, Berichte, Backup und optionale Attribution herunterladen
+Echte Suche mit lokalem `PEXELS_API_KEY`:
 
-## Weboberfläche
+```bash
+npm run arsenal:search -- --execute true --max-jobs 20
+```
 
-- Volltextsuche nach Titel, Beschreibung, Tags, Aliasen, Kategorie und Projekt
-- Filter nach Typ, Kategorie, Ausrichtung, Stil, Status, Lizenz und Nutzung
-- Schnellfilter für B-Rolls, Hochformat, Review, Freigabe, Favoriten und aktive Kategorien
-- Favoriten als temporäre Projektauswahl
-- JSON-Export der Auswahl mit Quelle, Lizenz, Status und Attribution
-- deutliche Warnung, wenn die Auswahl nicht freigegebene Medien enthält
-- sichtbarer technischer Fortschritt, Realtest-Stand und nächste Abnahmeschritte
+Die Batchgröße ist standardmäßig auf 20 Aufträge begrenzt. Ergebnisse liegen geordnet unter:
+
+```text
+.local-storage/arsenal-search/<kanal>/<sammlung>/
+```
+
+## Ausgewählte Arsenal-Treffer importieren
+
+```bash
+npm run arsenal:import -- \
+  --input .local-storage/arsenal-search/electro/circuit-breakers-rcd/electro-circuit-breakers-rcd-video-vertical.json \
+  --ids 12345,67890
+```
+
+Der Import übernimmt automatisch:
+
+- Hauptkategorie
+- Kanal-Tag
+- Sammlungs-Tag
+- Suchbegriff
+- Tags
+- Ausrichtung
+- Status `review`
+
+## Realtest im Browser
+
+Nach dem Start erscheint **„Lokale Verwaltung aktiv“**. Dort können Assets ohne Konsolenbefehle:
+
+- vollständig angesehen werden
+- freigegeben oder eingeschränkt werden
+- mit Qualitätsbewertung und Notiz protokolliert werden
+- einem echten Projekt und einer Plattform zugeordnet werden
+- als Attributionsliste exportiert werden
+- über ein Katalog-Backup gesichert werden
+
+## Besondere Rechte-Regeln für MMA/UFC-Content
+
+Die Bibliothek verwendet generische Kampfsport-Stockaufnahmen. Nicht automatisch freigeben:
+
+- UFC- und Veranstalterlogos
+- TV-, Pay-per-View- oder Broadcastausschnitte
+- echte Kampfausschnitte ohne nachgewiesene Rechte
+- geschützte Gürtel- und Eventdesigns
+- sichtbare Sponsoren- und Mikrofonmarken
+- grafische Verletzungen
+- gefährliche Weight-Cut-Darstellungen
 
 ## Wichtige Befehle
 
 ```bash
-npm run pexels:search -- --query "KI Technologie" --type video --orientation vertical --output .local-storage/pexels-search/results.json
-npm run pexels:gallery -- --input .local-storage/pexels-search/results.json
-npm run pexels:select -- --input .local-storage/pexels-search/results.json --ids 12345,67890 --category technology-ai --tags ai,technik
-npm run asset:review -- --id VAH-XXXXXXXX --decision approve --reviewer Arman --notes "Clip vollständig geprüft"
-npm run usage:add -- --asset VAH-XXXXXXXX --project elektro-klar-reel-01 --platform tiktok
-npm run attribution:export -- --project elektro-klar-reel-01
+npm run arsenal:validate
+npm run arsenal:plan
+npm run arsenal:search -- --max-jobs 20
+npm run arsenal:import -- --input <datei> --ids <id1,id2>
+npm run arsenal:report
+npm run asset:review -- --id VAH-XXXXXXXX --decision approve --reviewer Arman
+npm run usage:add -- --asset VAH-XXXXXXXX --project projekt-01 --platform tiktok
+npm run attribution:export -- --project projekt-01
 npm run backup
+npm run restore -- --backup backups/<zeitstempel> --dry-run true
 npm run beta:verify
 npm run check
 npm run serve
 ```
 
-## Sicherheit und Rechte
+## Sicherheit
 
-- API-Schlüssel liegen ausschließlich in `.env` oder GitHub Secrets.
-- `npm run check` scannt das Repository auf offensichtliche API-Keys und Tokens.
-- Externe Vorschau-URLs werden auf unsichere oder signierte Parameter geprüft.
-- Die lokale Verwaltungs-API bindet standardmäßig ausschließlich an `127.0.0.1`.
-- Schreibaktionen benötigen ein zufälliges Sitzungstoken und denselben Browser-Ursprung.
-- Der Server setzt Content-Security-Policy, Frame-Schutz und weitere Sicherheitsheader.
-- Pexels-Importe starten immer mit Status `review`.
-- Vor Freigabe müssen erkennbare Personen, Marken, sensible Themen und der konkrete Nutzungskontext geprüft werden.
-- Quelle, Lizenzseite und Urheberhinweis werden pro Asset dokumentiert.
-- Unbekannte oder eingeschränkte Rechte können nicht als `approved` freigegeben werden.
-- Nutzungen nicht freigegebener Assets werden standardmäßig blockiert.
-- Änderungen an Status, Rechten und Nutzung werden bei Validierungsfehlern automatisch zurückgerollt.
+- API-Schlüssel liegen nur in `.env` oder GitHub Secrets.
+- Pexels-Importe starten immer als `review`.
+- Nicht freigegebene Assets können nicht normal als reale Nutzung dokumentiert werden.
+- Die lokale Verwaltungs-API bindet nur an `127.0.0.1`.
+- Schreibaktionen benötigen ein zufälliges Sitzungstoken und denselben Ursprung.
+- Unbekannte oder eingeschränkte Rechte verhindern eine Freigabe.
+- Fehlerhafte Import-, Review-, Nutzungs- und Restore-Schritte werden zurückgerollt.
 
 ## Bekannter externer Blocker
 
-GitHub Actions stellt im Repository derzeit keinen Runner bereit. Selbst minimale Linux- und Windows-Diagnosejobs scheitern vor ihrem ersten Step und erzeugen keine Logs. Der vollständige lokale Browser-Test ist davon unabhängig; die automatische GitHub-Abnahme bleibt bis zur Korrektur der Repository-/Kontoeinstellung blockiert.
+GitHub Actions startet in diesem Repository momentan keinen Runner und bricht vor dem ersten Workflow-Schritt ab. Der vollständige lokale Windows-Test funktioniert unabhängig davon. Das Runner-Problem ist in Issue #4 dokumentiert.
 
 ## Dokumentation
 
+- [`docs/CHANNEL-ARSENAL.md`](docs/CHANNEL-ARSENAL.md)
 - [`docs/OPERATIONS.md`](docs/OPERATIONS.md)
-- [`docs/WORKFLOW.md`](docs/WORKFLOW.md)
-- [`docs/STORAGE-AND-RIGHTS.md`](docs/STORAGE-AND-RIGHTS.md)
 - [`docs/BETA-TEST.md`](docs/BETA-TEST.md)
 - [`docs/RELEASE-CHECKLIST.md`](docs/RELEASE-CHECKLIST.md)
-- [`docs/NAMING.md`](docs/NAMING.md)
 - [`SECURITY.md`](SECURITY.md)
 - [`CHANGELOG.md`](CHANGELOG.md)
