@@ -28,8 +28,8 @@ function stripHtml(value) {
 
 function classifyLicense(shortName, usageTerms, licenseUrl) {
   const raw = `${shortName} ${usageTerms} ${licenseUrl}`.toLowerCase();
-  if (/public domain|gemeinfrei|pdm/.test(raw)) return 'public-domain';
   if (/\bcc0\b/.test(raw)) return 'cc0';
+  if (/public domain|gemeinfrei|pdm/.test(raw)) return 'public-domain';
   if (/cc[ -]?by[ -]?sa|creativecommons\.org\/licenses\/by-sa/.test(raw)) return 'cc-by-sa';
   if (/cc[ -]?by\b|creativecommons\.org\/licenses\/by\//.test(raw)) return 'cc-by';
   return null;
