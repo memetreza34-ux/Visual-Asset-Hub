@@ -64,8 +64,26 @@ const candidates = [
     technical: { width: 720, height: 1366, durationSeconds: 10, fps: 25, codec: 'h264/mp4' },
     storage: { kind: 'external', previewUrl: 'https://images.pexels.com/videos/6153725/pexels-photo-6153725.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1200&w=630', externalUrl: 'https://videos.pexels.com/video-files/6153725/6153725-hd_720_1366_25fps.mp4' },
     rights: { licenseStatus: 'licensed', sourceName: 'Pexels', sourceUrl: 'https://www.pexels.com/de-de/video/person-technologie-bewegen-wissenschaft-6153725/', licenseUrl: 'https://www.pexels.com/license/', usageScopes: commonScopes, attributionRequired: false, attributionText: 'Video von cottonbro studio auf Pexels', notes: 'Pexels-Lizenz dokumentiert. Person, Technikobjekt und Nutzungskontext vollständig prüfen.' }
+  },
+  {
+    id: 'VAH-WBOX2021', filename: 'img-combat-sports-boxing-training-sparring-ms-horizontal-0001.jpg',
+    title: 'Boxtraining im Freien', description: 'Horizontales Wikimedia-Commons-Foto mit mehreren Personen beim Boxtraining. Geeignet als generisches Boxtraining-Motiv; sichtbare Personen und möglicher Persönlichkeitsrechtskontext müssen vor Nutzung geprüft werden.',
+    type: 'image', category: 'combat-sports', secondaryCategories: ['health-fitness', 'people-lifestyle'],
+    tags: ['channel-combat-sports', 'collection-boxing-training', 'boxing', 'training', 'sparring', 'athlete', 'wikimedia'],
+    searchAliases: ['Boxtraining', 'Boxer Training', 'boxing training', 'boxing sparring'],
+    subject: 'boxing-training', action: 'sparring', orientation: 'horizontal', shotType: 'ms', cameraMovement: 'static', style: 'documentary', status: 'review', qualityRating: 4,
+    technical: { width: 1849, height: 1512, codec: 'jpg' },
+    storage: { kind: 'external', previewUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Boxer_training.jpg/587px-Boxer_training.jpg', externalUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/16/Boxer_training.jpg' },
+    rights: { licenseStatus: 'cc-by-sa', sourceName: 'Wikimedia Commons', sourceUrl: 'https://commons.wikimedia.org/wiki/File:Boxer_training.jpg', licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/', usageScopes: commonScopes, attributionRequired: true, attributionText: 'Foto: Dotun55 / Wikimedia Commons · CC BY-SA 4.0', notes: 'CC BY-SA 4.0: Urheber nennen, Lizenz verlinken, Änderungen kennzeichnen und bei Bearbeitung Share-Alike-Bedingungen beachten. Sichtbare Personen vor Freigabe zusätzlich prüfen.' },
+    notes: 'Wikimedia-Commons-Starter für Kampfsport. Status bleibt wegen sichtbarer Personen und Kontextprüfung auf review.'
   }
-].map((asset) => ({ ...asset, createdAt: timestamp, importedAt: timestamp, createdBy: 'channel-starter-pack', notes: 'Aus einem erfolgreich ausgeführten Pexels-API-Test übernommen. Status bleibt bis zur Sichtprüfung review.' }));
+].map((asset) => ({
+  ...asset,
+  createdAt: timestamp,
+  importedAt: timestamp,
+  createdBy: asset.createdBy || 'channel-starter-pack',
+  notes: asset.notes || 'Aus einem erfolgreich ausgeführten Pexels-API-Test übernommen. Status bleibt bis zur Sichtprüfung review.'
+}));
 
 const existingIds = new Set(catalog.assets.map((asset) => asset.id));
 const existingSources = new Set(catalog.assets.map((asset) => asset.rights?.sourceUrl).filter(Boolean));
@@ -78,7 +96,7 @@ try {
   fs.writeFileSync(catalogPath, `${JSON.stringify(catalog, null, 2)}\n`);
   run('scripts/validate-catalog.mjs');
   run('scripts/build-index.mjs');
-  console.log(`${additions.length} echte Pexels-Starterassets als review importiert.`);
+  console.log(`${additions.length} echte Starterassets als review importiert.`);
 } catch (error) {
   fs.writeFileSync(catalogPath, previous);
   console.error(`Starterimport zurückgerollt: ${error instanceof Error ? error.message : String(error)}`);
