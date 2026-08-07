@@ -68,8 +68,13 @@ export function createLocalArsenalApi({ root = process.cwd(), token } = {}) {
           const wrapper = readJson(file);
           const provider = wrapper.provider ?? wrapper.result?.provider ?? 'pexels';
           const env = provider === 'unsplash' ? { UNSPLASH_ACCESS_KEY: requireText(input.apiKey, 'apiKey', 8, 300) } : {};
+          const catalogPath = path.join(root, 'catalog', 'assets.json');
+          const beforeCount = countCatalogAssets(catalogPath);
           const output = runScript(root, 'scripts/arsenal-import-selected.mjs', ['--input', relative, '--ids', input.ids.join(',')], env);
-          return sendJson(response, 200, { ok: true, provider, imported: input.ids.length, output });
+          const afterCount = countCatalogAssets(catalogPath);
+          const imported = Math.max(0, afterCount - beforeCount);
+          const skipped = Math.max(0, input.ids.length - imported);
+          return sendJson(response, 200, { ok: true, provider, requested: input.ids.length, imported, skipped, output });
         }
 
         return sendJson(response, 404, { error: 'Arsenal-Aktion nicht gefunden.' });
@@ -225,6 +230,11 @@ function readFreshPixabayCache(file, ttl) {
   } catch {
     return null;
   }
+}
+
+function countCatalogAssets(file) {
+  const catalog = readJson(file);
+  return Array.isArray(catalog.assets) ? catalog.assets.length : 0;
 }
 
 function responsePayload(wrapper, cached) {
