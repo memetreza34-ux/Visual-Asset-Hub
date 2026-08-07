@@ -22,35 +22,25 @@ test('alle lokalen Browser-Dateien aus index.html existieren', () => {
     ...referencedFiles(indexHtml, 'src'),
     ...referencedFiles(indexHtml, 'href')
   ];
-  for (const relative of references) {
-    assert.ok(fs.existsSync(path.join(webRoot, relative)), `Webdatei fehlt: ${relative}`);
-  }
+  for (const relative of references) assert.ok(fs.existsSync(path.join(webRoot, relative)), `Webdatei fehlt: ${relative}`);
 });
 
 test('Auswahlexport speichert Rechte- und Quelleninformationen', () => {
-  for (const field of ['sourcePage', 'licenseUrl', 'usageScopes', 'attributionRequired', 'status']) {
-    assert.match(selectionTools, new RegExp(`\\b${field}\\b`), `Exportfeld fehlt: ${field}`);
-  }
+  for (const field of ['sourcePage', 'licenseUrl', 'usageScopes', 'attributionRequired', 'status']) assert.match(selectionTools, new RegExp(`\\b${field}\\b`), `Exportfeld fehlt: ${field}`);
   assert.match(selectionTools, /nicht freigegebene Assets/i);
 });
 
 test('Auswahlbedienung ist vollständig verknüpft', () => {
-  for (const id of ['favorite-selection-count', 'export-favorites', 'clear-favorites']) {
-    assert.match(indexHtml, new RegExp(`id="${id}"`), `Bedienelement fehlt: ${id}`);
-  }
+  for (const id of ['favorite-selection-count', 'export-favorites', 'clear-favorites']) assert.match(indexHtml, new RegExp(`id="${id}"`), `Bedienelement fehlt: ${id}`);
   assert.match(indexHtml, /selection-tools\.js/);
   assert.match(indexHtml, /selection-tools\.css/);
 });
 
 test('lokale No-Code-Verwaltung ist vollständig verknüpft', () => {
-  for (const id of ['local-admin-status', 'local-admin-status-text', 'local-backup']) {
-    assert.match(indexHtml, new RegExp(`id="${id}"`), `Lokales Bedienelement fehlt: ${id}`);
-  }
+  for (const id of ['local-admin-status', 'local-admin-status-text', 'local-backup']) assert.match(indexHtml, new RegExp(`id="${id}"`), `Lokales Bedienelement fehlt: ${id}`);
   assert.match(indexHtml, /local-admin\.js/);
   assert.match(indexHtml, /local-admin\.css/);
-  for (const endpoint of ['/api/health', '/api/review', '/api/usage', '/api/backup', '/api/attribution']) {
-    assert.ok(localAdmin.includes(endpoint) || server.includes(endpoint), `API-Verknüpfung fehlt: ${endpoint}`);
-  }
+  for (const endpoint of ['/api/health', '/api/review', '/api/usage', '/api/backup', '/api/attribution']) assert.ok(localAdmin.includes(endpoint) || server.includes(endpoint), `API-Verknüpfung fehlt: ${endpoint}`);
 });
 
 test('Beta-Fortschritt und Testbericht sind in der Oberfläche verknüpft', () => {
@@ -88,6 +78,19 @@ test('Ausbau 720 empfiehlt Medienart, Quelle und Format automatisch', () => {
   assert.match(builder, /detail\.provider/);
   assert.match(builder, /detail\.variant/);
   assert.match(builder, /preferredVariantForProvider/);
+});
+
+test('Review-first verbindet Ausbau-Dashboard und priorisierte Warteschlange', () => {
+  const dashboard = fs.readFileSync(path.join(webRoot, 'expansion-dashboard.js'), 'utf8');
+  const reviewQueue = fs.readFileSync(path.join(webRoot, 'review-queue.js'), 'utf8');
+  assert.match(dashboard, /vah:review-focus/);
+  assert.match(dashboard, /Review zuerst/);
+  assert.match(dashboard, /reviewWeakest/);
+  assert.match(reviewQueue, /vah:review-focus/);
+  assert.match(reviewQueue, /Größter Ausbau-Effekt/);
+  assert.match(reviewQueue, /buildPriorityMap/);
+  assert.match(reviewQueue, /Ausbau-Priorität/);
+  assert.match(reviewQueue, /collection-/);
 });
 
 test('API-Keys bleiben ausschließlich im Arbeitsspeicher der aktuellen Seite', () => {
