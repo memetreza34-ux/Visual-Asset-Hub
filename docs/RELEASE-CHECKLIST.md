@@ -6,8 +6,8 @@
 - [ ] `npm run beta:verify` meldet technisch bereit
 - [ ] `npm run arsenal:validate` bestätigt Kanaldateien und Planerlexikon
 - [ ] `npm run arsenal:plan` erzeugt JSON und CSV
-- [ ] `npm run arsenal:expansion` erzeugt Ausbauplan Version 3 als JSON und CSV
-- [ ] `npm run arsenal:report` erzeugt den Abdeckungsbericht
+- [ ] `npm run arsenal:expansion` erzeugt Ausbauplan Version 4 als JSON und CSV
+- [ ] `npm run arsenal:report` erzeugt den Abdeckungsbericht Version 2
 - [ ] `npm run links:check -- --strict true` prüft externe Medien- und Quelllinks
 - [ ] statische Website wird mit `npm run site:build` erzeugt
 - [ ] Mac-Start über `npm run serve` funktioniert
@@ -45,10 +45,14 @@
 - [x] Zielgröße 720 freigegebene Kanal-Assets dokumentiert
 - [x] Ausbauplaner unterscheidet `search`, `review-first` und `complete`
 - [x] Ausbauplan nennt Medientyp, Format, Primärquelle und Fallbackquellen
+- [x] Freigabe-Mix-Lücke und echte Such-Mix-Lücke sind getrennt
 - [ ] Finanzen-, KI-, Elektro- und Kampfsport-Bereiche vollständig sichtbar
 - [ ] Kandidaten-, Review- und Freigabezahlen stimmen
 - [ ] **Ausbau 720** zeigt 160/160/160/240 als Kanalziele
+- [ ] globale **Nächste Aufgaben** zeigt höchstens sechs Aufgaben
+- [ ] globale Aufgaben priorisieren Review vor neuer Suche
 - [ ] Video- und Fotolücken werden korrekt erkannt
+- [ ] vorhandene Review-Videos/Fotos verhindern redundante Suche desselben Medientyps
 - [ ] vorhandener ausreichender Review-Vorrat führt direkt in die Review-Warteschlange
 - [ ] echte Suchlücken werden mit passender Quelle und passendem Format vorbereitet
 - [ ] höchstens fünf priorisierte Sammlungen werden an den Builder übergeben
@@ -110,6 +114,12 @@
 - [ ] weder `localStorage` noch `sessionStorage` speichern API-Keys
 - [ ] Batch-Suche verarbeitet höchstens fünf Sammlungen sequenziell
 - [ ] Suchtreffer zeigen Vorschau, Creator/Quelle und Quellseite
+- [ ] **Technischer Fit 0–100** wird angezeigt
+- [ ] technisch bessere Treffer stehen standardmäßig weiter oben
+- [ ] Technischer Fit bewertet keine Rechte, Personen, Marken oder Freigabestatus
+- [ ] **Nächster Suchbegriff** wird vor dem Provider-Fallback angeboten
+- [ ] Suchbegriff 1 → 2 → 3 wird nur vorbereitet und nicht automatisch ausgeführt
+- [ ] nach dem letzten Suchbegriff erscheint der passende Provider-Fallback
 - [ ] nur markierte Treffer werden importiert
 - [ ] jeder Import startet auf `review`
 - [ ] Kanal- und Sammlungs-Tags werden korrekt gesetzt
