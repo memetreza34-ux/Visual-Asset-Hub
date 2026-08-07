@@ -49,7 +49,7 @@ test('Openverse und Wikimedia benötigen keinen API-Key und sind foto-only', () 
     const photo = validateSearchPayload({
       provider,
       channel: 'electro',
-      collection: 'electric-motors',
+      collection: 'motors-drives',
       variant: 'photo-horizontal'
     }, root);
     assert.equal(photo.provider, provider);
@@ -58,7 +58,7 @@ test('Openverse und Wikimedia benötigen keinen API-Key und sind foto-only', () 
     assert.throws(() => validateSearchPayload({
       provider,
       channel: 'electro',
-      collection: 'electric-motors',
+      collection: 'motors-drives',
       variant: 'video-vertical'
     }, root), /nur Bilder/);
   }
