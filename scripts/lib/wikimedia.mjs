@@ -1,4 +1,5 @@
 const API_BASE = 'https://commons.wikimedia.org/w/api.php';
+const SAFE_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/tiff']);
 
 function inferOrientation(width, height) {
   if (!width || !height) return 'unknown';
@@ -7,15 +8,10 @@ function inferOrientation(width, height) {
 }
 
 function assertInteger(value, name, min, max) {
-  if (!Number.isInteger(value) || value < min || value > max) {
-    throw new Error(`${name} muss eine ganze Zahl zwischen ${min} und ${max} sein.`);
-  }
+  if (!Number.isInteger(value) || value < min || value > max) throw new Error(`${name} muss eine ganze Zahl zwischen ${min} und ${max} sein.`);
 }
 
-function text(meta, key) {
-  return stripHtml(meta?.[key]?.value ?? '');
-}
-
+function text(meta, key) { return stripHtml(meta?.[key]?.value ?? ''); }
 function stripHtml(value) {
   return String(value ?? '')
     .replace(/<br\s*\/?>/gi, ' ')
@@ -41,7 +37,7 @@ function classifyLicense(shortName, usageTerms, licenseUrl) {
 
 function normalizePage(page) {
   const info = page.imageinfo?.[0];
-  if (!info || !String(info.mime || '').startsWith('image/')) return null;
+  if (!info || !SAFE_MIME_TYPES.has(String(info.mime || '').toLowerCase())) return null;
   const meta = info.extmetadata ?? {};
   const licenseName = text(meta, 'LicenseShortName');
   const usageTerms = text(meta, 'UsageTerms');
@@ -72,13 +68,7 @@ function normalizePage(page) {
   };
 }
 
-export async function searchWikimedia({
-  query,
-  orientation,
-  page = 1,
-  perPage = 15,
-  fetchImpl = globalThis.fetch
-}) {
+export async function searchWikimedia({ query, orientation, page = 1, perPage = 15, fetchImpl = globalThis.fetch }) {
   if (!query || !String(query).trim()) throw new Error('Eine Suchanfrage ist erforderlich.');
   if (typeof fetchImpl !== 'function') throw new Error('In dieser Node.js-Version ist fetch nicht verfügbar.');
   assertInteger(page, 'page', 1, 100);
