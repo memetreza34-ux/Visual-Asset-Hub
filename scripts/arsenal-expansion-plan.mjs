@@ -32,12 +32,15 @@ export function buildExpansionPlan({ channels, assets, goals = DEFAULT_GOALS }) 
       const videoGap = Math.max(0, goals.minimumVideosPerCollection - approvedVideos);
       const photoGap = Math.max(0, goals.minimumPhotosPerCollection - approvedPhotos);
       const searchGap = Math.max(0, approvedGap - review.length);
-      const providerPriority = providerPriorityFor({ searchGap, videoGap, photoGap, candidateVideos, candidatePhotos });
       const nextAction = approvedGap === 0 && videoGap === 0 && photoGap === 0
         ? 'complete'
         : review.length > 0 && searchGap === 0
           ? 'review-first'
           : 'search';
+      const recommendedSearch = nextAction === 'search'
+        ? searchRecommendation({ videoGap, photoGap, candidateVideos, candidatePhotos })
+        : null;
+      const providerPriority = recommendedSearch?.providers ?? [];
       const priorityScore = (minimumGap * 100) + (searchGap * 12) + (approvedGap * 4) + (videoGap * 4) + (photoGap * 4) - Math.min(review.length, 8);
 
       const row = {
@@ -66,6 +69,7 @@ export function buildExpansionPlan({ channels, assets, goals = DEFAULT_GOALS }) 
           searchCandidates: searchGap
         },
         nextAction,
+        recommendedSearch,
         providerPriority,
         priorityScore,
         complete: nextAction === 'complete'
@@ -90,13 +94,13 @@ export function buildExpansionPlan({ channels, assets, goals = DEFAULT_GOALS }) 
       completeCollections: rows.filter((row) => row.complete).length,
       reviewFirstCollections: rows.filter((row) => row.nextAction === 'review-first').length,
       searchCollections: rows.filter((row) => row.nextAction === 'search').length,
-      topPriorities: [...rows].filter((row) => row.nextAction === 'search').sort(comparePriority).slice(0, 5).map((row) => row.collection)
+      topPriorities: [...rows].filter((row) => row.nextAction !== 'complete').sort(comparePriority).slice(0, 5).map((row) => row.collection)
     });
   }
 
   const ordered = [...collections].sort(comparePriority);
   return {
-    version: 2,
+    version: 3,
     generatedAt: new Date().toISOString(),
     goals,
     summary: {
@@ -128,23 +132,51 @@ export function buildExpansionPlan({ channels, assets, goals = DEFAULT_GOALS }) 
       review: row.counts.review,
       target: goals.recommendedApprovedPerCollection,
       gaps: row.gaps,
+      mediaType: row.recommendedSearch.mediaType,
+      variant: row.recommendedSearch.variant,
+      primaryProvider: row.recommendedSearch.providers[0],
+      fallbackProviders: row.recommendedSearch.providers.slice(1),
       providers: row.providerPriority,
       queries: row.queries
     }))
   };
 }
 
-function providerPriorityFor({ searchGap, videoGap, photoGap, candidateVideos, candidatePhotos }) {
-  if (searchGap <= 0) return [];
-  const result = [];
-  if (videoGap > 0 || candidateVideos < 2) result.push('pexels', 'pixabay');
-  if (photoGap > 0 || candidatePhotos < 2) result.push('unsplash', 'openverse', 'wikimedia');
-  if (!result.length) result.push('pexels', 'pixabay', 'unsplash', 'openverse', 'wikimedia');
-  return [...new Set(result)];
+function searchRecommendation({ videoGap, photoGap, candidateVideos, candidatePhotos }) {
+  if (videoGap > 0 || candidateVideos < 2) {
+    return {
+      mediaType: 'video',
+      variant: 'video-vertical',
+      providers: ['pexels', 'pixabay'],
+      reason: 'Video-Bestand liegt unter dem Mindestmix; zuerst vertikale B-Rolls ergänzen.'
+    };
+  }
+  if (photoGap > 0 || candidatePhotos < 2) {
+    return {
+      mediaType: 'photo',
+      variant: 'photo-vertical',
+      providers: ['unsplash', 'openverse', 'wikimedia'],
+      reason: 'Foto-Bestand liegt unter dem Mindestmix; zuerst hochwertige Bilder ergänzen.'
+    };
+  }
+  if (candidateVideos <= candidatePhotos) {
+    return {
+      mediaType: 'video',
+      variant: 'video-vertical',
+      providers: ['pexels', 'pixabay'],
+      reason: 'Grundmix ist vorhanden; die kleinere Video-Seite des Bestands wird ergänzt.'
+    };
+  }
+  return {
+    mediaType: 'photo',
+    variant: 'photo-vertical',
+    providers: ['unsplash', 'openverse', 'wikimedia'],
+    reason: 'Grundmix ist vorhanden; die kleinere Foto-Seite des Bestands wird ergänzt.'
+  };
 }
 
 function comparePriority(a, b) {
-  const actionRank = { search: 0, 'review-first': 1, complete: 2 };
+  const actionRank = { 'review-first': 0, search: 1, complete: 2 };
   return (actionRank[a.nextAction] ?? 9) - (actionRank[b.nextAction] ?? 9) || b.priorityScore - a.priorityScore || a.counts.approved - b.counts.approved || a.counts.totalCandidates - b.counts.totalCandidates || a.channelLabel.localeCompare(b.channelLabel, 'de') || a.collectionLabel.localeCompare(b.collectionLabel, 'de');
 }
 
@@ -161,8 +193,23 @@ function main() {
   const reports = path.join(root, 'reports');
   fs.mkdirSync(reports, { recursive: true });
   fs.writeFileSync(path.join(reports, 'arsenal-expansion-plan.json'), `${JSON.stringify(plan, null, 2)}\n`);
-  const rows = [['Kanal','Sammlung','Aktion','Kandidaten','Freigegeben','Review','Such-Lücke','Video-Lücke','Foto-Lücke','Ziel-Lücke','Prioritätsquellen']];
-  for (const item of plan.priorities) rows.push([item.channelLabel,item.collectionLabel,item.nextAction,item.counts.totalCandidates,item.counts.approved,item.counts.review,item.gaps.searchCandidates,item.gaps.videos,item.gaps.photos,item.gaps.approved,item.providerPriority.join(' + ')]);
+  const rows = [['Kanal','Sammlung','Aktion','Medientyp','Variante','Primärquelle','Fallbacks','Kandidaten','Freigegeben','Review','Such-Lücke','Video-Lücke','Foto-Lücke','Ziel-Lücke']];
+  for (const item of plan.priorities) rows.push([
+    item.channelLabel,
+    item.collectionLabel,
+    item.nextAction,
+    item.recommendedSearch?.mediaType ?? '',
+    item.recommendedSearch?.variant ?? '',
+    item.providerPriority[0] ?? '',
+    item.providerPriority.slice(1).join(' + '),
+    item.counts.totalCandidates,
+    item.counts.approved,
+    item.counts.review,
+    item.gaps.searchCandidates,
+    item.gaps.videos,
+    item.gaps.photos,
+    item.gaps.approved
+  ]);
   fs.writeFileSync(path.join(reports, 'arsenal-expansion-plan.csv'), `${rows.map((row) => row.map(csv).join(',')).join('\n')}\n`);
   console.log(`Ausbauplan: ${plan.summary.approved}/${plan.summary.target} freigegeben · ${plan.summary.review} im Review · ${plan.summary.candidates} Kandidaten.`);
   console.log(`${plan.summary.reviewFirstCollections} Sammlungen zuerst prüfen · ${plan.summary.searchCollections} Sammlungen benötigen weitere Suche.`);
