@@ -83,21 +83,52 @@ export function createLocalArsenalApi({ root = process.cwd(), token } = {}) {
 }
 
 async function executeAndStoreSearch({ input, searchDirectory }) {
-  const searchId = createSearchId(input.provider, input.job);
+  const searchId = createSearchId();
   const file = path.join(searchDirectory, `${searchId}.json`);
-  if (input.provider === 'pixabay' && isFreshCache(file, PIXABAY_CACHE_MS)) return responsePayload(readJson(file), true);
-  const result = await searchProvider(input);
+  let result;
+  let cached = false;
+  let expiresAt = null;
+
+  if (input.provider === 'pixabay') {
+    const cacheDirectory = path.join(searchDirectory, 'pixabay-cache');
+    fs.mkdirSync(cacheDirectory, { recursive: true });
+    const cacheKey = createPixabayCacheKey(input.job);
+    const cacheFile = path.join(cacheDirectory, `${cacheKey}.json`);
+    const cachedEntry = readFreshPixabayCache(cacheFile, PIXABAY_CACHE_MS);
+    if (cachedEntry) {
+      result = cachedEntry.result;
+      cached = true;
+      expiresAt = cachedEntry.expiresAt;
+    } else {
+      result = await searchProvider(input);
+      expiresAt = new Date(Date.now() + PIXABAY_CACHE_MS).toISOString();
+      const cacheEntry = {
+        version: 1,
+        provider: 'pixabay',
+        cacheKey,
+        fetchedAt: new Date().toISOString(),
+        expiresAt,
+        request: pixabayCacheRequest(input.job),
+        result
+      };
+      fs.writeFileSync(cacheFile, `${JSON.stringify(cacheEntry, null, 2)}\n`, { mode: 0o600 });
+    }
+  } else {
+    result = await searchProvider(input);
+  }
+
   const wrapper = {
-    version: 5,
+    version: 6,
     searchId,
     provider: input.provider,
     searchedAt: new Date().toISOString(),
-    expiresAt: input.provider === 'pixabay' ? new Date(Date.now() + PIXABAY_CACHE_MS).toISOString() : null,
+    expiresAt,
+    cached,
     arsenalJob: input.job,
     result
   };
   fs.writeFileSync(file, `${JSON.stringify(wrapper, null, 2)}\n`, { mode: 0o600 });
-  return responsePayload(wrapper, false);
+  return responsePayload(wrapper, cached);
 }
 
 async function searchProvider(input) {
@@ -124,7 +155,7 @@ export function validateSearchPayload(payload, root = process.cwd()) {
   const perPageRequested = payload?.perPage === undefined ? undefined : integer(payload.perPage, 3, 20, 'perPage');
   const queryIndex = payload?.queryIndex === undefined ? 0 : integer(payload.queryIndex, 0, 7, 'queryIndex');
   const index = readJson(path.join(root, 'catalog', 'channels', 'index.json'));
-  const channelFile = (index.files ?? []).find((file) => path.basename(file, '.json') === channelId);
+  const channelFile = (index.files ?? []).find((entry) => path.basename(entry, '.json') === channelId);
   if (!channelFile) throw new Error(`Unbekannter Kanal: ${channelId}`);
   const channel = readJson(path.join(root, channelFile));
   const collection = (channel.collections ?? []).find((entry) => entry.id === collectionId);
@@ -163,15 +194,51 @@ export function validateImportPayload(payload) {
   return { searchId, ids, apiKey: payload?.apiKey };
 }
 
-function createSearchId(provider, job) {
-  if (provider === 'pixabay') {
-    const digest = createHash('sha256').update(JSON.stringify({ provider, query: job.query, type: job.type, orientation: job.orientation, perPage: job.perPage })).digest('hex');
-    return `ARS-${digest.slice(0, 16).toUpperCase()}`;
-  }
+export function createPixabayCacheKey(job) {
+  return createHash('sha256').update(JSON.stringify(pixabayCacheRequest(job))).digest('hex').slice(0, 32);
+}
+
+function pixabayCacheRequest(job) {
+  return {
+    query: job.query,
+    type: job.type,
+    orientation: job.orientation,
+    perPage: job.perPage,
+    locale: 'de',
+    page: 1
+  };
+}
+
+function createSearchId() {
   return `ARS-${randomBytes(8).toString('hex').toUpperCase()}`;
 }
-function isFreshCache(file, ttl) { if (!fs.existsSync(file)) return false; try { const stat = fs.statSync(file); const wrapper = readJson(file); return wrapper?.provider === 'pixabay' && Date.now() - stat.mtimeMs < ttl && Array.isArray(wrapper?.result?.assets); } catch { return false; } }
-function responsePayload(wrapper, cached) { return { ok: true, provider: wrapper.provider ?? wrapper.result?.provider ?? 'pexels', cached, searchId: wrapper.searchId, job: wrapper.arsenalJob, totalResults: wrapper.result.total_results, rateLimit: wrapper.result.rate_limit ?? null, assets: wrapper.result.assets }; }
+
+function readFreshPixabayCache(file, ttl) {
+  if (!fs.existsSync(file)) return null;
+  try {
+    const stat = fs.statSync(file);
+    const entry = readJson(file);
+    if (entry?.provider !== 'pixabay' || !Array.isArray(entry?.result?.assets)) return null;
+    if (Date.now() - stat.mtimeMs >= ttl) return null;
+    if (entry.expiresAt && Date.parse(entry.expiresAt) <= Date.now()) return null;
+    return entry;
+  } catch {
+    return null;
+  }
+}
+
+function responsePayload(wrapper, cached) {
+  return {
+    ok: true,
+    provider: wrapper.provider ?? wrapper.result?.provider ?? 'pexels',
+    cached,
+    searchId: wrapper.searchId,
+    job: wrapper.arsenalJob,
+    totalResults: wrapper.result.total_results,
+    rateLimit: wrapper.result.rate_limit ?? null,
+    assets: wrapper.result.assets
+  };
+}
 function runScript(root, script, args, envOverrides = {}) { const result = spawnSync(process.execPath, [script, ...args], { cwd: root, encoding: 'utf8', shell: false, maxBuffer: 4 * 1024 * 1024, env: { ...process.env, ...envOverrides } }); const output = `${result.stdout || ''}${result.stderr || ''}`.trim(); if (result.status !== 0) throw new Error(output || `${script} ist fehlgeschlagen.`); return output.slice(-10000); }
 async function readBody(request, limit) { const contentType = String(request.headers['content-type'] || '').split(';')[0].trim(); if (contentType !== 'application/json') throw new Error('Content-Type muss application/json sein.'); const chunks = []; let size = 0; for await (const chunk of request) { size += chunk.length; if (size > limit) throw new Error('Anfrage ist zu groß.'); chunks.push(chunk); } try { return JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}'); } catch { throw new Error('JSON konnte nicht gelesen werden.'); } }
 function sameOrigin(request) { const origin = request.headers.origin; if (!origin) return true; try { const parsed = new URL(origin); return parsed.protocol === 'http:' && parsed.host === request.headers.host; } catch { return false; } }
