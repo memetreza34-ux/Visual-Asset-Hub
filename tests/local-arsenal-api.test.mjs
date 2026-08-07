@@ -46,15 +46,15 @@ test('Batch-Suche akzeptiert höchstens fünf eindeutige Sammlungen', () => {
   const batch = validateBatchSearchPayload({
     provider: 'openverse',
     channel: 'finance',
-    collections: ['cash-money', 'stock-market', 'banking'],
+    collections: ['cash-money', 'budgeting-saving', 'banking-cards'],
     variant: 'photo-vertical',
     queryIndex: 0,
     perPage: 8
   }, root);
   assert.equal(batch.length, 3);
-  assert.deepEqual(batch.map((item) => item.job.collection), ['cash-money', 'stock-market', 'banking']);
+  assert.deepEqual(batch.map((item) => item.job.collection), ['cash-money', 'budgeting-saving', 'banking-cards']);
   assert.throws(() => validateBatchSearchPayload({ provider: 'openverse', channel: 'finance', collections: ['cash-money', 'cash-money'], variant: 'photo-vertical' }, root), /Duplikate/);
-  assert.throws(() => validateBatchSearchPayload({ provider: 'openverse', channel: 'finance', collections: ['cash-money', 'stock-market', 'banking', 'crypto', 'inflation', 'budgeting'], variant: 'photo-vertical' }, root), /1 bis 5/);
+  assert.throws(() => validateBatchSearchPayload({ provider: 'openverse', channel: 'finance', collections: ['cash-money', 'budgeting-saving', 'banking-cards', 'investing-stocks', 'trading-charts', 'crypto-blockchain'], variant: 'photo-vertical' }, root), /1 bis 5/);
 });
 
 test('Pexels bleibt die Standardquelle für bestehende Aufrufe', () => {
