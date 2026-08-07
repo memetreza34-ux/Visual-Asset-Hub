@@ -2,20 +2,12 @@ name: Katalog-Testversion bauen
 
 on:
   workflow_dispatch:
-  pull_request:
-    branches: [main]
-    paths:
-      - "web/**"
-      - "catalog/**"
-      - "assets/**"
-      - "previews/**"
-      - "scripts/build-site.mjs"
 
 permissions:
   contents: read
 
 concurrency:
-  group: visual-asset-hub-preview-${{ github.event.pull_request.number || github.ref }}
+  group: visual-asset-hub-preview-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
