@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
 import process from 'node:process';
 import test from 'node:test';
-import { validateBatchSearchPayload, validateImportPayload, validateSearchPayload } from '../scripts/local-arsenal-api.mjs';
+import { createPixabayCacheKey, validateBatchSearchPayload, validateImportPayload, validateSearchPayload } from '../scripts/local-arsenal-api.mjs';
 
 const root = process.cwd();
 
@@ -55,6 +57,20 @@ test('Batch-Suche akzeptiert höchstens fünf eindeutige Sammlungen', () => {
   assert.deepEqual(batch.map((item) => item.job.collection), ['cash-money', 'budgeting-saving', 'banking-cards']);
   assert.throws(() => validateBatchSearchPayload({ provider: 'openverse', channel: 'finance', collections: ['cash-money', 'cash-money'], variant: 'photo-vertical' }, root), /Duplikate/);
   assert.throws(() => validateBatchSearchPayload({ provider: 'openverse', channel: 'finance', collections: ['cash-money', 'budgeting-saving', 'banking-cards', 'investing-stocks', 'trading-charts', 'crypto-blockchain'], variant: 'photo-vertical' }, root), /1 bis 5/);
+});
+
+test('Pixabay cachet nur API-Parameter und niemals Kanal- oder Sammlungsmetadaten', () => {
+  const common = { query: 'same stock query', type: 'video', orientation: 'vertical', perPage: 12 };
+  const first = createPixabayCacheKey({ ...common, channel: 'finance', collection: 'cash-money', id: 'finance-cash' });
+  const second = createPixabayCacheKey({ ...common, channel: 'combat-sports', collection: 'boxing-training', id: 'combat-boxing' });
+  assert.equal(first, second, 'identische Pixabay-API-Anfragen sollen denselben 24h-Cache verwenden');
+  assert.match(first, /^[a-f0-9]{32}$/);
+
+  const source = fs.readFileSync(path.join(root, 'scripts/local-arsenal-api.mjs'), 'utf8');
+  assert.match(source, /pixabay-cache/);
+  assert.match(source, /arsenalJob:\s*input\.job/);
+  assert.match(source, /const searchId = createSearchId\(\)/);
+  assert.doesNotMatch(source, /return `ARS-\$\{digest\.slice/);
 });
 
 test('Pexels bleibt die Standardquelle für bestehende Aufrufe', () => {
