@@ -61,6 +61,16 @@ test('Beta-Fortschritt und Testbericht sind in der Oberfläche verknüpft', () =
   assert.match(releaseStatus, /nextActions/);
 });
 
+test('Ausbau-720-Dashboard ist vollständig verknüpft', () => {
+  assert.match(indexHtml, /id="expansion-dashboard"/);
+  assert.match(indexHtml, /expansion-dashboard\.js/);
+  assert.match(indexHtml, /expansion-dashboard\.css/);
+  const dashboard = fs.readFileSync(path.join(webRoot, 'expansion-dashboard.js'), 'utf8');
+  assert.match(dashboard, /720|target/);
+  assert.match(dashboard, /vah:arsenal-select/);
+  for (const provider of ['Pexels', 'Pixabay', 'Unsplash', 'Openverse', 'Wikimedia']) assert.match(dashboard, new RegExp(provider));
+});
+
 test('lokaler Server ist auf Loopback und strikte Browser-Sicherheit ausgelegt', () => {
   assert.match(server, /127\.0\.0\.1/);
   assert.match(server, /Content-Security-Policy/);
