@@ -39,7 +39,7 @@ function render(channels, records) {
   copy.append(
     text('span', 'Ausbauplan', 'eyebrow'),
     text('h2', `${approved}/${target} freigegebene Assets`),
-    text('p', `${candidates} Kandidaten vorhanden · ${review} warten auf Review · ${percent}% des empfohlenen Gesamtziels. Der Hub erkennt zusätzlich Video- und Fotolücken und schlägt automatisch eine passende Quelle vor.`)
+    text('p', `${candidates} Kandidaten vorhanden · ${review} warten auf Review · ${percent}% des empfohlenen Gesamtziels. Der Hub prüft vorhandene Kandidaten zuerst und sucht nur nach, wenn der Review-Vorrat für eine Sammlung nicht reicht.`)
   );
   const overall = document.createElement('div');
   overall.className = 'expansion-overall';
@@ -53,9 +53,9 @@ function render(channels, records) {
   const strategy = document.createElement('div');
   strategy.className = 'expansion-strategy';
   strategy.append(
-    strategyItem('Video-Lücke', 'Pexels → Pixabay', 'Hochformat-B-Rolls werden für Reel-Produktion zuerst priorisiert.'),
-    strategyItem('Foto-Lücke', 'Unsplash', 'hochwertige moderne Fotos als erste Bildquelle'),
-    strategyItem('Offene Alternative', 'Openverse + Wikimedia', 'CC/Public-Domain für Nischenmotive und Ergänzungen')
+    strategyItem('1. Review', 'Vorhandene Kandidaten', 'bereits importierte Assets zuerst prüfen und freigeben oder aussortieren'),
+    strategyItem('2. Video-Lücke', 'Pexels → Pixabay', 'Hochformat-B-Rolls werden für Reel-Produktion zuerst ergänzt'),
+    strategyItem('3. Foto-Lücke', 'Unsplash → Openverse/Wikimedia', 'hochwertige oder offen lizenzierte Bilder ergänzen')
   );
   section.replaceChildren(header, grid, strategy);
 }
@@ -84,6 +84,9 @@ function summarizeChannel(channel, records) {
     .filter((row) => row.searchGap > 0)
     .sort((a, b) => (b.videoGap + b.photoGap) - (a.videoGap + a.photoGap) || b.searchGap - a.searchGap || b.gap - a.gap || a.approved - b.approved || a.candidates - b.candidates || a.collection.label.localeCompare(b.collection.label, 'de'))
     .slice(0, 10);
+  const reviewWeakest = [...collections]
+    .filter((row) => row.gap > 0 && row.review > 0 && row.searchGap === 0)
+    .sort((a, b) => b.gap - a.gap || b.review - a.review || a.approved - b.approved || a.collection.label.localeCompare(b.collection.label, 'de'));
   const batch = smartBatch(searchWeakest);
   return {
     channel,
@@ -95,6 +98,7 @@ function summarizeChannel(channel, records) {
     percent: target ? Math.min(100, Math.round((approved / target) * 100)) : 100,
     weakest,
     searchWeakest,
+    reviewWeakest,
     batch
   };
 }
@@ -113,20 +117,17 @@ function channelCard(row) {
   for (const item of row.weakest) {
     const button = document.createElement('button');
     button.type = 'button';
-    const media = item.recommendation.mediaType === 'video' ? 'Video' : 'Foto';
-    button.append(text('span', `${item.collection.label} · ${media}/${providerLabel(item.recommendation.provider)}`), text('b', `${item.approved}/${targetPerCollection} · ${item.review} R`));
-    button.title = `${row.channel.label} / ${item.collection.label}: ${item.recommendation.reason}`;
-    button.addEventListener('click', () => {
-      window.dispatchEvent(new CustomEvent('vah:arsenal-select', {
-        detail: {
-          channel: row.channel.id,
-          collection: item.collection.id,
-          provider: item.recommendation.provider,
-          variant: item.recommendation.variant
-        }
-      }));
-      document.querySelector('#arsenal-builder')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
+    const hasReviewStock = item.review > 0 && item.searchGap === 0;
+    if (hasReviewStock) {
+      button.append(text('span', `${item.collection.label} · Review zuerst`), text('b', `${item.approved}/${targetPerCollection} · ${item.review} R`));
+      button.title = `${row.channel.label} / ${item.collection.label}: vorhandene Review-Kandidaten reichen zunächst aus.`;
+      button.addEventListener('click', () => openReview(row.channel.id, item.collection.id));
+    } else {
+      const media = item.recommendation.mediaType === 'video' ? 'Video' : 'Foto';
+      button.append(text('span', `${item.collection.label} · ${media}/${providerLabel(item.recommendation.provider)}`), text('b', `${item.approved}/${targetPerCollection} · ${item.review} R`));
+      button.title = `${row.channel.label} / ${item.collection.label}: ${item.recommendation.reason}`;
+      button.addEventListener('click', () => openSearch(row.channel.id, item));
+    }
     list.append(button);
   }
   if (!row.weakest.length) list.append(text('span', 'Empfohlenes Ziel erreicht.'));
@@ -134,30 +135,47 @@ function channelCard(row) {
   const batch = document.createElement('button');
   batch.type = 'button';
   batch.className = 'expansion-batch-button';
-  if (row.batch.items.length) {
+  if (row.reviewWeakest.length) {
+    batch.textContent = `${row.reviewWeakest.length} priorisierte Review-Sammlungen prüfen`;
+    batch.addEventListener('click', () => openReview(row.channel.id));
+  } else if (row.batch.items.length) {
     const media = row.batch.mediaType === 'video' ? 'Video' : 'Foto';
     batch.textContent = `${row.batch.items.length} ${media}-Suchlücken mit ${providerLabel(row.batch.provider)} vorbereiten`;
-  } else if (row.review > 0 && row.approved < row.target) {
-    batch.textContent = 'Erst vorhandene Reviews prüfen';
+    batch.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('vah:arsenal-batch-select', {
+        detail: {
+          channel: row.channel.id,
+          collections: row.batch.items.map((item) => item.collection.id),
+          provider: row.batch.provider,
+          variant: row.batch.variant
+        }
+      }));
+      document.querySelector('#arsenal-builder')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   } else {
     batch.textContent = 'Kanal vollständig';
+    batch.disabled = true;
   }
-  batch.disabled = row.batch.items.length === 0;
-  batch.addEventListener('click', () => {
-    if (!row.batch.items.length) return;
-    window.dispatchEvent(new CustomEvent('vah:arsenal-batch-select', {
-      detail: {
-        channel: row.channel.id,
-        collections: row.batch.items.map((item) => item.collection.id),
-        provider: row.batch.provider,
-        variant: row.batch.variant
-      }
-    }));
-    document.querySelector('#arsenal-builder')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
 
   card.append(title, list, batch);
   return card;
+}
+
+function openReview(channel, collection) {
+  window.dispatchEvent(new CustomEvent('vah:review-focus', { detail: { channel, collection } }));
+  document.querySelector('#review-queue')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function openSearch(channel, item) {
+  window.dispatchEvent(new CustomEvent('vah:arsenal-select', {
+    detail: {
+      channel,
+      collection: item.collection.id,
+      provider: item.recommendation.provider,
+      variant: item.recommendation.variant
+    }
+  }));
+  document.querySelector('#arsenal-builder')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function recommendSearch({ videos, photos, videoGap, photoGap }) {
