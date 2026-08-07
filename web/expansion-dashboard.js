@@ -98,7 +98,20 @@ function channelCard(row) {
     list.append(button);
   }
   if (!row.weakest.length) list.append(text('span', 'Empfohlenes Ziel erreicht.'));
-  card.append(title, list);
+
+  const batch = document.createElement('button');
+  batch.type = 'button';
+  batch.className = 'expansion-batch-button';
+  batch.textContent = row.weakest.length ? `Top ${row.weakest.length} Lücken vorbereiten` : 'Kanal vollständig';
+  batch.disabled = row.weakest.length === 0;
+  batch.addEventListener('click', () => {
+    window.dispatchEvent(new CustomEvent('vah:arsenal-batch-select', {
+      detail: { channel: row.channel.id, collections: row.weakest.map((item) => item.collection.id) }
+    }));
+    document.querySelector('#arsenal-builder')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  card.append(title, list, batch);
   return card;
 }
 
