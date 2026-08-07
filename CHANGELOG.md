@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.4.0-beta.3 – Erweiterungen 2026-08-07
+## 0.4.0-beta.4 – 2026-08-07
 
 ### Neu
 
@@ -11,10 +11,19 @@
 - konservativer Open-Lizenzfilter für Public Domain, CC0, CC BY und CC BY-SA
 - `cc-by-sa` als eigener Lizenzstatus mit verpflichtender Attribution und Share-Alike-Hinweis
 - Batch-Suche für bis zu fünf Sammlungen pro Durchlauf
+- gesamter Suchbatch kann über alle Ergebnisgruppen markiert und sequenziell als `review` importiert werden
+- bereits importierte Batch-Karten werden gesperrt und sichtbar als importiert markiert
+- manueller Quellen-Fallback mit gleicher Sammlung, gleichem Format und gleichem Suchbegriff
+- Video-Fallbackkette: Pexels → Pixabay
+- Foto-Fallbackkette: Unsplash → Openverse → Wikimedia Commons → Pexels → Pixabay
 - Ausbau-720-Dashboard mit Fortschritt für Finanzen, KI, Elektrotechnik und Kampfsport
-- priorisierte Top-Suchlücken können direkt an den Arsenal Builder übergeben werden
-- neuer CLI-Ausbauplan über `npm run arsenal:expansion` als JSON und CSV
-- Review-first-Logik: vorhandene ungeprüfte Kandidaten reduzieren die Suchlücke und verhindern unnötige Nachsuche
+- Smart-Medienmix erkennt Video- und Fotolücken pro Sammlung
+- priorisierte Top-Suchlücken können mit empfohlener Quelle und Format direkt an den Arsenal Builder übergeben werden
+- Ausbau-Dashboard leitet Sammlungen mit ausreichendem Review-Vorrat direkt in die Review-Warteschlange
+- Review-Warteschlange mit Sammlungsfilter und Sortierung **Größter Ausbau-Effekt**
+- sichtbare Review-Priorität aus Freigabelücke, Medienmix, Qualität und dokumentiertem Rechte-Status
+- CLI-Ausbauplan Version 3 über `npm run arsenal:expansion` als JSON und CSV
+- CLI-Ausbauplan unterscheidet `review-first`, `search` und `complete` und nennt Primär- sowie Fallbackquelle
 - Pexels-, Pixabay- und Unsplash-Keys können nur für die aktuelle Browserseite im Arbeitsspeicher gehalten werden
 - Schaltfläche **Sitzungs-Keys löschen** entfernt alle gespeicherten Provider-Keys sofort aus dem Arbeitsspeicher
 - CC-BY-SA-4.0-Kampfsport-Starter `VAH-WBOX2021` aus Wikimedia Commons
@@ -28,21 +37,31 @@
 - Wikimedia filtert nicht unterstützte MIME-Typen und unklare Lizenztypen vor dem Import
 - API-Keys werden weder in `localStorage` noch in `sessionStorage` geschrieben
 - priorisierte Batches verwenden konkrete Sammlungs-IDs statt nur fünf benachbarte Sammlungen
-- GitHub-Workflows lösen weniger doppelte Prüfungen pro Commit aus
+- Review-first steht vor neuer API-Suche, wenn bereits genug Kandidaten vorhanden sind
+- tatsächliche Importzahl und übersprungene Dubletten werden getrennt gemeldet
+- Openverse- und Wikimedia-Importe erkennen Dubletten zusätzlich über die Original-Medien-URL
+- Batch-Import lädt die Seite erst nach Abschluss aller ausgewählten Gruppen einmal neu
+- alle GitHub-Actions-Workflows sind auf `workflow_dispatch` beschränkt; Push-, Pull-Request- und Schedule-Trigger sind entfernt
+- lokaler Regressionstest blockiert die erneute Einführung automatischer GitHub-Actions-Trigger
 
 ### Fehlerbehebungen
 
 - Pixabay-API-Cache und Import-Suchergebnis sind getrennt: dieselbe gecachte API-Antwort kann wiederverwendet werden, ohne Kanal- oder Sammlungsmetadaten eines anderen Jobs zu übernehmen
+- Unsplash-Import kann nach **Sitzungs-Keys löschen** keinen alten Schlüssel aus einem bereits gerenderten Ergebnis weiterverwenden
+- Batch-Ergebnisse bleiben nach dem Import einer einzelnen Gruppe erhalten und können weiter bearbeitet werden
 - Startseite leitet stabil auf `/web/` um, damit CSS- und JavaScript-Pfade korrekt aufgelöst werden
 - lokale Tests für IPv4-gemappte IPv6-Adressen, neue Themenkategorien und gemeinsame Schreibsperren korrigiert
 
-### Sicherheit
+### Sicherheit und Kostenkontrolle
 
 - alle externen Importe bleiben bis zur manuellen Sichtprüfung auf `review`
+- auch die Ausbau-Priorität löst niemals eine automatische Freigabe aus
 - Openverse und Wikimedia übernehmen nur eindeutig unterstützte offene Lizenztypen
 - CC BY und CC BY-SA erzwingen dokumentierte Attribution
 - sichtbare Personen, Marken, Logos und Nutzungskontext bleiben auch bei offenen Lizenzen Pflichtprüfung
-- GitHub-Actions-Runner-Blocker ist als externer Billing-/Spending-Blocker dokumentiert; die Beta-Abnahme erfolgt lokal ohne zusätzliche Actions-Kosten
+- Quellen-Fallbacks werden nur vorbereitet und starten keine API-Anfrage ohne ausdrücklichen Klick
+- GitHub Actions startet im Beta-Branch nicht automatisch durch Push, Pull Request oder Zeitplan
+- die vollständige Beta-Abnahme erfolgt lokal auf dem Mac; GitHub-hosted Runner sind für die Abnahme nicht erforderlich
 
 ## 0.4.0-beta.3 – 2026-08-06
 
