@@ -26,6 +26,7 @@ async function init() {
 function render({ health, channelIndex, channels }) {
   section.hidden = false;
   const allVariants = channelIndex.variants ?? [];
+  let plannedBatchCollections = [];
   const header = document.createElement('div');
   header.className = 'builder-header';
   const headerContent = document.createElement('div');
@@ -71,7 +72,15 @@ function render({ health, channelIndex, channels }) {
   updateCollections();
   updateVariants();
   updateProviderCopy();
-  channel.input.addEventListener('change', updateCollections);
+  channel.input.addEventListener('change', () => {
+    plannedBatchCollections = [];
+    updateCollections();
+    updateBatchButtonCopy();
+  });
+  collection.input.addEventListener('change', () => {
+    plannedBatchCollections = [];
+    updateBatchButtonCopy();
+  });
   apiKey.input.addEventListener('input', () => {
     const value = apiKey.input.value.trim();
     if (!keylessProviders.has(provider.input.value) && value) sessionKeys.set(provider.input.value, value);
@@ -96,14 +105,35 @@ function render({ health, channelIndex, channels }) {
     const detail = event.detail ?? {};
     const selectedChannel = channels.find((item) => item.id === detail.channel);
     if (!selectedChannel) return;
+    plannedBatchCollections = [];
     channel.input.value = selectedChannel.id;
     updateCollections();
     if (selectedChannel.collections.some((item) => item.id === detail.collection)) collection.input.value = detail.collection;
     const preferred = [...variant.input.options].find((option) => option.value === 'video-vertical') ?? variant.input.options[0];
     if (preferred) variant.input.value = preferred.value;
     queryIndex.input.value = '0';
+    updateBatchButtonCopy();
     const selectedCollection = selectedChannel.collections.find((item) => item.id === collection.input.value);
     showStatus(status, `${selectedChannel.label} / ${selectedCollection?.label ?? collection.input.value} wurde vorbereitet.`, true);
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTimeout(() => (apiKey.wrapper.hidden ? provider.input : apiKey.input).focus({ preventScroll: true }), 500);
+  });
+
+  window.addEventListener('vah:arsenal-batch-select', (event) => {
+    const detail = event.detail ?? {};
+    const selectedChannel = channels.find((item) => item.id === detail.channel);
+    if (!selectedChannel || !Array.isArray(detail.collections)) return;
+    const valid = [...new Set(detail.collections.map(String))]
+      .filter((id) => selectedChannel.collections.some((item) => item.id === id))
+      .slice(0, Math.min(5, health.maxBatchCollections ?? 5));
+    if (!valid.length) return;
+    plannedBatchCollections = valid;
+    channel.input.value = selectedChannel.id;
+    updateCollections();
+    collection.input.value = valid[0];
+    queryIndex.input.value = '0';
+    updateBatchButtonCopy();
+    showStatus(status, `${valid.length} priorisierte Lücken für ${selectedChannel.label} wurden als Batch vorbereitet. Quelle und Format wählen, dann Batch starten.`, true);
     section.scrollIntoView({ behavior: 'smooth', block: 'start' });
     setTimeout(() => (apiKey.wrapper.hidden ? provider.input : apiKey.input).focus({ preventScroll: true }), 500);
   });
@@ -141,7 +171,8 @@ function render({ health, channelIndex, channels }) {
     if (transientApiKey === null) return;
     const selectedChannel = channels.find((item) => item.id === channel.input.value) ?? channels[0];
     const start = Math.max(0, selectedChannel.collections.findIndex((item) => item.id === collection.input.value));
-    const collections = selectedChannel.collections.slice(start, start + Math.min(5, health.maxBatchCollections ?? 5)).map((item) => item.id);
+    const fallbackCollections = selectedChannel.collections.slice(start, start + Math.min(5, health.maxBatchCollections ?? 5)).map((item) => item.id);
+    const collections = plannedBatchCollections.length ? [...plannedBatchCollections] : fallbackCollections;
     submit.disabled = true;
     batchSubmit.disabled = true;
     resultArea.replaceChildren();
@@ -150,6 +181,8 @@ function render({ health, channelIndex, channels }) {
       const data = await post('/arsenal-api/batch-search', { ...searchPayload(transientApiKey), collections }, health.token);
       apiKey.input.value = '';
       updateKeyPlaceholder();
+      plannedBatchCollections = [];
+      updateBatchButtonCopy();
       showStatus(status, `${data.assets} Treffer aus ${data.collections} Sammlungen geladen. Nichts wurde automatisch freigegeben.`, true);
       renderBatchResults(resultArea, data.groups, health.token, data.provider === 'unsplash' ? transientApiKey : '');
     } catch (error) {
@@ -212,8 +245,15 @@ function render({ health, channelIndex, channels }) {
     apiKey.input.value = '';
     apiKey.wrapper.querySelector('span').textContent = `${name} API-Key`;
     submit.textContent = `${name} durchsuchen`;
-    batchSubmit.textContent = `5 Sammlungen mit ${name} durchsuchen`;
+    updateBatchButtonCopy();
     updateKeyPlaceholder();
+  }
+
+  function updateBatchButtonCopy() {
+    const name = providerLabel(provider.input.value);
+    batchSubmit.textContent = plannedBatchCollections.length
+      ? `${plannedBatchCollections.length} priorisierte Sammlungen mit ${name} durchsuchen`
+      : `5 Sammlungen mit ${name} durchsuchen`;
   }
 
   function updateKeyPlaceholder() {
@@ -229,10 +269,10 @@ function renderBatchResults(container, groups, token, transientApiKey) {
   const wrapper = document.createElement('div');
   wrapper.className = 'builder-batch-results';
   for (const group of groups) {
-    const section = document.createElement('section');
-    section.className = 'builder-batch-group';
-    renderResults(section, group, token, group.provider === 'unsplash' ? transientApiKey : '');
-    wrapper.append(section);
+    const groupSection = document.createElement('section');
+    groupSection.className = 'builder-batch-group';
+    renderResults(groupSection, group, token, group.provider === 'unsplash' ? transientApiKey : '');
+    wrapper.append(groupSection);
   }
   container.replaceChildren(title, wrapper);
 }
