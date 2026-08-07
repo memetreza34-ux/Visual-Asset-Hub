@@ -2,11 +2,6 @@ name: Unsplash API prüfen
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - agent/beta-release
-    paths:
-      - .github/workflows/unsplash-key-check.yml
 
 permissions:
   contents: read
