@@ -26,9 +26,7 @@ export function createLocalArsenalApi({ root = process.cwd(), token } = {}) {
       if (!url.pathname.startsWith('/arsenal-api/')) return false;
       setHeaders(response);
       if (!isLoopback(request.socket.remoteAddress)) return sendJson(response, 403, { error: 'Die Arsenal-API ist ausschließlich lokal erreichbar.' });
-      if (request.method === 'GET' && url.pathname === '/arsenal-api/health') {
-        return sendJson(response, 200, { ok: true, local: true, providers: PROVIDERS });
-      }
+      if (request.method === 'GET' && url.pathname === '/arsenal-api/health') return sendJson(response, 200, { ok: true, local: true, providers: PROVIDERS, maxBatchCollections: 5 });
       if (request.method !== 'POST') return sendJson(response, 405, { error: 'Nur POST ist für diese Aktion erlaubt.' });
       if (!sameOrigin(request)) return sendJson(response, 403, { error: 'Ungültiger Ursprung.' });
       if (request.headers['x-vah-token'] !== token) return sendJson(response, 403, { error: 'Ungültiges lokales Verwaltungstoken.' });
@@ -40,41 +38,25 @@ export function createLocalArsenalApi({ root = process.cwd(), token } = {}) {
 
       busy = true;
       try {
+        fs.mkdirSync(searchDirectory, { recursive: true });
+
         if (url.pathname === '/arsenal-api/search') {
           const input = validateSearchPayload(payload, root);
-          fs.mkdirSync(searchDirectory, { recursive: true });
-          const searchId = createSearchId(input.provider, input.job);
-          const file = path.join(searchDirectory, `${searchId}.json`);
+          const data = await executeAndStoreSearch({ input, searchDirectory });
+          return sendJson(response, 200, data);
+        }
 
-          if (input.provider === 'pixabay' && isFreshCache(file, PIXABAY_CACHE_MS)) {
-            const wrapper = readJson(file);
-            return sendJson(response, 200, responsePayload(wrapper, true));
-          }
-
-          let result;
-          if (input.provider === 'pixabay') {
-            result = await searchPixabay({ apiKey: input.apiKey, query: input.job.query, type: input.job.type, orientation: input.job.orientation, locale: 'de', page: 1, perPage: input.job.perPage });
-          } else if (input.provider === 'unsplash') {
-            result = await searchUnsplash({ apiKey: input.apiKey, query: input.job.query, orientation: input.job.orientation, page: 1, perPage: input.job.perPage, contentFilter: 'high' });
-          } else if (input.provider === 'openverse') {
-            result = await searchOpenverse({ query: input.job.query, orientation: input.job.orientation, page: 1, perPage: input.job.perPage });
-          } else if (input.provider === 'wikimedia') {
-            result = await searchWikimedia({ query: input.job.query, orientation: input.job.orientation, page: 1, perPage: input.job.perPage });
-          } else {
-            result = await searchPexels({ apiKey: input.apiKey, query: input.job.query, type: input.job.type, orientation: input.job.orientation, locale: 'de-DE', page: 1, perPage: input.job.perPage });
-          }
-
-          const wrapper = {
-            version: 4,
-            searchId,
-            provider: input.provider,
-            searchedAt: new Date().toISOString(),
-            expiresAt: input.provider === 'pixabay' ? new Date(Date.now() + PIXABAY_CACHE_MS).toISOString() : null,
-            arsenalJob: input.job,
-            result
-          };
-          fs.writeFileSync(file, `${JSON.stringify(wrapper, null, 2)}\n`, { mode: 0o600 });
-          return sendJson(response, 200, responsePayload(wrapper, false));
+        if (url.pathname === '/arsenal-api/batch-search') {
+          const inputs = validateBatchSearchPayload(payload, root);
+          const groups = [];
+          for (const input of inputs) groups.push(await executeAndStoreSearch({ input, searchDirectory }));
+          return sendJson(response, 200, {
+            ok: true,
+            provider: inputs[0]?.provider,
+            groups,
+            collections: groups.length,
+            assets: groups.reduce((sum, group) => sum + group.assets.length, 0)
+          });
         }
 
         if (url.pathname === '/arsenal-api/import') {
@@ -100,6 +82,39 @@ export function createLocalArsenalApi({ root = process.cwd(), token } = {}) {
   };
 }
 
+async function executeAndStoreSearch({ input, searchDirectory }) {
+  const searchId = createSearchId(input.provider, input.job);
+  const file = path.join(searchDirectory, `${searchId}.json`);
+  if (input.provider === 'pixabay' && isFreshCache(file, PIXABAY_CACHE_MS)) return responsePayload(readJson(file), true);
+  const result = await searchProvider(input);
+  const wrapper = {
+    version: 5,
+    searchId,
+    provider: input.provider,
+    searchedAt: new Date().toISOString(),
+    expiresAt: input.provider === 'pixabay' ? new Date(Date.now() + PIXABAY_CACHE_MS).toISOString() : null,
+    arsenalJob: input.job,
+    result
+  };
+  fs.writeFileSync(file, `${JSON.stringify(wrapper, null, 2)}\n`, { mode: 0o600 });
+  return responsePayload(wrapper, false);
+}
+
+async function searchProvider(input) {
+  if (input.provider === 'pixabay') return searchPixabay({ apiKey: input.apiKey, query: input.job.query, type: input.job.type, orientation: input.job.orientation, locale: 'de', page: 1, perPage: input.job.perPage });
+  if (input.provider === 'unsplash') return searchUnsplash({ apiKey: input.apiKey, query: input.job.query, orientation: input.job.orientation, page: 1, perPage: input.job.perPage, contentFilter: 'high' });
+  if (input.provider === 'openverse') return searchOpenverse({ query: input.job.query, orientation: input.job.orientation, page: 1, perPage: input.job.perPage });
+  if (input.provider === 'wikimedia') return searchWikimedia({ query: input.job.query, orientation: input.job.orientation, page: 1, perPage: input.job.perPage });
+  return searchPexels({ apiKey: input.apiKey, query: input.job.query, type: input.job.type, orientation: input.job.orientation, locale: 'de-DE', page: 1, perPage: input.job.perPage });
+}
+
+export function validateBatchSearchPayload(payload, root = process.cwd()) {
+  if (!Array.isArray(payload?.collections) || payload.collections.length < 1 || payload.collections.length > 5) throw new Error('collections benötigt 1 bis 5 Sammlungen.');
+  const collections = [...new Set(payload.collections.map((value) => String(value).trim()))];
+  if (collections.length !== payload.collections.length) throw new Error('collections enthält Duplikate.');
+  return collections.map((collection) => validateSearchPayload({ ...payload, collection }, root));
+}
+
 export function validateSearchPayload(payload, root = process.cwd()) {
   const provider = requireMember(payload?.provider ?? 'pexels', PROVIDERS, 'provider');
   const apiKey = KEYLESS_PROVIDERS.has(provider) ? '' : requireText(payload?.apiKey, 'apiKey', 8, 300);
@@ -116,9 +131,7 @@ export function validateSearchPayload(payload, root = process.cwd()) {
   if (!collection) throw new Error(`Unbekannte Sammlung: ${channelId}/${collectionId}`);
   const variant = (index.variants ?? []).find((entry) => entry.id === variantId);
   if (!variant) throw new Error(`Unbekannte Variante: ${variantId}`);
-  if (PHOTO_ONLY_PROVIDERS.has(provider) && variant.type !== 'photo') {
-    throw new Error(`${providerLabel(provider)} bietet in diesem Builder nur Bilder an. Bitte ein Fotoformat wählen.`);
-  }
+  if (PHOTO_ONLY_PROVIDERS.has(provider) && variant.type !== 'photo') throw new Error(`${providerLabel(provider)} bietet in diesem Builder nur Bilder an. Bitte ein Fotoformat wählen.`);
   const query = collection.queries[queryIndex % collection.queries.length];
   const perPage = Math.min(20, Math.max(3, perPageRequested ?? variant.perPage ?? 15));
   return {
@@ -157,12 +170,7 @@ function createSearchId(provider, job) {
   }
   return `ARS-${randomBytes(8).toString('hex').toUpperCase()}`;
 }
-
-function isFreshCache(file, ttl) {
-  if (!fs.existsSync(file)) return false;
-  try { const stat = fs.statSync(file); const wrapper = readJson(file); return wrapper?.provider === 'pixabay' && Date.now() - stat.mtimeMs < ttl && Array.isArray(wrapper?.result?.assets); }
-  catch { return false; }
-}
+function isFreshCache(file, ttl) { if (!fs.existsSync(file)) return false; try { const stat = fs.statSync(file); const wrapper = readJson(file); return wrapper?.provider === 'pixabay' && Date.now() - stat.mtimeMs < ttl && Array.isArray(wrapper?.result?.assets); } catch { return false; } }
 function responsePayload(wrapper, cached) { return { ok: true, provider: wrapper.provider ?? wrapper.result?.provider ?? 'pexels', cached, searchId: wrapper.searchId, job: wrapper.arsenalJob, totalResults: wrapper.result.total_results, rateLimit: wrapper.result.rate_limit ?? null, assets: wrapper.result.assets }; }
 function runScript(root, script, args, envOverrides = {}) { const result = spawnSync(process.execPath, [script, ...args], { cwd: root, encoding: 'utf8', shell: false, maxBuffer: 4 * 1024 * 1024, env: { ...process.env, ...envOverrides } }); const output = `${result.stdout || ''}${result.stderr || ''}`.trim(); if (result.status !== 0) throw new Error(output || `${script} ist fehlgeschlagen.`); return output.slice(-10000); }
 async function readBody(request, limit) { const contentType = String(request.headers['content-type'] || '').split(';')[0].trim(); if (contentType !== 'application/json') throw new Error('Content-Type muss application/json sein.'); const chunks = []; let size = 0; for await (const chunk of request) { size += chunk.length; if (size > limit) throw new Error('Anfrage ist zu groß.'); chunks.push(chunk); } try { return JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}'); } catch { throw new Error('JSON konnte nicht gelesen werden.'); } }
