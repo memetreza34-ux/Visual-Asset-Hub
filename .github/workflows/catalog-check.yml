@@ -2,14 +2,15 @@ name: Catalog Check
 
 on:
   push:
-    branches: [main, "agent/**", "codex/**"]
+    branches: [main]
   pull_request:
+    branches: [main]
 
 permissions:
   contents: read
 
 concurrency:
-  group: visual-asset-hub-${{ github.workflow }}-${{ github.ref }}
+  group: visual-asset-hub-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
