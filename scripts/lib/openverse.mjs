@@ -17,10 +17,18 @@ function extension(value) {
   catch { return ''; }
 }
 
+function normalizeExtension(value, fallbackUrl) {
+  let ext = String(value || '').toLowerCase().trim();
+  if (ext.includes('/')) ext = ext.split('/').pop();
+  if (!ext) ext = extension(fallbackUrl);
+  if (ext === 'jpeg') ext = 'jpg';
+  return ext;
+}
+
 function normalizeItem(item) {
   const license = String(item.license || '').toLowerCase();
   const original = item.url || null;
-  const ext = String(item.filetype || extension(original)).toLowerCase().replace('jpeg', 'jpg');
+  const ext = normalizeExtension(item.filetype, original);
   if (!original || !SAFE_IMAGE_EXTENSIONS.has(ext)) return null;
   return {
     provider: 'openverse',
