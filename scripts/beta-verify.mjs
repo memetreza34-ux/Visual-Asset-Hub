@@ -33,7 +33,7 @@ const approvedRightsRisks = approved.filter((asset) => ['unknown', 'restricted',
 const decisions = reviews.decisions ?? [];
 const reviewedAssetIds = new Set(decisions.map((entry) => entry.assetId).filter(Boolean));
 const reviewedAssets = assets.filter((asset) => reviewedAssetIds.has(asset.id));
-const requiredReviewCount = Math.min(12, assets.length);
+const requiredReviewCount = 12;
 const usageCount = (usage.uses ?? []).length;
 const requiredChannels = ['channel-finance', 'channel-ai', 'channel-electro', 'channel-combat-sports'];
 const channelCounts = Object.fromEntries(requiredChannels.map((tag) => [tag, assets.filter((asset) => asset.tags?.includes(tag)).length]));
