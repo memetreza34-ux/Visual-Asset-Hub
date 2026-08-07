@@ -15,7 +15,7 @@ async function initWorkspaceNavigation() {
     { id: 'planner', label: 'Skript planen', count: null, target: '#script-planner' },
     { id: 'inbox', label: 'Eigene Dateien', count: inbox.files?.length ?? 0, target: '#inbox-importer' },
     { id: 'review', label: 'Prüfen', count: index.reviewCount ?? 0, target: '#review-queue' },
-    { id: 'pexels', label: 'Pexels suchen', count: null, target: '#arsenal-builder' },
+    { id: 'media-search', label: 'Medien suchen', count: null, target: '#arsenal-builder' },
     { id: 'categories', label: '90 Kategorien', count: null, target: '#channel-arsenal' }
   ];
 
