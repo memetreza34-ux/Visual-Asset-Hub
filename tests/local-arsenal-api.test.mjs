@@ -44,6 +44,26 @@ test('Unsplash akzeptiert Fotoformate und blockiert Videoformate', () => {
   }, root), /nur Bilder/);
 });
 
+test('Openverse und Wikimedia benötigen keinen API-Key und sind foto-only', () => {
+  for (const provider of ['openverse', 'wikimedia']) {
+    const photo = validateSearchPayload({
+      provider,
+      channel: 'electro',
+      collection: 'electric-motors',
+      variant: 'photo-horizontal'
+    }, root);
+    assert.equal(photo.provider, provider);
+    assert.equal(photo.apiKey, '');
+    assert.equal(photo.job.type, 'photo');
+    assert.throws(() => validateSearchPayload({
+      provider,
+      channel: 'electro',
+      collection: 'electric-motors',
+      variant: 'video-vertical'
+    }, root), /nur Bilder/);
+  }
+});
+
 test('Pexels bleibt die Standardquelle für bestehende Aufrufe', () => {
   const value = validateSearchPayload({
     apiKey: 'test-pexels-key-1234567890',
@@ -63,12 +83,12 @@ test('lokale Suche blockiert unbekannte Quellen, Kanäle, Sammlungen und zu gro�
   assert.throws(() => validateSearchPayload({ ...base, apiKey: 'kurz' }, root), /apiKey/);
 });
 
-test('Import akzeptiert numerische und sichere Unsplash-IDs', () => {
+test('Import akzeptiert numerische und sichere externe Medien-IDs', () => {
   const numeric = validateImportPayload({ searchId: 'ARS-1234567890ABCDEF', ids: ['12345', '67890'] });
   assert.deepEqual(numeric.ids, ['12345', '67890']);
-  const unsplash = validateImportPayload({ searchId: 'ARS-1234567890ABCDEF', ids: ['AbC_123-xY'], apiKey: 'temporary-key' });
-  assert.deepEqual(unsplash.ids, ['AbC_123-xY']);
-  assert.equal(unsplash.apiKey, 'temporary-key');
+  const external = validateImportPayload({ searchId: 'ARS-1234567890ABCDEF', ids: ['AbC_123-xY'], apiKey: 'temporary-key' });
+  assert.deepEqual(external.ids, ['AbC_123-xY']);
+  assert.equal(external.apiKey, 'temporary-key');
   assert.throws(() => validateImportPayload({ searchId: '../catalog/assets', ids: ['12345'] }), /searchId/);
   assert.throws(() => validateImportPayload({ searchId: 'ARS-1234567890ABCDEF', ids: ['12345', '12345'] }), /Duplikate/);
   assert.throws(() => validateImportPayload({ searchId: 'ARS-1234567890ABCDEF', ids: ['bad/id'] }), /ungültige/);
