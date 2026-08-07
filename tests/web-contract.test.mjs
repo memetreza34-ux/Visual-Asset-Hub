@@ -71,6 +71,14 @@ test('Ausbau-720-Dashboard ist vollständig verknüpft', () => {
   for (const provider of ['Pexels', 'Pixabay', 'Unsplash', 'Openverse', 'Wikimedia']) assert.match(dashboard, new RegExp(provider));
 });
 
+test('API-Keys bleiben ausschließlich im Arbeitsspeicher der aktuellen Seite', () => {
+  const builder = fs.readFileSync(path.join(webRoot, 'arsenal-builder.js'), 'utf8');
+  assert.match(builder, /sessionKeys\s*=\s*new Map/);
+  assert.match(builder, /Sitzungs-Keys löschen/);
+  assert.doesNotMatch(builder, /localStorage/);
+  assert.doesNotMatch(builder, /sessionStorage/);
+});
+
 test('lokaler Server ist auf Loopback und strikte Browser-Sicherheit ausgelegt', () => {
   assert.match(server, /127\.0\.0\.1/);
   assert.match(server, /Content-Security-Policy/);
