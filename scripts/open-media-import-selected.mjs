@@ -26,12 +26,19 @@ const tags = unique(`${args.tags || ''},${provider},open-license`).map(slug).fil
 const aliases = unique(args.aliases || '');
 const quality = integer(args.quality || '3', 1, 5);
 const style = args.style || 'realistic';
-const existingSources = new Set(catalog.assets.map((asset) => asset.rights?.sourceUrl).filter(Boolean));
+const existingSources = new Set(catalog.assets.map((asset) => urlIdentity(asset.rights?.sourceUrl)).filter(Boolean));
+const existingOriginals = new Set(catalog.assets.map((asset) => urlIdentity(asset.storage?.externalUrl)).filter(Boolean));
 const existingIds = new Set(catalog.assets.map((asset) => asset.id));
 const plans = [];
+let skippedDuplicates = 0;
 
 for (const source of selected) {
-  if (existingSources.has(source.source_url)) continue;
+  const sourceIdentity = urlIdentity(source.source_url);
+  const originalIdentity = urlIdentity(source.files?.original);
+  if ((sourceIdentity && existingSources.has(sourceIdentity)) || (originalIdentity && existingOriginals.has(originalIdentity))) {
+    skippedDuplicates += 1;
+    continue;
+  }
   const licenseStatus = normalizeLicense(source.license);
   if (!taxonomy.licenseStatuses.includes(licenseStatus)) fail(`Nicht unterstützter Lizenzstatus: ${licenseStatus}`);
   const orientation = normalizeOrientation(source.orientation, args.orientation);
@@ -81,11 +88,13 @@ for (const source of selected) {
     notes: `${sourceName} Asset-ID ${source.provider_id}. Aus Suche „${args.query || input.query}“ importiert; Status bleibt bis zur Sichtprüfung auf review.`
   };
   existingIds.add(asset.id);
-  existingSources.add(source.source_url);
+  if (sourceIdentity) existingSources.add(sourceIdentity);
+  if (originalIdentity) existingOriginals.add(originalIdentity);
   plans.push({ asset });
 }
 
-console.log(JSON.stringify(plans.map(({ asset }) => ({ id: asset.id, source: asset.rights.sourceUrl, license: asset.rights.licenseStatus, title: asset.title })), null, 2));
+console.log(JSON.stringify(plans.map(({ asset }) => ({ id: asset.id, source: asset.rights.sourceUrl, original: asset.storage.externalUrl, license: asset.rights.licenseStatus, title: asset.title })), null, 2));
+if (skippedDuplicates) console.log(`${skippedDuplicates} Dublette(n) anhand Quellseite oder Original-Medien-URL übersprungen.`);
 if (args['dry-run'] === 'true') {
   console.log('Dry-Run: keine Dateien verändert.');
   process.exit(0);
@@ -131,6 +140,16 @@ function normalizeOrientation(value, fallback) {
   if (fallback === 'landscape') return 'horizontal';
   if (['vertical', 'horizontal', 'square'].includes(fallback)) return fallback;
   return 'mixed';
+}
+function urlIdentity(value) {
+  if (!value) return '';
+  try {
+    const url = new URL(String(value));
+    url.hash = '';
+    return url.toString();
+  } catch {
+    return String(value).trim();
+  }
 }
 function parseArgs(values) { const result = {}; for (let i = 0; i < values.length; i += 1) { const token = values[i]; if (!token.startsWith('--')) fail(`Unbekanntes Argument: ${token}`); const [key, inline] = token.slice(2).split('=', 2); const next = values[i + 1]; result[key] = inline ?? (next && !next.startsWith('--') ? values[++i] : 'true'); } return result; }
 function unique(value) { return [...new Set(String(value ?? '').split(',').map((item) => item.trim()).filter(Boolean))]; }
