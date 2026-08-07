@@ -1,5 +1,7 @@
 const section = document.querySelector('#review-queue');
 const reviewerKey = 'visual-asset-hub:reviewer';
+const targetPerCollection = 8;
+const minimumPerCoreType = 2;
 
 if (section) initReviewQueue().catch(() => {
   section.hidden = true;
@@ -32,7 +34,7 @@ function renderQueue(state) {
   const title = document.createElement('h2');
   title.textContent = 'Review-Warteschlange';
   const description = document.createElement('p');
-  description.textContent = 'Ungeprüfte Assets nacheinander ansehen, entscheiden und sofort zum nächsten Treffer wechseln.';
+  description.textContent = 'Ungeprüfte Assets gezielt nach Ausbau-Effekt prüfen. Freigaben bleiben vollständig manuell und benötigen weiterhin alle Pflichtkontrollen.';
   heading.append(eyebrow, title, description);
   const summary = document.createElement('strong');
   summary.className = 'review-queue-summary';
@@ -48,6 +50,7 @@ function renderQueue(state) {
     ['channel-combat-sports', 'Kampfsport'],
     ['untagged', 'Noch keinem Kanal zugeordnet']
   ]);
+  const collection = selectControl('Sammlung', [['all', 'Alle Sammlungen']]);
   const type = selectControl('Medientyp', [
     ['all', 'Alle Typen'],
     ['video', 'Videos'],
@@ -57,21 +60,27 @@ function renderQueue(state) {
     ['screen-recording', 'Screen-Recordings']
   ]);
   const order = selectControl('Reihenfolge', [
-    ['oldest', 'Älteste zuerst'],
+    ['impact', 'Größter Ausbau-Effekt'],
     ['quality', 'Beste Qualität zuerst'],
+    ['oldest', 'Älteste zuerst'],
     ['newest', 'Neueste zuerst'],
     ['channel', 'Kanalweise']
-  ]);
+  ], 'impact');
   const refresh = document.createElement('button');
   refresh.type = 'button';
   refresh.textContent = 'Warteschlange neu laden';
-  controls.append(channel.wrapper, type.wrapper, order.wrapper, refresh);
+  controls.append(channel.wrapper, collection.wrapper, type.wrapper, order.wrapper, refresh);
 
   const content = document.createElement('div');
   content.className = 'review-queue-content';
   section.replaceChildren(header, controls, content);
 
-  for (const input of [channel.input, type.input, order.input]) input.addEventListener('change', rebuild);
+  channel.input.addEventListener('change', () => {
+    updateCollectionOptions();
+    rebuild();
+  });
+  for (const input of [collection.input, type.input, order.input]) input.addEventListener('change', rebuild);
+
   refresh.addEventListener('click', async () => {
     refresh.disabled = true;
     refresh.textContent = 'Wird geladen …';
@@ -80,6 +89,7 @@ function renderQueue(state) {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const index = await response.json();
       records = index.records ?? [];
+      updateCollectionOptions();
       rebuild();
     } finally {
       refresh.disabled = false;
@@ -87,25 +97,61 @@ function renderQueue(state) {
     }
   });
 
+  window.addEventListener('vah:review-focus', (event) => {
+    const detail = event.detail ?? {};
+    const channelTag = detail.channel ? `channel-${detail.channel}` : 'all';
+    if ([...channel.input.options].some((option) => option.value === channelTag)) channel.input.value = channelTag;
+    updateCollectionOptions();
+    if (detail.collection) {
+      const collectionTag = `collection-${detail.collection}`;
+      if ([...collection.input.options].some((option) => option.value === collectionTag)) collection.input.value = collectionTag;
+    }
+    if (detail.type && [...type.input.options].some((option) => option.value === detail.type)) type.input.value = detail.type;
+    order.input.value = 'impact';
+    rebuild();
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  updateCollectionOptions();
   rebuild();
+
+  function updateCollectionOptions() {
+    const previous = collection.input.value;
+    const channelValue = channel.input.value;
+    const tags = new Map();
+    for (const record of records) {
+      if (!['review', 'inbox'].includes(record.status)) continue;
+      const recordTags = record.tags ?? [];
+      if (!['all', 'untagged'].includes(channelValue) && !recordTags.includes(channelValue)) continue;
+      for (const tag of recordTags.filter((value) => value.startsWith('collection-'))) tags.set(tag, label(tag.replace(/^collection-/, '')));
+    }
+    collection.input.replaceChildren();
+    addOption(collection.input, 'all', 'Alle Sammlungen');
+    for (const [value, name] of [...tags].sort((a, b) => a[1].localeCompare(b[1], 'de'))) addOption(collection.input, value, name);
+    if ([...collection.input.options].some((option) => option.value === previous)) collection.input.value = previous;
+  }
 
   function rebuild() {
     const channelValue = channel.input.value;
+    const collectionValue = collection.input.value;
     const typeValue = type.input.value;
+    const priorityMap = buildPriorityMap(records);
     queue = records.filter((record) => {
       if (!['review', 'inbox'].includes(record.status)) return false;
       if (typeValue !== 'all' && record.type !== typeValue) return false;
-      const channelTags = record.tags.filter((tag) => tag.startsWith('channel-'));
+      const tags = record.tags ?? [];
+      const channelTags = tags.filter((tag) => tag.startsWith('channel-'));
       if (channelValue === 'untagged' && channelTags.length) return false;
-      if (!['all', 'untagged'].includes(channelValue) && !record.tags.includes(channelValue)) return false;
+      if (!['all', 'untagged'].includes(channelValue) && !tags.includes(channelValue)) return false;
+      if (collectionValue !== 'all' && !tags.includes(collectionValue)) return false;
       return true;
     });
-    queue.sort(sorter(order.input.value));
+    queue.sort(sorter(order.input.value, priorityMap));
     position = 0;
-    renderCurrent();
+    renderCurrent(priorityMap);
   }
 
-  function renderCurrent() {
+  function renderCurrent(priorityMap = buildPriorityMap(records)) {
     const totalPending = records.filter((record) => ['review', 'inbox'].includes(record.status)).length;
     summary.textContent = `${queue.length} in dieser Auswahl · ${totalPending} insgesamt offen`;
     content.replaceChildren();
@@ -115,7 +161,7 @@ function renderQueue(state) {
       const doneTitle = document.createElement('h3');
       doneTitle.textContent = 'Diese Warteschlange ist leer';
       const doneText = document.createElement('p');
-      doneText.textContent = totalPending ? 'Wähle einen anderen Kanal oder Medientyp.' : 'Alle vorhandenen Assets besitzen bereits eine Entscheidung.';
+      doneText.textContent = totalPending ? 'Wähle einen anderen Kanal, eine andere Sammlung oder einen anderen Medientyp.' : 'Alle vorhandenen Assets besitzen bereits eine Entscheidung.';
       done.append(doneTitle, doneText);
       content.append(done);
       return;
@@ -126,12 +172,12 @@ function renderQueue(state) {
     const card = document.createElement('article');
     card.className = 'review-queue-card';
     const visual = createVisual(record);
-    const panel = createReviewPanel(record);
+    const panel = createReviewPanel(record, priorityMap.get(record.id));
     card.append(visual, panel);
     content.append(card);
   }
 
-  function createReviewPanel(record) {
+  function createReviewPanel(record, priority) {
     const panel = document.createElement('div');
     panel.className = 'review-queue-panel';
 
@@ -147,12 +193,14 @@ function renderQueue(state) {
     const metadata = document.createElement('dl');
     metadata.className = 'review-queue-meta';
     addMeta(metadata, 'Kanal', channelLabel(record));
+    addMeta(metadata, 'Sammlung', collectionLabel(record));
     addMeta(metadata, 'Kategorie', label(record.category));
     addMeta(metadata, 'Typ', label(record.type));
     addMeta(metadata, 'Format', label(record.orientation));
     addMeta(metadata, 'Quelle', record.sourceName || 'Unbekannt');
     addMeta(metadata, 'Lizenz', label(record.licenseStatus));
     addMeta(metadata, 'Qualität', `${record.qualityRating}/5`);
+    if (priority) addMeta(metadata, 'Ausbau-Priorität', `${priority.level} · ${priority.reason}`);
 
     const links = document.createElement('div');
     links.className = 'review-queue-links';
@@ -162,7 +210,7 @@ function renderQueue(state) {
 
     const form = document.createElement('form');
     form.className = 'review-queue-form';
-    const reviewer = inputField('Prüfer', 'text', localStorage.getItem(reviewerKey) || '', { required: true, maxlength: 120, placeholder: 'z. B. Arman' });
+    const reviewer = inputField('Prüfer', 'text', localStorage.getItem(reviewerKey) || '', { required: true, maxlength: 120, placeholder: 'z. B. Prüfername' });
     const quality = selectControl('Qualität', [[1, '1 – schwach'], [2, '2 – eher schwach'], [3, '3 – brauchbar'], [4, '4 – gut'], [5, '5 – sehr gut']], String(record.qualityRating || 3));
     const notes = textareaField('Notiz oder Begründung', 'Inhalt, sichtbare Personen/Marken, Rechte oder geplanter Einsatz …');
     const checklist = document.createElement('fieldset');
@@ -224,10 +272,11 @@ function renderQueue(state) {
         if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
         const nextStatus = ({ approve: 'approved', restrict: 'restricted', archive: 'archived' })[decision];
         records = records.map((item) => item.id === record.id ? { ...item, status: nextStatus, qualityRating: payload.quality } : item);
-        queue.splice(position, 1);
-        if (position >= queue.length) position = 0;
         showResult(result, `${record.id} gespeichert.`, true);
-        setTimeout(renderCurrent, 350);
+        setTimeout(() => {
+          updateCollectionOptions();
+          rebuild();
+        }, 350);
       } catch (error) {
         showResult(result, error.message, false);
         buttons.forEach((button) => { button.disabled = false; });
@@ -237,6 +286,40 @@ function renderQueue(state) {
     panel.append(progress, title, description, metadata, links, form);
     return panel;
   }
+}
+
+function buildPriorityMap(records) {
+  const groups = new Map();
+  for (const record of records) {
+    const channelTag = (record.tags ?? []).find((tag) => tag.startsWith('channel-'));
+    const collectionTag = (record.tags ?? []).find((tag) => tag.startsWith('collection-'));
+    if (!channelTag || !collectionTag) continue;
+    const key = `${channelTag}|${collectionTag}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(record);
+  }
+
+  const result = new Map();
+  for (const record of records) {
+    const tags = record.tags ?? [];
+    const channelTag = tags.find((tag) => tag.startsWith('channel-'));
+    const collectionTag = tags.find((tag) => tag.startsWith('collection-'));
+    const matching = channelTag && collectionTag ? (groups.get(`${channelTag}|${collectionTag}`) ?? []) : [];
+    const approved = matching.filter((item) => item.status === 'approved');
+    const approvedSameType = approved.filter((item) => item.type === record.type).length;
+    const collectionGap = matching.length ? Math.max(0, targetPerCollection - approved.length) : 0;
+    const typeGap = ['video', 'image'].includes(record.type) ? Math.max(0, minimumPerCoreType - approvedSameType) : 0;
+    const quality = Number(record.qualityRating || 0);
+    const documentedRightsBoost = ['owned', 'cc0', 'public-domain'].includes(record.licenseStatus) ? 3 : ['cc-by', 'cc-by-sa', 'licensed'].includes(record.licenseStatus) ? 1 : 0;
+    const score = collectionGap * 20 + typeGap * 10 + quality * 3 + documentedRightsBoost;
+    const reasonParts = [];
+    if (collectionGap) reasonParts.push(`${collectionGap} Freigaben bis Ziel`);
+    if (typeGap) reasonParts.push(`${typeGap} ${record.type === 'video' ? 'Video' : 'Bild'}-Freigaben bis Mindestmix`);
+    if (!reasonParts.length) reasonParts.push('Sammlung bereits gut abgedeckt');
+    const level = score >= 140 ? 'Hoch' : score >= 80 ? 'Mittel' : 'Niedrig';
+    result.set(record.id, { score, level, reason: reasonParts.join(' · ') });
+  }
+  return result;
 }
 
 function createVisual(record) {
@@ -263,7 +346,7 @@ function createVisual(record) {
   }
   const tags = document.createElement('div');
   tags.className = 'review-queue-tags';
-  for (const tag of record.tags.slice(0, 10)) {
+  for (const tag of (record.tags ?? []).slice(0, 10)) {
     const chip = document.createElement('span');
     chip.textContent = label(tag);
     tags.append(chip);
@@ -272,17 +355,23 @@ function createVisual(record) {
   return visual;
 }
 
-function sorter(mode) {
+function sorter(mode, priorities = new Map()) {
   return (a, b) => {
+    if (mode === 'impact') return (priorities.get(b.id)?.score ?? 0) - (priorities.get(a.id)?.score ?? 0) || b.qualityRating - a.qualityRating || dateValue(a.importedAt) - dateValue(b.importedAt);
     if (mode === 'quality') return b.qualityRating - a.qualityRating || a.title.localeCompare(b.title, 'de');
-    if (mode === 'newest') return Date.parse(b.importedAt) - Date.parse(a.importedAt);
-    if (mode === 'channel') return channelLabel(a).localeCompare(channelLabel(b), 'de') || a.title.localeCompare(b.title, 'de');
-    return Date.parse(a.importedAt) - Date.parse(b.importedAt);
+    if (mode === 'newest') return dateValue(b.importedAt) - dateValue(a.importedAt);
+    if (mode === 'channel') return channelLabel(a).localeCompare(channelLabel(b), 'de') || collectionLabel(a).localeCompare(collectionLabel(b), 'de') || a.title.localeCompare(b.title, 'de');
+    return dateValue(a.importedAt) - dateValue(b.importedAt);
   };
 }
 
+function dateValue(value) {
+  const timestamp = Date.parse(value);
+  return Number.isFinite(timestamp) ? timestamp : 0;
+}
+
 function channelLabel(record) {
-  const tag = record.tags.find((value) => value.startsWith('channel-'));
+  const tag = (record.tags ?? []).find((value) => value.startsWith('channel-'));
   return ({
     'channel-finance': 'Finanzen',
     'channel-ai': 'Künstliche Intelligenz',
@@ -291,21 +380,28 @@ function channelLabel(record) {
   })[tag] || 'Nicht zugeordnet';
 }
 
+function collectionLabel(record) {
+  const tag = (record.tags ?? []).find((value) => value.startsWith('collection-'));
+  return tag ? label(tag.replace(/^collection-/, '')) : 'Nicht zugeordnet';
+}
+
 function selectControl(labelText, options, selected = '') {
   const wrapper = document.createElement('label');
   wrapper.className = 'review-queue-field';
   const text = document.createElement('span');
   text.textContent = labelText;
   const input = document.createElement('select');
-  for (const [value, name] of options) {
-    const option = document.createElement('option');
-    option.value = String(value);
-    option.textContent = name;
-    option.selected = String(value) === String(selected);
-    input.append(option);
-  }
+  for (const [value, name] of options) addOption(input, value, name, selected);
   wrapper.append(text, input);
   return { wrapper, input };
+}
+
+function addOption(select, value, name, selected = '') {
+  const option = document.createElement('option');
+  option.value = String(value);
+  option.textContent = name;
+  option.selected = String(value) === String(selected);
+  select.append(option);
 }
 
 function inputField(labelText, type, value, attributes = {}) {
