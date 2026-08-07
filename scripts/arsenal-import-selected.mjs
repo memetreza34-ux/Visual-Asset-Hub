@@ -15,7 +15,7 @@ const job = wrapper.arsenalJob;
 const result = wrapper.result;
 if (!job || !result || !Array.isArray(result.assets)) fail('Die Datei ist kein gültiges Arsenal-Suchergebnis.');
 const provider = wrapper.provider ?? result.provider ?? 'pexels';
-if (!['pexels', 'pixabay', 'unsplash'].includes(provider)) fail(`Nicht unterstützte Quelle: ${provider}`);
+if (!['pexels', 'pixabay', 'unsplash', 'openverse', 'wikimedia'].includes(provider)) fail(`Nicht unterstützte Quelle: ${provider}`);
 
 const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'vah-arsenal-import-'));
 const tempInput = path.join(tempDirectory, `${provider}-result.json`);
@@ -23,7 +23,9 @@ fs.writeFileSync(tempInput, `${JSON.stringify(result, null, 2)}\n`);
 const importers = {
   pexels: 'scripts/pexels-import-selected.mjs',
   pixabay: 'scripts/pixabay-import-selected.mjs',
-  unsplash: 'scripts/unsplash-import-selected.mjs'
+  unsplash: 'scripts/unsplash-import-selected.mjs',
+  openverse: 'scripts/open-media-import-selected.mjs',
+  wikimedia: 'scripts/open-media-import-selected.mjs'
 };
 const childArgs = [
   importers[provider],
@@ -43,7 +45,8 @@ if (args.shot) childArgs.push('--shot', args.shot);
 if (args.movement) childArgs.push('--movement', args.movement);
 if (args['dry-run'] === 'true') childArgs.push('--dry-run', 'true');
 
-console.log(`Quelle: ${provider === 'pixabay' ? 'Pixabay' : provider === 'unsplash' ? 'Unsplash' : 'Pexels'}`);
+const labels = { pexels: 'Pexels', pixabay: 'Pixabay', unsplash: 'Unsplash', openverse: 'Openverse', wikimedia: 'Wikimedia Commons' };
+console.log(`Quelle: ${labels[provider]}`);
 console.log(`Kanal: ${job.channelLabel} · Sammlung: ${job.collectionLabel}`);
 console.log(`Kategorie: ${job.category} · Tags: ${(job.tags ?? []).join(', ')}`);
 if (job.reviewNotes) console.log(`Review-Hinweis: ${job.reviewNotes}`);
