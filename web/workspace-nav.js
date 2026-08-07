@@ -16,6 +16,7 @@ async function initWorkspaceNavigation() {
     { id: 'inbox', label: 'Eigene Dateien', count: inbox.files?.length ?? 0, target: '#inbox-importer' },
     { id: 'review', label: 'Prüfen', count: index.reviewCount ?? 0, target: '#review-queue' },
     { id: 'media-search', label: 'Medien suchen', count: null, target: '#arsenal-builder' },
+    { id: 'expansion', label: 'Ausbau 720', count: index.approvedCount ?? 0, target: '#expansion-dashboard' },
     { id: 'categories', label: '90 Kategorien', count: null, target: '#channel-arsenal' }
   ];
 
