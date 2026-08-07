@@ -156,7 +156,7 @@ function render({ health, channelIndex, channels }) {
       const cacheText = data.cached ? ' · aus 24-Stunden-Cache' : '';
       const rateText = data.rateLimit?.remaining !== null && data.rateLimit?.remaining !== undefined ? ` · API-Limit verbleibend: ${data.rateLimit.remaining}` : '';
       showStatus(status, `${data.assets.length} Treffer geladen · insgesamt ${data.totalResults} bei ${providerLabel(data.provider)}${cacheText}${rateText}.`, true);
-      renderResults(resultArea, data, health.token, resolveProviderKey);
+      renderResults(resultArea, data, health.token, resolveProviderKey, { reloadAfterImport: true });
     } catch (error) {
       apiKey.input.value = '';
       updateKeyPlaceholder();
@@ -183,7 +183,7 @@ function render({ health, channelIndex, channels }) {
       updateKeyPlaceholder();
       plannedBatchCollections = [];
       updateBatchButtonCopy();
-      showStatus(status, `${data.assets} Treffer aus ${data.collections} Sammlungen geladen. Nichts wurde automatisch freigegeben.`, true);
+      showStatus(status, `${data.assets} Treffer aus ${data.collections} Sammlungen geladen. Du kannst jetzt über alle Gruppen markieren und gesammelt importieren.`, true);
       renderBatchResults(resultArea, data.groups, health.token, resolveProviderKey);
     } catch (error) {
       apiKey.input.value = '';
@@ -297,19 +297,73 @@ function render({ health, channelIndex, channels }) {
 }
 
 function renderBatchResults(container, groups, token, keyResolver) {
-  const title = textElement('div', `${groups.length} Sammlungen durchsucht`, 'builder-result-tools');
+  const header = document.createElement('div');
+  header.className = 'builder-result-tools';
+  const summary = document.createElement('div');
+  summary.append(textElement('strong', `${groups.length} Sammlungen durchsucht`), textElement('span', 'Treffer aus allen Gruppen markieren und gemeinsam als Review importieren.'));
+  const actions = document.createElement('div');
+  const batchImport = button('Alle markierten Batch-Treffer importieren', 'builder-primary');
+  actions.append(batchImport);
+  header.append(summary, actions);
+
+  const batchStatus = textElement('p', '', 'builder-status');
+  batchStatus.hidden = true;
   const wrapper = document.createElement('div');
   wrapper.className = 'builder-batch-results';
+
   for (const group of groups) {
     const groupSection = document.createElement('section');
     groupSection.className = 'builder-batch-group';
-    renderResults(groupSection, group, token, keyResolver);
+    groupSection.dataset.searchId = group.searchId;
+    groupSection.dataset.provider = group.provider;
+    renderResults(groupSection, group, token, keyResolver, { reloadAfterImport: false });
     wrapper.append(groupSection);
   }
-  container.replaceChildren(title, wrapper);
+
+  batchImport.addEventListener('click', async () => {
+    const selections = groups.map((group, index) => {
+      const groupSection = wrapper.children[index];
+      const ids = [...groupSection.querySelectorAll('input[type="checkbox"]:checked:not(:disabled)')].map((input) => input.value);
+      return { group, groupSection, ids };
+    }).filter((item) => item.ids.length > 0);
+
+    if (!selections.length) return showStatus(batchStatus, 'Bitte in mindestens einer Gruppe Treffer markieren.', false);
+    if (selections.some((item) => item.group.provider === 'unsplash') && !keyResolver('unsplash')) {
+      return showStatus(batchStatus, 'Der Unsplash-Key wurde aus dem Arbeitsspeicher gelöscht. Bitte die Unsplash-Suche erneut ausführen.', false);
+    }
+
+    batchImport.disabled = true;
+    let imported = 0;
+    let skipped = 0;
+    let processedGroups = 0;
+    showStatus(batchStatus, `${selections.length} Gruppen werden nacheinander importiert …`, true);
+
+    try {
+      for (const item of selections) {
+        const providerKey = item.group.provider === 'unsplash' ? keyResolver('unsplash') : '';
+        const response = await post('/arsenal-api/import', {
+          searchId: item.group.searchId,
+          ids: item.ids,
+          apiKey: item.group.provider === 'unsplash' ? providerKey : undefined
+        }, token);
+        imported += response.imported ?? 0;
+        skipped += response.skipped ?? 0;
+        processedGroups += 1;
+        markImported(item.groupSection, item.ids);
+        showStatus(batchStatus, `${processedGroups}/${selections.length} Gruppen verarbeitet · ${imported} importiert · ${skipped} übersprungen.`, true);
+      }
+      showStatus(batchStatus, `Batch abgeschlossen: ${imported} importiert · ${skipped} bereits vorhanden/übersprungen. Die Seite wird einmal neu geladen.`, true);
+      setTimeout(() => location.reload(), 1100);
+    } catch (error) {
+      showStatus(batchStatus, `Batch nach ${processedGroups}/${selections.length} Gruppen gestoppt: ${error.message}`, false);
+      batchImport.disabled = false;
+    }
+  });
+
+  container.replaceChildren(header, batchStatus, wrapper);
 }
 
-function renderResults(container, data, token, keyResolver) {
+function renderResults(container, data, token, keyResolver, options = {}) {
   const tools = document.createElement('div');
   tools.className = 'builder-result-tools';
   const summary = document.createElement('div');
@@ -328,14 +382,14 @@ function renderResults(container, data, token, keyResolver) {
   container.replaceChildren(tools, grid, importStatus);
 
   selectAll.addEventListener('click', () => {
-    const boxes = [...grid.querySelectorAll('input[type="checkbox"]')];
+    const boxes = [...grid.querySelectorAll('input[type="checkbox"]:not(:disabled)')];
     const shouldSelect = boxes.some((box) => !box.checked);
     for (const box of boxes) box.checked = shouldSelect;
     selectAll.textContent = shouldSelect ? 'Auswahl aufheben' : 'Alle auswählen';
   });
 
   importButton.addEventListener('click', async () => {
-    const ids = [...grid.querySelectorAll('input[type="checkbox"]:checked')].map((input) => input.value);
+    const ids = [...grid.querySelectorAll('input[type="checkbox"]:checked:not(:disabled)')].map((input) => input.value);
     if (!ids.length) return showStatus(importStatus, 'Bitte mindestens einen Treffer auswählen.', false);
     const providerKey = data.provider === 'unsplash' ? keyResolver('unsplash') : '';
     if (data.provider === 'unsplash' && !providerKey) return showStatus(importStatus, 'Der Unsplash-Key wurde aus dem Arbeitsspeicher gelöscht. Bitte die Suche erneut ausführen.', false);
@@ -344,13 +398,29 @@ function renderResults(container, data, token, keyResolver) {
     try {
       const response = await post('/arsenal-api/import', { searchId: data.searchId, ids, apiKey: data.provider === 'unsplash' ? providerKey : undefined }, token);
       const skipped = response.skipped ? ` · ${response.skipped} bereits vorhanden/übersprungen` : '';
-      showStatus(importStatus, `${response.imported} ${providerLabel(response.provider)}-Treffer importiert${skipped}. Die Seite wird neu geladen.`, true);
-      setTimeout(() => location.reload(), 900);
+      const reloadText = options.reloadAfterImport === false ? '' : ' Die Seite wird neu geladen.';
+      showStatus(importStatus, `${response.imported} ${providerLabel(response.provider)}-Treffer importiert${skipped}.${reloadText}`, true);
+      if (options.reloadAfterImport === false) {
+        markImported(container, ids);
+        importButton.disabled = false;
+      } else {
+        setTimeout(() => location.reload(), 900);
+      }
     } catch (error) {
       showStatus(importStatus, error.message, false);
       importButton.disabled = false;
     }
   });
+}
+
+function markImported(container, ids) {
+  const idSet = new Set(ids.map(String));
+  for (const input of container.querySelectorAll('input[type="checkbox"]')) {
+    if (!idSet.has(input.value)) continue;
+    input.checked = false;
+    input.disabled = true;
+    input.closest('.builder-result-card')?.classList.add('imported');
+  }
 }
 
 function resultCard(asset, provider) {
