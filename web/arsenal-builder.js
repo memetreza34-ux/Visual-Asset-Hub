@@ -1,5 +1,7 @@
 const section = document.querySelector('#arsenal-builder');
 const files = ['finance.json', 'ai.json', 'electro.json', 'combat-sports.json'];
+const keylessProviders = new Set(['openverse', 'wikimedia']);
+const photoOnlyProviders = new Set(['unsplash', 'openverse', 'wikimedia']);
 
 if (section) init().catch(() => { section.hidden = true; });
 
@@ -28,8 +30,8 @@ function render({ health, channelIndex, channels }) {
   const headerContent = document.createElement('div');
   headerContent.append(
     textElement('span', 'Arsenal Builder', 'eyebrow'),
-    textElement('h2', 'Pexels, Pixabay und Unsplash durchsuchen'),
-    textElement('p', 'Der jeweilige API-Key wird nur für die aktuelle lokale Anfrage verwendet und nicht gespeichert. Unsplash hält den Key nur bis zum ausgewählten Import im Arbeitsspeicher, um das vorgeschriebene Download-Ereignis zu melden. Alle Importe starten im Status Review.')
+    textElement('h2', '5 Medienquellen direkt durchsuchen'),
+    textElement('p', 'Pexels, Pixabay und Unsplash verwenden einen API-Key nur für die aktuelle lokale Anfrage. Openverse und Wikimedia Commons funktionieren ohne Key. Alle Importe starten im Status Review und offene Lizenzen werden dokumentiert.')
   );
   header.append(headerContent);
 
@@ -39,6 +41,8 @@ function render({ health, channelIndex, channels }) {
   addOption(provider.input, 'pexels', 'Pexels');
   addOption(provider.input, 'pixabay', 'Pixabay');
   addOption(provider.input, 'unsplash', 'Unsplash');
+  addOption(provider.input, 'openverse', 'Openverse · ohne Key');
+  addOption(provider.input, 'wikimedia', 'Wikimedia Commons · ohne Key');
   const apiKey = field('Pexels API-Key', 'password', { required: true, minlength: 8, maxlength: 300, autocomplete: 'off', placeholder: 'Nur lokal für diese Suche' });
   const channel = selectField('Kanal');
   channel.input.id = 'arsenal-builder-channel';
@@ -84,20 +88,21 @@ function render({ health, channelIndex, channels }) {
     const selectedCollection = selectedChannel.collections.find((item) => item.id === collection.input.value);
     showStatus(status, `${selectedChannel.label} / ${selectedCollection?.label ?? collection.input.value} wurde vorbereitet.`, true);
     section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    setTimeout(() => apiKey.input.focus({ preventScroll: true }), 500);
+    setTimeout(() => (apiKey.wrapper.hidden ? provider.input : apiKey.input).focus({ preventScroll: true }), 500);
   });
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     submit.disabled = true;
-    const providerName = providerLabel(provider.input.value);
-    const transientApiKey = apiKey.input.value;
+    const selectedProvider = provider.input.value;
+    const providerName = providerLabel(selectedProvider);
+    const transientApiKey = keylessProviders.has(selectedProvider) ? '' : apiKey.input.value;
     showStatus(status, `${providerName} wird durchsucht …`, true);
     resultArea.replaceChildren();
     try {
       const data = await post('/arsenal-api/search', {
-        provider: provider.input.value,
-        apiKey: transientApiKey,
+        provider: selectedProvider,
+        apiKey: transientApiKey || undefined,
         channel: channel.input.value,
         collection: collection.input.value,
         variant: variant.input.value,
@@ -106,9 +111,7 @@ function render({ health, channelIndex, channels }) {
       }, health.token);
       apiKey.input.value = '';
       const cacheText = data.cached ? ' · aus 24-Stunden-Cache' : '';
-      const rateText = data.rateLimit?.remaining !== null && data.rateLimit?.remaining !== undefined
-        ? ` · API-Limit verbleibend: ${data.rateLimit.remaining}`
-        : '';
+      const rateText = data.rateLimit?.remaining !== null && data.rateLimit?.remaining !== undefined ? ` · API-Limit verbleibend: ${data.rateLimit.remaining}` : '';
       showStatus(status, `${data.assets.length} Treffer geladen · insgesamt ${data.totalResults} bei ${providerLabel(data.provider)}${cacheText}${rateText}.`, true);
       renderResults(resultArea, data, health.token, data.provider === 'unsplash' ? transientApiKey : '');
     } catch (error) {
@@ -127,18 +130,21 @@ function render({ health, channelIndex, channels }) {
 
   function updateVariants() {
     const selectedProvider = provider.input.value;
-    const allowed = selectedProvider === 'unsplash'
-      ? allVariants.filter((item) => item.type === 'photo')
-      : allVariants;
+    const allowed = photoOnlyProviders.has(selectedProvider) ? allVariants.filter((item) => item.type === 'photo') : allVariants;
     variant.input.replaceChildren();
     for (const item of allowed) addOption(variant.input, item.id, variantLabel(item));
-    const preferredId = selectedProvider === 'unsplash' ? 'photo-vertical' : 'video-vertical';
+    const preferredId = photoOnlyProviders.has(selectedProvider) ? 'photo-vertical' : 'video-vertical';
     const preferred = [...variant.input.options].find((option) => option.value === preferredId) ?? variant.input.options[0];
     if (preferred) variant.input.value = preferred.value;
   }
 
   function updateProviderCopy() {
-    const name = providerLabel(provider.input.value);
+    const selectedProvider = provider.input.value;
+    const name = providerLabel(selectedProvider);
+    const keyless = keylessProviders.has(selectedProvider);
+    apiKey.wrapper.hidden = keyless;
+    apiKey.input.required = !keyless;
+    if (keyless) apiKey.input.value = '';
     apiKey.wrapper.querySelector('span').textContent = `${name} API-Key`;
     submit.textContent = `${name} durchsuchen`;
   }
@@ -148,10 +154,7 @@ function renderResults(container, data, token, transientApiKey = '') {
   const tools = document.createElement('div');
   tools.className = 'builder-result-tools';
   const summary = document.createElement('div');
-  summary.append(
-    textElement('strong', `${data.job.channelLabel} / ${data.job.collectionLabel}`),
-    textElement('span', `${providerLabel(data.provider)} · ${data.job.query} · ${data.job.type} · ${data.job.orientation}`)
-  );
+  summary.append(textElement('strong', `${data.job.channelLabel} / ${data.job.collectionLabel}`), textElement('span', `${providerLabel(data.provider)} · ${data.job.query} · ${data.job.type} · ${data.job.orientation}`));
   const actions = document.createElement('div');
   const selectAll = button('Alle auswählen');
   const importButton = button('Ausgewählte als Review importieren', 'builder-primary');
@@ -175,17 +178,11 @@ function renderResults(container, data, token, transientApiKey = '') {
   importButton.addEventListener('click', async () => {
     const ids = [...grid.querySelectorAll('input[type="checkbox"]:checked')].map((input) => input.value);
     if (!ids.length) return showStatus(importStatus, 'Bitte mindestens einen Treffer auswählen.', false);
-    if (data.provider === 'unsplash' && !transientApiKey) {
-      return showStatus(importStatus, 'Der Unsplash-Key ist nicht mehr im Arbeitsspeicher. Bitte die Suche erneut ausführen.', false);
-    }
+    if (data.provider === 'unsplash' && !transientApiKey) return showStatus(importStatus, 'Der Unsplash-Key ist nicht mehr im Arbeitsspeicher. Bitte die Suche erneut ausführen.', false);
     importButton.disabled = true;
     showStatus(importStatus, `${ids.length} Treffer werden sicher als Review importiert …`, true);
     try {
-      const response = await post('/arsenal-api/import', {
-        searchId: data.searchId,
-        ids,
-        apiKey: data.provider === 'unsplash' ? transientApiKey : undefined
-      }, token);
+      const response = await post('/arsenal-api/import', { searchId: data.searchId, ids, apiKey: data.provider === 'unsplash' ? transientApiKey : undefined }, token);
       transientApiKey = '';
       showStatus(importStatus, `${response.imported} ${providerLabel(response.provider)}-Treffer wurden importiert. Die Seite wird neu geladen.`, true);
       setTimeout(() => location.reload(), 900);
@@ -214,7 +211,7 @@ function resultCard(asset, provider) {
   const body = document.createElement('div');
   body.className = 'builder-result-body';
   const title = textElement('strong', asset.title || `${providerLabel(provider)} ${asset.provider_id}`);
-  const meta = textElement('span', `${asset.type === 'video' ? 'Video' : 'Bild'} · ${asset.width ?? '?'} × ${asset.height ?? '?'}${asset.duration_seconds ? ` · ${asset.duration_seconds} s` : ''}`);
+  const meta = textElement('span', `${asset.type === 'video' ? 'Video' : 'Bild'} · ${asset.width ?? '?'} × ${asset.height ?? '?'}${asset.duration_seconds ? ` · ${asset.duration_seconds} s` : ''}${asset.license ? ` · ${licenseLabel(asset.license)}` : ''}`);
   body.append(title, meta);
 
   if (provider === 'unsplash' && asset.creator_url) {
@@ -241,16 +238,13 @@ function resultCard(asset, provider) {
 }
 
 async function post(endpoint, payload, token) {
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-VAH-Token': token },
-    body: JSON.stringify(payload)
-  });
+  const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-VAH-Token': token }, body: JSON.stringify(payload) });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
   return data;
 }
-function providerLabel(value) { return value === 'pixabay' ? 'Pixabay' : value === 'unsplash' ? 'Unsplash' : 'Pexels'; }
+function providerLabel(value) { return ({ pexels: 'Pexels', pixabay: 'Pixabay', unsplash: 'Unsplash', openverse: 'Openverse', wikimedia: 'Wikimedia Commons' })[value] ?? value; }
+function licenseLabel(value) { return ({ by: 'CC BY', 'by-sa': 'CC BY-SA', 'cc-by': 'CC BY', 'cc-by-sa': 'CC BY-SA', cc0: 'CC0', pdm: 'Public Domain', 'public-domain': 'Public Domain' })[value] ?? String(value).toUpperCase(); }
 function field(labelText, type, attributes = {}) { const wrapper = document.createElement('label'); wrapper.className = 'builder-field'; const text = textElement('span', labelText); const input = document.createElement('input'); input.type = type; for (const [key, value] of Object.entries(attributes)) input.setAttribute(key, String(value)); wrapper.append(text, input); return { wrapper, input }; }
 function selectField(labelText) { const wrapper = document.createElement('label'); wrapper.className = 'builder-field'; const text = textElement('span', labelText); const input = document.createElement('select'); wrapper.append(text, input); return { wrapper, input }; }
 function addOption(select, value, text) { const option = document.createElement('option'); option.value = value; option.textContent = text; select.append(option); }
