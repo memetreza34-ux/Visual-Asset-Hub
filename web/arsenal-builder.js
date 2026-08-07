@@ -156,7 +156,12 @@ function render({ health, channelIndex, channels }) {
       const cacheText = data.cached ? ' · aus 24-Stunden-Cache' : '';
       const rateText = data.rateLimit?.remaining !== null && data.rateLimit?.remaining !== undefined ? ` · API-Limit verbleibend: ${data.rateLimit.remaining}` : '';
       showStatus(status, `${data.assets.length} Treffer geladen · insgesamt ${data.totalResults} bei ${providerLabel(data.provider)}${cacheText}${rateText}. Technisch passendere Treffer stehen oben; das ist keine Inhalts- oder Rechtefreigabe.`, true);
-      renderResults(resultArea, data, health.token, resolveProviderKey, { reloadAfterImport: true, onFallback: prepareFallback });
+      renderResults(resultArea, data, health.token, resolveProviderKey, {
+        reloadAfterImport: true,
+        onFallback: prepareFallback,
+        getNextQuery,
+        onNextQuery: prepareNextQuery
+      });
     } catch (error) {
       apiKey.input.value = '';
       updateKeyPlaceholder();
@@ -184,7 +189,7 @@ function render({ health, channelIndex, channels }) {
       plannedBatchCollections = [];
       updateBatchButtonCopy();
       showStatus(status, `${data.assets} Treffer aus ${data.collections} Sammlungen geladen. Jede Gruppe ist technisch vorsortiert; du markierst weiterhin selbst und importierst anschließend gesammelt.`, true);
-      renderBatchResults(resultArea, data.groups, health.token, resolveProviderKey, prepareFallback);
+      renderBatchResults(resultArea, data.groups, health.token, resolveProviderKey, prepareFallback, getNextQuery, prepareNextQuery);
     } catch (error) {
       apiKey.input.value = '';
       updateKeyPlaceholder();
@@ -193,6 +198,33 @@ function render({ health, channelIndex, channels }) {
       setBusy(false);
     }
   });
+
+  function getNextQuery(data) {
+    const selectedChannel = channels.find((item) => item.id === data.job.channel);
+    const selectedCollection = selectedChannel?.collections.find((item) => item.id === data.job.collection);
+    const queries = selectedCollection?.queries ?? [];
+    const currentIndex = queries.findIndex((query) => query === data.job.query);
+    if (currentIndex < 0 || currentIndex >= queries.length - 1) return null;
+    return { index: currentIndex + 1, query: queries[currentIndex + 1] };
+  }
+
+  function prepareNextQuery(data, nextQuery) {
+    const selectedChannel = channels.find((item) => item.id === data.job.channel);
+    if (!selectedChannel || !nextQuery) return;
+    plannedBatchCollections = [];
+    channel.input.value = selectedChannel.id;
+    updateCollections();
+    if (selectedChannel.collections.some((item) => item.id === data.job.collection)) collection.input.value = data.job.collection;
+    provider.input.value = data.provider;
+    updateVariants();
+    updateProviderCopy();
+    const desiredVariant = `${data.job.type}-${data.job.orientation}`;
+    if ([...variant.input.options].some((option) => option.value === desiredVariant)) variant.input.value = desiredVariant;
+    queryIndex.input.value = String(nextQuery.index);
+    updateBatchButtonCopy();
+    showStatus(status, `Suchbegriff ${nextQuery.index + 1} vorbereitet: „${nextQuery.query}“ · ${providerLabel(data.provider)} · ${data.job.collectionLabel}. Die Suche startet erst nach deinem Klick.`, true);
+    focusBuilder();
+  }
 
   function prepareFallback(data, nextProvider) {
     const selectedChannel = channels.find((item) => item.id === data.job.channel);
@@ -316,7 +348,7 @@ function render({ health, channelIndex, channels }) {
   }
 }
 
-function renderBatchResults(container, groups, token, keyResolver, onFallback) {
+function renderBatchResults(container, groups, token, keyResolver, onFallback, getNextQuery, onNextQuery) {
   const header = document.createElement('div');
   header.className = 'builder-result-tools';
   const summary = document.createElement('div');
@@ -336,7 +368,7 @@ function renderBatchResults(container, groups, token, keyResolver, onFallback) {
     groupSection.className = 'builder-batch-group';
     groupSection.dataset.searchId = group.searchId;
     groupSection.dataset.provider = group.provider;
-    renderResults(groupSection, group, token, keyResolver, { reloadAfterImport: false, onFallback });
+    renderResults(groupSection, group, token, keyResolver, { reloadAfterImport: false, onFallback, getNextQuery, onNextQuery });
     wrapper.append(groupSection);
   }
 
@@ -394,11 +426,20 @@ function renderResults(container, data, token, keyResolver, options = {}) {
   const selectAll = button('Alle auswählen');
   const importButton = button('Ausgewählte als Review importieren', 'builder-primary');
   actions.append(selectAll, importButton);
-  const nextProvider = fallbackProvider(data.provider, data.job.type);
-  if (nextProvider && typeof options.onFallback === 'function') {
-    const fallbackButton = button(`Nächste Quelle: ${providerLabel(nextProvider)}`);
-    fallbackButton.addEventListener('click', () => options.onFallback(data, nextProvider));
-    actions.append(fallbackButton);
+
+  const nextQuery = typeof options.getNextQuery === 'function' ? options.getNextQuery(data) : null;
+  if (nextQuery && typeof options.onNextQuery === 'function') {
+    const nextQueryButton = button(`Nächster Suchbegriff ${nextQuery.index + 1}`);
+    nextQueryButton.title = nextQuery.query;
+    nextQueryButton.addEventListener('click', () => options.onNextQuery(data, nextQuery));
+    actions.append(nextQueryButton);
+  } else {
+    const nextProvider = fallbackProvider(data.provider, data.job.type);
+    if (nextProvider && typeof options.onFallback === 'function') {
+      const fallbackButton = button(`Nächste Quelle: ${providerLabel(nextProvider)}`);
+      fallbackButton.addEventListener('click', () => options.onFallback(data, nextProvider));
+      actions.append(fallbackButton);
+    }
   }
   tools.append(summary, actions);
 
