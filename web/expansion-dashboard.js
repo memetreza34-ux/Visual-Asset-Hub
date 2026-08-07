@@ -1,5 +1,8 @@
 const section = document.querySelector('#expansion-dashboard');
 const files = ['finance.json', 'ai.json', 'electro.json', 'combat-sports.json'];
+const targetPerCollection = 8;
+const minimumVideosPerCollection = 2;
+const minimumPhotosPerCollection = 2;
 
 if (section) init().catch((error) => {
   section.hidden = false;
@@ -36,7 +39,7 @@ function render(channels, records) {
   copy.append(
     text('span', 'Ausbauplan', 'eyebrow'),
     text('h2', `${approved}/${target} freigegebene Assets`),
-    text('p', `${candidates} Kandidaten vorhanden · ${review} warten auf Review · ${percent}% des empfohlenen Gesamtziels. Neue Suchen werden nur für Sammlungen vorbereitet, deren vorhandener Review-Vorrat noch nicht reicht.`)
+    text('p', `${candidates} Kandidaten vorhanden · ${review} warten auf Review · ${percent}% des empfohlenen Gesamtziels. Der Hub erkennt zusätzlich Video- und Fotolücken und schlägt automatisch eine passende Quelle vor.`)
   );
   const overall = document.createElement('div');
   overall.className = 'expansion-overall';
@@ -50,9 +53,9 @@ function render(channels, records) {
   const strategy = document.createElement('div');
   strategy.className = 'expansion-strategy';
   strategy.append(
-    strategyItem('Videos', 'Pexels + Pixabay', 'B-Rolls und bewegte Motive'),
-    strategyItem('Premium-Fotos', 'Unsplash', 'moderne hochwertige Stockfotos'),
-    strategyItem('Offene Bilder', 'Openverse + Wikimedia', 'CC/Public-Domain und Nischenmotive')
+    strategyItem('Video-Lücke', 'Pexels → Pixabay', 'Hochformat-B-Rolls werden für Reel-Produktion zuerst priorisiert.'),
+    strategyItem('Foto-Lücke', 'Unsplash', 'hochwertige moderne Fotos als erste Bildquelle'),
+    strategyItem('Offene Alternative', 'Openverse + Wikimedia', 'CC/Public-Domain für Nischenmotive und Ergänzungen')
   );
   section.replaceChildren(header, grid, strategy);
 }
@@ -64,20 +67,24 @@ function summarizeChannel(channel, records) {
     const review = matching.filter((record) => ['inbox', 'review'].includes(record.status)).length;
     const videos = matching.filter((record) => record.type === 'video').length;
     const photos = matching.filter((record) => record.type === 'image').length;
-    const gap = Math.max(0, 8 - approved);
+    const gap = Math.max(0, targetPerCollection - approved);
     const searchGap = Math.max(0, gap - review);
-    return { collection, candidates: matching.length, approved, review, videos, photos, gap, searchGap };
+    const videoGap = Math.max(0, minimumVideosPerCollection - videos);
+    const photoGap = Math.max(0, minimumPhotosPerCollection - photos);
+    const recommendation = recommendSearch({ videos, photos, videoGap, photoGap });
+    return { collection, candidates: matching.length, approved, review, videos, photos, gap, searchGap, videoGap, photoGap, recommendation };
   });
-  const target = collections.length * 8;
+  const target = collections.length * targetPerCollection;
   const approved = collections.reduce((sum, row) => sum + row.approved, 0);
   const weakest = [...collections]
     .filter((row) => row.gap > 0)
-    .sort((a, b) => b.gap - a.gap || b.searchGap - a.searchGap || a.approved - b.approved || a.candidates - b.candidates || a.collection.label.localeCompare(b.collection.label, 'de'))
+    .sort((a, b) => b.gap - a.gap || b.searchGap - a.searchGap || (b.videoGap + b.photoGap) - (a.videoGap + a.photoGap) || a.approved - b.approved || a.candidates - b.candidates || a.collection.label.localeCompare(b.collection.label, 'de'))
     .slice(0, 5);
   const searchWeakest = [...collections]
     .filter((row) => row.searchGap > 0)
-    .sort((a, b) => b.searchGap - a.searchGap || b.gap - a.gap || a.approved - b.approved || a.candidates - b.candidates || a.collection.label.localeCompare(b.collection.label, 'de'))
-    .slice(0, 5);
+    .sort((a, b) => (b.videoGap + b.photoGap) - (a.videoGap + a.photoGap) || b.searchGap - a.searchGap || b.gap - a.gap || a.approved - b.approved || a.candidates - b.candidates || a.collection.label.localeCompare(b.collection.label, 'de'))
+    .slice(0, 10);
+  const batch = smartBatch(searchWeakest);
   return {
     channel,
     collections,
@@ -87,7 +94,8 @@ function summarizeChannel(channel, records) {
     review: collections.reduce((sum, row) => sum + row.review, 0),
     percent: target ? Math.min(100, Math.round((approved / target) * 100)) : 100,
     weakest,
-    searchWeakest
+    searchWeakest,
+    batch
   };
 }
 
@@ -105,10 +113,18 @@ function channelCard(row) {
   for (const item of row.weakest) {
     const button = document.createElement('button');
     button.type = 'button';
-    button.append(text('span', item.collection.label), text('b', `${item.approved}/8 · ${item.review} R`));
-    button.title = `${row.channel.label} / ${item.collection.label} im Medien-Builder öffnen`;
+    const media = item.recommendation.mediaType === 'video' ? 'Video' : 'Foto';
+    button.append(text('span', `${item.collection.label} · ${media}/${providerLabel(item.recommendation.provider)}`), text('b', `${item.approved}/${targetPerCollection} · ${item.review} R`));
+    button.title = `${row.channel.label} / ${item.collection.label}: ${item.recommendation.reason}`;
     button.addEventListener('click', () => {
-      window.dispatchEvent(new CustomEvent('vah:arsenal-select', { detail: { channel: row.channel.id, collection: item.collection.id } }));
+      window.dispatchEvent(new CustomEvent('vah:arsenal-select', {
+        detail: {
+          channel: row.channel.id,
+          collection: item.collection.id,
+          provider: item.recommendation.provider,
+          variant: item.recommendation.variant
+        }
+      }));
       document.querySelector('#arsenal-builder')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
     list.append(button);
@@ -118,18 +134,24 @@ function channelCard(row) {
   const batch = document.createElement('button');
   batch.type = 'button';
   batch.className = 'expansion-batch-button';
-  if (row.searchWeakest.length) {
-    batch.textContent = `Top ${row.searchWeakest.length} Suchlücken vorbereiten`;
+  if (row.batch.items.length) {
+    const media = row.batch.mediaType === 'video' ? 'Video' : 'Foto';
+    batch.textContent = `${row.batch.items.length} ${media}-Suchlücken mit ${providerLabel(row.batch.provider)} vorbereiten`;
   } else if (row.review > 0 && row.approved < row.target) {
     batch.textContent = 'Erst vorhandene Reviews prüfen';
   } else {
     batch.textContent = 'Kanal vollständig';
   }
-  batch.disabled = row.searchWeakest.length === 0;
+  batch.disabled = row.batch.items.length === 0;
   batch.addEventListener('click', () => {
-    if (!row.searchWeakest.length) return;
+    if (!row.batch.items.length) return;
     window.dispatchEvent(new CustomEvent('vah:arsenal-batch-select', {
-      detail: { channel: row.channel.id, collections: row.searchWeakest.map((item) => item.collection.id) }
+      detail: {
+        channel: row.channel.id,
+        collections: row.batch.items.map((item) => item.collection.id),
+        provider: row.batch.provider,
+        variant: row.batch.variant
+      }
     }));
     document.querySelector('#arsenal-builder')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
@@ -138,10 +160,25 @@ function channelCard(row) {
   return card;
 }
 
+function recommendSearch({ videos, photos, videoGap, photoGap }) {
+  if (videoGap > 0) return { mediaType: 'video', provider: 'pexels', variant: 'video-vertical', reason: `${videos}/${minimumVideosPerCollection} Video-Kandidaten vorhanden; zuerst vertikale B-Rolls ergänzen.` };
+  if (photoGap > 0) return { mediaType: 'photo', provider: 'unsplash', variant: 'photo-vertical', reason: `${photos}/${minimumPhotosPerCollection} Foto-Kandidaten vorhanden; hochwertige Fotos ergänzen.` };
+  if (videos <= photos) return { mediaType: 'video', provider: 'pexels', variant: 'video-vertical', reason: 'Grundmix ist vorhanden; für Reel-Nutzung wird die kleinere Video-Seite des Bestands ergänzt.' };
+  return { mediaType: 'photo', provider: 'unsplash', variant: 'photo-vertical', reason: 'Grundmix ist vorhanden; die kleinere Foto-Seite des Bestands wird ergänzt.' };
+}
+
+function smartBatch(rows) {
+  if (!rows.length) return { items: [], mediaType: null, provider: null, variant: null };
+  const first = rows[0].recommendation;
+  const items = rows.filter((row) => row.recommendation.mediaType === first.mediaType).slice(0, 5);
+  return { items, mediaType: first.mediaType, provider: first.provider, variant: first.variant };
+}
+
 function strategyItem(title, providers, description) {
   const item = document.createElement('div');
   item.append(text('strong', title), text('span', providers), text('small', description));
   return item;
 }
+function providerLabel(value) { return ({ pexels: 'Pexels', pixabay: 'Pixabay', unsplash: 'Unsplash', openverse: 'Openverse', wikimedia: 'Wikimedia' })[value] ?? value; }
 function progress(value) { const outer = document.createElement('div'); outer.className = 'expansion-progress'; outer.setAttribute('role', 'progressbar'); outer.setAttribute('aria-valuemin', '0'); outer.setAttribute('aria-valuemax', '100'); outer.setAttribute('aria-valuenow', String(value)); const inner = document.createElement('span'); inner.style.width = `${value}%`; outer.append(inner); return outer; }
 function text(tag, value, className = '') { const el = document.createElement(tag); el.textContent = value; if (className) el.className = className; return el; }
