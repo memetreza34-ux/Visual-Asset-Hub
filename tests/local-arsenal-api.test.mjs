@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import process from 'node:process';
 import test from 'node:test';
-import { validateImportPayload, validateSearchPayload } from '../scripts/local-arsenal-api.mjs';
+import { validateBatchSearchPayload, validateImportPayload, validateSearchPayload } from '../scripts/local-arsenal-api.mjs';
 
 const root = process.cwd();
 
@@ -26,51 +26,39 @@ test('lokale Arsenal-Suche löst Quelle, Kanal, Sammlung und Format kontrolliert
 });
 
 test('Unsplash akzeptiert Fotoformate und blockiert Videoformate', () => {
-  const photo = validateSearchPayload({
-    provider: 'unsplash',
-    apiKey: 'test-unsplash-key-1234567890',
-    channel: 'ai',
-    collection: 'humanoid-robots',
-    variant: 'photo-vertical'
-  }, root);
+  const photo = validateSearchPayload({ provider: 'unsplash', apiKey: 'test-unsplash-key-1234567890', channel: 'ai', collection: 'humanoid-robots', variant: 'photo-vertical' }, root);
   assert.equal(photo.provider, 'unsplash');
   assert.equal(photo.job.type, 'photo');
-  assert.throws(() => validateSearchPayload({
-    provider: 'unsplash',
-    apiKey: 'test-unsplash-key-1234567890',
-    channel: 'ai',
-    collection: 'humanoid-robots',
-    variant: 'video-vertical'
-  }, root), /nur Bilder/);
+  assert.throws(() => validateSearchPayload({ provider: 'unsplash', apiKey: 'test-unsplash-key-1234567890', channel: 'ai', collection: 'humanoid-robots', variant: 'video-vertical' }, root), /nur Bilder/);
 });
 
 test('Openverse und Wikimedia benötigen keinen API-Key und sind foto-only', () => {
   for (const provider of ['openverse', 'wikimedia']) {
-    const photo = validateSearchPayload({
-      provider,
-      channel: 'electro',
-      collection: 'motors-drives',
-      variant: 'photo-horizontal'
-    }, root);
+    const photo = validateSearchPayload({ provider, channel: 'electro', collection: 'motors-drives', variant: 'photo-horizontal' }, root);
     assert.equal(photo.provider, provider);
     assert.equal(photo.apiKey, '');
     assert.equal(photo.job.type, 'photo');
-    assert.throws(() => validateSearchPayload({
-      provider,
-      channel: 'electro',
-      collection: 'motors-drives',
-      variant: 'video-vertical'
-    }, root), /nur Bilder/);
+    assert.throws(() => validateSearchPayload({ provider, channel: 'electro', collection: 'motors-drives', variant: 'video-vertical' }, root), /nur Bilder/);
   }
 });
 
-test('Pexels bleibt die Standardquelle für bestehende Aufrufe', () => {
-  const value = validateSearchPayload({
-    apiKey: 'test-pexels-key-1234567890',
+test('Batch-Suche akzeptiert höchstens fünf eindeutige Sammlungen', () => {
+  const batch = validateBatchSearchPayload({
+    provider: 'openverse',
     channel: 'finance',
-    collection: 'cash-money',
-    variant: 'video-vertical'
+    collections: ['cash-money', 'stock-market', 'banking'],
+    variant: 'photo-vertical',
+    queryIndex: 0,
+    perPage: 8
   }, root);
+  assert.equal(batch.length, 3);
+  assert.deepEqual(batch.map((item) => item.job.collection), ['cash-money', 'stock-market', 'banking']);
+  assert.throws(() => validateBatchSearchPayload({ provider: 'openverse', channel: 'finance', collections: ['cash-money', 'cash-money'], variant: 'photo-vertical' }, root), /Duplikate/);
+  assert.throws(() => validateBatchSearchPayload({ provider: 'openverse', channel: 'finance', collections: ['cash-money', 'stock-market', 'banking', 'crypto', 'inflation', 'budgeting'], variant: 'photo-vertical' }, root), /1 bis 5/);
+});
+
+test('Pexels bleibt die Standardquelle für bestehende Aufrufe', () => {
+  const value = validateSearchPayload({ apiKey: 'test-pexels-key-1234567890', channel: 'finance', collection: 'cash-money', variant: 'video-vertical' }, root);
   assert.equal(value.provider, 'pexels');
 });
 
