@@ -30,7 +30,8 @@ test('Ausbauplan priorisiert leere Sammlungen und passende Quellen', () => {
   assert.equal(plan.priorities[0].collection, 'empty');
 
   const empty = plan.priorities.find((row) => row.collection === 'empty');
-  assert.deepEqual(empty.gaps, { approved: 8, minimumApproved: 4, videos: 2, photos: 2 });
+  assert.deepEqual(empty.gaps, { approved: 8, minimumApproved: 4, videos: 2, photos: 2, searchCandidates: 8 });
+  assert.equal(empty.nextAction, 'search');
   assert.deepEqual(empty.providerPriority, ['pexels', 'pixabay', 'unsplash', 'openverse', 'wikimedia']);
 
   const photosOnly = plan.priorities.find((row) => row.collection === 'photos-only');
@@ -47,12 +48,25 @@ test('Ausbauplan priorisiert leere Sammlungen und passende Quellen', () => {
   assert.ok(videosOnly.providerPriority.includes('wikimedia'));
 });
 
-test('Review-Kandidaten zählen nicht als freigegeben', () => {
+test('Review-Kandidaten zählen nicht als freigegeben und reduzieren die Suchlücke', () => {
   const assets = [asset('R1', 'empty', 'video', 'review'), asset('R2', 'empty', 'image', 'review')];
   const plan = buildExpansionPlan({ channels, assets });
   const row = plan.priorities.find((item) => item.collection === 'empty');
   assert.equal(row.counts.totalCandidates, 2);
   assert.equal(row.counts.review, 2);
   assert.equal(row.counts.approved, 0);
+  assert.equal(row.gaps.searchCandidates, 6);
+  assert.equal(row.nextAction, 'search');
   assert.equal(row.complete, false);
+});
+
+test('genug Review-Kandidaten erzwingen Review vor weiterer Suche', () => {
+  const assets = Array.from({ length: 8 }, (_, index) => asset(`R${index}`, 'empty', index % 2 ? 'video' : 'image', 'review'));
+  const plan = buildExpansionPlan({ channels, assets });
+  const row = plan.priorities.find((item) => item.collection === 'empty');
+  assert.equal(row.gaps.searchCandidates, 0);
+  assert.equal(row.nextAction, 'review-first');
+  assert.deepEqual(row.providerPriority, []);
+  assert.ok(plan.nextReview.some((item) => item.collection === 'empty'));
+  assert.ok(!plan.nextBatch.some((item) => item.collection === 'empty'));
 });
