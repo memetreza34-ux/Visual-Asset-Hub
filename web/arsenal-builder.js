@@ -27,13 +27,14 @@ function render({ health, channelIndex, channels }) {
   section.hidden = false;
   const allVariants = channelIndex.variants ?? [];
   let plannedBatchCollections = [];
+
   const header = document.createElement('div');
   header.className = 'builder-header';
   const headerContent = document.createElement('div');
   headerContent.append(
     textElement('span', 'Arsenal Builder', 'eyebrow'),
     textElement('h2', '5 Medienquellen direkt durchsuchen'),
-    textElement('p', 'Pexels, Pixabay und Unsplash können ihren API-Key für die aktuelle Browser-Sitzung ausschließlich im Arbeitsspeicher behalten. Openverse und Wikimedia Commons funktionieren ohne Key. Mit dem Batch-Modus werden bis zu fünf Sammlungen nacheinander durchsucht. Alle Importe starten im Status Review.')
+    textElement('p', 'Ausbau 720 kann Quelle, Format und Sammlung automatisch vorbereiten. Pexels, Pixabay und Unsplash behalten ihren Key nur im Arbeitsspeicher der aktuell geöffneten Seite. Openverse und Wikimedia Commons funktionieren ohne Key. Alle Importe starten auf Review.')
   );
   header.append(headerContent);
 
@@ -45,7 +46,14 @@ function render({ health, channelIndex, channels }) {
   addOption(provider.input, 'unsplash', 'Unsplash');
   addOption(provider.input, 'openverse', 'Openverse · ohne Key');
   addOption(provider.input, 'wikimedia', 'Wikimedia Commons · ohne Key');
-  const apiKey = field('Pexels API-Key', 'password', { required: true, minlength: 8, maxlength: 300, autocomplete: 'off', placeholder: 'Nur lokal für diese Sitzung' });
+
+  const apiKey = field('Pexels API-Key', 'password', {
+    required: true,
+    minlength: 8,
+    maxlength: 300,
+    autocomplete: 'off',
+    placeholder: 'Nur lokal für diese Sitzung'
+  });
   const channel = selectField('Kanal');
   channel.input.id = 'arsenal-builder-channel';
   const collection = selectField('Sammlung');
@@ -54,24 +62,21 @@ function render({ health, channelIndex, channels }) {
   variant.input.id = 'arsenal-builder-variant';
   const queryIndex = selectField('Suchvariante');
   const perPage = field('Treffer', 'number', { min: 3, max: 20, value: '12', required: true });
-  const submit = document.createElement('button');
+
+  const submit = button('Pexels durchsuchen', 'builder-primary');
   submit.type = 'submit';
-  submit.className = 'builder-primary';
-  submit.textContent = 'Pexels durchsuchen';
-  const batchSubmit = document.createElement('button');
-  batchSubmit.type = 'button';
-  batchSubmit.textContent = '5 Sammlungen mit Pexels durchsuchen';
-  const clearKeys = document.createElement('button');
-  clearKeys.type = 'button';
-  clearKeys.textContent = 'Sitzungs-Keys löschen';
+  const batchSubmit = button('5 Sammlungen mit Pexels durchsuchen');
+  const clearKeys = button('Sitzungs-Keys löschen');
   const status = textElement('p', '', 'builder-status');
   status.hidden = true;
 
   for (const item of channels) addOption(channel.input, item.id, item.label);
   for (let index = 0; index < 3; index += 1) addOption(queryIndex.input, String(index), `Suchbegriff ${index + 1}`);
+
   updateCollections();
   updateVariants();
   updateProviderCopy();
+
   channel.input.addEventListener('change', () => {
     plannedBatchCollections = [];
     updateCollections();
@@ -93,7 +98,7 @@ function render({ health, channelIndex, channels }) {
     sessionKeys.clear();
     apiKey.input.value = '';
     updateProviderCopy();
-    showStatus(status, 'Alle API-Keys wurden aus dem Arbeitsspeicher dieser Seite gelöscht.', true);
+    showStatus(status, 'Alle API-Keys wurden aus dem Arbeitsspeicher dieser Seite gelöscht. Bereits geladene Unsplash-Treffer müssen vor dem Import erneut gesucht werden.', true);
   });
 
   form.append(provider.wrapper, apiKey.wrapper, channel.wrapper, collection.wrapper, variant.wrapper, queryIndex.wrapper, perPage.wrapper, submit, batchSubmit, clearKeys, status);
@@ -109,14 +114,12 @@ function render({ health, channelIndex, channels }) {
     channel.input.value = selectedChannel.id;
     updateCollections();
     if (selectedChannel.collections.some((item) => item.id === detail.collection)) collection.input.value = detail.collection;
-    const preferred = [...variant.input.options].find((option) => option.value === 'video-vertical') ?? variant.input.options[0];
-    if (preferred) variant.input.value = preferred.value;
+    applyRecommendation(detail);
     queryIndex.input.value = '0';
     updateBatchButtonCopy();
     const selectedCollection = selectedChannel.collections.find((item) => item.id === collection.input.value);
-    showStatus(status, `${selectedChannel.label} / ${selectedCollection?.label ?? collection.input.value} wurde vorbereitet.`, true);
-    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    setTimeout(() => (apiKey.wrapper.hidden ? provider.input : apiKey.input).focus({ preventScroll: true }), 500);
+    showStatus(status, `${selectedChannel.label} / ${selectedCollection?.label ?? collection.input.value} wurde vorbereitet · ${providerLabel(provider.input.value)} · ${variantLabelById(variant.input.value)}.`, true);
+    focusBuilder();
   });
 
   window.addEventListener('vah:arsenal-batch-select', (event) => {
@@ -131,19 +134,18 @@ function render({ health, channelIndex, channels }) {
     channel.input.value = selectedChannel.id;
     updateCollections();
     collection.input.value = valid[0];
+    applyRecommendation(detail);
     queryIndex.input.value = '0';
     updateBatchButtonCopy();
-    showStatus(status, `${valid.length} priorisierte Lücken für ${selectedChannel.label} wurden als Batch vorbereitet. Quelle und Format wählen, dann Batch starten.`, true);
-    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    setTimeout(() => (apiKey.wrapper.hidden ? provider.input : apiKey.input).focus({ preventScroll: true }), 500);
+    showStatus(status, `${valid.length} priorisierte Lücken vorbereitet · ${providerLabel(provider.input.value)} · ${variantLabelById(variant.input.value)}.`, true);
+    focusBuilder();
   });
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const transientApiKey = getApiKeyOrError();
     if (transientApiKey === null) return;
-    submit.disabled = true;
-    batchSubmit.disabled = true;
+    setBusy(true);
     const providerName = providerLabel(provider.input.value);
     showStatus(status, `${providerName} wird durchsucht …`, true);
     resultArea.replaceChildren();
@@ -154,14 +156,13 @@ function render({ health, channelIndex, channels }) {
       const cacheText = data.cached ? ' · aus 24-Stunden-Cache' : '';
       const rateText = data.rateLimit?.remaining !== null && data.rateLimit?.remaining !== undefined ? ` · API-Limit verbleibend: ${data.rateLimit.remaining}` : '';
       showStatus(status, `${data.assets.length} Treffer geladen · insgesamt ${data.totalResults} bei ${providerLabel(data.provider)}${cacheText}${rateText}.`, true);
-      renderResults(resultArea, data, health.token, data.provider === 'unsplash' ? transientApiKey : '');
+      renderResults(resultArea, data, health.token, resolveProviderKey);
     } catch (error) {
       apiKey.input.value = '';
       updateKeyPlaceholder();
       showStatus(status, error.message, false);
     } finally {
-      submit.disabled = false;
-      batchSubmit.disabled = false;
+      setBusy(false);
     }
   });
 
@@ -173,8 +174,7 @@ function render({ health, channelIndex, channels }) {
     const start = Math.max(0, selectedChannel.collections.findIndex((item) => item.id === collection.input.value));
     const fallbackCollections = selectedChannel.collections.slice(start, start + Math.min(5, health.maxBatchCollections ?? 5)).map((item) => item.id);
     const collections = plannedBatchCollections.length ? [...plannedBatchCollections] : fallbackCollections;
-    submit.disabled = true;
-    batchSubmit.disabled = true;
+    setBusy(true);
     resultArea.replaceChildren();
     showStatus(status, `${providerLabel(provider.input.value)} durchsucht ${collections.length} Sammlungen nacheinander …`, true);
     try {
@@ -184,16 +184,28 @@ function render({ health, channelIndex, channels }) {
       plannedBatchCollections = [];
       updateBatchButtonCopy();
       showStatus(status, `${data.assets} Treffer aus ${data.collections} Sammlungen geladen. Nichts wurde automatisch freigegeben.`, true);
-      renderBatchResults(resultArea, data.groups, health.token, data.provider === 'unsplash' ? transientApiKey : '');
+      renderBatchResults(resultArea, data.groups, health.token, resolveProviderKey);
     } catch (error) {
       apiKey.input.value = '';
       updateKeyPlaceholder();
       showStatus(status, error.message, false);
     } finally {
-      submit.disabled = false;
-      batchSubmit.disabled = false;
+      setBusy(false);
     }
   });
+
+  function applyRecommendation(detail) {
+    const requestedProvider = String(detail.provider ?? '');
+    if (requestedProvider && [...provider.input.options].some((option) => option.value === requestedProvider)) {
+      provider.input.value = requestedProvider;
+      updateVariants();
+      updateProviderCopy();
+    }
+    const requestedVariant = String(detail.variant ?? '');
+    const fallback = preferredVariantForProvider(provider.input.value);
+    const desired = requestedVariant && [...variant.input.options].some((option) => option.value === requestedVariant) ? requestedVariant : fallback;
+    if (desired && [...variant.input.options].some((option) => option.value === desired)) variant.input.value = desired;
+  }
 
   function searchPayload(transientApiKey) {
     return {
@@ -220,6 +232,11 @@ function render({ health, channelIndex, channels }) {
     return value;
   }
 
+  function resolveProviderKey(providerName) {
+    if (keylessProviders.has(providerName)) return '';
+    return sessionKeys.get(providerName) || '';
+  }
+
   function updateCollections() {
     const selected = channels.find((item) => item.id === channel.input.value) ?? channels[0];
     collection.input.replaceChildren();
@@ -231,9 +248,8 @@ function render({ health, channelIndex, channels }) {
     const allowed = photoOnlyProviders.has(selectedProvider) ? allVariants.filter((item) => item.type === 'photo') : allVariants;
     variant.input.replaceChildren();
     for (const item of allowed) addOption(variant.input, item.id, variantLabel(item));
-    const preferredId = photoOnlyProviders.has(selectedProvider) ? 'photo-vertical' : 'video-vertical';
-    const preferred = [...variant.input.options].find((option) => option.value === preferredId) ?? variant.input.options[0];
-    if (preferred) variant.input.value = preferred.value;
+    const preferred = preferredVariantForProvider(selectedProvider);
+    if (preferred && [...variant.input.options].some((option) => option.value === preferred)) variant.input.value = preferred;
   }
 
   function updateProviderCopy() {
@@ -262,22 +278,38 @@ function render({ health, channelIndex, channels }) {
     apiKey.input.placeholder = sessionKeys.has(selectedProvider) ? 'Für diese Sitzung gespeichert' : 'Nur lokal für diese Sitzung';
     apiKey.input.required = !sessionKeys.has(selectedProvider);
   }
+
+  function variantLabelById(value) {
+    const item = allVariants.find((entry) => entry.id === value);
+    return item ? variantLabel(item) : value;
+  }
+
+  function focusBuilder() {
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTimeout(() => (apiKey.wrapper.hidden || sessionKeys.has(provider.input.value) ? provider.input : apiKey.input).focus({ preventScroll: true }), 500);
+  }
+
+  function setBusy(value) {
+    submit.disabled = value;
+    batchSubmit.disabled = value;
+    clearKeys.disabled = value;
+  }
 }
 
-function renderBatchResults(container, groups, token, transientApiKey) {
+function renderBatchResults(container, groups, token, keyResolver) {
   const title = textElement('div', `${groups.length} Sammlungen durchsucht`, 'builder-result-tools');
   const wrapper = document.createElement('div');
   wrapper.className = 'builder-batch-results';
   for (const group of groups) {
     const groupSection = document.createElement('section');
     groupSection.className = 'builder-batch-group';
-    renderResults(groupSection, group, token, group.provider === 'unsplash' ? transientApiKey : '');
+    renderResults(groupSection, group, token, keyResolver);
     wrapper.append(groupSection);
   }
   container.replaceChildren(title, wrapper);
 }
 
-function renderResults(container, data, token, transientApiKey = '') {
+function renderResults(container, data, token, keyResolver) {
   const tools = document.createElement('div');
   tools.className = 'builder-result-tools';
   const summary = document.createElement('div');
@@ -305,13 +337,14 @@ function renderResults(container, data, token, transientApiKey = '') {
   importButton.addEventListener('click', async () => {
     const ids = [...grid.querySelectorAll('input[type="checkbox"]:checked')].map((input) => input.value);
     if (!ids.length) return showStatus(importStatus, 'Bitte mindestens einen Treffer auswählen.', false);
-    if (data.provider === 'unsplash' && !transientApiKey) return showStatus(importStatus, 'Der Unsplash-Key ist nicht mehr im Arbeitsspeicher. Bitte die Suche erneut ausführen.', false);
+    const providerKey = data.provider === 'unsplash' ? keyResolver('unsplash') : '';
+    if (data.provider === 'unsplash' && !providerKey) return showStatus(importStatus, 'Der Unsplash-Key wurde aus dem Arbeitsspeicher gelöscht. Bitte die Suche erneut ausführen.', false);
     importButton.disabled = true;
     showStatus(importStatus, `${ids.length} Treffer werden sicher als Review importiert …`, true);
     try {
-      const response = await post('/arsenal-api/import', { searchId: data.searchId, ids, apiKey: data.provider === 'unsplash' ? transientApiKey : undefined }, token);
-      transientApiKey = '';
-      showStatus(importStatus, `${response.imported} ${providerLabel(response.provider)}-Treffer wurden importiert. Die Seite wird neu geladen.`, true);
+      const response = await post('/arsenal-api/import', { searchId: data.searchId, ids, apiKey: data.provider === 'unsplash' ? providerKey : undefined }, token);
+      const skipped = response.skipped ? ` · ${response.skipped} bereits vorhanden/übersprungen` : '';
+      showStatus(importStatus, `${response.imported} ${providerLabel(response.provider)}-Treffer importiert${skipped}. Die Seite wird neu geladen.`, true);
       setTimeout(() => location.reload(), 900);
     } catch (error) {
       showStatus(importStatus, error.message, false);
@@ -363,11 +396,17 @@ function resultCard(asset, provider) {
 }
 
 async function post(endpoint, payload, token) {
-  const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-VAH-Token': token }, body: JSON.stringify(payload) });
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-VAH-Token': token },
+    body: JSON.stringify(payload)
+  });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
   return data;
 }
+
+function preferredVariantForProvider(provider) { return photoOnlyProviders.has(provider) ? 'photo-vertical' : 'video-vertical'; }
 function providerLabel(value) { return ({ pexels: 'Pexels', pixabay: 'Pixabay', unsplash: 'Unsplash', openverse: 'Openverse', wikimedia: 'Wikimedia Commons' })[value] ?? value; }
 function licenseLabel(value) { return ({ by: 'CC BY', 'by-sa': 'CC BY-SA', 'cc-by': 'CC BY', 'cc-by-sa': 'CC BY-SA', cc0: 'CC0', pdm: 'Public Domain', 'public-domain': 'Public Domain' })[value] ?? String(value).toUpperCase(); }
 function field(labelText, type, attributes = {}) { const wrapper = document.createElement('label'); wrapper.className = 'builder-field'; const text = textElement('span', labelText); const input = document.createElement('input'); input.type = type; for (const [key, value] of Object.entries(attributes)) input.setAttribute(key, String(value)); wrapper.append(text, input); return { wrapper, input }; }
