@@ -1,5 +1,6 @@
 const API_BASE = 'https://api.openverse.org/v1/images/';
 const SAFE_LICENSES = 'by,by-sa,cc0,pdm';
+const SAFE_IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp', 'avif', 'tif', 'tiff']);
 
 function inferOrientation(width, height) {
   if (!width || !height) return 'unknown';
@@ -8,13 +9,19 @@ function inferOrientation(width, height) {
 }
 
 function assertInteger(value, name, min, max) {
-  if (!Number.isInteger(value) || value < min || value > max) {
-    throw new Error(`${name} muss eine ganze Zahl zwischen ${min} und ${max} sein.`);
-  }
+  if (!Number.isInteger(value) || value < min || value > max) throw new Error(`${name} muss eine ganze Zahl zwischen ${min} und ${max} sein.`);
+}
+
+function extension(value) {
+  try { return new URL(value).pathname.split('.').pop()?.toLowerCase() || ''; }
+  catch { return ''; }
 }
 
 function normalizeItem(item) {
   const license = String(item.license || '').toLowerCase();
+  const original = item.url || null;
+  const ext = String(item.filetype || extension(original)).toLowerCase().replace('jpeg', 'jpg');
+  if (!original || !SAFE_IMAGE_EXTENSIONS.has(ext)) return null;
   return {
     provider: 'openverse',
     provider_id: String(item.id),
@@ -27,10 +34,7 @@ function normalizeItem(item) {
     height: item.height ?? null,
     orientation: inferOrientation(item.width, item.height),
     preview_url: item.thumbnail || null,
-    files: {
-      original: item.url || null,
-      medium: item.thumbnail || null
-    },
+    files: { original, medium: item.thumbnail || null },
     license,
     license_version: item.license_version || null,
     license_url: item.license_url || null,
@@ -41,13 +45,7 @@ function normalizeItem(item) {
   };
 }
 
-export async function searchOpenverse({
-  query,
-  orientation,
-  page = 1,
-  perPage = 15,
-  fetchImpl = globalThis.fetch
-}) {
+export async function searchOpenverse({ query, orientation, page = 1, perPage = 15, fetchImpl = globalThis.fetch }) {
   if (!query || !String(query).trim()) throw new Error('Eine Suchanfrage ist erforderlich.');
   if (typeof fetchImpl !== 'function') throw new Error('In dieser Node.js-Version ist fetch nicht verfügbar.');
   assertInteger(page, 'page', 1, 100);
@@ -70,7 +68,8 @@ export async function searchOpenverse({
   const payload = await response.json();
   const normalized = (payload.results ?? [])
     .map(normalizeItem)
-    .filter((item) => item.source_url && item.files.original && !item.mature)
+    .filter(Boolean)
+    .filter((item) => item.source_url && !item.mature)
     .filter((item) => !orientation || orientation === 'any' || item.orientation === orientation)
     .slice(0, perPage);
 
