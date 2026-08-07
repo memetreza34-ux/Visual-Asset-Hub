@@ -6,10 +6,15 @@ import { spawnSync } from 'node:child_process';
 import { searchPexels } from './lib/pexels.mjs';
 import { searchPixabay } from './lib/pixabay.mjs';
 import { searchUnsplash } from './lib/unsplash.mjs';
+import { searchOpenverse } from './lib/openverse.mjs';
+import { searchWikimedia } from './lib/wikimedia.mjs';
 
 const searchIdPattern = /^ARS-[A-F0-9]{16}$/;
 const providerIdPattern = /^[A-Za-z0-9_-]{1,64}$/;
 const PIXABAY_CACHE_MS = 24 * 60 * 60 * 1000;
+const PROVIDERS = ['pexels', 'pixabay', 'unsplash', 'openverse', 'wikimedia'];
+const KEYLESS_PROVIDERS = new Set(['openverse', 'wikimedia']);
+const PHOTO_ONLY_PROVIDERS = new Set(['unsplash', 'openverse', 'wikimedia']);
 
 export function createLocalArsenalApi({ root = process.cwd(), token } = {}) {
   if (!token) throw new Error('Lokales Verwaltungstoken fehlt.');
@@ -22,7 +27,7 @@ export function createLocalArsenalApi({ root = process.cwd(), token } = {}) {
       setHeaders(response);
       if (!isLoopback(request.socket.remoteAddress)) return sendJson(response, 403, { error: 'Die Arsenal-API ist ausschließlich lokal erreichbar.' });
       if (request.method === 'GET' && url.pathname === '/arsenal-api/health') {
-        return sendJson(response, 200, { ok: true, local: true, providers: ['pexels', 'pixabay', 'unsplash'] });
+        return sendJson(response, 200, { ok: true, local: true, providers: PROVIDERS });
       }
       if (request.method !== 'POST') return sendJson(response, 405, { error: 'Nur POST ist für diese Aktion erlaubt.' });
       if (!sameOrigin(request)) return sendJson(response, 403, { error: 'Ungültiger Ursprung.' });
@@ -48,38 +53,19 @@ export function createLocalArsenalApi({ root = process.cwd(), token } = {}) {
 
           let result;
           if (input.provider === 'pixabay') {
-            result = await searchPixabay({
-              apiKey: input.apiKey,
-              query: input.job.query,
-              type: input.job.type,
-              orientation: input.job.orientation,
-              locale: 'de',
-              page: 1,
-              perPage: input.job.perPage
-            });
+            result = await searchPixabay({ apiKey: input.apiKey, query: input.job.query, type: input.job.type, orientation: input.job.orientation, locale: 'de', page: 1, perPage: input.job.perPage });
           } else if (input.provider === 'unsplash') {
-            result = await searchUnsplash({
-              apiKey: input.apiKey,
-              query: input.job.query,
-              orientation: input.job.orientation,
-              page: 1,
-              perPage: input.job.perPage,
-              contentFilter: 'high'
-            });
+            result = await searchUnsplash({ apiKey: input.apiKey, query: input.job.query, orientation: input.job.orientation, page: 1, perPage: input.job.perPage, contentFilter: 'high' });
+          } else if (input.provider === 'openverse') {
+            result = await searchOpenverse({ query: input.job.query, orientation: input.job.orientation, page: 1, perPage: input.job.perPage });
+          } else if (input.provider === 'wikimedia') {
+            result = await searchWikimedia({ query: input.job.query, orientation: input.job.orientation, page: 1, perPage: input.job.perPage });
           } else {
-            result = await searchPexels({
-              apiKey: input.apiKey,
-              query: input.job.query,
-              type: input.job.type,
-              orientation: input.job.orientation,
-              locale: 'de-DE',
-              page: 1,
-              perPage: input.job.perPage
-            });
+            result = await searchPexels({ apiKey: input.apiKey, query: input.job.query, type: input.job.type, orientation: input.job.orientation, locale: 'de-DE', page: 1, perPage: input.job.perPage });
           }
 
           const wrapper = {
-            version: 3,
+            version: 4,
             searchId,
             provider: input.provider,
             searchedAt: new Date().toISOString(),
@@ -99,15 +85,8 @@ export function createLocalArsenalApi({ root = process.cwd(), token } = {}) {
           if (relative.startsWith('..') || path.isAbsolute(relative)) throw new Error('Ungültiger Suchergebnis-Pfad.');
           const wrapper = readJson(file);
           const provider = wrapper.provider ?? wrapper.result?.provider ?? 'pexels';
-          const env = provider === 'unsplash'
-            ? { UNSPLASH_ACCESS_KEY: requireText(input.apiKey, 'apiKey', 8, 300) }
-            : {};
-          const output = runScript(
-            root,
-            'scripts/arsenal-import-selected.mjs',
-            ['--input', relative, '--ids', input.ids.join(',')],
-            env
-          );
+          const env = provider === 'unsplash' ? { UNSPLASH_ACCESS_KEY: requireText(input.apiKey, 'apiKey', 8, 300) } : {};
+          const output = runScript(root, 'scripts/arsenal-import-selected.mjs', ['--input', relative, '--ids', input.ids.join(',')], env);
           return sendJson(response, 200, { ok: true, provider, imported: input.ids.length, output });
         }
 
@@ -122,8 +101,8 @@ export function createLocalArsenalApi({ root = process.cwd(), token } = {}) {
 }
 
 export function validateSearchPayload(payload, root = process.cwd()) {
-  const apiKey = requireText(payload?.apiKey, 'apiKey', 8, 300);
-  const provider = requireMember(payload?.provider ?? 'pexels', ['pexels', 'pixabay', 'unsplash'], 'provider');
+  const provider = requireMember(payload?.provider ?? 'pexels', PROVIDERS, 'provider');
+  const apiKey = KEYLESS_PROVIDERS.has(provider) ? '' : requireText(payload?.apiKey, 'apiKey', 8, 300);
   const channelId = requireSlug(payload?.channel, 'channel');
   const collectionId = requireSlug(payload?.collection, 'collection');
   const variantId = requireSlug(payload?.variant, 'variant');
@@ -137,8 +116,8 @@ export function validateSearchPayload(payload, root = process.cwd()) {
   if (!collection) throw new Error(`Unbekannte Sammlung: ${channelId}/${collectionId}`);
   const variant = (index.variants ?? []).find((entry) => entry.id === variantId);
   if (!variant) throw new Error(`Unbekannte Variante: ${variantId}`);
-  if (provider === 'unsplash' && variant.type !== 'photo') {
-    throw new Error('Unsplash bietet in diesem Builder nur Bilder an. Bitte ein Fotoformat wählen.');
+  if (PHOTO_ONLY_PROVIDERS.has(provider) && variant.type !== 'photo') {
+    throw new Error(`${providerLabel(provider)} bietet in diesem Builder nur Bilder an. Bitte ein Fotoformat wählen.`);
   }
   const query = collection.queries[queryIndex % collection.queries.length];
   const perPage = Math.min(20, Math.max(3, perPageRequested ?? variant.perPage ?? 15));
@@ -165,21 +144,15 @@ export function validateSearchPayload(payload, root = process.cwd()) {
 export function validateImportPayload(payload) {
   const searchId = requireText(payload?.searchId, 'searchId', 20, 20);
   if (!searchIdPattern.test(searchId)) throw new Error('Ungültige searchId.');
-  if (!Array.isArray(payload?.ids) || payload.ids.length < 1 || payload.ids.length > 20) {
-    throw new Error('ids benötigt 1 bis 20 ausgewählte Medien-IDs.');
-  }
+  if (!Array.isArray(payload?.ids) || payload.ids.length < 1 || payload.ids.length > 20) throw new Error('ids benötigt 1 bis 20 ausgewählte Medien-IDs.');
   const ids = [...new Set(payload.ids.map((value) => String(value).trim()))];
-  if (ids.length !== payload.ids.length || ids.some((id) => !providerIdPattern.test(id))) {
-    throw new Error('ids enthält Duplikate oder ungültige Medien-IDs.');
-  }
+  if (ids.length !== payload.ids.length || ids.some((id) => !providerIdPattern.test(id))) throw new Error('ids enthält Duplikate oder ungültige Medien-IDs.');
   return { searchId, ids, apiKey: payload?.apiKey };
 }
 
 function createSearchId(provider, job) {
   if (provider === 'pixabay') {
-    const digest = createHash('sha256')
-      .update(JSON.stringify({ provider, query: job.query, type: job.type, orientation: job.orientation, perPage: job.perPage }))
-      .digest('hex');
+    const digest = createHash('sha256').update(JSON.stringify({ provider, query: job.query, type: job.type, orientation: job.orientation, perPage: job.perPage })).digest('hex');
     return `ARS-${digest.slice(0, 16).toUpperCase()}`;
   }
   return `ARS-${randomBytes(8).toString('hex').toUpperCase()}`;
@@ -187,64 +160,17 @@ function createSearchId(provider, job) {
 
 function isFreshCache(file, ttl) {
   if (!fs.existsSync(file)) return false;
-  try {
-    const stat = fs.statSync(file);
-    const wrapper = readJson(file);
-    return wrapper?.provider === 'pixabay' && Date.now() - stat.mtimeMs < ttl && Array.isArray(wrapper?.result?.assets);
-  } catch {
-    return false;
-  }
-}
-
-function responsePayload(wrapper, cached) {
-  return {
-    ok: true,
-    provider: wrapper.provider ?? wrapper.result?.provider ?? 'pexels',
-    cached,
-    searchId: wrapper.searchId,
-    job: wrapper.arsenalJob,
-    totalResults: wrapper.result.total_results,
-    rateLimit: wrapper.result.rate_limit ?? null,
-    assets: wrapper.result.assets
-  };
-}
-
-function runScript(root, script, args, envOverrides = {}) {
-  const result = spawnSync(process.execPath, [script, ...args], {
-    cwd: root,
-    encoding: 'utf8',
-    shell: false,
-    maxBuffer: 4 * 1024 * 1024,
-    env: { ...process.env, ...envOverrides }
-  });
-  const output = `${result.stdout || ''}${result.stderr || ''}`.trim();
-  if (result.status !== 0) throw new Error(output || `${script} ist fehlgeschlagen.`);
-  return output.slice(-10000);
-}
-
-async function readBody(request, limit) {
-  const contentType = String(request.headers['content-type'] || '').split(';')[0].trim();
-  if (contentType !== 'application/json') throw new Error('Content-Type muss application/json sein.');
-  const chunks = [];
-  let size = 0;
-  for await (const chunk of request) {
-    size += chunk.length;
-    if (size > limit) throw new Error('Anfrage ist zu groß.');
-    chunks.push(chunk);
-  }
-  try { return JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}'); }
-  catch { throw new Error('JSON konnte nicht gelesen werden.'); }
-}
-
-function sameOrigin(request) {
-  const origin = request.headers.origin;
-  if (!origin) return true;
-  try { const parsed = new URL(origin); return parsed.protocol === 'http:' && parsed.host === request.headers.host; }
+  try { const stat = fs.statSync(file); const wrapper = readJson(file); return wrapper?.provider === 'pixabay' && Date.now() - stat.mtimeMs < ttl && Array.isArray(wrapper?.result?.assets); }
   catch { return false; }
 }
+function responsePayload(wrapper, cached) { return { ok: true, provider: wrapper.provider ?? wrapper.result?.provider ?? 'pexels', cached, searchId: wrapper.searchId, job: wrapper.arsenalJob, totalResults: wrapper.result.total_results, rateLimit: wrapper.result.rate_limit ?? null, assets: wrapper.result.assets }; }
+function runScript(root, script, args, envOverrides = {}) { const result = spawnSync(process.execPath, [script, ...args], { cwd: root, encoding: 'utf8', shell: false, maxBuffer: 4 * 1024 * 1024, env: { ...process.env, ...envOverrides } }); const output = `${result.stdout || ''}${result.stderr || ''}`.trim(); if (result.status !== 0) throw new Error(output || `${script} ist fehlgeschlagen.`); return output.slice(-10000); }
+async function readBody(request, limit) { const contentType = String(request.headers['content-type'] || '').split(';')[0].trim(); if (contentType !== 'application/json') throw new Error('Content-Type muss application/json sein.'); const chunks = []; let size = 0; for await (const chunk of request) { size += chunk.length; if (size > limit) throw new Error('Anfrage ist zu groß.'); chunks.push(chunk); } try { return JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}'); } catch { throw new Error('JSON konnte nicht gelesen werden.'); } }
+function sameOrigin(request) { const origin = request.headers.origin; if (!origin) return true; try { const parsed = new URL(origin); return parsed.protocol === 'http:' && parsed.host === request.headers.host; } catch { return false; } }
 function isLoopback(address) { return ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(address || ''); }
 function setHeaders(response) { response.setHeader('Content-Type', 'application/json; charset=utf-8'); response.setHeader('Cache-Control', 'no-store'); response.setHeader('X-Content-Type-Options', 'nosniff'); response.setHeader('Referrer-Policy', 'no-referrer'); }
 function sendJson(response, status, value) { response.statusCode = status; response.end(`${JSON.stringify(value, null, 2)}\n`); return true; }
+function providerLabel(value) { return ({ pexels: 'Pexels', pixabay: 'Pixabay', unsplash: 'Unsplash', openverse: 'Openverse', wikimedia: 'Wikimedia Commons' })[value] ?? value; }
 function requireText(value, label, min, max) { if (typeof value !== 'string') throw new Error(`${label} muss Text sein.`); const text = value.trim(); if (text.length < min || text.length > max) throw new Error(`${label} muss zwischen ${min} und ${max} Zeichen lang sein.`); if (/[\u0000-\u001F\u007F]/.test(text)) throw new Error(`${label} enthält ungültige Zeichen.`); return text; }
 function requireSlug(value, label) { const slug = requireText(value, label, 2, 100); if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) throw new Error(`${label} ist kein gültiger Slug.`); return slug; }
 function requireMember(value, values, label) { const normalized = String(value ?? '').trim(); if (!values.includes(normalized)) throw new Error(`${label} ist ungültig.`); return normalized; }
