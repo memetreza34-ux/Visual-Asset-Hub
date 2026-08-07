@@ -1,5 +1,49 @@
 # Changelog
 
+## 0.4.0-beta.3 – Erweiterungen 2026-08-07
+
+### Neu
+
+- Arsenal Builder auf fünf Medienquellen erweitert: Pexels, Pixabay, Unsplash, Openverse und Wikimedia Commons
+- Pixabay-Suche für Bilder und Videos mit 24-Stunden-API-Cache
+- Unsplash-Fotosuche mit Fotografenattribution und vorgeschriebener Download-Meldung beim Import
+- Openverse- und Wikimedia-Commons-Suche ohne geheimen API-Key
+- konservativer Open-Lizenzfilter für Public Domain, CC0, CC BY und CC BY-SA
+- `cc-by-sa` als eigener Lizenzstatus mit verpflichtender Attribution und Share-Alike-Hinweis
+- Batch-Suche für bis zu fünf Sammlungen pro Durchlauf
+- Ausbau-720-Dashboard mit Fortschritt für Finanzen, KI, Elektrotechnik und Kampfsport
+- priorisierte Top-Suchlücken können direkt an den Arsenal Builder übergeben werden
+- neuer CLI-Ausbauplan über `npm run arsenal:expansion` als JSON und CSV
+- Review-first-Logik: vorhandene ungeprüfte Kandidaten reduzieren die Suchlücke und verhindern unnötige Nachsuche
+- Pexels-, Pixabay- und Unsplash-Keys können nur für die aktuelle Browserseite im Arbeitsspeicher gehalten werden
+- Schaltfläche **Sitzungs-Keys löschen** entfernt alle gespeicherten Provider-Keys sofort aus dem Arbeitsspeicher
+- CC-BY-SA-4.0-Kampfsport-Starter `VAH-WBOX2021` aus Wikimedia Commons
+- Starterbibliothek auf zwölf reale Assets erweitert und alle vier Kanäle im Starter-Realtest vertreten
+
+### Verbessert
+
+- Navigation um **Medien suchen** und **Ausbau 720** erweitert
+- Realtest, README, Kanal-Arsenal und Release-Checkliste auf Mac, fünf Quellen und zwölf Starterassets aktualisiert
+- Openverse filtert nicht unterstützte Bildformate vor dem Import
+- Wikimedia filtert nicht unterstützte MIME-Typen und unklare Lizenztypen vor dem Import
+- API-Keys werden weder in `localStorage` noch in `sessionStorage` geschrieben
+- priorisierte Batches verwenden konkrete Sammlungs-IDs statt nur fünf benachbarte Sammlungen
+- GitHub-Workflows lösen weniger doppelte Prüfungen pro Commit aus
+
+### Fehlerbehebungen
+
+- Pixabay-API-Cache und Import-Suchergebnis sind getrennt: dieselbe gecachte API-Antwort kann wiederverwendet werden, ohne Kanal- oder Sammlungsmetadaten eines anderen Jobs zu übernehmen
+- Startseite leitet stabil auf `/web/` um, damit CSS- und JavaScript-Pfade korrekt aufgelöst werden
+- lokale Tests für IPv4-gemappte IPv6-Adressen, neue Themenkategorien und gemeinsame Schreibsperren korrigiert
+
+### Sicherheit
+
+- alle externen Importe bleiben bis zur manuellen Sichtprüfung auf `review`
+- Openverse und Wikimedia übernehmen nur eindeutig unterstützte offene Lizenztypen
+- CC BY und CC BY-SA erzwingen dokumentierte Attribution
+- sichtbare Personen, Marken, Logos und Nutzungskontext bleiben auch bei offenen Lizenzen Pflichtprüfung
+- GitHub-Actions-Runner-Blocker ist als externer Billing-/Spending-Blocker dokumentiert; die Beta-Abnahme erfolgt lokal ohne zusätzliche Actions-Kosten
+
 ## 0.4.0-beta.3 – 2026-08-06
 
 ### Neu
