@@ -75,12 +75,37 @@ test('Ausbau-720-Dashboard ist vollständig verknüpft', () => {
   for (const provider of ['Pexels', 'Pixabay', 'Unsplash', 'Openverse', 'Wikimedia']) assert.match(dashboard, new RegExp(provider));
 });
 
+test('Ausbau 720 empfiehlt Medienart, Quelle und Format automatisch', () => {
+  const dashboard = fs.readFileSync(path.join(webRoot, 'expansion-dashboard.js'), 'utf8');
+  const builder = fs.readFileSync(path.join(webRoot, 'arsenal-builder.js'), 'utf8');
+  assert.match(dashboard, /recommendSearch/);
+  assert.match(dashboard, /smartBatch/);
+  assert.match(dashboard, /video-vertical/);
+  assert.match(dashboard, /photo-vertical/);
+  assert.match(dashboard, /provider:\s*item\.recommendation\.provider/);
+  assert.match(dashboard, /variant:\s*item\.recommendation\.variant/);
+  assert.match(builder, /applyRecommendation/);
+  assert.match(builder, /detail\.provider/);
+  assert.match(builder, /detail\.variant/);
+  assert.match(builder, /preferredVariantForProvider/);
+});
+
 test('API-Keys bleiben ausschließlich im Arbeitsspeicher der aktuellen Seite', () => {
   const builder = fs.readFileSync(path.join(webRoot, 'arsenal-builder.js'), 'utf8');
   assert.match(builder, /sessionKeys\s*=\s*new Map/);
+  assert.match(builder, /sessionKeys\.clear\(\)/);
+  assert.match(builder, /resolveProviderKey/);
+  assert.match(builder, /keyResolver\('unsplash'\)/);
   assert.match(builder, /Sitzungs-Keys löschen/);
   assert.doesNotMatch(builder, /localStorage/);
   assert.doesNotMatch(builder, /sessionStorage/);
+});
+
+test('Importmeldung unterscheidet echte Importe und übersprungene Dubletten', () => {
+  const builder = fs.readFileSync(path.join(webRoot, 'arsenal-builder.js'), 'utf8');
+  assert.match(builder, /response\.imported/);
+  assert.match(builder, /response\.skipped/);
+  assert.match(builder, /bereits vorhanden\/übersprungen/);
 });
 
 test('lokaler Server ist auf Loopback und strikte Browser-Sicherheit ausgelegt', () => {
