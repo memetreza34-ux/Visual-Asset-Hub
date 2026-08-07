@@ -2,6 +2,7 @@ const section = document.querySelector('#arsenal-builder');
 const files = ['finance.json', 'ai.json', 'electro.json', 'combat-sports.json'];
 const keylessProviders = new Set(['openverse', 'wikimedia']);
 const photoOnlyProviders = new Set(['unsplash', 'openverse', 'wikimedia']);
+const sessionKeys = new Map();
 
 if (section) init().catch(() => { section.hidden = true; });
 
@@ -31,7 +32,7 @@ function render({ health, channelIndex, channels }) {
   headerContent.append(
     textElement('span', 'Arsenal Builder', 'eyebrow'),
     textElement('h2', '5 Medienquellen direkt durchsuchen'),
-    textElement('p', 'Pexels, Pixabay und Unsplash verwenden einen API-Key nur für die aktuelle lokale Anfrage. Openverse und Wikimedia Commons funktionieren ohne Key. Mit dem Batch-Modus werden bis zu fünf Sammlungen nacheinander durchsucht. Alle Importe starten im Status Review.')
+    textElement('p', 'Pexels, Pixabay und Unsplash können ihren API-Key für die aktuelle Browser-Sitzung ausschließlich im Arbeitsspeicher behalten. Openverse und Wikimedia Commons funktionieren ohne Key. Mit dem Batch-Modus werden bis zu fünf Sammlungen nacheinander durchsucht. Alle Importe starten im Status Review.')
   );
   header.append(headerContent);
 
@@ -43,7 +44,7 @@ function render({ health, channelIndex, channels }) {
   addOption(provider.input, 'unsplash', 'Unsplash');
   addOption(provider.input, 'openverse', 'Openverse · ohne Key');
   addOption(provider.input, 'wikimedia', 'Wikimedia Commons · ohne Key');
-  const apiKey = field('Pexels API-Key', 'password', { required: true, minlength: 8, maxlength: 300, autocomplete: 'off', placeholder: 'Nur lokal für diese Suche' });
+  const apiKey = field('Pexels API-Key', 'password', { required: true, minlength: 8, maxlength: 300, autocomplete: 'off', placeholder: 'Nur lokal für diese Sitzung' });
   const channel = selectField('Kanal');
   channel.input.id = 'arsenal-builder-channel';
   const collection = selectField('Sammlung');
@@ -59,6 +60,9 @@ function render({ health, channelIndex, channels }) {
   const batchSubmit = document.createElement('button');
   batchSubmit.type = 'button';
   batchSubmit.textContent = '5 Sammlungen mit Pexels durchsuchen';
+  const clearKeys = document.createElement('button');
+  clearKeys.type = 'button';
+  clearKeys.textContent = 'Sitzungs-Keys löschen';
   const status = textElement('p', '', 'builder-status');
   status.hidden = true;
 
@@ -68,12 +72,22 @@ function render({ health, channelIndex, channels }) {
   updateVariants();
   updateProviderCopy();
   channel.input.addEventListener('change', updateCollections);
+  apiKey.input.addEventListener('input', () => {
+    const value = apiKey.input.value.trim();
+    if (!keylessProviders.has(provider.input.value) && value) sessionKeys.set(provider.input.value, value);
+  });
   provider.input.addEventListener('change', () => {
     updateVariants();
     updateProviderCopy();
   });
+  clearKeys.addEventListener('click', () => {
+    sessionKeys.clear();
+    apiKey.input.value = '';
+    updateProviderCopy();
+    showStatus(status, 'Alle API-Keys wurden aus dem Arbeitsspeicher dieser Seite gelöscht.', true);
+  });
 
-  form.append(provider.wrapper, apiKey.wrapper, channel.wrapper, collection.wrapper, variant.wrapper, queryIndex.wrapper, perPage.wrapper, submit, batchSubmit, status);
+  form.append(provider.wrapper, apiKey.wrapper, channel.wrapper, collection.wrapper, variant.wrapper, queryIndex.wrapper, perPage.wrapper, submit, batchSubmit, clearKeys, status);
   const resultArea = document.createElement('div');
   resultArea.className = 'builder-results';
   section.replaceChildren(header, form, resultArea);
@@ -106,12 +120,14 @@ function render({ health, channelIndex, channels }) {
     try {
       const data = await post('/arsenal-api/search', searchPayload(transientApiKey), health.token);
       apiKey.input.value = '';
+      updateKeyPlaceholder();
       const cacheText = data.cached ? ' · aus 24-Stunden-Cache' : '';
       const rateText = data.rateLimit?.remaining !== null && data.rateLimit?.remaining !== undefined ? ` · API-Limit verbleibend: ${data.rateLimit.remaining}` : '';
       showStatus(status, `${data.assets.length} Treffer geladen · insgesamt ${data.totalResults} bei ${providerLabel(data.provider)}${cacheText}${rateText}.`, true);
       renderResults(resultArea, data, health.token, data.provider === 'unsplash' ? transientApiKey : '');
     } catch (error) {
       apiKey.input.value = '';
+      updateKeyPlaceholder();
       showStatus(status, error.message, false);
     } finally {
       submit.disabled = false;
@@ -133,10 +149,12 @@ function render({ health, channelIndex, channels }) {
     try {
       const data = await post('/arsenal-api/batch-search', { ...searchPayload(transientApiKey), collections }, health.token);
       apiKey.input.value = '';
+      updateKeyPlaceholder();
       showStatus(status, `${data.assets} Treffer aus ${data.collections} Sammlungen geladen. Nichts wurde automatisch freigegeben.`, true);
       renderBatchResults(resultArea, data.groups, health.token, data.provider === 'unsplash' ? transientApiKey : '');
     } catch (error) {
       apiKey.input.value = '';
+      updateKeyPlaceholder();
       showStatus(status, error.message, false);
     } finally {
       submit.disabled = false;
@@ -158,7 +176,9 @@ function render({ health, channelIndex, channels }) {
 
   function getApiKeyOrError() {
     if (keylessProviders.has(provider.input.value)) return '';
-    const value = apiKey.input.value.trim();
+    const typed = apiKey.input.value.trim();
+    if (typed) sessionKeys.set(provider.input.value, typed);
+    const value = typed || sessionKeys.get(provider.input.value) || '';
     if (value.length < 8) {
       showStatus(status, `${providerLabel(provider.input.value)} benötigt einen API-Key.`, false);
       apiKey.input.focus();
@@ -188,11 +208,19 @@ function render({ health, channelIndex, channels }) {
     const name = providerLabel(selectedProvider);
     const keyless = keylessProviders.has(selectedProvider);
     apiKey.wrapper.hidden = keyless;
-    apiKey.input.required = !keyless;
-    if (keyless) apiKey.input.value = '';
+    apiKey.input.required = !keyless && !sessionKeys.has(selectedProvider);
+    apiKey.input.value = '';
     apiKey.wrapper.querySelector('span').textContent = `${name} API-Key`;
     submit.textContent = `${name} durchsuchen`;
     batchSubmit.textContent = `5 Sammlungen mit ${name} durchsuchen`;
+    updateKeyPlaceholder();
+  }
+
+  function updateKeyPlaceholder() {
+    const selectedProvider = provider.input.value;
+    if (keylessProviders.has(selectedProvider)) return;
+    apiKey.input.placeholder = sessionKeys.has(selectedProvider) ? 'Für diese Sitzung gespeichert' : 'Nur lokal für diese Sitzung';
+    apiKey.input.required = !sessionKeys.has(selectedProvider);
   }
 }
 
