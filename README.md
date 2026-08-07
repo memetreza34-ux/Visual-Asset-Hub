@@ -21,7 +21,44 @@ Jede Sammlung ist für vier Grundformate vorbereitet:
 - vertikales Foto
 - horizontales Foto
 
-Der vollständige Suchplan umfasst **360 Pexels-Suchaufträge** und kann bis zu **5.850 Kandidaten** liefern. Kandidaten werden niemals automatisch freigegeben.
+Die 90 Sammlungen bilden eine Grundmatrix aus **360 Format-Suchaufträgen**. Pexels und Pixabay können Bilder und Videos liefern; Unsplash, Openverse und Wikimedia Commons ergänzen die Foto-Suche. Kandidaten werden niemals automatisch freigegeben.
+
+## Fünf Medienquellen
+
+Der lokale Arsenal Builder bündelt fünf Quellen:
+
+| Quelle | Bilder | Videos | geheimer Key |
+|---|---:|---:|---:|
+| Pexels | ja | ja | ja |
+| Pixabay | ja | ja | ja |
+| Unsplash | ja | nein | ja |
+| Openverse | ja | nein | nein |
+| Wikimedia Commons | ja | nein | nein |
+
+Pexels-, Pixabay- und Unsplash-Keys können für die Dauer der geöffneten Browserseite ausschließlich in einer In-Memory-Map gehalten werden. Sie werden nicht in `localStorage`, `sessionStorage`, Katalogdateien oder Suchdateien geschrieben. Über **Sitzungs-Keys löschen** können sie sofort aus dem Arbeitsspeicher entfernt werden.
+
+Openverse und Wikimedia werden konservativ gefiltert. Automatisch berücksichtigt werden nur Public Domain, CC0, CC BY und CC BY-SA. Attribution und Lizenz-URL werden im Asset dokumentiert; CC BY-SA bleibt auch nach dem Import ausdrücklich als Share-Alike-Lizenz erkennbar.
+
+## Ausbau 720
+
+Der Bereich **Ausbau 720** zeigt den tatsächlichen Fortschritt je Kanal und Sammlung:
+
+- vorhandene Kandidaten
+- offene Reviews
+- freigegebene Assets
+- Zielstand pro Kanal
+- größte Freigabe-Lücken
+- priorisierte Suchlücken
+
+Der Hub unterscheidet zwischen **mehr suchen** und **erst prüfen**. Wenn für eine Sammlung bereits genug Review-Kandidaten vorhanden sind, wird keine weitere Suche empfohlen. Für echte Lücken können bis zu fünf priorisierte Sammlungen als Batch an den Arsenal Builder übergeben werden.
+
+Auf der Konsole erzeugt
+
+```bash
+npm run arsenal:expansion
+```
+
+einen JSON- und CSV-Ausbauplan unter `reports/`.
 
 ## Reel- und Skript-Planer
 
@@ -40,11 +77,11 @@ Der Planer erstellt automatisch:
 - passende Kanal-Sammlungen
 - passende vorhandene Assets
 - Status- und Rechtewarnungen
-- Pexels-Suchbegriffe für fehlende Motive
+- vorbereitete Suchbegriffe für fehlende Motive
 - Abdeckung mit vorhandenen und freigegebenen Assets
 - Exporte als JSON, CSV und Markdown
 
-Das Matching verwendet ein geprüftes Lexikon mit deutschen und englischen Fachbegriffen für Finanzen, KI, Elektrotechnik und Kampfsport. Der Text bleibt lokal und wird nicht an eine KI-API oder Pexels übertragen.
+Das Matching verwendet ein geprüftes Lexikon mit deutschen und englischen Fachbegriffen für Finanzen, KI, Elektrotechnik und Kampfsport. Der Text bleibt lokal und wird nicht an eine externe KI-API übertragen.
 
 Für Textdateien steht zusätzlich ein Kommandozeilen-Export mit SRT-Markern zur Verfügung:
 
@@ -58,25 +95,25 @@ npm run script:plan -- \
 
 Ausgabe: JSON, CSV, Markdown, SRT und eine Kopie des Skripts unter `reports/shot-plans/`.
 
-## Drei Quellenwege
+## Arbeitswege
 
-### 1. Pexels Arsenal Builder
+### 1. Arsenal Builder
 
 Direkt im lokalen Browser:
 
-1. Kanal auswählen.
-2. Sammlung auswählen.
+1. Quelle auswählen.
+2. Kanal und Sammlung auswählen.
 3. Video oder Foto sowie Hoch- oder Querformat wählen.
-4. Pexels-Key nur für diese eine lokale Anfrage eingeben.
-5. Vorschauen ansehen.
+4. bei Pexels, Pixabay oder Unsplash den jeweiligen Key einmal für die aktuelle Browser-Sitzung eingeben.
+5. Vorschauen und Quellen ansehen.
 6. passende Treffer markieren.
 7. nur ausgewählte Treffer als `review` importieren.
 
-Der Key wird nicht gespeichert und nach jeder Anfrage aus dem Feld entfernt.
+Mit dem Batch-Modus können bis zu fünf Sammlungen nacheinander durchsucht werden. Über **Ausbau 720** können genau die aktuell größten Suchlücken vorbereitet werden.
 
 ### 2. Eigene Dateien über `inbox`
 
-Eigene MP4-, MOV-, WEBM-, MKV-, JPG-, PNG-, WEBP-, AVIF-, SVG-, GIF- und weitere unterstützte Dateien können in den lokalen Ordner `inbox` kopiert werden. Die Weboberfläche erkennt diese Dateien, zeigt eine Vorschau und ermöglicht:
+Eigene MP4-, MOV-, WEBM-, MKV-, JPG-, PNG-, WEBP-, AVIF-, SVG-, GIF- und weitere unterstützte Dateien können lokal importiert werden. Die Weboberfläche ermöglicht:
 
 - Kanal- und Sammlungszuordnung
 - Titel und Beschreibung
@@ -103,26 +140,37 @@ Nicht freigegebene Assets werden strikt blockiert. Pro Paket sind höchstens 20 
 
 ## Starterbibliothek
 
-Im Branch liegen sechs Grundassets. Beim ersten Start ergänzt `START-HERE.cmd` idempotent fünf weitere bereits bekannte Pexels-B-Rolls. Die lokale Testbibliothek enthält danach acht Pexels-Videos, drei eigene SVG-Grafiken und insgesamt elf reale Starterassets. Alle starten auf `review`.
+Im Branch liegen sechs Grundassets. `npm run starter:import` ergänzt idempotent fünf bekannte Pexels-B-Rolls und ein Wikimedia-Commons-Foto für Kampfsport unter CC BY-SA 4.0. Die lokale Testbibliothek enthält danach:
+
+- acht Pexels-Videos
+- drei eigene SVG-Grafiken
+- ein Wikimedia-Commons-Foto
+- **insgesamt zwölf reale Starterassets**
+
+Alle Starterassets beginnen auf `review`. Damit sind Finanzen, KI, Elektrotechnik und Kampfsport bereits im Realtest vertreten, ohne dass etwas automatisch freigegeben wird.
 
 ## Aktueller Funktionsumfang
 
 - 24 universelle und spezialisierte Hauptkategorien
 - 90 klar benannte Kanal-Sammlungen
-- 270 englische Pexels-Suchbegriffe
+- 270 vorbereitete Suchbegriffe
+- fünf Medienquellen in einem lokalen Builder
+- Batch-Suche für bis zu fünf Sammlungen
+- Ausbau-720-Dashboard mit priorisierten Suchlücken
+- Review-first-Logik gegen unnötige Massenimporte
+- API-Keys nur im Arbeitsspeicher der geöffneten Seite
 - deutsches Skript-Matching mit kanalbezogenen Synonymen
 - lokale Shotlist-Planung mit Zeitbereichen und Asset-Vorschlägen
 - Shotlist-Export als JSON, CSV, Markdown und SRT
-- automatische Suchplanung als JSON und CSV
-- Pexels-Suche im Browser und in sicheren Batches
 - lokale Inbox für eigene Medien
 - stabile Asset-IDs, Dateinamen, Tags und Suchaliasse
 - Rechte-, Quellen- und Lizenzverwaltung
+- Public-Domain-, CC0-, CC-BY- und CC-BY-SA-Unterstützung
 - Dublettenprüfung
 - Suche, Filter, Favoriten und Vorschauen
 - feste Navigation zwischen allen Arbeitsbereichen
 - Lückenempfehlungen für unvollständige Sammlungen
-- getrennte Kandidaten- und Freigabefortschritte
+- getrennte Kandidaten-, Review- und Freigabefortschritte
 - schnelle Review-Warteschlange
 - Freigabe, Einschränkung und Archivierung im Browser
 - Nutzungshistorie und Attributions-Export
@@ -131,19 +179,31 @@ Im Branch liegen sechs Grundassets. Beim ersten Start ergänzt `START-HERE.cmd` 
 - Secret-, URL-, Metadaten- und Integritätsprüfungen
 - gemeinsame Sperre gegen parallele Katalogänderungen
 
+## Schnellstart auf dem Mac
+
+```bash
+cd ~/Downloads/Visual-Asset-Hub-clean
+git pull --ff-only
+npm run starter:import
+npm run check
+npm run serve
+```
+
+Danach öffnen:
+
+```text
+http://127.0.0.1:4173/web/
+```
+
+Das Terminalfenster muss während der lokalen Nutzung geöffnet bleiben.
+
 ## Schnellstart unter Windows
 
 1. Branch `agent/beta-release` als ZIP herunterladen und entpacken.
 2. Node.js 22 oder neuer installieren.
 3. `START-HERE.cmd` doppelklicken.
 
-Die Bibliothek startet unter:
-
-```text
-http://127.0.0.1:4173
-```
-
-Das Konsolenfenster muss geöffnet bleiben.
+Die Bibliothek startet unter `http://127.0.0.1:4173/web/`.
 
 ## Schnelle Review-Warteschlange
 
@@ -183,7 +243,7 @@ npm run cleanup:local
 npm run script:plan -- --channel finance --file ./mein-reel.txt --duration 45
 npm run arsenal:validate
 npm run arsenal:plan
-npm run arsenal:search -- --max-jobs 20
+npm run arsenal:expansion
 npm run arsenal:import -- --input <datei> --ids <id1,id2>
 npm run arsenal:report
 npm run asset:review -- --id VAH-XXXXXXXX --decision approve --reviewer Arman
@@ -199,7 +259,8 @@ npm run serve
 
 ## Sicherheit
 
-- API-Schlüssel liegen nur in `.env` oder GitHub Secrets.
+- Pexels-, Pixabay- und Unsplash-Keys werden im Browser nur im Arbeitsspeicher der aktuellen Seite gehalten; optional können CLI-Workflows lokale `.env`-Werte verwenden.
+- Openverse und Wikimedia benötigen keinen geheimen Key.
 - Skripttexte bleiben lokal und werden nicht automatisch gespeichert oder übertragen.
 - alle automatischen Importe starten auf `review`.
 - eigene Inbox-Dateien benötigen eine ausdrückliche Rechtebestätigung.
@@ -211,7 +272,7 @@ npm run serve
 
 ## Bekannter externer Blocker
 
-GitHub Actions startet in diesem Repository momentan keinen Runner und bricht vor dem ersten Workflow-Schritt ab. Der vollständige lokale Windows-Test funktioniert unabhängig davon. Das Runner-Problem ist in Issue #4 dokumentiert.
+GitHub Actions erhält für dieses Repository aktuell keinen GitHub-hosted Runner. Die GitHub-Anmerkung verweist auf eine Billing-/Spending-Sperre. Da der lokale Workflow unabhängig davon funktioniert und keine zusätzlichen GitHub-Actions-Kosten benötigt, erfolgt die Beta-Abnahme lokal auf dem Mac beziehungsweise unter Windows. Issue #4 dokumentiert den externen Runner-Blocker.
 
 ## Dokumentation
 
