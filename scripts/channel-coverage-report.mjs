@@ -45,6 +45,8 @@ for (const channel of channels) {
       searchGap: plan?.gaps?.searchCandidates ?? 0,
       videoGap: plan?.gaps?.videos ?? 0,
       photoGap: plan?.gaps?.photos ?? 0,
+      searchVideoGap: plan?.gaps?.searchVideos ?? 0,
+      searchPhotoGap: plan?.gaps?.searchPhotos ?? 0,
       recommendedSearch: plan?.recommendedSearch ?? null,
       providerPriority: plan?.providerPriority ?? []
     };
@@ -75,6 +77,7 @@ const report = {
   version: 2,
   generatedAt: new Date().toISOString(),
   goals,
+  expansionPlanVersion: expansion.version,
   totals: {
     channels: channelReports.length,
     collections: totalCollections,
@@ -117,16 +120,16 @@ const markdown = [
     `- Review zuerst: **${channel.reviewFirstCollections}**`,
     `- Weitere Suche: **${channel.searchCollections}**`,
     '',
-    '| Sammlung | Freigegeben | Review | Aktion | Such-Lücke | Medien-Lücke | Primärquelle |',
-    '|---|---:|---:|---|---:|---|---|',
-    ...channel.collections.map((entry) => `| ${entry.label} | ${entry.approved} | ${entry.review} | ${actionLabel(entry.nextAction)} | ${entry.searchGap} | ${mediaGapLabel(entry)} | ${entry.providerPriority[0] ? providerLabel(entry.providerPriority[0]) : '–'} |`)
+    '| Sammlung | Freigegeben | Review | Aktion | Such-Lücke | Freigabe-Mix-Lücke | Such-Mix-Lücke | Primärquelle |',
+    '|---|---:|---:|---|---:|---|---|---|',
+    ...channel.collections.map((entry) => `| ${entry.label} | ${entry.approved} | ${entry.review} | ${actionLabel(entry.nextAction)} | ${entry.searchGap} | ${approvalMediaGapLabel(entry)} | ${searchMediaGapLabel(entry)} | ${entry.providerPriority[0] ? providerLabel(entry.providerPriority[0]) : '–'} |`)
   ]),
   '',
   '## Nächste Review-Aufgaben',
   ...(report.nextReview.length ? report.nextReview.slice(0, 20).map((entry) => `- ${entry.channel} / ${entry.collectionLabel}: ${entry.review} Review-Kandidaten bei ${entry.approved}/${entry.target} Freigaben`) : ['- Keine priorisierten Review-Aufgaben.']),
   '',
   '## Nächste Suchaufgaben',
-  ...(report.nextBatch.length ? report.nextBatch.map((entry) => `- ${entry.channel} / ${entry.collectionLabel}: ${entry.mediaType} · ${providerLabel(entry.primaryProvider)}${entry.fallbackProviders.length ? ` → ${entry.fallbackProviders.map(providerLabel).join(' → ')}` : ''} · Such-Lücke ${entry.gaps.searchCandidates}`) : ['- Keine priorisierten Suchaufgaben.'])
+  ...(report.nextBatch.length ? report.nextBatch.map((entry) => `- ${entry.channel} / ${entry.collectionLabel}: ${entry.mediaType} · ${providerLabel(entry.primaryProvider)}${entry.fallbackProviders.length ? ` → ${entry.fallbackProviders.map(providerLabel).join(' → ')}` : ''} · Such-Lücke ${entry.gaps.searchCandidates} · Such-Mix ${searchGapFromPlan(entry.gaps)}`) : ['- Keine priorisierten Suchaufgaben.'])
 ].join('\n');
 fs.writeFileSync(path.join(outputDirectory, 'channel-coverage.md'), `${markdown}\n`);
 console.log(`Kanal-Abdeckung: ${approvedAssets}/${targetApprovedAssets} freigegeben (${report.totals.approvedCompletionPercentage} %), ${reviewAssets} im Review.`);
@@ -135,11 +138,23 @@ console.log(`${report.totals.reviewFirstCollections} Sammlungen zuerst prüfen �
 function actionLabel(value) {
   return ({ 'review-first': 'Review zuerst', search: 'Suchen', complete: 'Ziel erreicht' })[value] ?? value;
 }
-function mediaGapLabel(entry) {
+function approvalMediaGapLabel(entry) {
   const parts = [];
   if (entry.videoGap) parts.push(`Video ${entry.videoGap}`);
   if (entry.photoGap) parts.push(`Foto ${entry.photoGap}`);
   return parts.join(' + ') || '–';
+}
+function searchMediaGapLabel(entry) {
+  const parts = [];
+  if (entry.searchVideoGap) parts.push(`Video ${entry.searchVideoGap}`);
+  if (entry.searchPhotoGap) parts.push(`Foto ${entry.searchPhotoGap}`);
+  return parts.join(' + ') || '–';
+}
+function searchGapFromPlan(gaps) {
+  const parts = [];
+  if (gaps.searchVideos) parts.push(`Video ${gaps.searchVideos}`);
+  if (gaps.searchPhotos) parts.push(`Foto ${gaps.searchPhotos}`);
+  return parts.join(' + ') || 'ausreichend';
 }
 function providerLabel(value) {
   return ({ pexels: 'Pexels', pixabay: 'Pixabay', unsplash: 'Unsplash', openverse: 'Openverse', wikimedia: 'Wikimedia' })[value] ?? value;
