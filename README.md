@@ -4,7 +4,7 @@ Visual Asset Hub ist eine universelle, kostenlose Medienbibliothek für **B-Roll
 
 ## Spezialisierte Kanalbibliotheken
 
-Die Version `0.4.0-beta.3` enthält ein großes Arsenal für vier Content-Kanäle:
+Die Version `0.4.0-beta.4` enthält ein großes Arsenal für vier Content-Kanäle:
 
 | Kanal | Sammlungen | Suchbegriffe | empfohlenes Ausbauziel |
 |---|---:|---:|---:|
@@ -48,9 +48,17 @@ Der Bereich **Ausbau 720** zeigt den tatsächlichen Fortschritt je Kanal und Sam
 - freigegebene Assets
 - Zielstand pro Kanal
 - größte Freigabe-Lücken
-- priorisierte Suchlücken
+- Video- und Fotolücken
+- priorisierte Review- und Suchaufgaben
 
-Der Hub unterscheidet zwischen **mehr suchen** und **erst prüfen**. Wenn für eine Sammlung bereits genug Review-Kandidaten vorhanden sind, wird keine weitere Suche empfohlen. Für echte Lücken können bis zu fünf priorisierte Sammlungen als Batch an den Arsenal Builder übergeben werden.
+Der Hub arbeitet **review-first**. Wenn für eine Sammlung bereits genug ungeprüfte Kandidaten vorhanden sind, führt die Empfehlung direkt in die passende Review-Warteschlange statt eine neue API-Suche vorzuschlagen. Erst wenn der Review-Vorrat nicht reicht, wird eine konkrete Suche vorbereitet.
+
+Für neue Suchlücken wird automatisch ein sinnvoller Medientyp gewählt:
+
+- Video zuerst: Pexels, danach Pixabay als manueller Fallback
+- Foto zuerst: Unsplash, danach Openverse und Wikimedia Commons als manuelle Fallbacks
+
+Die nächste Quelle wird nur vorbereitet. Eine externe API-Suche startet niemals ohne ausdrücklichen Klick.
 
 Auf der Konsole erzeugt
 
@@ -58,7 +66,7 @@ Auf der Konsole erzeugt
 npm run arsenal:expansion
 ```
 
-einen JSON- und CSV-Ausbauplan unter `reports/`.
+einen JSON- und CSV-Ausbauplan unter `reports/`. Der Plan unterscheidet `review-first`, `search` und `complete` und enthält Primärquelle, Fallbackquellen, Medientyp und Format.
 
 ## Reel- und Skript-Planer
 
@@ -101,7 +109,7 @@ Ausgabe: JSON, CSV, Markdown, SRT und eine Kopie des Skripts unter `reports/shot
 
 Direkt im lokalen Browser:
 
-1. Quelle auswählen.
+1. Quelle auswählen oder von **Ausbau 720** vorbereiten lassen.
 2. Kanal und Sammlung auswählen.
 3. Video oder Foto sowie Hoch- oder Querformat wählen.
 4. bei Pexels, Pixabay oder Unsplash den jeweiligen Key einmal für die aktuelle Browser-Sitzung eingeben.
@@ -109,9 +117,22 @@ Direkt im lokalen Browser:
 6. passende Treffer markieren.
 7. nur ausgewählte Treffer als `review` importieren.
 
-Mit dem Batch-Modus können bis zu fünf Sammlungen nacheinander durchsucht werden. Über **Ausbau 720** können genau die aktuell größten Suchlücken vorbereitet werden.
+Mit dem Batch-Modus können bis zu fünf Sammlungen nacheinander durchsucht werden. Treffer aus allen Gruppen können markiert und anschließend **in einem Sammelimport sequenziell** verarbeitet werden. Die Seite lädt dabei erst nach Abschluss des gesamten Sammelimports neu. Bereits in der aktuellen Ansicht importierte Treffer werden gesperrt und als `importiert` markiert.
 
-### 2. Eigene Dateien über `inbox`
+Falls eine Quelle keine passenden Ergebnisse liefert, bereitet **Nächste Quelle** die nächste Quelle mit derselben Sammlung, demselben Format und demselben Suchbegriff vor. Die nächste Suche wird nicht automatisch gestartet.
+
+### 2. Priorisierte Review-Warteschlange
+
+Die Review-Warteschlange kann nach Kanal, Sammlung und Medientyp gefiltert werden. Standardmäßig steht **Größter Ausbau-Effekt** oben. Die Priorität berücksichtigt:
+
+- Freigabelücke der Sammlung
+- fehlenden Video-/Bild-Mindestmix
+- vorhandene Qualitätsbewertung
+- dokumentierten Rechte-Status
+
+Die Priorität ist nur eine Arbeitsreihenfolge. Jede Freigabe bleibt manuell und erfordert weiterhin die vollständige Vier-Punkte-Prüfung für Inhalt, Personen/Marken, Rechte und Einsatzkontext.
+
+### 3. Eigene Dateien über `inbox`
 
 Eigene MP4-, MOV-, WEBM-, MKV-, JPG-, PNG-, WEBP-, AVIF-, SVG-, GIF- und weitere unterstützte Dateien können lokal importiert werden. Die Weboberfläche ermöglicht:
 
@@ -124,7 +145,7 @@ Eigene MP4-, MOV-, WEBM-, MKV-, JPG-, PNG-, WEBP-, AVIF-, SVG-, GIF- und weitere
 
 Der Inhalt von `inbox` ist über `.gitignore` ausgeschlossen und wird nicht automatisch veröffentlicht.
 
-### 3. Freigegebene Medienpakete
+### 4. Freigegebene Medienpakete
 
 Favoriten können als vollständiges Schnittpaket unter `exports/media-packs` ausgegeben werden. Enthalten sind:
 
@@ -156,8 +177,11 @@ Alle Starterassets beginnen auf `review`. Damit sind Finanzen, KI, Elektrotechni
 - 270 vorbereitete Suchbegriffe
 - fünf Medienquellen in einem lokalen Builder
 - Batch-Suche für bis zu fünf Sammlungen
-- Ausbau-720-Dashboard mit priorisierten Suchlücken
-- Review-first-Logik gegen unnötige Massenimporte
+- gruppenübergreifender Sammelimport ausgewählter Batch-Treffer
+- manuelle Quellen-Fallbackketten
+- Ausbau-720-Dashboard mit Review-first- und Suchprioritäten
+- Smart-Medienmix für Video- und Fotolücken
+- priorisierte Review-Warteschlange mit Sammlungsfilter
 - API-Keys nur im Arbeitsspeicher der geöffneten Seite
 - deutsches Skript-Matching mit kanalbezogenen Synonymen
 - lokale Shotlist-Planung mit Zeitbereichen und Asset-Vorschlägen
@@ -166,18 +190,19 @@ Alle Starterassets beginnen auf `review`. Damit sind Finanzen, KI, Elektrotechni
 - stabile Asset-IDs, Dateinamen, Tags und Suchaliasse
 - Rechte-, Quellen- und Lizenzverwaltung
 - Public-Domain-, CC0-, CC-BY- und CC-BY-SA-Unterstützung
-- Dublettenprüfung
+- quellenübergreifende Dublettenprüfung für offene Medien
 - Suche, Filter, Favoriten und Vorschauen
 - feste Navigation zwischen allen Arbeitsbereichen
 - Lückenempfehlungen für unvollständige Sammlungen
 - getrennte Kandidaten-, Review- und Freigabefortschritte
-- schnelle Review-Warteschlange
 - Freigabe, Einschränkung und Archivierung im Browser
 - Nutzungshistorie und Attributions-Export
 - verifizierte Medienpakete für den Schnitt
 - Backup und verifizierte Wiederherstellung
 - Secret-, URL-, Metadaten- und Integritätsprüfungen
 - gemeinsame Sperre gegen parallele Katalogänderungen
+- GitHub-Actions-Workflows ausschließlich manuell über `workflow_dispatch`
+- Regressionstest gegen versehentlich reaktivierte Push-, PR- oder Schedule-Trigger
 
 ## Schnellstart auf dem Mac
 
@@ -185,6 +210,7 @@ Alle Starterassets beginnen auf `review`. Damit sind Finanzen, KI, Elektrotechni
 cd ~/Downloads/Visual-Asset-Hub-clean
 git pull --ff-only
 npm run starter:import
+npm run arsenal:expansion
 npm run check
 npm run serve
 ```
@@ -205,9 +231,11 @@ Das Terminalfenster muss während der lokalen Nutzung geöffnet bleiben.
 
 Die Bibliothek startet unter `http://127.0.0.1:4173/web/`.
 
-## Schnelle Review-Warteschlange
+## GitHub Actions und Kostenkontrolle
 
-Die Warteschlange zeigt ausschließlich offene Assets. Sie kann nach Kanal und Medientyp gefiltert werden. Pro Asset stehen Vorschau, Quelle, Lizenz, Qualitätsbewertung, Pflichtprüfung und einzelne Entscheidungen bereit. Nach einer Entscheidung wird das nächste Asset angezeigt. Eine blinde Sammelfreigabe gibt es nicht.
+Alle Workflows unter `.github/workflows` sind im Beta-Branch bewusst **nur manuell** startbar. Es gibt keine automatischen `push`-, `pull_request`- oder `schedule`-Trigger. Dadurch startet kein GitHub-hosted Runner allein durch einen Commit oder Pull Request.
+
+Der lokale Test `tests/workflow-trigger-contract.test.mjs` prüft diese Regel bei `npm run check`. GitHub Actions sind damit optional; die vollständige Beta-Abnahme ist lokal möglich.
 
 ## Medienpaket über die Konsole
 
@@ -246,7 +274,7 @@ npm run arsenal:plan
 npm run arsenal:expansion
 npm run arsenal:import -- --input <datei> --ids <id1,id2>
 npm run arsenal:report
-npm run asset:review -- --id VAH-XXXXXXXX --decision approve --reviewer Arman
+npm run asset:review -- --id VAH-XXXXXXXX --decision approve --reviewer <name>
 npm run usage:add -- --asset VAH-XXXXXXXX --project projekt-01 --platform tiktok
 npm run attribution:export -- --project projekt-01
 npm run media:pack -- --ids VAH-XXXXXXXX --name projekt-01
@@ -260,9 +288,10 @@ npm run serve
 ## Sicherheit
 
 - Pexels-, Pixabay- und Unsplash-Keys werden im Browser nur im Arbeitsspeicher der aktuellen Seite gehalten; optional können CLI-Workflows lokale `.env`-Werte verwenden.
+- **Sitzungs-Keys löschen** entfernt die Schlüssel sofort; bereits geladene Unsplash-Ergebnisse dürfen danach nicht mit einem alten Schlüssel importiert werden.
 - Openverse und Wikimedia benötigen keinen geheimen Key.
 - Skripttexte bleiben lokal und werden nicht automatisch gespeichert oder übertragen.
-- alle automatischen Importe starten auf `review`.
+- alle externen und Inbox-Importe starten auf `review`.
 - eigene Inbox-Dateien benötigen eine ausdrückliche Rechtebestätigung.
 - Nicht freigegebene Assets können nicht als Medienpaket exportiert werden.
 - externe Downloads blockieren lokale, private und reservierte Netzadressen.
@@ -272,7 +301,7 @@ npm run serve
 
 ## Bekannter externer Blocker
 
-GitHub Actions erhält für dieses Repository aktuell keinen GitHub-hosted Runner. Die GitHub-Anmerkung verweist auf eine Billing-/Spending-Sperre. Da der lokale Workflow unabhängig davon funktioniert und keine zusätzlichen GitHub-Actions-Kosten benötigt, erfolgt die Beta-Abnahme lokal auf dem Mac beziehungsweise unter Windows. Issue #4 dokumentiert den externen Runner-Blocker.
+GitHub Actions erhält für dieses Repository aktuell keinen GitHub-hosted Runner. Die GitHub-Anmerkung verweist auf eine Billing-/Spending-Sperre. Da alle Workflows manuell sind und der lokale Workflow keine GitHub-Actions-Kosten benötigt, erfolgt die Beta-Abnahme lokal auf dem Mac beziehungsweise optional unter Windows. Issue #4 dokumentiert den externen Runner-Blocker.
 
 ## Dokumentation
 
