@@ -155,7 +155,7 @@ function render({ health, channelIndex, channels }) {
       updateKeyPlaceholder();
       const cacheText = data.cached ? ' · aus 24-Stunden-Cache' : '';
       const rateText = data.rateLimit?.remaining !== null && data.rateLimit?.remaining !== undefined ? ` · API-Limit verbleibend: ${data.rateLimit.remaining}` : '';
-      showStatus(status, `${data.assets.length} Treffer geladen · insgesamt ${data.totalResults} bei ${providerLabel(data.provider)}${cacheText}${rateText}.`, true);
+      showStatus(status, `${data.assets.length} Treffer geladen · insgesamt ${data.totalResults} bei ${providerLabel(data.provider)}${cacheText}${rateText}. Technisch passendere Treffer stehen oben; das ist keine Inhalts- oder Rechtefreigabe.`, true);
       renderResults(resultArea, data, health.token, resolveProviderKey, { reloadAfterImport: true, onFallback: prepareFallback });
     } catch (error) {
       apiKey.input.value = '';
@@ -183,7 +183,7 @@ function render({ health, channelIndex, channels }) {
       updateKeyPlaceholder();
       plannedBatchCollections = [];
       updateBatchButtonCopy();
-      showStatus(status, `${data.assets} Treffer aus ${data.collections} Sammlungen geladen. Du kannst jetzt über alle Gruppen markieren und gesammelt importieren.`, true);
+      showStatus(status, `${data.assets} Treffer aus ${data.collections} Sammlungen geladen. Jede Gruppe ist technisch vorsortiert; du markierst weiterhin selbst und importierst anschließend gesammelt.`, true);
       renderBatchResults(resultArea, data.groups, health.token, resolveProviderKey, prepareFallback);
     } catch (error) {
       apiKey.input.value = '';
@@ -320,7 +320,7 @@ function renderBatchResults(container, groups, token, keyResolver, onFallback) {
   const header = document.createElement('div');
   header.className = 'builder-result-tools';
   const summary = document.createElement('div');
-  summary.append(textElement('strong', `${groups.length} Sammlungen durchsucht`), textElement('span', 'Treffer aus allen Gruppen markieren und gemeinsam als Review importieren.'));
+  summary.append(textElement('strong', `${groups.length} Sammlungen durchsucht`), textElement('span', 'Treffer aus allen Gruppen markieren und gemeinsam als Review importieren. Technischer Fit ist nur eine Vorsortierung.'));
   const actions = document.createElement('div');
   const batchImport = button('Alle markierten Batch-Treffer importieren', 'builder-primary');
   actions.append(batchImport);
@@ -382,10 +382,14 @@ function renderBatchResults(container, groups, token, keyResolver, onFallback) {
 }
 
 function renderResults(container, data, token, keyResolver, options = {}) {
+  const ranked = rankTechnicalCandidates(data.assets ?? [], data.job ?? {});
   const tools = document.createElement('div');
   tools.className = 'builder-result-tools';
   const summary = document.createElement('div');
-  summary.append(textElement('strong', `${data.job.channelLabel} / ${data.job.collectionLabel}`), textElement('span', `${providerLabel(data.provider)} · ${data.job.query} · ${data.job.type} · ${data.job.orientation}`));
+  summary.append(
+    textElement('strong', `${data.job.channelLabel} / ${data.job.collectionLabel}`),
+    textElement('span', `${providerLabel(data.provider)} · ${data.job.query} · ${data.job.type} · ${data.job.orientation} · technisch vorsortiert`)
+  );
   const actions = document.createElement('div');
   const selectAll = button('Alle auswählen');
   const importButton = button('Ausgewählte als Review importieren', 'builder-primary');
@@ -398,12 +402,13 @@ function renderResults(container, data, token, keyResolver, options = {}) {
   }
   tools.append(summary, actions);
 
+  const fitNotice = textElement('p', 'Technischer Fit bewertet nur Format, Auflösung, Dauer und vorhandene technische Metadaten. Er ersetzt keine Sichtprüfung, Rechteprüfung oder Inhaltsbewertung.', 'builder-fit-notice');
   const grid = document.createElement('div');
   grid.className = 'builder-result-grid';
-  for (const asset of data.assets) grid.append(resultCard(asset, data.provider));
+  for (const item of ranked) grid.append(resultCard(item.asset, data.provider, item.fit));
   const importStatus = textElement('p', '', 'builder-status');
   importStatus.hidden = true;
-  container.replaceChildren(tools, grid, importStatus);
+  container.replaceChildren(tools, fitNotice, grid, importStatus);
 
   selectAll.addEventListener('click', () => {
     const boxes = [...grid.querySelectorAll('input[type="checkbox"]:not(:disabled)')];
@@ -437,6 +442,102 @@ function renderResults(container, data, token, keyResolver, options = {}) {
   });
 }
 
+function rankTechnicalCandidates(assets, job) {
+  return assets.map((asset, index) => ({ asset, index, fit: technicalFit(asset, job) }))
+    .sort((a, b) => b.fit.score - a.fit.score || a.index - b.index);
+}
+
+function technicalFit(asset, job) {
+  let score = 0;
+  const reasons = [];
+  const width = positiveNumber(asset?.width);
+  const height = positiveNumber(asset?.height);
+  const orientation = asset?.orientation || inferOrientation(width, height);
+
+  if (orientation === job.orientation) {
+    score += 20;
+    reasons.push('Format passt');
+  } else if (!orientation || orientation === 'unknown' || orientation === 'square') {
+    score += 8;
+    reasons.push('Format teilweise prüfbar');
+  } else {
+    reasons.push('Format weicht ab');
+  }
+
+  const shortEdge = width && height ? Math.min(width, height) : 0;
+  if (shortEdge >= 1080) {
+    score += 30;
+    reasons.push('hohe Auflösung');
+  } else if (shortEdge >= 720) {
+    score += 22;
+    reasons.push('brauchbare Auflösung');
+  } else if (shortEdge >= 480) {
+    score += 12;
+    reasons.push('mittlere Auflösung');
+  } else if (shortEdge > 0) {
+    score += 4;
+    reasons.push('niedrige Auflösung');
+  } else {
+    reasons.push('Auflösung unbekannt');
+  }
+
+  if (asset?.preview_url) {
+    score += 10;
+    reasons.push('Vorschau vorhanden');
+  }
+  if (asset?.source_url) {
+    score += 10;
+    reasons.push('Quellseite vorhanden');
+  }
+  if (asset?.creator) {
+    score += 5;
+    reasons.push('Urheber dokumentiert');
+  }
+  if (hasMediaReference(asset?.files)) {
+    score += 5;
+    reasons.push('Mediendatei vorhanden');
+  }
+
+  if (job.type === 'video') {
+    const duration = positiveNumber(asset?.duration_seconds);
+    if (duration >= 3 && duration <= 20) {
+      score += 20;
+      reasons.push('reeltaugliche Videolänge');
+    } else if (duration >= 2 && duration <= 30) {
+      score += 15;
+      reasons.push('brauchbare Videolänge');
+    } else if (duration > 0) {
+      score += 7;
+      reasons.push('Videolänge prüfen');
+    } else {
+      score += 3;
+      reasons.push('Videolänge unbekannt');
+    }
+  } else {
+    const pixels = width && height ? width * height : 0;
+    if (pixels >= 2_000_000) {
+      score += 20;
+      reasons.push('mindestens 2 MP');
+    } else if (pixels >= 1_000_000) {
+      score += 15;
+      reasons.push('mindestens 1 MP');
+    } else if (pixels > 0) {
+      score += 7;
+      reasons.push('Bildgröße prüfen');
+    } else {
+      score += 3;
+      reasons.push('Bildgröße unbekannt');
+    }
+  }
+
+  const normalized = Math.max(0, Math.min(100, Math.round(score)));
+  return {
+    score: normalized,
+    band: normalized >= 85 ? 'very-good' : normalized >= 70 ? 'good' : normalized >= 50 ? 'check' : 'weak',
+    reasons
+  };
+}
+
 function fallbackProvider(provider, type) {
   const chain = type === 'video'
     ? ['pexels', 'pixabay']
@@ -455,9 +556,10 @@ function markImported(container, ids) {
   }
 }
 
-function resultCard(asset, provider) {
+function resultCard(asset, provider, fit = technicalFit(asset, {})) {
   const label = document.createElement('label');
   label.className = 'builder-result-card';
+  label.dataset.technicalFit = String(fit.score);
   const check = document.createElement('input');
   check.type = 'checkbox';
   check.value = asset.provider_id;
@@ -473,8 +575,11 @@ function resultCard(asset, provider) {
   const body = document.createElement('div');
   body.className = 'builder-result-body';
   const title = textElement('strong', asset.title || `${providerLabel(provider)} ${asset.provider_id}`);
+  const fitBadge = textElement('span', `Technischer Fit ${fit.score}/100`, `builder-fit builder-fit-${fit.band}`);
+  fitBadge.title = `Nur technische Vorsortierung: ${fit.reasons.join(' · ')}. Keine Inhalts- oder Rechtefreigabe.`;
+  const fitReason = textElement('small', fit.reasons.slice(0, 4).join(' · '), 'builder-fit-reasons');
   const meta = textElement('span', `${asset.type === 'video' ? 'Video' : 'Bild'} · ${asset.width ?? '?'} × ${asset.height ?? '?'}${asset.duration_seconds ? ` · ${asset.duration_seconds} s` : ''}${asset.license ? ` · ${licenseLabel(asset.license)}` : ''}`);
-  body.append(title, meta);
+  body.append(title, fitBadge, fitReason, meta);
   if (provider === 'unsplash' && asset.creator_url) {
     const creatorLink = document.createElement('a');
     creatorLink.href = asset.creator_url;
@@ -495,6 +600,23 @@ function resultCard(asset, provider) {
   body.append(link);
   label.append(check, visual, body);
   return label;
+}
+
+function hasMediaReference(files) {
+  if (Array.isArray(files)) return files.some((item) => item?.url);
+  if (!files || typeof files !== 'object') return false;
+  return Object.values(files).some((value) => typeof value === 'string' ? Boolean(value) : Boolean(value?.url));
+}
+
+function positiveNumber(value) {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? number : 0;
+}
+
+function inferOrientation(width, height) {
+  if (!width || !height) return 'unknown';
+  if (width === height) return 'square';
+  return width > height ? 'horizontal' : 'vertical';
 }
 
 async function post(endpoint, payload, token) {
