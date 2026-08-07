@@ -25,12 +25,16 @@ export function buildExpansionPlan({ channels, assets, goals = DEFAULT_GOALS }) 
       const restricted = matching.filter((asset) => asset.status === 'restricted');
       const approvedVideos = approved.filter((asset) => asset.type === 'video').length;
       const approvedPhotos = approved.filter((asset) => asset.type === 'image').length;
+      const reviewVideos = review.filter((asset) => asset.type === 'video').length;
+      const reviewPhotos = review.filter((asset) => asset.type === 'image').length;
       const candidateVideos = matching.filter((asset) => asset.type === 'video').length;
       const candidatePhotos = matching.filter((asset) => asset.type === 'image').length;
       const approvedGap = Math.max(0, goals.recommendedApprovedPerCollection - approved.length);
       const minimumGap = Math.max(0, goals.minimumApprovedPerCollection - approved.length);
       const videoGap = Math.max(0, goals.minimumVideosPerCollection - approvedVideos);
       const photoGap = Math.max(0, goals.minimumPhotosPerCollection - approvedPhotos);
+      const searchVideoGap = Math.max(0, goals.minimumVideosPerCollection - candidateVideos);
+      const searchPhotoGap = Math.max(0, goals.minimumPhotosPerCollection - candidatePhotos);
       const searchGap = Math.max(0, approvedGap - review.length);
       const nextAction = approvedGap === 0 && videoGap === 0 && photoGap === 0
         ? 'complete'
@@ -38,10 +42,10 @@ export function buildExpansionPlan({ channels, assets, goals = DEFAULT_GOALS }) 
           ? 'review-first'
           : 'search';
       const recommendedSearch = nextAction === 'search'
-        ? searchRecommendation({ videoGap, photoGap, candidateVideos, candidatePhotos })
+        ? searchRecommendation({ searchVideoGap, searchPhotoGap, candidateVideos, candidatePhotos })
         : null;
       const providerPriority = recommendedSearch?.providers ?? [];
-      const priorityScore = (minimumGap * 100) + (searchGap * 12) + (approvedGap * 4) + (videoGap * 4) + (photoGap * 4) - Math.min(review.length, 8);
+      const priorityScore = (minimumGap * 100) + (searchGap * 12) + (approvedGap * 4) + (videoGap * 2) + (photoGap * 2) + (searchVideoGap * 10) + (searchPhotoGap * 10) - Math.min(review.length, 8);
 
       const row = {
         channel: channel.id,
@@ -58,6 +62,8 @@ export function buildExpansionPlan({ channels, assets, goals = DEFAULT_GOALS }) 
           restricted: restricted.length,
           approvedVideos,
           approvedPhotos,
+          reviewVideos,
+          reviewPhotos,
           candidateVideos,
           candidatePhotos
         },
@@ -66,7 +72,9 @@ export function buildExpansionPlan({ channels, assets, goals = DEFAULT_GOALS }) 
           minimumApproved: minimumGap,
           videos: videoGap,
           photos: photoGap,
-          searchCandidates: searchGap
+          searchCandidates: searchGap,
+          searchVideos: searchVideoGap,
+          searchPhotos: searchPhotoGap
         },
         nextAction,
         recommendedSearch,
@@ -100,7 +108,7 @@ export function buildExpansionPlan({ channels, assets, goals = DEFAULT_GOALS }) 
 
   const ordered = [...collections].sort(comparePriority);
   return {
-    version: 3,
+    version: 4,
     generatedAt: new Date().toISOString(),
     goals,
     summary: {
@@ -142,21 +150,21 @@ export function buildExpansionPlan({ channels, assets, goals = DEFAULT_GOALS }) 
   };
 }
 
-function searchRecommendation({ videoGap, photoGap, candidateVideos, candidatePhotos }) {
-  if (videoGap > 0 || candidateVideos < 2) {
+function searchRecommendation({ searchVideoGap, searchPhotoGap, candidateVideos, candidatePhotos }) {
+  if (searchVideoGap > 0) {
     return {
       mediaType: 'video',
       variant: 'video-vertical',
       providers: ['pexels', 'pixabay'],
-      reason: 'Video-Bestand liegt unter dem Mindestmix; zuerst vertikale B-Rolls ergänzen.'
+      reason: 'Im gesamten Kandidatenbestand fehlen noch Videos für den Mindestmix; zuerst vertikale B-Rolls ergänzen.'
     };
   }
-  if (photoGap > 0 || candidatePhotos < 2) {
+  if (searchPhotoGap > 0) {
     return {
       mediaType: 'photo',
       variant: 'photo-vertical',
       providers: ['unsplash', 'openverse', 'wikimedia'],
-      reason: 'Foto-Bestand liegt unter dem Mindestmix; zuerst hochwertige Bilder ergänzen.'
+      reason: 'Im gesamten Kandidatenbestand fehlen noch Fotos für den Mindestmix; zuerst hochwertige Bilder ergänzen.'
     };
   }
   if (candidateVideos <= candidatePhotos) {
@@ -164,14 +172,14 @@ function searchRecommendation({ videoGap, photoGap, candidateVideos, candidatePh
       mediaType: 'video',
       variant: 'video-vertical',
       providers: ['pexels', 'pixabay'],
-      reason: 'Grundmix ist vorhanden; die kleinere Video-Seite des Bestands wird ergänzt.'
+      reason: 'Der Kandidaten-Mindestmix ist vorhanden; die kleinere Video-Seite des Bestands wird ergänzt.'
     };
   }
   return {
     mediaType: 'photo',
     variant: 'photo-vertical',
     providers: ['unsplash', 'openverse', 'wikimedia'],
-    reason: 'Grundmix ist vorhanden; die kleinere Foto-Seite des Bestands wird ergänzt.'
+    reason: 'Der Kandidaten-Mindestmix ist vorhanden; die kleinere Foto-Seite des Bestands wird ergänzt.'
   };
 }
 
@@ -193,7 +201,7 @@ function main() {
   const reports = path.join(root, 'reports');
   fs.mkdirSync(reports, { recursive: true });
   fs.writeFileSync(path.join(reports, 'arsenal-expansion-plan.json'), `${JSON.stringify(plan, null, 2)}\n`);
-  const rows = [['Kanal','Sammlung','Aktion','Medientyp','Variante','Primärquelle','Fallbacks','Kandidaten','Freigegeben','Review','Such-Lücke','Video-Lücke','Foto-Lücke','Ziel-Lücke']];
+  const rows = [['Kanal','Sammlung','Aktion','Medientyp','Variante','Primärquelle','Fallbacks','Kandidaten','Freigegeben','Review','Such-Lücke','Freigabe-Video-Lücke','Freigabe-Foto-Lücke','Such-Video-Lücke','Such-Foto-Lücke','Ziel-Lücke']];
   for (const item of plan.priorities) rows.push([
     item.channelLabel,
     item.collectionLabel,
@@ -208,6 +216,8 @@ function main() {
     item.gaps.searchCandidates,
     item.gaps.videos,
     item.gaps.photos,
+    item.gaps.searchVideos,
+    item.gaps.searchPhotos,
     item.gaps.approved
   ]);
   fs.writeFileSync(path.join(reports, 'arsenal-expansion-plan.csv'), `${rows.map((row) => row.map(csv).join(',')).join('\n')}\n`);
