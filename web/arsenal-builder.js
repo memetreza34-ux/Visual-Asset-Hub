@@ -156,7 +156,7 @@ function render({ health, channelIndex, channels }) {
       const cacheText = data.cached ? ' · aus 24-Stunden-Cache' : '';
       const rateText = data.rateLimit?.remaining !== null && data.rateLimit?.remaining !== undefined ? ` · API-Limit verbleibend: ${data.rateLimit.remaining}` : '';
       showStatus(status, `${data.assets.length} Treffer geladen · insgesamt ${data.totalResults} bei ${providerLabel(data.provider)}${cacheText}${rateText}.`, true);
-      renderResults(resultArea, data, health.token, resolveProviderKey, { reloadAfterImport: true });
+      renderResults(resultArea, data, health.token, resolveProviderKey, { reloadAfterImport: true, onFallback: prepareFallback });
     } catch (error) {
       apiKey.input.value = '';
       updateKeyPlaceholder();
@@ -184,7 +184,7 @@ function render({ health, channelIndex, channels }) {
       plannedBatchCollections = [];
       updateBatchButtonCopy();
       showStatus(status, `${data.assets} Treffer aus ${data.collections} Sammlungen geladen. Du kannst jetzt über alle Gruppen markieren und gesammelt importieren.`, true);
-      renderBatchResults(resultArea, data.groups, health.token, resolveProviderKey);
+      renderBatchResults(resultArea, data.groups, health.token, resolveProviderKey, prepareFallback);
     } catch (error) {
       apiKey.input.value = '';
       updateKeyPlaceholder();
@@ -193,6 +193,26 @@ function render({ health, channelIndex, channels }) {
       setBusy(false);
     }
   });
+
+  function prepareFallback(data, nextProvider) {
+    const selectedChannel = channels.find((item) => item.id === data.job.channel);
+    if (!selectedChannel) return;
+    plannedBatchCollections = [];
+    channel.input.value = selectedChannel.id;
+    updateCollections();
+    if (selectedChannel.collections.some((item) => item.id === data.job.collection)) collection.input.value = data.job.collection;
+    provider.input.value = nextProvider;
+    updateVariants();
+    updateProviderCopy();
+    const desiredVariant = `${data.job.type}-${data.job.orientation}`;
+    if ([...variant.input.options].some((option) => option.value === desiredVariant)) variant.input.value = desiredVariant;
+    const selectedCollection = selectedChannel.collections.find((item) => item.id === data.job.collection);
+    const sameQueryIndex = Math.max(0, (selectedCollection?.queries ?? []).findIndex((query) => query === data.job.query));
+    queryIndex.input.value = String(sameQueryIndex);
+    updateBatchButtonCopy();
+    showStatus(status, `Fallback vorbereitet: ${providerLabel(nextProvider)} · ${data.job.collectionLabel} · ${variantLabelById(variant.input.value)} · gleicher Suchbegriff. Die Suche startet erst nach deinem Klick.`, true);
+    focusBuilder();
+  }
 
   function applyRecommendation(detail) {
     const requestedProvider = String(detail.provider ?? '');
@@ -296,7 +316,7 @@ function render({ health, channelIndex, channels }) {
   }
 }
 
-function renderBatchResults(container, groups, token, keyResolver) {
+function renderBatchResults(container, groups, token, keyResolver, onFallback) {
   const header = document.createElement('div');
   header.className = 'builder-result-tools';
   const summary = document.createElement('div');
@@ -316,7 +336,7 @@ function renderBatchResults(container, groups, token, keyResolver) {
     groupSection.className = 'builder-batch-group';
     groupSection.dataset.searchId = group.searchId;
     groupSection.dataset.provider = group.provider;
-    renderResults(groupSection, group, token, keyResolver, { reloadAfterImport: false });
+    renderResults(groupSection, group, token, keyResolver, { reloadAfterImport: false, onFallback });
     wrapper.append(groupSection);
   }
 
@@ -328,9 +348,7 @@ function renderBatchResults(container, groups, token, keyResolver) {
     }).filter((item) => item.ids.length > 0);
 
     if (!selections.length) return showStatus(batchStatus, 'Bitte in mindestens einer Gruppe Treffer markieren.', false);
-    if (selections.some((item) => item.group.provider === 'unsplash') && !keyResolver('unsplash')) {
-      return showStatus(batchStatus, 'Der Unsplash-Key wurde aus dem Arbeitsspeicher gelöscht. Bitte die Unsplash-Suche erneut ausführen.', false);
-    }
+    if (selections.some((item) => item.group.provider === 'unsplash') && !keyResolver('unsplash')) return showStatus(batchStatus, 'Der Unsplash-Key wurde aus dem Arbeitsspeicher gelöscht. Bitte die Unsplash-Suche erneut ausführen.', false);
 
     batchImport.disabled = true;
     let imported = 0;
@@ -372,6 +390,12 @@ function renderResults(container, data, token, keyResolver, options = {}) {
   const selectAll = button('Alle auswählen');
   const importButton = button('Ausgewählte als Review importieren', 'builder-primary');
   actions.append(selectAll, importButton);
+  const nextProvider = fallbackProvider(data.provider, data.job.type);
+  if (nextProvider && typeof options.onFallback === 'function') {
+    const fallbackButton = button(`Nächste Quelle: ${providerLabel(nextProvider)}`);
+    fallbackButton.addEventListener('click', () => options.onFallback(data, nextProvider));
+    actions.append(fallbackButton);
+  }
   tools.append(summary, actions);
 
   const grid = document.createElement('div');
@@ -411,6 +435,14 @@ function renderResults(container, data, token, keyResolver, options = {}) {
       importButton.disabled = false;
     }
   });
+}
+
+function fallbackProvider(provider, type) {
+  const chain = type === 'video'
+    ? ['pexels', 'pixabay']
+    : ['unsplash', 'openverse', 'wikimedia', 'pexels', 'pixabay'];
+  const index = chain.indexOf(provider);
+  return index >= 0 && index < chain.length - 1 ? chain[index + 1] : null;
 }
 
 function markImported(container, ids) {
