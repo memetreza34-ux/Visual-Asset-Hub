@@ -31,7 +31,7 @@ function render({ health, channelIndex, channels }) {
   headerContent.append(
     textElement('span', 'Arsenal Builder', 'eyebrow'),
     textElement('h2', '5 Medienquellen direkt durchsuchen'),
-    textElement('p', 'Pexels, Pixabay und Unsplash verwenden einen API-Key nur für die aktuelle lokale Anfrage. Openverse und Wikimedia Commons funktionieren ohne Key. Alle Importe starten im Status Review und offene Lizenzen werden dokumentiert.')
+    textElement('p', 'Pexels, Pixabay und Unsplash verwenden einen API-Key nur für die aktuelle lokale Anfrage. Openverse und Wikimedia Commons funktionieren ohne Key. Mit dem Batch-Modus werden bis zu fünf Sammlungen nacheinander durchsucht. Alle Importe starten im Status Review.')
   );
   header.append(headerContent);
 
@@ -56,6 +56,9 @@ function render({ health, channelIndex, channels }) {
   submit.type = 'submit';
   submit.className = 'builder-primary';
   submit.textContent = 'Pexels durchsuchen';
+  const batchSubmit = document.createElement('button');
+  batchSubmit.type = 'button';
+  batchSubmit.textContent = '5 Sammlungen mit Pexels durchsuchen';
   const status = textElement('p', '', 'builder-status');
   status.hidden = true;
 
@@ -70,7 +73,7 @@ function render({ health, channelIndex, channels }) {
     updateProviderCopy();
   });
 
-  form.append(provider.wrapper, apiKey.wrapper, channel.wrapper, collection.wrapper, variant.wrapper, queryIndex.wrapper, perPage.wrapper, submit, status);
+  form.append(provider.wrapper, apiKey.wrapper, channel.wrapper, collection.wrapper, variant.wrapper, queryIndex.wrapper, perPage.wrapper, submit, batchSubmit, status);
   const resultArea = document.createElement('div');
   resultArea.className = 'builder-results';
   section.replaceChildren(header, form, resultArea);
@@ -93,22 +96,15 @@ function render({ health, channelIndex, channels }) {
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
+    const transientApiKey = getApiKeyOrError();
+    if (transientApiKey === null) return;
     submit.disabled = true;
-    const selectedProvider = provider.input.value;
-    const providerName = providerLabel(selectedProvider);
-    const transientApiKey = keylessProviders.has(selectedProvider) ? '' : apiKey.input.value;
+    batchSubmit.disabled = true;
+    const providerName = providerLabel(provider.input.value);
     showStatus(status, `${providerName} wird durchsucht …`, true);
     resultArea.replaceChildren();
     try {
-      const data = await post('/arsenal-api/search', {
-        provider: selectedProvider,
-        apiKey: transientApiKey || undefined,
-        channel: channel.input.value,
-        collection: collection.input.value,
-        variant: variant.input.value,
-        queryIndex: Number(queryIndex.input.value),
-        perPage: Number(perPage.input.value)
-      }, health.token);
+      const data = await post('/arsenal-api/search', searchPayload(transientApiKey), health.token);
       apiKey.input.value = '';
       const cacheText = data.cached ? ' · aus 24-Stunden-Cache' : '';
       const rateText = data.rateLimit?.remaining !== null && data.rateLimit?.remaining !== undefined ? ` · API-Limit verbleibend: ${data.rateLimit.remaining}` : '';
@@ -119,8 +115,57 @@ function render({ health, channelIndex, channels }) {
       showStatus(status, error.message, false);
     } finally {
       submit.disabled = false;
+      batchSubmit.disabled = false;
     }
   });
+
+  batchSubmit.addEventListener('click', async () => {
+    if (!form.reportValidity()) return;
+    const transientApiKey = getApiKeyOrError();
+    if (transientApiKey === null) return;
+    const selectedChannel = channels.find((item) => item.id === channel.input.value) ?? channels[0];
+    const start = Math.max(0, selectedChannel.collections.findIndex((item) => item.id === collection.input.value));
+    const collections = selectedChannel.collections.slice(start, start + Math.min(5, health.maxBatchCollections ?? 5)).map((item) => item.id);
+    submit.disabled = true;
+    batchSubmit.disabled = true;
+    resultArea.replaceChildren();
+    showStatus(status, `${providerLabel(provider.input.value)} durchsucht ${collections.length} Sammlungen nacheinander …`, true);
+    try {
+      const data = await post('/arsenal-api/batch-search', { ...searchPayload(transientApiKey), collections }, health.token);
+      apiKey.input.value = '';
+      showStatus(status, `${data.assets} Treffer aus ${data.collections} Sammlungen geladen. Nichts wurde automatisch freigegeben.`, true);
+      renderBatchResults(resultArea, data.groups, health.token, data.provider === 'unsplash' ? transientApiKey : '');
+    } catch (error) {
+      apiKey.input.value = '';
+      showStatus(status, error.message, false);
+    } finally {
+      submit.disabled = false;
+      batchSubmit.disabled = false;
+    }
+  });
+
+  function searchPayload(transientApiKey) {
+    return {
+      provider: provider.input.value,
+      apiKey: transientApiKey || undefined,
+      channel: channel.input.value,
+      collection: collection.input.value,
+      variant: variant.input.value,
+      queryIndex: Number(queryIndex.input.value),
+      perPage: Number(perPage.input.value)
+    };
+  }
+
+  function getApiKeyOrError() {
+    if (keylessProviders.has(provider.input.value)) return '';
+    const value = apiKey.input.value.trim();
+    if (value.length < 8) {
+      showStatus(status, `${providerLabel(provider.input.value)} benötigt einen API-Key.`, false);
+      apiKey.input.focus();
+      return null;
+    }
+    return value;
+  }
 
   function updateCollections() {
     const selected = channels.find((item) => item.id === channel.input.value) ?? channels[0];
@@ -147,7 +192,21 @@ function render({ health, channelIndex, channels }) {
     if (keyless) apiKey.input.value = '';
     apiKey.wrapper.querySelector('span').textContent = `${name} API-Key`;
     submit.textContent = `${name} durchsuchen`;
+    batchSubmit.textContent = `5 Sammlungen mit ${name} durchsuchen`;
   }
+}
+
+function renderBatchResults(container, groups, token, transientApiKey) {
+  const title = textElement('div', `${groups.length} Sammlungen durchsucht`, 'builder-result-tools');
+  const wrapper = document.createElement('div');
+  wrapper.className = 'builder-batch-results';
+  for (const group of groups) {
+    const section = document.createElement('section');
+    section.className = 'builder-batch-group';
+    renderResults(section, group, token, group.provider === 'unsplash' ? transientApiKey : '');
+    wrapper.append(section);
+  }
+  container.replaceChildren(title, wrapper);
 }
 
 function renderResults(container, data, token, transientApiKey = '') {
@@ -213,7 +272,6 @@ function resultCard(asset, provider) {
   const title = textElement('strong', asset.title || `${providerLabel(provider)} ${asset.provider_id}`);
   const meta = textElement('span', `${asset.type === 'video' ? 'Video' : 'Bild'} · ${asset.width ?? '?'} × ${asset.height ?? '?'}${asset.duration_seconds ? ` · ${asset.duration_seconds} s` : ''}${asset.license ? ` · ${licenseLabel(asset.license)}` : ''}`);
   body.append(title, meta);
-
   if (provider === 'unsplash' && asset.creator_url) {
     const creatorLink = document.createElement('a');
     creatorLink.href = asset.creator_url;
@@ -225,7 +283,6 @@ function resultCard(asset, provider) {
   } else {
     body.append(textElement('span', asset.creator ? `von ${asset.creator}` : providerLabel(provider)));
   }
-
   const link = document.createElement('a');
   link.href = asset.source_url;
   link.target = '_blank';
