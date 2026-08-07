@@ -24,13 +24,21 @@ test('Ausbauplan empfiehlt pro Suchschritt genau einen Medientyp mit Fallback-Ke
     asset('A3', 'videos-only', 'video'), asset('A4', 'videos-only', 'video')
   ];
   const plan = buildExpansionPlan({ channels, assets });
-  assert.equal(plan.version, 3);
+  assert.equal(plan.version, 4);
   assert.equal(plan.summary.collections, 3);
   assert.equal(plan.summary.approved, 4);
   assert.equal(plan.summary.target, 24);
 
   const empty = plan.priorities.find((row) => row.collection === 'empty');
-  assert.deepEqual(empty.gaps, { approved: 8, minimumApproved: 4, videos: 2, photos: 2, searchCandidates: 8 });
+  assert.deepEqual(empty.gaps, {
+    approved: 8,
+    minimumApproved: 4,
+    videos: 2,
+    photos: 2,
+    searchCandidates: 8,
+    searchVideos: 2,
+    searchPhotos: 2
+  });
   assert.equal(empty.nextAction, 'search');
   assert.equal(empty.recommendedSearch.mediaType, 'video');
   assert.equal(empty.recommendedSearch.variant, 'video-vertical');
@@ -39,12 +47,16 @@ test('Ausbauplan empfiehlt pro Suchschritt genau einen Medientyp mit Fallback-Ke
   const photosOnly = plan.priorities.find((row) => row.collection === 'photos-only');
   assert.equal(photosOnly.gaps.videos, 2);
   assert.equal(photosOnly.gaps.photos, 0);
+  assert.equal(photosOnly.gaps.searchVideos, 2);
+  assert.equal(photosOnly.gaps.searchPhotos, 0);
   assert.equal(photosOnly.recommendedSearch.mediaType, 'video');
   assert.deepEqual(photosOnly.providerPriority, ['pexels', 'pixabay']);
 
   const videosOnly = plan.priorities.find((row) => row.collection === 'videos-only');
   assert.equal(videosOnly.gaps.videos, 0);
   assert.equal(videosOnly.gaps.photos, 2);
+  assert.equal(videosOnly.gaps.searchVideos, 0);
+  assert.equal(videosOnly.gaps.searchPhotos, 2);
   assert.equal(videosOnly.recommendedSearch.mediaType, 'photo');
   assert.equal(videosOnly.recommendedSearch.variant, 'photo-vertical');
   assert.deepEqual(videosOnly.providerPriority, ['unsplash', 'openverse', 'wikimedia']);
@@ -61,10 +73,28 @@ test('Review-Kandidaten zählen nicht als freigegeben und reduzieren die Suchlü
   assert.equal(row.counts.totalCandidates, 2);
   assert.equal(row.counts.review, 2);
   assert.equal(row.counts.approved, 0);
+  assert.equal(row.counts.reviewVideos, 1);
+  assert.equal(row.counts.reviewPhotos, 1);
   assert.equal(row.gaps.searchCandidates, 6);
+  assert.equal(row.gaps.searchVideos, 1);
+  assert.equal(row.gaps.searchPhotos, 1);
   assert.equal(row.nextAction, 'search');
   assert.ok(row.recommendedSearch);
   assert.equal(row.complete, false);
+});
+
+test('Review-Medien verhindern redundante Suche desselben Medientyps', () => {
+  const assets = [
+    asset('R1', 'empty', 'video', 'review'),
+    asset('R2', 'empty', 'video', 'review')
+  ];
+  const plan = buildExpansionPlan({ channels, assets });
+  const row = plan.priorities.find((item) => item.collection === 'empty');
+  assert.equal(row.gaps.videos, 2, 'Freigegebener Video-Mix ist noch nicht erreicht.');
+  assert.equal(row.gaps.searchVideos, 0, 'Es liegen bereits genug Video-Kandidaten vor.');
+  assert.equal(row.gaps.searchPhotos, 2);
+  assert.equal(row.recommendedSearch.mediaType, 'photo');
+  assert.deepEqual(row.providerPriority, ['unsplash', 'openverse', 'wikimedia']);
 });
 
 test('genug Review-Kandidaten erzwingen Review vor weiterer Suche', () => {
@@ -72,6 +102,8 @@ test('genug Review-Kandidaten erzwingen Review vor weiterer Suche', () => {
   const plan = buildExpansionPlan({ channels, assets });
   const row = plan.priorities.find((item) => item.collection === 'empty');
   assert.equal(row.gaps.searchCandidates, 0);
+  assert.equal(row.gaps.searchVideos, 0);
+  assert.equal(row.gaps.searchPhotos, 0);
   assert.equal(row.nextAction, 'review-first');
   assert.equal(row.recommendedSearch, null);
   assert.deepEqual(row.providerPriority, []);
