@@ -27,6 +27,7 @@
     "arsenal:search": "node scripts/pexels-arsenal-search.mjs",
     "arsenal:import": "node scripts/arsenal-import-selected.mjs",
     "arsenal:report": "node scripts/channel-coverage-report.mjs",
+    "arsenal:expansion": "node scripts/arsenal-expansion-plan.mjs",
     "secrets:scan": "node scripts/scan-secrets.mjs",
     "validate": "node scripts/validate-catalog.mjs && node scripts/validate-channel-library.mjs && node scripts/validate-planner-keywords.mjs && node scripts/validate-preview-urls.mjs && node scripts/validate-operations.mjs",
     "index": "node scripts/build-index.mjs",
