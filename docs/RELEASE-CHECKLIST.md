@@ -6,7 +6,7 @@
 - [ ] `npm run beta:verify` meldet technisch bereit
 - [ ] `npm run arsenal:validate` bestätigt Kanaldateien und Planerlexikon
 - [ ] `npm run arsenal:plan` erzeugt JSON und CSV
-- [ ] `npm run arsenal:expansion` erzeugt Ausbauplan als JSON und CSV
+- [ ] `npm run arsenal:expansion` erzeugt Ausbauplan Version 3 als JSON und CSV
 - [ ] `npm run arsenal:report` erzeugt den Abdeckungsbericht
 - [ ] `npm run links:check -- --strict true` prüft externe Medien- und Quelllinks
 - [ ] statische Website wird mit `npm run site:build` erzeugt
@@ -44,13 +44,27 @@
 - [x] 360 Grundformat-Suchaufträge planbar
 - [x] Zielgröße 720 freigegebene Kanal-Assets dokumentiert
 - [x] Ausbauplaner unterscheidet `search`, `review-first` und `complete`
+- [x] Ausbauplan nennt Medientyp, Format, Primärquelle und Fallbackquellen
 - [ ] Finanzen-, KI-, Elektro- und Kampfsport-Bereiche vollständig sichtbar
 - [ ] Kandidaten-, Review- und Freigabezahlen stimmen
 - [ ] **Ausbau 720** zeigt 160/160/160/240 als Kanalziele
-- [ ] Top-Suchlücken werden korrekt priorisiert
+- [ ] Video- und Fotolücken werden korrekt erkannt
+- [ ] vorhandener ausreichender Review-Vorrat führt direkt in die Review-Warteschlange
+- [ ] echte Suchlücken werden mit passender Quelle und passendem Format vorbereitet
 - [ ] höchstens fünf priorisierte Sammlungen werden an den Builder übergeben
-- [ ] vorhandener ausreichender Review-Vorrat verhindert unnötige Nachsuche
 - [ ] UFC-, Event- und Broadcast-Risikohinweise werden angezeigt
+
+## Priorisierte Review-Warteschlange
+
+- [ ] Filter nach Kanal funktioniert
+- [ ] Filter nach Sammlung funktioniert
+- [ ] Filter nach Medientyp funktioniert
+- [ ] Standardreihenfolge **Größter Ausbau-Effekt** funktioniert
+- [ ] sichtbare Ausbau-Priorität enthält eine nachvollziehbare Begründung
+- [ ] Entscheidung aktualisiert die verbleibende Priorität
+- [ ] Review-Empfehlung aus **Ausbau 720** öffnet die passende Sammlung
+- [ ] keine Prioritätslogik umgeht die Vier-Punkte-Freigabeprüfung
+- [ ] Freigabe, Einschränkung und Archivierung bleiben Einzelentscheidungen
 
 ## Medienquellen-Builder
 
@@ -65,6 +79,7 @@
 - [ ] echte Suche erfolgreich
 - [ ] Foto und Video unterstützt
 - [ ] 24-Stunden-Cache für gleiche Suchen funktioniert
+- [ ] Cache-Antwort übernimmt niemals falsche Kanal- oder Sammlungsmetadaten
 - [ ] API-Key kann für die aktuelle Seite im Arbeitsspeicher gehalten werden
 
 ### Unsplash
@@ -74,6 +89,7 @@
 - [ ] Fotograf und Unsplash werden dokumentiert
 - [ ] Download-Ereignis wird beim Import gemeldet
 - [ ] Access Key kann für die aktuelle Seite im Arbeitsspeicher gehalten werden
+- [ ] nach **Sitzungs-Keys löschen** kann ein bereits geladenes Ergebnis nicht mit einem alten Key importiert werden
 
 ### Openverse
 
@@ -97,7 +113,14 @@
 - [ ] nur markierte Treffer werden importiert
 - [ ] jeder Import startet auf `review`
 - [ ] Kanal- und Sammlungs-Tags werden korrekt gesetzt
-- [ ] Dubletten werden übersprungen oder blockiert
+- [ ] tatsächliche Importzahl und übersprungene Dubletten werden getrennt gemeldet
+- [ ] Openverse/Wikimedia-Dubletten werden auch über Original-Medien-URL erkannt
+- [ ] gruppenübergreifender Sammelimport verarbeitet ausgewählte Batch-Gruppen nacheinander
+- [ ] Sammelimport lädt die Seite erst nach Abschluss einmal neu
+- [ ] bereits importierte Karten werden deaktiviert und markiert
+- [ ] Video-Fallback Pexels → Pixabay wird nur vorbereitet
+- [ ] Foto-Fallback Unsplash → Openverse → Wikimedia → Pexels → Pixabay wird nur vorbereitet
+- [ ] Fallback übernimmt Sammlung, Format und Suchbegriff, startet aber keine API-Anfrage automatisch
 
 ## Eigene Medien und Inbox
 
@@ -117,9 +140,6 @@
 - [x] ein CC-BY-SA-Wikimedia-Kampfsport-Starter vorbereitet
 - [ ] `npm run starter:import` ergänzt die Bibliothek idempotent auf zwölf Assets
 - [ ] alle vier Kanäle sind nach dem Starterimport vertreten
-- [ ] schnelle Review-Warteschlange funktioniert
-- [ ] Kanal-, Typ- und Sortierfilter funktionieren
-- [ ] automatische Weiterleitung zum nächsten Asset funktioniert
 - [ ] alle acht Videos vollständig abgespielt und bewertet
 - [ ] alle drei Originalgrafiken visuell kontrolliert
 - [ ] Wikimedia-Kampfsportfoto inklusive Personen- und Lizenzprüfung kontrolliert
@@ -159,13 +179,21 @@
 - [ ] Restore-Dry-Run wurde erfolgreich ausgeführt
 - [ ] Sicherheitsbackup und Rollback wurden kontrolliert
 
+## GitHub Actions und Kostenkontrolle
+
+- [x] alle Workflows im Beta-Branch besitzen `workflow_dispatch`
+- [x] automatische `push`-Trigger entfernt
+- [x] automatische `pull_request`-Trigger entfernt
+- [x] automatische `schedule`-Trigger ausgeschlossen
+- [x] lokaler Vertragstest blockiert versehentlich reaktivierte automatische Trigger
+- [ ] keine manuelle GitHub-Action ist für die lokale Beta-Abnahme erforderlich
+
 ## Release
 
-- [x] Changelog-Basis für `0.4.0-beta.3` vorhanden
-- [ ] aktuelle Erweiterungen im Changelog dokumentiert
+- [x] Changelog für `0.4.0-beta.4` vorhanden
+- [x] Paketversion auf `0.4.0-beta.4` gesetzt
 - [ ] Pull Request ist nicht mehr Draft
 - [ ] lokale Komplettprüfung ist grün
-- [ ] GitHub-Actions-Runner-Blocker ist als externer Billing-/Spending-Blocker dokumentiert
 - [ ] `realTestComplete` ist `true`
 - [ ] Beta-Tag oder Release wurde erstellt
 
