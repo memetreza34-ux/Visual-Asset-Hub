@@ -2,26 +2,28 @@
 
 ## Ziel
 
-Der komplette kostenlose Ablauf wird real geprüft:
+Der komplette kostenlose Ablauf wird real auf dem lokalen Rechner geprüft:
 
-1. Visual Asset Hub unter Windows starten
-2. ein echtes Kanalskript in eine Shotlist umwandeln
-3. elf Starterassets ansehen und entscheiden
-4. die vier Kanalbibliotheken und 90 Sammlungen durchsuchen
-5. eine Pexels-Suche pro Kanal durchführen
-6. eine eigene lokale Datei über `inbox` importieren
-7. mindestens ein Asset freigeben
-8. ein verifiziertes Medienpaket für den Schnitt erzeugen
-9. ein Asset in einem echten Content-Projekt verwenden
-10. Nutzung, Attribution und Backup dokumentieren
+1. Visual Asset Hub auf dem Mac starten
+2. zwölf Starterassets importieren und vollständig entscheiden
+3. ein echtes Kanalskript in eine Shotlist umwandeln
+4. die vier Kanalbibliotheken und 90 Sammlungen prüfen
+5. alle fünf Medienquellen technisch testen
+6. den priorisierten Ausbau-720-Workflow testen
+7. eine eigene lokale Datei importieren
+8. mindestens ein Asset freigeben
+9. ein verifiziertes Medienpaket erzeugen
+10. ein Asset in einem echten Content-Projekt verwenden
+11. Nutzung, Attribution und Backup dokumentieren
 
-## Starterbibliothek nach dem ersten Start
+## Starterbibliothek nach `npm run starter:import`
 
-`START-HERE.cmd` importiert idempotent fünf zusätzliche Pexels-B-Rolls. Danach enthält die lokale Testbibliothek:
+Der Import ergänzt idempotent sechs zusätzliche Medien. Danach enthält die lokale Testbibliothek:
 
-- acht vertikale Pexels-Videos
+- acht Pexels-Videos
 - drei eigene horizontale SVG-Grafiken
-- insgesamt elf Assets
+- ein Wikimedia-Commons-Foto für Kampfsport unter CC BY-SA 4.0
+- insgesamt **zwölf Assets**
 - alle Assets zunächst im Status `review`
 
 ### Bereits im Repository
@@ -33,144 +35,221 @@ Der komplette kostenlose Ablauf wird real geprüft:
 - `VAH-GBIZGR01` – Business-Wachstum
 - `VAH-GCIRCU01` – technischer Schaltplan-Hintergrund
 
-### Beim ersten Start ergänzt
+### Durch den Starterimport ergänzt
 
 - `VAH-P6120120` – Finanzanalyse mit Taschenrechner
 - `VAH-P7989872` – digitale Interaktion am Smartphone
 - `VAH-P6153455` – bionischer Arm
 - `VAH-P6153460` – Technologieszene im Labor
 - `VAH-P6153725` – robotisches Gerät in Bewegung
+- `VAH-WBOX2021` – Boxtraining, Wikimedia Commons, CC BY-SA 4.0
 
 Keines dieser Medien darf vor vollständiger Sichtprüfung als freigegeben behandelt werden.
 
-## Test A – Windows, Start und Navigation
+## Test A – Mac, Start und Navigation
 
-1. Branch `agent/beta-release` herunterladen und entpacken.
-2. Node.js 22 oder neuer installieren.
-3. `START-HERE.cmd` doppelklicken.
-4. Prüfen, ob `http://127.0.0.1:4173` geöffnet wird.
-5. Kontrollieren, ob **Lokale Verwaltung aktiv** angezeigt wird.
-6. Prüfen, ob elf Assets sichtbar sind.
-7. Kontrollieren, ob Beta-Fortschritt und offene Aufgaben angezeigt werden.
-8. Die feste Navigation testen:
+Im lokalen Clone:
+
+```bash
+cd ~/Downloads/Visual-Asset-Hub-clean
+git pull --ff-only
+npm run starter:import
+npm run check
+npm run serve
+```
+
+Danach:
+
+1. `http://127.0.0.1:4173/web/` öffnen.
+2. **Lokale Verwaltung aktiv** kontrollieren.
+3. prüfen, ob zwölf Assets sichtbar sind.
+4. Navigation testen:
    - Bibliothek
    - Skript planen
    - Eigene Dateien
    - Prüfen
-   - Pexels suchen
+   - Medien suchen
+   - Ausbau 720
    - 90 Kategorien
-9. Prüfen, ob die jeweilige Sektion sauber angesprungen wird.
+5. prüfen, ob jede Sektion sauber angesprungen wird.
 
-## Test B – Kanal-Arsenal und Lückensteuerung
+## Test B – Kanal-Arsenal und Ausbau 720
 
-1. Die vier Kanal-Tabs öffnen:
+1. Die vier Kanäle öffnen:
    - Finanzen
    - Künstliche Intelligenz
    - Elektrotechnik
    - Kampfsport
 2. Nach `Aktien`, `RCD`, `Boxring`, `Muay Thai`, `Roboter` und `Schaltplan` suchen.
-3. Prüfen, ob Sammlungsnamen, Tags und Suchbegriffe stimmen.
-4. Kontrollieren, ob Kandidaten und Freigaben getrennte Fortschrittsbalken besitzen.
-5. `Nur unvollständige Sammlungen` aktivieren und deaktivieren.
-6. Sortierungen testen:
-   - größte Lücken
-   - meiste Freigaben
-   - meiste Reviews
-   - alphabetisch
-7. Unter **Als Nächstes ausbauen** eine Empfehlung anklicken.
-8. Prüfen, ob der Arsenal Builder automatisch auf den richtigen Kanal und die richtige Sammlung gestellt wird.
+3. Sammlungsnamen, Tags und Suchbegriffe kontrollieren.
+4. Kandidaten, Reviews und Freigaben getrennt prüfen.
+5. Navigation **Ausbau 720** öffnen.
+6. Zielwerte kontrollieren:
+   - Finanzen 160
+   - KI 160
+   - Elektrotechnik 160
+   - Kampfsport 240
+   - Gesamt 720
+7. Bei einem Kanal **Top Suchlücken vorbereiten** drücken.
+8. prüfen, ob höchstens fünf konkrete Sammlungen an den Arsenal Builder übergeben werden.
+9. Eine Sammlung mit genügend Review-Kandidaten darf nicht unnötig erneut als Suchlücke priorisiert werden.
 
-## Test C – Pexels Arsenal Builder
+## Test C – fünf Medienquellen
 
-Je eine kleine Suche mit höchstens fünf Treffern durchführen:
+### Pexels
 
-- Finanzen → Budget und Sparen
-- KI → humanoide Roboter
-- Elektrotechnik → LS, RCD und Schutzgeräte
-- Kampfsport → Boxtraining
+- Video · Hochformat wählen.
+- gültigen Pexels-Key eingeben.
+- reale Suche ausführen.
+- Vorschauen und Quelle prüfen.
 
-Für jede Suche:
+### Pixabay
 
-1. Kanal und Sammlung wählen.
-2. `Video · Hochformat` wählen.
-3. Pexels-Key lokal eingeben.
-4. Suche starten.
-5. Prüfen, ob der Key danach aus dem Feld entfernt wurde.
-6. Vorschauen und Quellseiten ansehen.
-7. nur einen geeigneten Treffer markieren.
-8. als `review` importieren.
-9. kontrollieren, ob Kanal- und Sammlungs-Tags korrekt gesetzt wurden.
+- einmal Video und einmal Foto testen.
+- gültigen Pixabay-Key eingeben.
+- bei Wiederholung derselben Suche den 24-Stunden-Cache kontrollieren.
 
-Keine UFC-Logos, Broadcastausschnitte, fremden Eventgrafiken oder gefährlichen Weight-Cut-Inhalte importieren.
+### Unsplash
 
-## Test D – Eigene Datei über Inbox
+- nur Fotoformat muss auswählbar sein.
+- gültigen Unsplash Access Key eingeben.
+- Treffer müssen Fotograf und Unsplash dokumentieren.
+- beim tatsächlichen Import muss der vorgesehene Download-Endpunkt gemeldet werden.
 
-1. Eine eigene Testdatei nach `inbox` kopieren, zum Beispiel ein selbst aufgenommenes Video oder ein eigenes Bild.
-2. In der Navigation **Eigene Dateien** öffnen.
-3. `Inbox neu laden` drücken.
-4. Prüfen, ob Vorschau, Dateityp und Dateigröße sichtbar sind.
-5. Kanal und Sammlung auswählen.
-6. Titel, Beschreibung, Tags und Quelle eintragen.
-7. Nutzungsrechte ausdrücklich bestätigen.
-8. Import als `review` starten.
-9. Prüfen, ob die Datei danach im Katalog sichtbar ist.
-10. Bei aktivierter Löschoption kontrollieren:
-    - die Datei wurde aus `inbox` entfernt, oder
-    - bei einem Löschproblem erscheint nur eine Warnung, obwohl der Katalogimport erfolgreich bleibt.
-11. Binäre Videos und Bilder müssen als Git-LFS-Medien eingeordnet werden; SVG-Grafiken dürfen im normalen Repository liegen.
+### Openverse
 
-## Test E – Schnellprüfung aller Starterassets
+- kein Key-Feld erforderlich.
+- nur Fotoformat.
+- nur Public Domain, CC0, CC BY oder CC BY-SA als unterstützte offene Lizenzen übernehmen.
+
+### Wikimedia Commons
+
+- kein Key-Feld erforderlich.
+- nur Fotoformat.
+- Lizenz, Quellseite und Attribution sichtbar prüfen.
+
+Für alle Quellen gilt:
+
+1. nichts automatisch freigeben.
+2. nur visuell geeignete Treffer markieren.
+3. als `review` importieren.
+4. Kanal- und Sammlungs-Tags kontrollieren.
+5. keine UFC-Logos, Broadcastausschnitte, fremden Eventgrafiken oder gefährlichen Weight-Cut-Inhalte blind übernehmen.
+
+## Test D – Batch-Suche
+
+1. In **Ausbau 720** einen Kanal wählen.
+2. **Top Suchlücken vorbereiten** drücken.
+3. im Builder Quelle und Format auswählen.
+4. Batch starten.
+5. kontrollieren, dass maximal fünf Sammlungen sequenziell durchsucht werden.
+6. jede Ergebnisgruppe muss separat auswählbar sein.
+7. nur ausgewählte Medien importieren.
+8. nach dem Import muss der Bestand aktualisiert werden.
+
+## Test E – Sitzungs-Keys
+
+1. Pexels-Key eingeben und eine Suche durchführen.
+2. eine zweite Pexels-Suche ohne erneute Eingabe starten.
+3. dasselbe mit Pixabay und Unsplash testen.
+4. **Sitzungs-Keys löschen** drücken.
+5. danach muss eine neue Key-Eingabe nötig sein.
+6. Browserseite neu laden; Keys dürfen danach nicht mehr vorhanden sein.
+7. im Browser-Code darf weder `localStorage` noch `sessionStorage` für API-Keys benutzt werden.
+
+## Test F – eigene Datei
+
+1. Eine eigene Testdatei über **Eigene Dateien** bereitstellen.
+2. Vorschau, Dateityp und Dateigröße prüfen.
+3. Kanal und Sammlung auswählen.
+4. Titel, Beschreibung und Tags eintragen.
+5. Nutzungsrechte ausdrücklich bestätigen.
+6. als `review` importieren.
+7. kontrollieren, ob das Asset im Katalog erscheint.
+
+## Test G – alle zwölf Starterassets prüfen
 
 1. Navigation **Prüfen** öffnen.
-2. Nacheinander nach Finanzen, KI und Elektrotechnik filtern.
-3. Alle elf Starterassets vollständig öffnen und bewerten.
-4. Bei jedem Asset prüfen:
+2. alle zwölf Starterassets vollständig öffnen und bewerten.
+3. Bei jedem Asset prüfen:
    - sichtbarer Inhalt stimmt mit Titel und Tags überein
    - Auflösung und Ausrichtung sind brauchbar
    - Personen, Logos, Marken und Kennzeichen wurden kontrolliert
-   - Quelle und Lizenzseite sind erreichbar
-   - der geplante Einsatzkontext ist passend
-5. Prüfer, Qualität und Notiz eintragen.
-6. Eine Entscheidung speichern:
+   - Quelle und Lizenzseite sind nachvollziehbar
+   - geplanter Einsatzkontext ist passend
+4. Prüfer, Qualität und Notiz eintragen.
+5. Entscheidung speichern:
    - freigeben
    - einschränken
    - archivieren
-   - überspringen und später erneut prüfen
-7. Prüfen, ob nach einer Entscheidung automatisch das nächste Asset erscheint.
+6. nach einer Entscheidung muss automatisch das nächste offene Asset erscheinen.
 
-Für die Beta-Abnahme müssen alle elf unterschiedlichen Starter-IDs eine dokumentierte Entscheidung besitzen.
+Für die Beta-Abnahme müssen **zwölf unterschiedliche Starter-IDs** eine dokumentierte Entscheidung besitzen.
 
-## Test F – Freigabe und Negativtests
+Für `VAH-WBOX2021` zusätzlich prüfen:
 
-Empfohlenes erstes Freigabe-Testasset: `VAH-GCIRCU01`, da es eine eigene Grafik ohne Personen oder fremde Marken ist.
+- sichtbare Personen
+- Attribution `Dotun55 / Wikimedia Commons`
+- Lizenz CC BY-SA 4.0
+- Share-Alike-Pflichten bei Bearbeitungen
 
-1. Asset vollständig ansehen.
-2. Alle vier Pflichtpunkte bestätigen:
-   - Asset vollständig angesehen
-   - Personen, Logos und Marken geprüft
-   - Quelle, Lizenz und Nutzung geprüft
-   - geplanter Einsatzkontext geprüft
-3. `Freigeben & weiter` drücken.
+## Test H – Freigabe und Negativtests
+
+Empfohlenes erstes Freigabe-Testasset: `VAH-GCIRCU01`, sofern die Sichtprüfung bestanden wurde.
+
+Vor Freigabe alle Pflichtpunkte bestätigen:
+
+- Asset vollständig angesehen
+- Personen, Logos und Marken geprüft
+- Quelle, Lizenz und Nutzung geprüft
+- geplanter Einsatzkontext geprüft
 
 Negativtests:
 
 - Freigabe mit fehlendem Pflichtpunkt muss blockiert werden.
 - Einschränkung ohne Begründung muss blockiert werden.
-- Ungeprüftes Asset darf nicht in ein Medienpaket exportiert werden.
-- Während einer laufenden Schreibaktion muss eine zweite Schreibaktion mit HTTP 409 blockiert werden.
+- ungeprüftes Asset darf nicht in ein Medienpaket exportiert werden.
+- während einer laufenden Schreibaktion muss eine zweite Schreibaktion mit HTTP 409 blockiert werden.
 
-## Test G – Auswahl und Medienpaket
+## Test I – Skript-Planer
 
-1. Mindestens ein freigegebenes Asset als Favorit markieren.
-2. Optional ein noch ungeprüftes Asset zusätzlich markieren.
-3. `Auswahl exportieren` testen; die JSON-Datei darf Review-Assets enthalten, muss sie aber warnend kennzeichnen.
-4. `Medienpaket erstellen` drücken.
-5. Prüfen, ob ein Review-Asset das Paket blockiert.
-6. Danach nur freigegebene Favoriten auswählen.
-7. Einen Paketnamen eingeben.
-8. Paket unter `exports/media-packs` kontrollieren.
+1. **Skript planen** öffnen.
+2. ein echtes Skript mit mindestens vier Sätzen verwenden.
+3. Kanal, Zieldauer und Format wählen.
+4. Shotlist erzeugen.
+5. kontrollieren:
+   - Szenen sinnvoll getrennt
+   - letzter Zeitwert entspricht der Zieldauer
+   - Sammlungen passen zum Sprechtext
+   - vorhandene Assets zeigen Status
+   - ungeprüfte Assets zeigen Warnung
+   - fehlende Motive liefern Suchbegriffe
+6. JSON, CSV und Markdown exportieren.
+7. zusätzlich CLI-Test:
 
-Erforderliche Inhalte:
+```bash
+npm run script:plan -- \
+  --channel electro \
+  --file ./mein-testskript.txt \
+  --duration 45 \
+  --orientation vertical
+```
+
+Unter `reports/shot-plans` prüfen:
+
+- `shotlist.json`
+- `shotlist.csv`
+- `shotlist.md`
+- `shotlist.srt`
+- `script.txt`
+
+## Test J – Medienpaket
+
+1. mindestens ein freigegebenes Asset favorisieren.
+2. optional ein Review-Asset zusätzlich markieren und den Negativtest ausführen.
+3. nur freigegebene Favoriten für das endgültige Paket verwenden.
+4. verifiziertes Medienpaket erstellen.
+5. unter `exports/media-packs` prüfen:
 
 ```text
 media/
@@ -181,118 +260,60 @@ README.md
 
 Im Manifest prüfen:
 
-- Asset-ID und standardisierter Dateiname
+- Asset-ID
+- Dateiname
 - Dateigröße
-- SHA-256-Prüfsumme
-- Quelle und Quellseite
-- Lizenzstatus und Lizenzseite
+- SHA-256
+- Quelle
+- Lizenz
 - Attribution
 - lokaler Medienpfad
 
-## Test H – echter Content-Einsatz
+## Test K – echter Content-Einsatz
 
-1. Ein freigegebenes Asset aus dem Medienpaket in einem echten Reel, Short, Video, Beitrag, einer Website oder Präsentation verwenden.
-2. Dasselbe Asset in Visual Asset Hub öffnen.
-3. Projekt-ID, Projektname und Plattform eintragen.
-4. optional Veröffentlichungslink und Nutzungsnotiz ergänzen.
-5. `Nutzung speichern` drücken.
-6. Attribution exportieren.
-7. Prüfen, ob Nutzung, Projekt und Plattform nach dem Neuladen sichtbar sind.
+1. ein freigegebenes Asset aus dem Medienpaket in einem echten Content-Projekt verwenden.
+2. Projekt-ID, Projektname und Plattform dokumentieren.
+3. optional Veröffentlichungslink und Nutzungsnotiz ergänzen.
+4. Attribution exportieren.
+5. Nutzung nach dem Neuladen kontrollieren.
 
-## Test I – Arsenal-Plan und Abdeckung
-
-Nach dem Start müssen diese Dateien vorhanden sein:
-
-```text
-reports/arsenal-plan.json
-reports/arsenal-plan.csv
-reports/channel-coverage.json
-reports/channel-coverage.md
-```
-
-Der vollständige Plan muss enthalten:
-
-- vier Kanäle
-- 90 Sammlungen
-- 360 Suchaufträge
-- Video und Foto
-- vertikal und horizontal
-
-Der Abdeckungsbericht muss das Ziel von 720 freigegebenen Kanal-Assets anzeigen.
-
-## Test J – Backup und Wiederherstellung
-
-1. Im Browser `Katalog-Backup erstellen` drücken.
-2. Prüfen, ob ein neuer Ordner unter `backups` vorhanden ist.
-3. Kontrollieren, ob Manifest und SHA-256-Prüfsummen enthalten sind.
-4. `RESTORE-BACKUP.cmd` testweise bis zum Dry-Run verwenden.
-5. Keine echte Wiederherstellung durchführen, solange kein Testbackup ausgewählt wurde.
-
-## Test K – Reel- und Skript-Planer
-
-1. Navigation **Skript planen** öffnen.
-2. Nacheinander mindestens zwei verschiedene Kanäle testen.
-3. Für einen vollständigen Realtest ein echtes Skript mit mindestens vier Sätzen einfügen.
-4. Zieldauer und Format wählen.
-5. Shotlist erzeugen.
-6. Kontrollieren:
-   - Szenen wurden sinnvoll getrennt
-   - letzter Zeitwert entspricht der Zieldauer
-   - erkannte Sammlungen passen zum Sprechtext
-   - vorhandene Assets besitzen Statusangaben
-   - ungeprüfte Assets zeigen eine Warnung
-   - fehlende Motive zeigen einen Pexels-Suchbegriff
-7. Bei einem fehlenden Motiv **Motiv suchen** drücken.
-8. Prüfen, ob der Arsenal Builder auf den richtigen Kanal und die richtige Sammlung springt.
-9. Ein vorgeschlagenes Asset als Favorit markieren.
-10. JSON, CSV und Markdown exportieren.
-11. Zusätzlich einen CLI-Test durchführen:
+## Test L – Berichte, Backup und Abschluss
 
 ```bash
-npm run script:plan -- \
-  --channel electro \
-  --file ./mein-testskript.txt \
-  --duration 45 \
-  --orientation vertical
-```
-
-12. Unter `reports/shot-plans` prüfen:
-   - `shotlist.json`
-   - `shotlist.csv`
-   - `shotlist.md`
-   - `shotlist.srt`
-   - `script.txt`
-
-## Optionale Abschlussprüfung
-
-```bash
-npm run links:check -- --strict true
-npm run script:plan -- --channel finance --file ./mein-testskript.txt --duration 45
-npm run arsenal:validate
+npm run arsenal:expansion
 npm run arsenal:report
+npm run backup
 npm run beta:verify
 npm run check
 ```
 
+Prüfen:
+
+- `reports/arsenal-expansion-plan.json`
+- `reports/arsenal-expansion-plan.csv`
+- `reports/channel-coverage.json`
+- `reports/channel-coverage.md`
+- Beta-Bericht
+- Backup-Manifest und Prüfsummen
+
 ## Abnahmekriterien
 
-- technische Projektprüfung erfolgreich
-- elf Starterassets sichtbar
-- alle elf Starterassets mit einer Entscheidung protokolliert
-- feste Arbeitsbereich-Navigation funktioniert
-- Skript-Planer erzeugt eine plausible Shotlist
-- Shotlist-Exporte als JSON, CSV, Markdown und SRT wurden geprüft
-- vier Kanalbibliotheken und 90 Sammlungen sichtbar
-- Lückenempfehlung konfiguriert den Arsenal Builder korrekt
-- vier kleine Pexels-Suchen erfolgreich
+- technische lokale Projektprüfung erfolgreich
+- zwölf Starterassets sichtbar
+- alle zwölf Starterassets mit einer Entscheidung protokolliert
+- alle vier Kanäle vertreten
+- fünf Medienquellen technisch geprüft
+- Openverse und Wikimedia ohne API-Key verwendbar
+- Pexels/Pixabay/Unsplash-Keys nur im Seitenspeicher gehalten
+- Ausbau-720-Priorisierung funktioniert
+- Review-first-Logik verhindert unnötige Nachsuche
+- Skript-Planer erzeugt plausible Shotlist und Exporte
 - mindestens ein eigener Inbox-Import erfolgreich
-- Schnellprüfung wechselt nach Entscheidungen weiter
 - mindestens ein Asset freigegeben
-- Auswahl- und Attributions-Export funktionieren
 - verifiziertes Medienpaket erfolgreich erzeugt
 - mindestens eine echte Nutzung dokumentiert
-- Backup erfolgreich erzeugt
-- Beta-Bericht meldet `realTestComplete: true`
+- Attribution und Backup erfolgreich erzeugt
+- `realTestComplete: true`
 - keine API-Schlüssel oder vertraulichen URLs im Repository
 
 Die Beta gilt als **real getestet**, sobald alle Kriterien erfüllt sind. Ein Merge in `main` erfolgt erst danach.
