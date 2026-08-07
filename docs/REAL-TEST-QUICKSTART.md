@@ -1,62 +1,81 @@
 # Realtest-Schnellstart
 
-## Vorbereitung
+## Vorbereitung auf dem Mac
 
-1. Branch `agent/beta-release` als ZIP herunterladen.
-2. entpacken.
-3. Node.js 22 oder neuer installieren.
-4. `START-HERE.cmd` doppelklicken.
-5. Konsolenfenster geöffnet lassen.
+1. Im lokalen Clone auf Branch `agent/beta-release` wechseln.
+2. `git pull --ff-only` ausführen.
+3. Node.js 22 oder neuer verwenden.
+4. `npm run starter:import` ausführen.
+5. `npm run check` ausführen.
+6. `npm run serve` starten und das Terminalfenster geöffnet lassen.
+7. `http://127.0.0.1:4173/web/` öffnen.
 
 ## Test in der Weboberfläche
 
-### 1. Starterassets prüfen
+### 1. Zwölf Starterassets prüfen
 
 - Navigation **Prüfen** öffnen.
-- alle elf Starterassets vollständig ansehen.
+- alle zwölf Starterassets vollständig ansehen.
 - für jedes Asset eine nachvollziehbare Entscheidung speichern.
-- mindestens `VAH-GCIRCU01` freigeben, sofern die Sichtprüfung bestanden wurde.
+- mindestens ein eindeutig geeignetes Asset freigeben.
+- das Wikimedia-Kampfsportfoto nur nach Prüfung der sichtbaren Personen und unter Beachtung von CC BY-SA 4.0 freigeben.
 
-### 2. Vier Kanäle befüllen
+### 2. Fünf Medienquellen real testen
 
-Je eine kleine Pexels-Suche ausführen:
+Unter **Medien suchen** mindestens eine reale Suche je Quelle ausführen:
 
-- Finanzen
-- Künstliche Intelligenz
-- Elektrotechnik
-- Kampfsport
+- Pexels – API-Key erforderlich
+- Pixabay – API-Key erforderlich
+- Unsplash – Access Key erforderlich
+- Openverse – kein Key erforderlich
+- Wikimedia Commons – kein Key erforderlich
 
-Nur einen guten Treffer je Kanal als `review` importieren. Keine UFC-Logos oder Broadcastausschnitte übernehmen.
+Pexels und Pixabay auch mit einem Videoformat testen. Unsplash, Openverse und Wikimedia Commons nur mit Fotoformaten testen. Nur visuell brauchbare Treffer als `review` importieren; nichts blind freigeben.
 
-### 3. Eigenes Medium testen
+### 3. Ausbau-720 prüfen
 
-- eigene Testdatei nach `inbox` kopieren.
+- Navigation **Ausbau 720** öffnen.
+- die vier Kanalkarten prüfen.
+- bei einem Kanal **Top Suchlücken vorbereiten** verwenden.
+- kontrollieren, dass höchstens fünf priorisierte Sammlungen an den Builder übergeben werden.
+- wenn eine Sammlung bereits genügend Review-Kandidaten besitzt, zuerst diese prüfen statt weitere Medien zu sammeln.
+
+### 4. Eigenes Medium testen
+
 - Navigation **Eigene Dateien** öffnen.
+- eine eigene Testdatei auswählen oder in den lokalen Inbox-Workflow geben.
 - Kanal und Sammlung wählen.
-- Rechte bestätigen.
+- Rechte ausdrücklich bestätigen.
 - als `review` importieren.
 
-### 4. Schnittpaket erstellen
+### 5. Skript planen
+
+- ein echtes Skript eines der vier Kanäle verarbeiten.
+- vollständige Shotlist erzeugen.
+- vorgeschlagene Sammlungen und vorhandene Assets kontrollieren.
+
+### 6. Schnittpaket erstellen
 
 - nur freigegebene Assets favorisieren.
-- `Medienpaket erstellen` drücken.
+- ein verifiziertes Medienpaket erstellen.
 - Paket unter `exports/media-packs` prüfen.
 
-### 5. Echte Nutzung
+### 7. Echte Nutzung
 
-- ein Asset aus dem Paket in einem echten Reel, Video, Post oder einer Präsentation verwenden.
-- Projekt und Plattform im Asset speichern.
+- ein freigegebenes Asset aus dem Paket in einem echten Reel, Video, Post oder einer Präsentation verwenden.
+- Projekt und Plattform als Nutzung dokumentieren.
 - Attribution exportieren.
 - Backup erzeugen.
 
 ## Bestanden
 
-Die Oberfläche muss am Ende anzeigen:
+Die Oberfläche beziehungsweise `npm run beta:verify` muss am Ende bestätigen:
 
-- alle Starterassets entschieden
-- alle vier Kanäle mit Assets
+- alle zwölf Starterassets entschieden
+- alle vier Kanäle mit Assets vertreten
 - eigenes Medium importiert
 - mindestens ein Asset freigegeben
-- Schnittpaket erzeugt
+- echtes Skript mit Shotlist verarbeitet
+- verifiziertes Schnittpaket erzeugt
 - echte Nutzung dokumentiert
 - `realTestComplete: true`
