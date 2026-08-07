@@ -66,8 +66,12 @@ test('Ausbau-720-Dashboard ist vollständig verknüpft', () => {
   assert.match(indexHtml, /expansion-dashboard\.js/);
   assert.match(indexHtml, /expansion-dashboard\.css/);
   const dashboard = fs.readFileSync(path.join(webRoot, 'expansion-dashboard.js'), 'utf8');
+  const builder = fs.readFileSync(path.join(webRoot, 'arsenal-builder.js'), 'utf8');
   assert.match(dashboard, /720|target/);
   assert.match(dashboard, /vah:arsenal-select/);
+  assert.match(dashboard, /vah:arsenal-batch-select/);
+  assert.match(builder, /vah:arsenal-batch-select/);
+  assert.match(builder, /plannedBatchCollections/);
   for (const provider of ['Pexels', 'Pixabay', 'Unsplash', 'Openverse', 'Wikimedia']) assert.match(dashboard, new RegExp(provider));
 });
 
