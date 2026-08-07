@@ -27,12 +27,17 @@ function render(channels, records) {
   const target = rows.reduce((sum, row) => sum + row.target, 0);
   const approved = rows.reduce((sum, row) => sum + row.approved, 0);
   const candidates = rows.reduce((sum, row) => sum + row.candidates, 0);
+  const review = rows.reduce((sum, row) => sum + row.review, 0);
   const percent = target ? Math.round((approved / target) * 100) : 0;
 
   const header = document.createElement('div');
   header.className = 'expansion-header';
   const copy = document.createElement('div');
-  copy.append(text('span', 'Ausbauplan', 'eyebrow'), text('h2', `${approved}/${target} freigegebene Assets`), text('p', `${candidates} Kandidaten vorhanden · ${percent}% des empfohlenen Gesamtziels. Die Prioritäten werden aus den tatsächlichen Kanal-Tags und Freigabestatus berechnet.`));
+  copy.append(
+    text('span', 'Ausbauplan', 'eyebrow'),
+    text('h2', `${approved}/${target} freigegebene Assets`),
+    text('p', `${candidates} Kandidaten vorhanden · ${review} warten auf Review · ${percent}% des empfohlenen Gesamtziels. Neue Suchen werden nur für Sammlungen vorbereitet, deren vorhandener Review-Vorrat noch nicht reicht.`)
+  );
   const overall = document.createElement('div');
   overall.className = 'expansion-overall';
   overall.append(text('strong', `${percent}%`), progress(percent));
@@ -59,10 +64,20 @@ function summarizeChannel(channel, records) {
     const review = matching.filter((record) => ['inbox', 'review'].includes(record.status)).length;
     const videos = matching.filter((record) => record.type === 'video').length;
     const photos = matching.filter((record) => record.type === 'image').length;
-    return { collection, candidates: matching.length, approved, review, videos, photos, gap: Math.max(0, 8 - approved) };
+    const gap = Math.max(0, 8 - approved);
+    const searchGap = Math.max(0, gap - review);
+    return { collection, candidates: matching.length, approved, review, videos, photos, gap, searchGap };
   });
   const target = collections.length * 8;
   const approved = collections.reduce((sum, row) => sum + row.approved, 0);
+  const weakest = [...collections]
+    .filter((row) => row.gap > 0)
+    .sort((a, b) => b.gap - a.gap || b.searchGap - a.searchGap || a.approved - b.approved || a.candidates - b.candidates || a.collection.label.localeCompare(b.collection.label, 'de'))
+    .slice(0, 5);
+  const searchWeakest = [...collections]
+    .filter((row) => row.searchGap > 0)
+    .sort((a, b) => b.searchGap - a.searchGap || b.gap - a.gap || a.approved - b.approved || a.candidates - b.candidates || a.collection.label.localeCompare(b.collection.label, 'de'))
+    .slice(0, 5);
   return {
     channel,
     collections,
@@ -71,7 +86,8 @@ function summarizeChannel(channel, records) {
     candidates: collections.reduce((sum, row) => sum + row.candidates, 0),
     review: collections.reduce((sum, row) => sum + row.review, 0),
     percent: target ? Math.min(100, Math.round((approved / target) * 100)) : 100,
-    weakest: [...collections].filter((row) => row.gap > 0).sort((a, b) => b.gap - a.gap || a.approved - b.approved || a.candidates - b.candidates || a.collection.label.localeCompare(b.collection.label, 'de')).slice(0, 5)
+    weakest,
+    searchWeakest
   };
 }
 
@@ -83,13 +99,13 @@ function channelCard(row) {
   top.append(text('strong', row.channel.label), text('b', `${row.approved}/${row.target}`));
   card.append(top, progress(row.percent), text('p', `${row.candidates} Kandidaten · ${row.review} offen · ${row.percent}% freigegeben`));
 
-  const title = text('span', 'Größte Lücken', 'expansion-gap-title');
+  const title = text('span', 'Größte Freigabe-Lücken', 'expansion-gap-title');
   const list = document.createElement('div');
   list.className = 'expansion-gaps';
   for (const item of row.weakest) {
     const button = document.createElement('button');
     button.type = 'button';
-    button.append(text('span', item.collection.label), text('b', `${item.approved}/8`));
+    button.append(text('span', item.collection.label), text('b', `${item.approved}/8 · ${item.review} R`));
     button.title = `${row.channel.label} / ${item.collection.label} im Medien-Builder öffnen`;
     button.addEventListener('click', () => {
       window.dispatchEvent(new CustomEvent('vah:arsenal-select', { detail: { channel: row.channel.id, collection: item.collection.id } }));
@@ -102,11 +118,18 @@ function channelCard(row) {
   const batch = document.createElement('button');
   batch.type = 'button';
   batch.className = 'expansion-batch-button';
-  batch.textContent = row.weakest.length ? `Top ${row.weakest.length} Lücken vorbereiten` : 'Kanal vollständig';
-  batch.disabled = row.weakest.length === 0;
+  if (row.searchWeakest.length) {
+    batch.textContent = `Top ${row.searchWeakest.length} Suchlücken vorbereiten`;
+  } else if (row.review > 0 && row.approved < row.target) {
+    batch.textContent = 'Erst vorhandene Reviews prüfen';
+  } else {
+    batch.textContent = 'Kanal vollständig';
+  }
+  batch.disabled = row.searchWeakest.length === 0;
   batch.addEventListener('click', () => {
+    if (!row.searchWeakest.length) return;
     window.dispatchEvent(new CustomEvent('vah:arsenal-batch-select', {
-      detail: { channel: row.channel.id, collections: row.weakest.map((item) => item.collection.id) }
+      detail: { channel: row.channel.id, collections: row.searchWeakest.map((item) => item.collection.id) }
     }));
     document.querySelector('#arsenal-builder')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
