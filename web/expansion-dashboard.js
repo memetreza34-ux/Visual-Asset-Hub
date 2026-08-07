@@ -46,6 +46,7 @@ function render(channels, records) {
   overall.append(text('strong', `${percent}%`), progress(percent));
   header.append(copy, overall);
 
+  const nextTasks = globalTaskQueue(rows);
   const grid = document.createElement('div');
   grid.className = 'expansion-channel-grid';
   for (const row of rows) grid.append(channelCard(row));
@@ -57,7 +58,7 @@ function render(channels, records) {
     strategyItem('2. Video-Lücke', 'Pexels → Pixabay', 'Hochformat-B-Rolls werden für Reel-Produktion zuerst ergänzt'),
     strategyItem('3. Foto-Lücke', 'Unsplash → Openverse/Wikimedia', 'hochwertige oder offen lizenzierte Bilder ergänzen')
   );
-  section.replaceChildren(header, grid, strategy);
+  section.replaceChildren(header, nextTasks, grid, strategy);
 }
 
 function summarizeChannel(channel, records) {
@@ -101,6 +102,69 @@ function summarizeChannel(channel, records) {
     reviewWeakest,
     batch
   };
+}
+
+function globalTaskQueue(rows) {
+  const tasks = [];
+  for (const row of rows) {
+    for (const item of row.collections) {
+      if (item.gap <= 0) continue;
+      if (item.review > 0 && item.searchGap === 0) {
+        tasks.push({
+          kind: 'review',
+          channel: row.channel,
+          item,
+          score: item.gap * 100 + item.review * 10 + item.videoGap * 5 + item.photoGap * 5
+        });
+      } else if (item.searchGap > 0) {
+        tasks.push({
+          kind: 'search',
+          channel: row.channel,
+          item,
+          score: item.searchGap * 100 + item.gap * 10 + item.videoGap * 20 + item.photoGap * 20
+        });
+      }
+    }
+  }
+  tasks.sort((a, b) => taskRank(a.kind) - taskRank(b.kind) || b.score - a.score || a.channel.label.localeCompare(b.channel.label, 'de') || a.item.collection.label.localeCompare(b.item.collection.label, 'de'));
+
+  const wrapper = document.createElement('section');
+  wrapper.className = 'expansion-next-tasks';
+  const heading = document.createElement('div');
+  heading.className = 'expansion-next-heading';
+  heading.append(text('strong', 'Nächste Aufgaben'), text('span', 'Review-first über alle vier Kanäle · nichts startet automatisch'));
+  const list = document.createElement('div');
+  list.className = 'expansion-next-list';
+
+  for (const task of tasks.slice(0, 6)) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    if (task.kind === 'review') {
+      button.append(
+        text('span', `${task.channel.label} · ${task.item.collection.label}`),
+        text('b', `Review zuerst · ${task.item.review} offen`)
+      );
+      button.title = `${task.item.approved}/${targetPerCollection} freigegeben; vorhandene Review-Kandidaten reichen zunächst aus.`;
+      button.addEventListener('click', () => openReview(task.channel.id, task.item.collection.id));
+    } else {
+      const media = task.item.recommendation.mediaType === 'video' ? 'Video' : 'Foto';
+      button.append(
+        text('span', `${task.channel.label} · ${task.item.collection.label}`),
+        text('b', `${media} · ${providerLabel(task.item.recommendation.provider)} · Lücke ${task.item.searchGap}`)
+      );
+      button.title = task.item.recommendation.reason;
+      button.addEventListener('click', () => openSearch(task.channel.id, task.item));
+    }
+    list.append(button);
+  }
+
+  if (!tasks.length) list.append(text('span', 'Alle Sammlungen haben das empfohlene Ausbauziel erreicht.', 'expansion-next-empty'));
+  wrapper.append(heading, list);
+  return wrapper;
+}
+
+function taskRank(kind) {
+  return kind === 'review' ? 0 : 1;
 }
 
 function channelCard(row) {
