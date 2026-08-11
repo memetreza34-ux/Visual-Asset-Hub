@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const script = path.join(repoRoot, 'scripts', 'build-found-media-vault.mjs');
 
-test('Alles-Gefunden baut Katalog und nicht importierte Suchkandidaten kategorisiert auf', () => {
+test('Alles-Gefunden baut Katalog und Suchkandidaten kategorisiert auf und bewahrt alte Funde', () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'vah-vault-'));
   try {
     fs.mkdirSync(path.join(root, 'catalog', 'channels'), { recursive: true });
@@ -37,7 +37,8 @@ test('Alles-Gefunden baut Katalog und nicht importierte Suchkandidaten kategoris
       storage: { kind: 'local', localPath: 'assets/test.svg' },
       rights: { sourceName: 'Eigene Datei', licenseStatus: 'owned', attributionRequired: false }
     }] }));
-    fs.writeFileSync(path.join(root, '.local-storage', 'arsenal-web', 'ARS-TEST.json'), JSON.stringify({
+    const searchFile = path.join(root, '.local-storage', 'arsenal-web', 'ARS-TEST.json');
+    fs.writeFileSync(searchFile, JSON.stringify({
       provider: 'pexels',
       arsenalJob: {
         channel: 'finance', channelLabel: 'Finanzen', collection: 'stock-market', collectionLabel: 'Aktien und Börse',
@@ -51,8 +52,8 @@ test('Alles-Gefunden baut Katalog und nicht importierte Suchkandidaten kategoris
       }] }
     }));
 
-    const result = spawnSync(process.execPath, [script], { cwd: root, encoding: 'utf8', shell: false });
-    assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+    const first = spawnSync(process.execPath, [script], { cwd: root, encoding: 'utf8', shell: false });
+    assert.equal(first.status, 0, `${first.stdout}\n${first.stderr}`);
 
     const vault = path.join(root, 'ALLES-GEFUNDEN');
     assert.ok(fs.existsSync(path.join(vault, '00-GESAMTINDEX.md')));
@@ -75,6 +76,12 @@ test('Alles-Gefunden baut Katalog und nicht importierte Suchkandidaten kategoris
     assert.ok(candidateFiles.some((name) => name.endsWith('-QUELLE.url')));
     assert.ok(candidateFiles.some((name) => name.endsWith('-MEDIUM.url')));
     assert.ok(candidateFiles.some((name) => name.endsWith('-VORSCHAU.url')));
+
+    fs.rmSync(searchFile);
+    const second = spawnSync(process.execPath, [script], { cwd: root, encoding: 'utf8', shell: false });
+    assert.equal(second.status, 0, `${second.stdout}\n${second.stderr}`);
+    assert.ok(fs.existsSync(candidateDir));
+    assert.ok(fs.readdirSync(candidateDir).some((name) => name.endsWith('-INFO.md')), 'historischer Suchfund muss nach dem Neuaufbau erhalten bleiben');
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }
