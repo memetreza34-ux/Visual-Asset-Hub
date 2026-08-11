@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
 import process from 'node:process';
+import { spawnSync } from 'node:child_process';
 import { createLocalAdminApi } from './local-admin-api.mjs';
 import { createLocalArsenalApi } from './local-arsenal-api.mjs';
 import { createLocalInboxApi } from './local-inbox-api.mjs';
@@ -43,6 +44,9 @@ const mimeTypes = {
   '.mov': 'video/quicktime',
   '.mkv': 'video/x-matroska'
 };
+
+rebuildMediaVault('Start');
+watchCatalogForVaultUpdates();
 
 const adminApi = createLocalAdminApi({ root });
 const arsenalApi = createLocalArsenalApi({ root, token: adminApi.token });
@@ -136,7 +140,38 @@ const server = http.createServer(async (request, response) => {
 server.listen(port, host, () => {
   console.log(`Visual Asset Hub: http://${host}:${port}`);
   console.log('Lokale Verwaltung aktiv: Skriptplanung, Browser-Upload, Review, Freigabe, Nutzung, Medienpakete, Inbox und Arsenal-Suche stehen bereit.');
+  console.log('Alles-gefunden-Ordner aktiv: catalog/assets.json wird automatisch nach ALLES-GEFUNDEN/ gespiegelt.');
 });
+
+function watchCatalogForVaultUpdates() {
+  const catalogPath = path.join(root, 'catalog', 'assets.json');
+  if (!fs.existsSync(catalogPath)) return;
+  let timer = null;
+  try {
+    fs.watch(catalogPath, { persistent: false }, () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => rebuildMediaVault('Katalogänderung'), 300);
+    });
+  } catch (error) {
+    console.warn(`Alles-gefunden-Wächter konnte nicht gestartet werden: ${error instanceof Error ? error.message : error}`);
+  }
+}
+
+function rebuildMediaVault(reason) {
+  const result = spawnSync(process.execPath, ['scripts/build-found-media-vault.mjs'], {
+    cwd: root,
+    encoding: 'utf8',
+    shell: false,
+    maxBuffer: 4 * 1024 * 1024
+  });
+  if (result.status === 0) {
+    const line = String(result.stdout || '').trim().split('\n').filter(Boolean).at(-1);
+    if (line) console.log(`[${reason}] ${line}`);
+    return;
+  }
+  const detail = `${result.stdout || ''}${result.stderr || ''}`.trim();
+  console.warn(`[${reason}] ALLES-GEFUNDEN konnte nicht aktualisiert werden${detail ? `: ${detail.slice(-1200)}` : '.'}`);
+}
 
 function setSecurityHeaders(response, pathname) {
   response.setHeader('X-Content-Type-Options', 'nosniff');
