@@ -13,6 +13,10 @@ archive/*
 !archive/README.md
 tmp/
 
+# Zentrale lokale Medienablage. Nur die Erklärung liegt im Repository.
+ALLES-GEFUNDEN/*
+!ALLES-GEFUNDEN/README.md
+
 # Betriebssystem- und Editor-Dateien.
 .vscode/
 .idea/
