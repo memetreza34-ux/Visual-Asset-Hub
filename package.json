@@ -6,7 +6,8 @@
   "engines": { "node": ">=22" },
   "scripts": {
     "cleanup:local": "node scripts/cleanup-local-searches.mjs",
-    "starter:import": "node scripts/tag-existing-channel-assets.mjs && node scripts/import-channel-starter-pack.mjs",
+    "vault:build": "node scripts/build-found-media-vault.mjs",
+    "starter:import": "node scripts/tag-existing-channel-assets.mjs && node scripts/import-channel-starter-pack.mjs && node scripts/build-found-media-vault.mjs",
     "asset:add": "node scripts/add-asset.mjs",
     "asset:review": "node scripts/review-asset.mjs",
     "usage:add": "node scripts/record-usage.mjs",
