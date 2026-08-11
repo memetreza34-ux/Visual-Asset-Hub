@@ -7,8 +7,9 @@
 - [ ] `npm run arsenal:validate` bestätigt Kanaldateien und Planerlexikon
 - [ ] `npm run arsenal:plan` erzeugt JSON und CSV
 - [ ] `npm run arsenal:expansion` erzeugt Ausbauplan Version 4 als JSON und CSV
-- [ ] `npm run arsenal:report` erzeugt den Abdeckungsbericht Version 2
+- [ ] `npm run arsenal:report` erzeugt den Abdeckungsbericht
 - [ ] `npm run links:check -- --strict true` prüft externe Medien- und Quelllinks
+- [ ] `npm run vault:build` erzeugt `ALLES-GEFUNDEN`
 - [ ] statische Website wird mit `npm run site:build` erzeugt
 - [ ] Mac-Start über `npm run serve` funktioniert
 - [ ] optional Windows-Start über `START-HERE.cmd` funktioniert
@@ -18,6 +19,26 @@
 - [ ] gemeinsame Schreibsperre blockiert parallele Änderungen mit HTTP 409
 - [ ] keine Secrets oder signierten URLs befinden sich im Repository
 - [ ] Katalog und Suchindex enthalten dieselben Asset-IDs
+
+## Alles-Gefunden-Ordner
+
+- [x] zentraler Ordner `ALLES-GEFUNDEN` ist definiert
+- [x] Kanäle werden als Finanzen, KI, Elektrotechnik und Kampfsport getrennt
+- [x] Sammlungen verwenden verständliche Titel
+- [x] Statusordner trennen Freigegeben, Review, Eingeschränkt und Archiv
+- [x] `90-GEFUNDENE-KANDIDATEN` trennt noch nicht importierte Suchfunde vom Katalog
+- [x] lokale Medien können als echte Dateikopie übernommen werden
+- [x] externe Medien erhalten Quelle-, Medium- und Vorschau-Verknüpfungen
+- [x] jeder Katalogeintrag erhält eine INFO-Datei mit Quelle, Lizenz und Prüfhinweisen
+- [x] Gesamtindex wird als Markdown, CSV und JSON erzeugt
+- [x] erzeugte Inhalte bleiben über `.gitignore` lokal
+- [ ] `npm run vault:build` läuft im echten lokalen Repository fehlerfrei
+- [ ] nach `npm run starter:import` enthält der Gesamtindex zwölf Starterassets
+- [ ] ein lokales Asset liegt als echte Datei im passenden Kategorieordner
+- [ ] ein externer Treffer besitzt funktionierende `.url`-Verknüpfungen
+- [ ] Suchfunde aus dem Arsenal Builder erscheinen unter `90-GEFUNDENE-KANDIDATEN`
+- [ ] laufender Server aktualisiert den Ordner nach einer Katalogänderung automatisch
+- [ ] kein Eintrag im Ordner umgeht Review- oder Rechteprüfung
 
 ## Reel- und Skript-Planer
 
@@ -45,13 +66,13 @@
 - [x] Zielgröße 720 freigegebene Kanal-Assets dokumentiert
 - [x] Ausbauplaner unterscheidet `search`, `review-first` und `complete`
 - [x] Ausbauplan nennt Medientyp, Format, Primärquelle und Fallbackquellen
-- [x] Freigabe-Mix-Lücke und echte Such-Mix-Lücke sind getrennt
 - [ ] Finanzen-, KI-, Elektro- und Kampfsport-Bereiche vollständig sichtbar
 - [ ] Kandidaten-, Review- und Freigabezahlen stimmen
 - [ ] **Ausbau 720** zeigt 160/160/160/240 als Kanalziele
-- [ ] globale **Nächste Aufgaben** zeigt höchstens sechs Aufgaben
-- [ ] globale Aufgaben priorisieren Review vor neuer Suche
+- [ ] globale **Nächste Aufgaben** zeigt höchstens sechs kanalübergreifende Prioritäten
+- [ ] Review-Aufgaben stehen in der globalen Liste vor Suchjobs
 - [ ] Video- und Fotolücken werden korrekt erkannt
+- [ ] Freigabe-Mix-Lücke und echte Such-Mix-Lücke bleiben getrennt
 - [ ] vorhandene Review-Videos/Fotos verhindern redundante Suche desselben Medientyps
 - [ ] vorhandener ausreichender Review-Vorrat führt direkt in die Review-Warteschlange
 - [ ] echte Suchlücken werden mit passender Quelle und passendem Format vorbereitet
@@ -114,12 +135,10 @@
 - [ ] weder `localStorage` noch `sessionStorage` speichern API-Keys
 - [ ] Batch-Suche verarbeitet höchstens fünf Sammlungen sequenziell
 - [ ] Suchtreffer zeigen Vorschau, Creator/Quelle und Quellseite
-- [ ] **Technischer Fit 0–100** wird angezeigt
-- [ ] technisch bessere Treffer stehen standardmäßig weiter oben
-- [ ] Technischer Fit bewertet keine Rechte, Personen, Marken oder Freigabestatus
-- [ ] **Nächster Suchbegriff** wird vor dem Provider-Fallback angeboten
-- [ ] Suchbegriff 1 → 2 → 3 wird nur vorbereitet und nicht automatisch ausgeführt
-- [ ] nach dem letzten Suchbegriff erscheint der passende Provider-Fallback
+- [ ] Suchtreffer zeigen **Technischen Fit 0–100** mit nachvollziehbarer technischer Begründung
+- [ ] Technischer Fit ändert keinen Review- oder Freigabestatus
+- [ ] vor dem Provider-Fallback werden zuerst weitere vorbereitete Suchbegriffe derselben Sammlung angeboten
+- [ ] Suchablauf ist **Suchbegriff 1 → 2 → 3 → nächste Quelle**
 - [ ] nur markierte Treffer werden importiert
 - [ ] jeder Import startet auf `review`
 - [ ] Kanal- und Sammlungs-Tags werden korrekt gesetzt
@@ -207,4 +226,4 @@
 - [ ] `realTestComplete` ist `true`
 - [ ] Beta-Tag oder Release wurde erstellt
 
-Die Beta darf erst als **real getestet** gelten, wenn ein echtes Skript geplant, alle zwölf Starterassets geprüft, alle fünf Medienquellen technisch getestet, mindestens ein eigener Inbox-Import erfolgreich und ein freigegebenes Asset über ein verifiziertes Medienpaket in einem echten Content-Projekt eingesetzt wurde.
+Die Beta darf erst als **real getestet** gelten, wenn ein echtes Skript geplant, alle zwölf Starterassets geprüft, alle fünf Medienquellen technisch getestet, der `ALLES-GEFUNDEN`-Ordner lokal geprüft, mindestens ein eigener Inbox-Import erfolgreich und ein freigegebenes Asset über ein verifiziertes Medienpaket in einem echten Content-Projekt eingesetzt wurde.
