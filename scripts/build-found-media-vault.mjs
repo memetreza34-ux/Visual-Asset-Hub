@@ -39,5 +39,61 @@ if (fs.existsSync(backupRoot)) {
 }
 fs.rmSync(backupRoot, { recursive: true, force: true });
 
+const historicalInfoFiles = listFiles(candidateRoot, (name) => name.endsWith('-INFO.md'));
+writeHistoryIndex(historicalInfoFiles);
+augmentMainIndexes(historicalInfoFiles);
+
 if (result.stdout) process.stdout.write(result.stdout);
-console.log('Historische Suchkandidaten bleiben unter ALLES-GEFUNDEN/90-GEFUNDENE-KANDIDATEN erhalten.');
+console.log(`Historische Suchkandidaten bleiben erhalten und sind indexiert: ${historicalInfoFiles.length} Einträge.`);
+
+function listFiles(directory, predicate) {
+  if (!fs.existsSync(directory)) return [];
+  const files = [];
+  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    const full = path.join(directory, entry.name);
+    if (entry.isDirectory()) files.push(...listFiles(full, predicate));
+    else if (entry.isFile() && predicate(entry.name)) files.push(full);
+  }
+  return files.sort((a, b) => a.localeCompare(b, 'de'));
+}
+
+function writeHistoryIndex(files) {
+  fs.mkdirSync(candidateRoot, { recursive: true });
+  const lines = [
+    '# Historisches Kandidatenarchiv', '',
+    `Aktuell erhaltene Suchfunde: **${files.length}**`, '',
+    'Diese Liste enthält auch Funde aus älteren Suchläufen, deren temporäre API-Suchdateien inzwischen gelöscht worden sein können.', '',
+    ...files.map((file) => `- [${path.basename(file, '-INFO.md')}](${encodeRelativePath(path.relative(candidateRoot, file))})`), '',
+    '> Diese Kandidaten sind nicht automatisch importiert oder freigegeben.'
+  ];
+  fs.writeFileSync(path.join(candidateRoot, '00-HISTORIE.md'), `${lines.join('\n')}\n`);
+}
+
+function augmentMainIndexes(files) {
+  const marker = '<!-- VAULT-HISTORY -->';
+  const indexFile = path.join(vaultRoot, '00-GESAMTINDEX.md');
+  if (fs.existsSync(indexFile)) {
+    const existing = fs.readFileSync(indexFile, 'utf8');
+    const base = existing.split(marker)[0].trimEnd();
+    const extra = [
+      '', '', marker,
+      '## Dauerhaftes Kandidatenarchiv', '',
+      `- Historisch erhaltene Suchfunde: **${files.length}**`,
+      '- Vollständige Liste: `90-GEFUNDENE-KANDIDATEN/00-HISTORIE.md`', '',
+      '> Historische Suchfunde bleiben lokal erhalten, auch wenn temporäre API-Suchdateien später bereinigt werden.'
+    ].join('\n');
+    fs.writeFileSync(indexFile, `${base}${extra}\n`);
+  }
+
+  const manifestFile = path.join(vaultRoot, '00-MANIFEST.json');
+  if (fs.existsSync(manifestFile)) {
+    const manifest = JSON.parse(fs.readFileSync(manifestFile, 'utf8'));
+    manifest.historicalCandidateCount = files.length;
+    manifest.historicalCandidateIndex = '90-GEFUNDENE-KANDIDATEN/00-HISTORIE.md';
+    fs.writeFileSync(manifestFile, `${JSON.stringify(manifest, null, 2)}\n`);
+  }
+}
+
+function encodeRelativePath(relative) {
+  return relative.split(path.sep).map((part) => encodeURIComponent(part)).join('/');
+}
