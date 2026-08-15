@@ -2,7 +2,7 @@
 
 Dieser Ordner ist die zentrale, automatisch erzeugte Medienablage des Visual Asset Hub.
 
-Hier findest du sowohl **alle bereits im Katalog vorhandenen Assets** als auch **alle noch nicht importierten Treffer aus den lokalen Mediensuchen**. Alles bleibt klar getrennt, damit Suchfunde nicht mit freigegebenen Assets verwechselt werden.
+Hier findest du **Katalog-Assets**, **normale Suchkandidaten** und **eigene Personen-/Themenrecherchen** klar getrennt. Dadurch kannst du beispielsweise eine Recherche zu `Conor McGregor` vollständig durchgehen, ohne sie mit bereits freigegebenen Medien zu verwechseln.
 
 ## Struktur
 
@@ -15,13 +15,14 @@ ALLES-GEFUNDEN/
 ├── 02-KI/
 ├── 03-Elektrotechnik/
 ├── 04-Kampfsport/
+├── 05-THEMENRECHERCHEN/
 ├── 90-GEFUNDENE-KANDIDATEN/
 └── 99-Sonstiges/
 ```
 
-### Katalog-Assets
+## Katalog-Assets
 
-Innerhalb der Kanäle werden die Assets nach den echten Sammlungen des Kanal-Arsenals sortiert. Darunter folgen Statusordner:
+Innerhalb der vier Kanalordner werden importierte Assets nach den echten Sammlungen des Kanal-Arsenals sortiert. Darunter folgen Statusordner:
 
 ```text
 01-FREIGEGEBEN
@@ -31,11 +32,43 @@ Innerhalb der Kanäle werden die Assets nach den echten Sammlungen des Kanal-Ars
 99-UNBEKANNT
 ```
 
-### Noch nicht importierte Suchfunde
+Für lokale Medien wird eine echte Dateikopie angelegt. Bei externen Medien entstehen zusätzlich verständliche Quelle-, Medium- und Vorschau-Verknüpfungen.
 
-Unter `90-GEFUNDENE-KANDIDATEN` werden Treffer gesammelt, die bei Pexels, Pixabay, Unsplash, Openverse oder Wikimedia gefunden wurden, aber noch nicht in den Katalog importiert sind.
+## Personen- und Themenrecherchen
 
-Die Struktur lautet:
+Der Browser-Arbeitsbereich **Thema recherchieren** legt jede Recherche separat unter `05-THEMENRECHERCHEN` ab.
+
+Beispiel:
+
+```text
+05-THEMENRECHERCHEN/
+└── 04-Kampfsport/
+    └── Conor McGregor/
+        ├── 00-RECHERCHEPLAN.md
+        ├── 01-Allgemein/
+        ├── 02-Training & Gym/
+        ├── 03-Kaempfe & Action/
+        ├── 04-Presse & Interviews/
+        ├── 05-Wiegen & Staredown/
+        ├── 06-Walkout & Arena/
+        ├── 07-Portraits/
+        ├── 08-Sieg & Reaktion/
+        └── 99-EXTERNE-SUCHLINKS/
+```
+
+Je Bereich werden die Funde nochmals nach Quelle getrennt. Die integrierte Recherche kann Pexels, Pixabay, Unsplash, Openverse und Wikimedia Commons verwenden. Ohne private Keys bleiben Openverse und Wikimedia verfügbar.
+
+Ein optional eingefügtes Reel-Skript kann zusätzliche Recherchebereiche für Gegner/Personen, Eventbezeichnungen und Jahreszahlen erzeugen. Bei tiefer Recherche werden höchstens acht priorisierte Bereiche beziehungsweise maximal 40 Provider-Suchen verwendet.
+
+### Externe Suchlinks
+
+`99-EXTERNE-SUCHLINKS` enthält Links für zusätzliche manuelle Sichtung, zum Beispiel YouTube-, Google-Bild- und Google-Video-Suchen sowie bei Kampfsport eine Websuche auf der offiziellen UFC-Domain.
+
+**Diese Links sind ausschließlich Recherchehilfen.** Ein dort sichtbares Bild oder Video besitzt dadurch keine automatische Nutzungs- oder Veröffentlichungserlaubnis. Broadcast-, Event-, Marken-, Personen- und Urheberrechte müssen separat geprüft werden.
+
+## Normale noch nicht importierte Suchfunde
+
+Unter `90-GEFUNDENE-KANDIDATEN` werden Treffer aus dem normalen Arsenal Builder gesammelt, die noch nicht in den Katalog importiert sind:
 
 ```text
 90-GEFUNDENE-KANDIDATEN/
@@ -46,29 +79,33 @@ Die Struktur lautet:
 
 Mehrfach gefundene identische Treffer derselben Sammlung werden dedupliziert.
 
-## Was pro Eintrag erzeugt wird
+## Was pro Fund erzeugt wird
 
-Für Katalog-Assets erzeugt der Hub:
+Je nach vorhandenem Material erzeugt der Hub:
 
-- einen verständlichen Dateinamen mit Titel und Asset-ID
-- eine `-INFO.md` mit Beschreibung, technischen Daten, Tags, Quelle, Lizenz und Prüfhinweisen
-- eine `-QUELLE.url`, wenn eine Quellseite vorhanden ist
-- eine `-MEDIUM.url`, wenn das Originalmedium extern verlinkt ist
-- eine `-VORSCHAU.url`, wenn eine externe Vorschau vorhanden ist
-- eine echte Dateikopie, wenn das Medium bereits lokal im Repository vorhanden ist
+- einen verständlichen Titel beziehungsweise Dateinamen
+- eine `-INFO.md` mit Zuordnung, technischen Daten, Quelle und Prüfhinweisen
+- eine `-QUELLE.url` zur Quellseite
+- eine `-MEDIUM.url` zum externen Medium
+- eine `-VORSCHAU.url` zur Vorschau
+- bei lokalen Katalog-Assets eine echte Dateikopie
 
-Für noch nicht importierte Suchfunde erzeugt der Hub ebenfalls verständliche Titel, `INFO`-Dateien und vorhandene Quelle-/Medium-/Vorschau-Verknüpfungen. Diese Treffer werden ausdrücklich als **NOCH NICHT IMPORTIERT** markiert.
+Nicht importierte Recherchetreffer sind ausdrücklich als **NOCH NICHT IMPORTIERT** gekennzeichnet.
+
+## Dauerhafte lokale Historie
+
+Normale Suchfunde und Themenrecherchen werden beim Neuaufbau des Ordners erhalten, auch wenn die ursprünglichen temporären API-Suchdateien später bereinigt werden.
+
+Dafür existieren unter anderem:
+
+```text
+05-THEMENRECHERCHEN/00-HISTORIE.md
+90-GEFUNDENE-KANDIDATEN/00-HISTORIE.md
+```
 
 ## Gesamtindex
 
-`00-GESAMTINDEX.md`, `00-GESAMTINDEX.csv` und `00-MANIFEST.json` enthalten den gesamten Überblick über:
-
-- Katalog-Assets
-- Freigabe- und Review-Status
-- Kanal und Sammlung
-- Quelle und Lizenz
-- lokale Kopien
-- noch nicht importierte Suchfunde
+`00-GESAMTINDEX.md`, `00-GESAMTINDEX.csv` und `00-MANIFEST.json` geben einen zentralen Überblick über Katalog-Assets, Status, Kanal/Sammlung, Quellen sowie aktuelle Recherchekandidaten. Die Historienindizes ergänzen ältere lokal erhaltene Funde.
 
 ## Aktualisieren
 
@@ -78,12 +115,10 @@ Manuell:
 npm run vault:build
 ```
 
-Zusätzlich baut `npm run starter:import` den Ordner automatisch neu auf.
-
-Während `npm run serve` läuft, wird `catalog/assets.json` überwacht. Nach Importen oder Statusänderungen wird der Ordner automatisch erneut aufgebaut.
+Zusätzlich baut `npm run starter:import` den Ordner automatisch neu auf. Während `npm run serve` läuft, wird `catalog/assets.json` überwacht und der Ordner nach Katalogänderungen aktualisiert. Eine Personen-/Themenrecherche aktualisiert den Ordner ebenfalls direkt nach dem Suchlauf.
 
 ## Wichtig
 
-Dieser Ordner ist ein Arbeitsarchiv und keine automatische Rechtefreigabe. Assets mit Status `review`, `inbox`, `restricted` oder `archived` sowie alle Einträge unter `90-GEFUNDENE-KANDIDATEN` dürfen nicht allein deshalb veröffentlicht werden, weil sie hier sichtbar sind. Für die reale Nutzung gelten weiterhin die Rechte- und Review-Regeln des Visual Asset Hub.
+`ALLES-GEFUNDEN` ist ein **Arbeits- und Recherchearchiv**, keine automatische Rechtefreigabe. Review-, Inbox-, eingeschränkte oder archivierte Assets sowie sämtliche nicht importierten Such- und Themenkandidaten dürfen nicht allein deshalb veröffentlicht werden, weil sie hier sichtbar sind.
 
-Die erzeugten Inhalte werden lokal gehalten und nicht automatisch in Git eingecheckt. Dadurch kann der Ordner auch sehr groß werden, ohne das Repository unnötig aufzublähen.
+Die erzeugten Inhalte bleiben lokal und werden nicht automatisch in Git eingecheckt. Dadurch kann die Medienablage groß werden, ohne das Repository unnötig aufzublähen.
