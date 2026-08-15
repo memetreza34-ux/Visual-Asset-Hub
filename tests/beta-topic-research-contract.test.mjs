@@ -23,8 +23,9 @@ test('Verifier liest nur dokumentierte beta.6-Recherchearten aus dem Recherchepl
   assert.match(source, /Firma \/ Marke \/ Organisation/);
   assert.match(source, /Produkt \/ Objekt/);
   assert.match(source, /Technik \/ Gerät \/ System/);
+  assert.match(source, /Sport \/ Kampf \/ Athletik/);
   assert.match(source, /Historisches Thema/);
-  assert.match(source, /Allgemeines Thema/);
+  assert.match(source, /Allgemeines Thema \/ Konzept/);
 });
 
 test('Unvollständige Themenordner zählen nicht als Realtest-Nachweis', () => {
