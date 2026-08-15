@@ -45,6 +45,7 @@ Beispiel:
 └── 04-Kampfsport/
     └── Conor McGregor/
         ├── 00-RECHERCHEPLAN.md
+        ├── 00-IMPORTIERTE-ASSETS.md
         ├── 01-Allgemein/
         ├── 02-Training & Gym/
         ├── 03-Kaempfe & Action/
@@ -59,6 +60,24 @@ Beispiel:
 Je Bereich werden die Funde nochmals nach Quelle getrennt. Die integrierte Recherche kann Pexels, Pixabay, Unsplash, Openverse und Wikimedia Commons verwenden. Ohne private Keys bleiben Openverse und Wikimedia verfügbar.
 
 Ein optional eingefügtes Reel-Skript kann zusätzliche Recherchebereiche für Gegner/Personen, Eventbezeichnungen und Jahreszahlen erzeugen. Bei tiefer Recherche werden höchstens acht priorisierte Bereiche beziehungsweise maximal 40 Provider-Suchen verwendet.
+
+### Nach dem Import eines Themenfunds
+
+Der ursprüngliche Recherchefund bleibt als Historie erhalten, wird aber nicht weiter fälschlich als „noch nicht importiert“ behandelt. Der Hub markiert ihn als **bereits in den Katalog importiert**.
+
+Das aktuelle Katalogasset wird zusätzlich im gleichen Themenbereich gespiegelt:
+
+```text
+Bereich/
+└── Quelle/
+    └── 90-IMPORTIERT/
+        ├── 01-FREIGEGEBEN/
+        ├── 02-REVIEW/
+        ├── 03-EINGESCHRAENKT/
+        └── 04-ARCHIV/
+```
+
+`00-IMPORTIERTE-ASSETS.md` zeigt pro Thema die aktuell katalogisierten Rechercheassets und ihren Status. Dadurch bleibt die Recherchegeschichte erhalten, während der aktuelle Review-/Freigabestand eindeutig sichtbar ist.
 
 ### Externe Suchlinks
 
@@ -90,7 +109,7 @@ Je nach vorhandenem Material erzeugt der Hub:
 - eine `-VORSCHAU.url` zur Vorschau
 - bei lokalen Katalog-Assets eine echte Dateikopie
 
-Nicht importierte Recherchetreffer sind ausdrücklich als **NOCH NICHT IMPORTIERT** gekennzeichnet.
+Nicht importierte Recherchetreffer sind ausdrücklich als **NOCH NICHT IMPORTIERT** gekennzeichnet. Nach einem erfolgreichen Katalogimport wird dieser historische Eintrag entsprechend ummarkiert.
 
 ## Dauerhafte lokale Historie
 
