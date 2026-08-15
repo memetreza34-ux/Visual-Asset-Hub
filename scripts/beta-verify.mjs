@@ -41,6 +41,8 @@ const allChannelsRepresented = requiredChannels.every((tag) => channelCounts[tag
 const inboxAssets = assets.filter((asset) => asset.createdBy === 'local-inbox-browser');
 const mediaPacks = findValidMediaPacks(path.join(root, 'exports', 'media-packs'));
 const scriptPlans = findValidScriptPlans(path.join(root, '.local-storage', 'operations', 'script-plans.json'));
+const topicResearches = findValidTopicResearch(path.join(root, 'ALLES-GEFUNDEN', '05-THEMENRECHERCHEN'));
+const scriptSpecificResearches = topicResearches.filter((entry) => entry.scriptSpecific);
 
 const technicalChecks = {
   projectCheck: Boolean(results.find((entry) => entry.name === 'Projektprüfung')?.success),
@@ -54,6 +56,8 @@ const technicalPercentage = Math.round(100 * Object.values(technicalChecks).filt
 const realTestChecks = {
   starterMediaPresent: videos.length >= 3 && staticVisuals.length >= 3,
   scriptPlanGenerated: scriptPlans.length >= 1,
+  topicResearchGenerated: topicResearches.length >= 1,
+  scriptSpecificTopicResearch: scriptSpecificResearches.length >= 1,
   starterAssetsReviewed: assets.length >= requiredReviewCount && reviewedAssets.length >= requiredReviewCount,
   fourChannelsRepresented: allChannelsRepresented,
   ownedInboxAssetImported: inboxAssets.length >= 1,
@@ -68,6 +72,8 @@ const overallPercentage = Math.round(technicalPercentage * 0.7 + realTestPercent
 const nextActions = [];
 if (videos.length < 3 || staticVisuals.length < 3) nextActions.push('Mindestens drei Videos und drei statische Bilder oder Grafiken bereitstellen.');
 if (scriptPlans.length < 1) nextActions.push('Ein echtes Kanalskript mit dem CLI-Planer verarbeiten und die erzeugte Shotlist prüfen.');
+if (topicResearches.length < 1) nextActions.push('Eine echte Personen-/Themenrecherche durchführen, Treffer visuell prüfen und den Themenordner kontrollieren.');
+if (scriptSpecificResearches.length < 1) nextActions.push('Eine Themenrecherche mit Reel-Skript durchführen, sodass mindestens ein skriptspezifischer Recherchebereich entsteht.');
 if (reviewedAssets.length < requiredReviewCount) nextActions.push(`${requiredReviewCount - reviewedAssets.length} weitere Starterassets vollständig prüfen und eine Entscheidung speichern.`);
 if (!allChannelsRepresented) {
   const missing = requiredChannels.filter((tag) => channelCounts[tag] === 0).map(channelLabel);
@@ -104,9 +110,12 @@ const report = {
     inboxAssets: inboxAssets.length,
     validMediaPacks: mediaPacks.length,
     validScriptPlans: scriptPlans.length,
+    validTopicResearches: topicResearches.length,
+    scriptSpecificTopicResearches: scriptSpecificResearches.length,
     channelCounts
   },
   scriptPlans,
+  topicResearches,
   mediaPacks,
   steps: results,
   nextActions
@@ -128,11 +137,14 @@ const md = [
   `- Dokumentiert geprüft: **${reviewedAssets.length}/${requiredReviewCount}**`,
   `- Freigegeben: **${approved.length}**`,
   `- Verifizierte Skriptpläne: **${scriptPlans.length}**`,
+  `- Verifizierte Themenrecherchen: **${topicResearches.length}** (${scriptSpecificResearches.length} mit Skriptbezug)`,
   `- Eigene Inbox-Assets: **${inboxAssets.length}**`,
   `- Verifizierte Medienpakete: **${mediaPacks.length}**`,
   `- Nutzungen: **${usageCount}**`, '',
   '## Kanalabdeckung',
   ...requiredChannels.map((tag) => `- ${channelLabel(tag)}: **${channelCounts[tag]} Assets**`), '',
+  '## Themenrecherchen',
+  ...(topicResearches.length ? topicResearches.map((entry) => `- ${entry.channel} / ${entry.topic}: **${entry.candidates} Kandidaten** · ${entry.scriptSpecific ? 'mit Skriptbezug' : 'ohne Skriptbezug'} · ${entry.providers.join(', ') || 'Quelle unbekannt'}`) : ['- Noch keine verifizierte Themenrecherche.']), '',
   '## Prüfschritte',
   ...results.map((entry) => `- ${entry.success ? 'OK' : 'FEHLER'} – ${entry.name}`), '',
   '## Realtest-Kriterien',
@@ -144,6 +156,51 @@ fs.writeFileSync(markdownPath, `${md}\n`);
 syncFinalReport([jsonPath, markdownPath]);
 console.log(md);
 if (!technicalReady) process.exitCode = 1;
+
+function findValidTopicResearch(directory) {
+  if (!fs.existsSync(directory)) return [];
+  const found = [];
+  for (const channelEntry of fs.readdirSync(directory, { withFileTypes: true })) {
+    if (!channelEntry.isDirectory() || channelEntry.name.startsWith('.')) continue;
+    const channelPath = path.join(directory, channelEntry.name);
+    for (const topicEntry of fs.readdirSync(channelPath, { withFileTypes: true })) {
+      if (!topicEntry.isDirectory() || topicEntry.name.startsWith('.')) continue;
+      const topicPath = path.join(channelPath, topicEntry.name);
+      const guidePath = path.join(topicPath, '00-RECHERCHEPLAN.md');
+      if (!fs.existsSync(guidePath) || !fs.statSync(guidePath).isFile()) continue;
+      try {
+        const guide = fs.readFileSync(guidePath, 'utf8');
+        if (!guide.startsWith('# Rechercheplan – ') || !guide.includes('## Rechtehinweis')) continue;
+        const candidates = listFiles(topicPath, (name) => name.endsWith('-INFO.md'));
+        if (!candidates.length) continue;
+        const providerMatch = guide.match(/- verwendete API-Quellen: \*\*(.+?)\*\*/);
+        const providers = providerMatch ? providerMatch[1].split(',').map((value) => value.trim()).filter(Boolean) : [];
+        found.push({
+          channel: channelEntry.name,
+          topic: topicEntry.name,
+          candidates: candidates.length,
+          scriptSpecific: guide.includes('**Skript:'),
+          providers,
+          guide: path.relative(root, guidePath)
+        });
+      } catch {
+        // Unvollständige Themenordner zählen nicht als Realtest-Nachweis.
+      }
+    }
+  }
+  return found;
+}
+
+function listFiles(directory, predicate) {
+  if (!fs.existsSync(directory)) return [];
+  const files = [];
+  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    const full = path.join(directory, entry.name);
+    if (entry.isDirectory()) files.push(...listFiles(full, predicate));
+    else if (entry.isFile() && predicate(entry.name)) files.push(full);
+  }
+  return files;
+}
 
 function findValidScriptPlans(evidencePath) {
   if (!fs.existsSync(evidencePath)) return [];
