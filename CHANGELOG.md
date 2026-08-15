@@ -1,5 +1,36 @@
 # Changelog
 
+## 0.4.0-beta.6 – 2026-08-15
+
+### Neu
+
+- **Universelle Medienrecherche** statt nur personen-/kampfsportzentrierter Recherche
+- Recherchearten: automatisch, Person, Firma/Marke/Organisation, Produkt/Objekt, Event, Ort, Technik/Gerät/System, Sport/Kampf, Historie und allgemeines Konzept
+- jede Rechercheart besitzt eigene Motivgruppen und Suchstrategien
+- Beispiele: Portrait/Karriere für Personen, Branding/Produkte für Firmen, Unboxing/Details für Produkte, Venue/Publikum für Events, Luftaufnahmen/Innenräume für Orte, Komponenten/Wartung für Technik und Archiv/Karten für historische Themen
+- `Auto` erkennt anhand von Zielkanal und eindeutigen Begriffen einen passenden Recherchetyp
+- dritter Rechercheumfang **Maximal** mit bis zu zwölf Motivbereichen und höchstens 60 Provider-Suchen
+- `Schnell` bleibt auf bis zu sechs, `Tief` auf bis zu acht Motivbereiche begrenzt
+- universelle Themenimporte erhalten zusätzlich `topic-type-*`-Tags und eine zur Rechercheart passende Hauptkategorie
+- externe Recherchehilfen um Google News und Wikipedia-Suche ergänzt
+
+### Verbessert
+
+- Zielkanal bestimmt nur noch die spätere Content-Zuordnung; die Rechercheart bestimmt die Motive
+- Skriptanalyse berücksichtigt weiterhin konkrete Namen, Events, Jahreszahlen und zitierte Begriffe und reserviert dafür Suchplätze
+- Browseroberfläche erklärt universelle Recherche explizit und bietet alle Recherchearten direkt an
+- Rechercheplan zeigt erkannte Rechercheart, Modus und maximale Provider-Suchen
+- Formularlayout für zusätzliche Recherchefelder responsiv überarbeitet
+- Servergrenze für bewusst gewählten Maximalmodus auf 60 sequenzielle Suchaufgaben erweitert
+- alter Versionstest von beta.3 auf den aktuellen Paketstand korrigiert
+
+### Sicherheit und Rechte
+
+- Maximalmodus startet nur nach ausdrücklicher Nutzereingabe und importiert weiterhin nichts automatisch
+- alle externen Treffer bleiben bis zur manuellen Sicht- und Rechteprüfung `review`
+- Firmen-, Produkt-, Event-, Personen-, Marken-, Broadcast- und Urheberrechte werden weiterhin nicht aus Suchsichtbarkeit abgeleitet
+- API-Keys bleiben ausschließlich im Arbeitsspeicher der geöffneten Browserseite
+
 ## 0.4.0-beta.5 – 2026-08-15
 
 ### Neu
