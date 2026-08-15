@@ -14,6 +14,7 @@ const PROVIDERS = ['pexels', 'pixabay', 'unsplash', 'openverse', 'wikimedia'];
 const KEYLESS = new Set(['openverse', 'wikimedia']);
 const PHOTO_ONLY = new Set(['unsplash', 'openverse', 'wikimedia']);
 const MAX_TASKS = 40;
+const CHANNEL_FOLDERS = { finance: '01-Finanzen', ai: '02-KI', electro: '03-Elektrotechnik', 'combat-sports': '04-Kampfsport' };
 
 export function createLocalEntityApi({ root = process.cwd(), token, searchers = defaultSearchers() } = {}) {
   if (!token) throw new Error('Lokales Verwaltungstoken fehlt.');
@@ -87,9 +88,10 @@ export function createLocalEntityApi({ root = process.cwd(), token, searchers = 
           }
 
           runVault(root);
+          const guidePath = writeResearchGuide(root, plan, channel, enabledProviders, groups, errors);
           return sendJson(response, 200, {
             ok: true,
-            research: { topic: plan.topic, topicSlug: plan.topicSlug, channel: plan.channel, depth: plan.depth },
+            research: { topic: plan.topic, topicSlug: plan.topicSlug, channel: plan.channel, depth: plan.depth, guidePath },
             plan,
             searchedProviders: enabledProviders,
             skippedProviders: PROVIDERS.filter((provider) => !enabledProviders.includes(provider)),
@@ -121,9 +123,7 @@ export function validateEntityPayload(payload) {
 export function buildTasks(plan, providers) {
   const tasks = [];
   for (const facet of plan.facets) {
-    for (const provider of providers) {
-      tasks.push({ provider, facet, type: PHOTO_ONLY.has(provider) ? 'photo' : facet.preferredMedia });
-    }
+    for (const provider of providers) tasks.push({ provider, facet, type: PHOTO_ONLY.has(provider) ? 'photo' : facet.preferredMedia });
   }
   return tasks;
 }
@@ -232,6 +232,45 @@ function runVault(root) {
   if (result.status !== 0) throw new Error(`${result.stdout || ''}${result.stderr || ''}`.trim() || 'ALLES-GEFUNDEN konnte nicht aktualisiert werden.');
 }
 
+function writeResearchGuide(root, plan, channel, providers, groups, errors) {
+  const topicRoot = path.join(root, 'ALLES-GEFUNDEN', '05-THEMENRECHERCHEN', CHANNEL_FOLDERS[channel.id] ?? safeName(channel.label), safeName(plan.topic));
+  const linksRoot = path.join(topicRoot, '99-EXTERNE-SUCHLINKS');
+  fs.mkdirSync(linksRoot, { recursive: true });
+  const broadLinks = [
+    ['YouTube-Suche', `https://www.youtube.com/results?search_query=${encodeURIComponent(plan.topic)}`],
+    ['Google-Bilder', `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(plan.topic)}`],
+    ['Google-Videos', `https://www.google.com/search?tbm=vid&q=${encodeURIComponent(plan.topic)}`]
+  ];
+  if (channel.id === 'combat-sports') broadLinks.push(['Offizielle-UFC-Websuche', `https://www.google.com/search?q=${encodeURIComponent(`site:ufc.com "${plan.topic}"`)}`]);
+  for (const [name, url] of broadLinks) writeShortcut(path.join(linksRoot, `${name}.url`), url);
+
+  const lines = [
+    `# Rechercheplan – ${plan.topic}`, '',
+    '> Dieser Ordner sammelt Recherchekandidaten. Externe Suchlinks und gefundene Medien sind keine automatische Nutzungs- oder Veröffentlichungserlaubnis.', '',
+    `- Kanal: **${channel.label}**`,
+    `- Recherchemodus: **${plan.depth === 'deep' ? 'tief' : 'schnell'}**`,
+    `- erfolgreiche Suchgruppen: **${groups.length}**`,
+    `- eindeutige API-Treffer: **${groups.reduce((sum, group) => sum + group.assets.length, 0)}**`,
+    `- verwendete API-Quellen: **${providers.map(providerLabel).join(', ')}**`,
+    `- fehlgeschlagene Einzelsuchen: **${errors.length}**`, '',
+    '## Suchbereiche', '',
+    ...plan.facets.map((facet) => `${facet.order}. **${facet.label}** – \`${facet.query}\` – ${facet.preferredMedia === 'video' ? 'Video bevorzugt' : 'Foto bevorzugt'}`), '',
+    '## Zusätzliche externe Sichtung', '',
+    '- `99-EXTERNE-SUCHLINKS/YouTube-Suche.url`',
+    '- `99-EXTERNE-SUCHLINKS/Google-Bilder.url`',
+    '- `99-EXTERNE-SUCHLINKS/Google-Videos.url`',
+    ...(channel.id === 'combat-sports' ? ['- `99-EXTERNE-SUCHLINKS/Offizielle-UFC-Websuche.url`'] : []), '',
+    '## Rechtehinweis', '',
+    'Material von TV-Sendern, Veranstaltern, Social-Media-Accounts, Presseagenturen oder anderen Rechteinhabern darf nicht allein deshalb verwendet werden, weil es über einen Suchlink sichtbar ist. Vor Reel-Nutzung müssen Quelle, Lizenz, Personen-/Markenrechte und der konkrete Nutzungskontext geprüft werden.'
+  ];
+  const guide = path.join(topicRoot, '00-RECHERCHEPLAN.md');
+  fs.writeFileSync(guide, `${lines.join('\n')}\n`);
+  return path.relative(root, guide);
+}
+
+function writeShortcut(file, url) { fs.writeFileSync(file, `[InternetShortcut]\nURL=${url.replace(/[\r\n]/g, '')}\n`); }
+function safeName(value) { return String(value ?? '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[\\/:*?"<>|]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 90) || 'Thema'; }
+function providerLabel(value) { return ({ pexels: 'Pexels', pixabay: 'Pixabay', unsplash: 'Unsplash', openverse: 'Openverse', wikimedia: 'Wikimedia Commons' })[value] ?? value; }
 function createSearchId() { return `ARS-${randomBytes(8).toString('hex').toUpperCase()}`; }
 function integer(value, min, max, label) { const number = Number(value); if (!Number.isInteger(number) || number < min || number > max) throw new Error(`${label} muss zwischen ${min} und ${max} liegen.`); return number; }
 function readJson(file) { return JSON.parse(fs.readFileSync(file, 'utf8')); }
