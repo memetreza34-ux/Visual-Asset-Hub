@@ -117,7 +117,7 @@
           "required": ["licenseStatus", "sourceName", "usageScopes", "attributionRequired"],
           "properties": {
             "licenseStatus": {
-              "enum": ["owned", "licensed", "public-domain", "cc0", "cc-by", "editorial-only", "restricted", "unknown"]
+              "enum": ["owned", "licensed", "public-domain", "cc0", "cc-by", "cc-by-sa", "editorial-only", "restricted", "unknown"]
             },
             "sourceName": { "type": "string", "minLength": 2, "maxLength": 200 },
             "sourceUrl": { "type": "string", "format": "uri", "maxLength": 2000 },
