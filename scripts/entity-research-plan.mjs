@@ -46,9 +46,12 @@ export function buildEntityResearchPlan({ topic, channel = 'combat-sports', scri
   const cleanTopic = validateTopic(topic);
   const cleanChannel = validateChannel(channel);
   const cleanScript = validateScript(script);
-  const maxFacets = depth === 'quick' ? 4 : 8;
+  const totalLimit = depth === 'quick' ? 6 : 8;
+  const scriptTerms = extractScriptTerms(cleanScript, cleanTopic).slice(0, depth === 'quick' ? 2 : 3);
+  const reservedScriptSlots = Math.min(scriptTerms.length, depth === 'quick' ? 2 : 3);
+  const baseLimit = Math.max(1, totalLimit - reservedScriptSlots);
   const base = (CHANNEL_FACETS[cleanChannel] ?? CHANNEL_FACETS['combat-sports'])
-    .slice(0, maxFacets)
+    .slice(0, baseLimit)
     .map(([id, label, template, preferredMedia], index) => ({
       id,
       label,
@@ -58,7 +61,6 @@ export function buildEntityResearchPlan({ topic, channel = 'combat-sports', scri
       origin: 'channel-template'
     }));
 
-  const scriptTerms = extractScriptTerms(cleanScript, cleanTopic).slice(0, depth === 'quick' ? 2 : 5);
   const existingQueries = new Set(base.map((item) => item.query.toLowerCase()));
   const extra = [];
   for (const term of scriptTerms) {
@@ -75,9 +77,9 @@ export function buildEntityResearchPlan({ topic, channel = 'combat-sports', scri
     });
   }
 
-  const facets = [...base, ...extra].slice(0, depth === 'quick' ? 6 : 12);
+  const facets = [...base, ...extra].slice(0, totalLimit).map((item, index) => ({ ...item, order: index + 1 }));
   return {
-    version: 1,
+    version: 2,
     topic: cleanTopic,
     topicSlug: slug(cleanTopic),
     channel: cleanChannel,
@@ -85,6 +87,7 @@ export function buildEntityResearchPlan({ topic, channel = 'combat-sports', scri
     facets,
     providers: ['pexels', 'pixabay', 'unsplash', 'openverse', 'wikimedia'],
     photoOnlyProviders: ['unsplash', 'openverse', 'wikimedia'],
+    maxSearchTasks: facets.length * 5,
     notes: [
       'Treffer sind Recherchekandidaten und keine automatische Veröffentlichungserlaubnis.',
       'Broadcast-, Event-, Marken- und Personenrechte müssen vor Nutzung geprüft werden.',
