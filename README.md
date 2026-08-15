@@ -1,12 +1,12 @@
 # Visual Asset Hub
 
-Visual Asset Hub ist eine universelle, kostenlose Medienbibliothek für **B-Rolls, Bilder, Animationen, Grafiken, Overlays, Screen-Recordings, Icons und Mockups**. Sie kann für Reels, Shorts, YouTube, Webseiten, Apps, Präsentationen und Kundenprojekte verwendet werden.
+Visual Asset Hub ist eine lokale Medienbibliothek und Rechercheoberfläche für **B-Rolls, Bilder, Animationen, Grafiken, Overlays, Screen-Recordings, Icons und Mockups**. Sie ist für Reels, Shorts, YouTube, Webseiten, Präsentationen und weitere Content-Projekte ausgelegt.
 
-## Spezialisierte Kanalbibliotheken
+Aktueller Beta-Stand: **`0.4.0-beta.6`**.
 
-Die Version `0.4.0-beta.5` enthält ein großes Arsenal für vier Content-Kanäle:
+## Vier spezialisierte Kanalbibliotheken
 
-| Kanal | Sammlungen | Suchbegriffe | empfohlenes Ausbauziel |
+| Kanal | Sammlungen | Suchbegriffe | Ausbauziel |
 |---|---:|---:|---:|
 | Finanzen | 20 | 60 | 160 freigegebene Assets |
 | Künstliche Intelligenz | 20 | 60 | 160 freigegebene Assets |
@@ -14,146 +14,178 @@ Die Version `0.4.0-beta.5` enthält ein großes Arsenal für vier Content-Kanäl
 | Kampfsport | 30 | 90 | 240 freigegebene Assets |
 | **Gesamt** | **90** | **270** | **720 freigegebene Assets** |
 
-Jede Sammlung ist für vier Grundformate vorbereitet:
-
-- vertikales B-Roll-Video
-- horizontales B-Roll-Video
-- vertikales Foto
-- horizontales Foto
-
-Die 90 Sammlungen bilden eine Grundmatrix aus **360 Format-Suchaufträgen**. Pexels und Pixabay können Bilder und Videos liefern; Unsplash, Openverse und Wikimedia Commons ergänzen die Foto-Suche. Kandidaten werden niemals automatisch freigegeben.
+Jede Sammlung ist für Video und Foto sowie Hoch- und Querformat vorbereitet. Die Kanalbibliotheken bilden die wiederverwendbare Grundversorgung; konkrete Reel-Themen können zusätzlich über die universelle Themenrecherche aufgebaut werden.
 
 ## Fünf Medienquellen
 
-Der lokale Arsenal Builder bündelt fünf Quellen:
-
-| Quelle | Bilder | Videos | geheimer Key |
+| Quelle | Bilder | Videos | Key |
 |---|---:|---:|---:|
-| Pexels | ja | ja | ja |
-| Pixabay | ja | ja | ja |
-| Unsplash | ja | nein | ja |
+| Pexels | ja | ja | erforderlich |
+| Pixabay | ja | ja | erforderlich |
+| Unsplash | ja | nein | erforderlich |
 | Openverse | ja | nein | nein |
 | Wikimedia Commons | ja | nein | nein |
 
-Pexels-, Pixabay- und Unsplash-Keys können für die Dauer der geöffneten Browserseite ausschließlich in einer In-Memory-Map gehalten werden. Sie werden nicht in `localStorage`, `sessionStorage`, Katalogdateien oder Suchdateien geschrieben. Über **Sitzungs-Keys löschen** können sie sofort aus dem Arbeitsspeicher entfernt werden.
+Pexels-, Pixabay- und Unsplash-Keys werden im Browser nur im Arbeitsspeicher der geöffneten Seite gehalten. Sie werden nicht in `localStorage`, `sessionStorage`, Katalogdateien oder Suchdateien gespeichert. **Sitzungs-Keys löschen** entfernt sie sofort.
 
-Openverse und Wikimedia werden konservativ gefiltert. Automatisch berücksichtigt werden nur Public Domain, CC0, CC BY und CC BY-SA. Attribution und Lizenz-URL werden im Asset dokumentiert; CC BY-SA bleibt auch nach dem Import ausdrücklich als Share-Alike-Lizenz erkennbar.
+Openverse und Wikimedia werden konservativ auf unterstützte offene Lizenzen begrenzt: Public Domain, CC0, CC BY und CC BY-SA. Attribution und Lizenzinformationen bleiben dokumentiert.
 
-## Personen- und Themenrecherche
+## Universelle Themenrecherche
 
-Der Arbeitsbereich **Thema recherchieren** baut aus einer beliebigen Person oder einem konkreten Reel-Thema automatisch eine eigene Medienrecherche auf.
-
-Beispiel:
+Der Arbeitsbereich **Thema recherchieren** ist nicht auf Personen oder Kampfsport beschränkt. Eingaben können praktisch jedes visuelle Reel-Thema sein, zum Beispiel:
 
 ```text
 Conor McGregor
+NVIDIA
+Tesla Model 3
+Berlin
+RCD Schutzschalter
+Berliner Mauer
+Inflation
+Humanoide Roboter
 ```
 
-Für den Kampfsport-Kanal entstehen ohne Skript bis zu acht priorisierte Bereiche:
+### Recherchearten
 
-1. Allgemein
-2. Training & Gym
-3. Kämpfe & Action
-4. Presse & Interviews
-5. Wiegen & Staredown
-6. Walkout & Arena
-7. Portraits
-8. Sieg & Reaktion
+Der Hub bietet:
 
-Optional kann das komplette Reel-Skript eingefügt werden. Der lokale Planner erkennt daraus zusätzliche Gegner-/Personennamen, Eventbezeichnungen wie `UFC 229` und Jahreszahlen. Bei tiefer Recherche bleiben insgesamt höchstens acht priorisierte Bereiche aktiv, sodass maximal **40 Provider-Suchen** entstehen. Skriptspezifische Begriffe erhalten reservierte Plätze und werden nicht hinter generischen Suchbegriffen abgeschnitten.
+- **Automatisch erkennen**
+- **Person**
+- **Firma / Marke / Organisation**
+- **Produkt / Objekt**
+- **Event / Veranstaltung**
+- **Ort / Gebäude / Region**
+- **Technik / Gerät / System**
+- **Sport / Kampf / Athletik**
+- **Historisches Thema**
+- **Allgemeines Thema / Konzept**
+
+Die Rechercheart bestimmt die visuellen Blickwinkel. Der **Zielkanal** bestimmt nur, in welchem Content-Kontext die später importierten Assets verwendet werden.
+
+Beispiele für automatisch vorbereitete Blickwinkel:
+
+- Person: Portrait, Karriere, Interviews, Events, Alltag, wichtige Orte, Reaktionen
+- Firma/Marke: Branding, Standorte, Führung, Team, Produkte, Events, Geschichte, Kampagnen
+- Produkt: Hero Shots, Close-ups, Nutzung, Unboxing, Vergleich, Produktion, Zubehör, Reparatur
+- Event: Venue, Ankunft, Hauptgeschehen, Bühne, Publikum, Presse, Backstage, Reaktionen
+- Ort: Wahrzeichen, Luftaufnahmen, Straßen, Innenräume, Menschen, Tag/Nacht, Verkehr, Geschichte
+- Technik: Hardware, Komponenten, Betrieb, Installation, Wartung, UI, Diagramme, Produktion
+- Sport/Kampf: Training, Wettkampf, Arena, Presse, Wiegen, Walkout, Portraits, Team, Reaktionen
+- Historie: Archiv, Personen, Orte, Artefakte, Karten, Zeitleiste, Schlüsselereignisse, Vermächtnis
+- Allgemeines Thema: Menschen, Objekte, Prozesse, Arbeit, Daten, News, Historie, Zukunft, symbolische B-Rolls
+
+### Rechercheumfang
+
+- **Schnell**: bis zu 6 Motivbereiche
+- **Tief**: bis zu 8 Motivbereiche
+- **Maximal**: bis zu 12 Motivbereiche
+
+Im Maximalmodus entstehen bei allen fünf verfügbaren Quellen höchstens **60 sequenzielle Provider-Suchen**. Der Modus wird nur auf ausdrückliche Auswahl gestartet.
+
+### Skript als Kontext
+
+Optional kann das komplette Reel-Skript eingefügt werden. Der lokale Planner erkennt zusätzliche konkrete Begriffe, unter anderem Namen, Gegner, Events, Jahreszahlen und zitierte Begriffe. Dafür werden Suchplätze reserviert, damit skriptspezifische Motive nicht hinter allgemeinen Suchen verschwinden.
+
+### Rechercheergebnis
 
 Der Recherchelauf:
 
-- verwendet alle fünf integrierten Quellen, sofern die nötigen Sitzung-Keys vorhanden sind
-- nutzt Openverse und Wikimedia auch ohne Key
-- bevorzugt für Pexels/Pixabay je Bereich Foto oder Video passend zum Motiv
-- beschränkt Unsplash/Openverse/Wikimedia auf Fotos
-- dedupliziert Treffer über Provider-ID sowie Quell-/Medien-URLs
-- sortiert Treffer technisch nach Reel-Eignung
-- zeigt Bilder direkt und Videos mit abspielbarem Player
-- importiert nur bewusst markierte Treffer und immer zunächst als `review`
-- speichert API-Keys nicht in den Recherche- oder Suchdateien
+- durchsucht alle verfügbaren integrierten Quellen
+- nutzt Openverse und Wikimedia ohne Key
+- bevorzugt je Motiv Foto oder Video
+- dedupliziert Treffer über Provider-ID sowie kanonisierte Quell- und Medien-URLs
+- sortiert Treffer nach technischem Fit
+- zeigt Bilder direkt und Videos mit Player
+- importiert ausschließlich bewusst markierte Treffer
+- setzt jeden Import zunächst auf `review`
+- speichert keine API-Keys in Recherchedateien
 
-Alle Recherchefunde werden zusätzlich dauerhaft nach Thema und Bereich abgelegt:
+## ALLES-GEFUNDEN
+
+`ALLES-GEFUNDEN/` ist die zentrale lokale Arbeitsablage.
 
 ```text
 ALLES-GEFUNDEN/
-└── 05-THEMENRECHERCHEN/
-    └── 04-Kampfsport/
-        └── Conor McGregor/
-            ├── 00-RECHERCHEPLAN.md
-            ├── 01-Allgemein/
-            ├── 02-Training & Gym/
-            ├── 03-Kaempfe & Action/
-            ├── 04-Presse & Interviews/
-            ├── 05-Wiegen & Staredown/
-            ├── 06-Walkout & Arena/
-            ├── 07-Portraits/
-            ├── 08-Sieg & Reaktion/
-            └── 99-EXTERNE-SUCHLINKS/
+├── 00-GESAMTINDEX.md
+├── 00-GESAMTINDEX.csv
+├── 00-MANIFEST.json
+├── 01-Finanzen/
+├── 02-KI/
+├── 03-Elektrotechnik/
+├── 04-Kampfsport/
+├── 05-THEMENRECHERCHEN/
+├── 90-GEFUNDENE-KANDIDATEN/
+└── 99-Sonstiges/
 ```
 
-Die externen Suchlinks zu YouTube und allgemeinen Bild-/Videosuchen dienen **nur zur weiteren Sichtung**. Sichtbarkeit im Web bedeutet keine Nutzungsfreigabe. TV-, Veranstalter-, Broadcast-, Marken- und Personenrechte müssen weiterhin konkret geprüft werden.
+Eine konkrete Recherche wird beispielsweise so abgelegt:
 
-Ein reiner Rechercheplan kann auch über die Konsole erzeugt werden:
-
-```bash
-npm run entity:plan -- "Conor McGregor"
+```text
+05-THEMENRECHERCHEN/
+└── 04-Kampfsport/
+    └── Conor McGregor/
+        ├── 00-RECHERCHEPLAN.md
+        ├── 00-IMPORTIERTE-ASSETS.md
+        ├── 01-Allgemein/
+        ├── 02-Training & Vorbereitung/
+        ├── 03-Wettkampf & Action/
+        ├── ...
+        ├── 90-IMPORTIERT/
+        └── 99-EXTERNE-SUCHLINKS/
 ```
+
+Die Ordnerstruktur hängt von der gewählten Rechercheart ab. Ein Produkt erhält andere Unterordner als eine Person, ein Ort oder ein technisches System.
+
+Pro Fund werden je nach Quelle verständliche INFO-, Quellen-, Medium- und Vorschau-Verknüpfungen erzeugt. Lokale Katalogmedien können als echte Dateikopie gespiegelt werden. Importierte Themenfunde werden klar von noch nicht importierten Recherchekandidaten getrennt.
+
+Normale Suchfunde und Themenrecherchen bleiben lokal historisiert, auch wenn temporäre API-Suchdateien später bereinigt werden.
+
+## Zusätzliche externe Recherchelinks
+
+Pro Themenrecherche entstehen Links für zusätzliche manuelle Sichtung, unter anderem:
+
+- YouTube-Suche
+- Google Bilder
+- Google Videos
+- Google News
+- Wikipedia-Suche
+- bei Kampfsport zusätzlich eine Websuche auf der offiziellen UFC-Domain
+
+Diese Links sind **nur Recherchehilfen**. Sichtbarkeit im Web ist keine Lizenz- oder Nutzungserlaubnis.
 
 ## Ausbau 720
 
-Der Bereich **Ausbau 720** zeigt den tatsächlichen Fortschritt je Kanal und Sammlung:
+Der Bereich **Ausbau 720** zeigt je Kanal und Sammlung:
 
-- vorhandene Kandidaten
+- Kandidaten
 - offene Reviews
 - freigegebene Assets
-- Zielstand pro Kanal
-- größte Freigabe-Lücken
 - Video- und Fotolücken
+- größte Freigabelücken
 - priorisierte Review- und Suchaufgaben
 
-Der Hub arbeitet **review-first**. Wenn für eine Sammlung bereits genug ungeprüfte Kandidaten vorhanden sind, führt die Empfehlung direkt in die passende Review-Warteschlange statt eine neue API-Suche vorzuschlagen. Erst wenn der Review-Vorrat nicht reicht, wird eine konkrete Suche vorbereitet.
+Der Hub arbeitet **review-first**. Wenn bereits genügend Review-Kandidaten vorhanden sind, wird zuerst die Review-Warteschlange empfohlen. Neue API-Suche erfolgt nur bei echter Suchlücke.
 
-Für neue Suchlücken wird automatisch ein sinnvoller Medientyp gewählt:
+Für neue Lücken gilt grundsätzlich:
 
-- Video zuerst: Pexels, danach Pixabay als manueller Fallback
-- Foto zuerst: Unsplash, danach Openverse und Wikimedia Commons als manuelle Fallbacks
+- Video: Pexels → Pixabay
+- Foto: Unsplash → Openverse → Wikimedia Commons → Pexels → Pixabay
 
-Die nächste Quelle wird nur vorbereitet. Eine externe API-Suche startet niemals ohne ausdrücklichen Klick.
-
-Auf der Konsole erzeugt
-
-```bash
-npm run arsenal:expansion
-```
-
-einen JSON- und CSV-Ausbauplan unter `reports/`. Der Plan unterscheidet `review-first`, `search` und `complete` und enthält Primärquelle, Fallbackquellen, Medientyp und Format.
+Suchbegriffe und Quellen-Fallbacks werden nur vorbereitet und starten nicht automatisch.
 
 ## Reel- und Skript-Planer
 
-Ein deutscher Sprechtext kann direkt im lokalen Browser in eine Shotlist umgewandelt werden:
-
-1. Kanal auswählen.
-2. Reel, YouTube oder Präsentation auswählen.
-3. Zieldauer festlegen.
-4. Sprechtext einfügen.
-5. Shotlist erzeugen.
-
-Der Planer erstellt automatisch:
+Ein deutscher Sprechtext kann lokal in eine Shotlist umgewandelt werden. Der Planer erzeugt:
 
 - Szenen und Zeitbereiche
 - empfohlenen Medientyp
 - passende Kanal-Sammlungen
-- passende vorhandene Assets
+- vorhandene Asset-Vorschläge
 - Status- und Rechtewarnungen
-- vorbereitete Suchbegriffe für fehlende Motive
-- Abdeckung mit vorhandenen und freigegebenen Assets
-- Exporte als JSON, CSV und Markdown
+- Suchbegriffe für fehlende Motive
+- JSON-, CSV-, Markdown- und SRT-Ausgaben
 
-Das Matching verwendet ein geprüftes Lexikon mit deutschen und englischen Fachbegriffen für Finanzen, KI, Elektrotechnik und Kampfsport. Der Text bleibt lokal und wird nicht an eine externe KI-API übertragen.
-
-Für Textdateien steht zusätzlich ein Kommandozeilen-Export mit SRT-Markern zur Verfügung:
+CLI-Beispiel:
 
 ```bash
 npm run script:plan -- \
@@ -163,141 +195,64 @@ npm run script:plan -- \
   --orientation vertical
 ```
 
-Ausgabe: JSON, CSV, Markdown, SRT und eine Kopie des Skripts unter `reports/shot-plans/`.
+Ein reiner Rechercheplan kann ebenfalls erzeugt werden:
 
-## ALLES-GEFUNDEN
+```bash
+npm run entity:plan -- "Conor McGregor"
+```
 
-`ALLES-GEFUNDEN/` ist die zentrale lokale Arbeitsablage. Sie enthält:
+## Arsenal Builder
 
-- alle Katalog-Assets nach Kanal, Sammlung und Status
-- lokale Dateikopien, wenn ein Medium lokal vorhanden ist
-- Quelle-, Medium- und Vorschau-Verknüpfungen für externe Assets
-- normale noch nicht importierte Suchkandidaten unter `90-GEFUNDENE-KANDIDATEN`
-- Personen-/Themenrecherchen unter `05-THEMENRECHERCHEN`
-- Gesamtindex als Markdown, CSV und JSON
-- dauerhafte lokale Historie auch nach Bereinigung temporärer API-Suchdateien
+Der normale Arsenal Builder bleibt für den systematischen Ausbau der 90 festen Sammlungen zuständig. Er bietet:
 
-Der Ordner wird mit `npm run vault:build`, beim Starterimport und während des lokalen Serverbetriebs automatisch aktualisiert. Die erzeugten Inhalte sind über `.gitignore` vom Repository ausgeschlossen.
+- fünf Medienquellen
+- Batch-Suche für bis zu fünf Sammlungen
+- technischen Fit 0–100
+- Suchbegriff-Kette
+- manuelle Provider-Fallbacks
+- Sammelimport markierter Treffer
+- Dublettenschutz
+- Review-first-Verknüpfung mit Ausbau 720
 
-## Arbeitswege
+Der technische Fit ist nur eine Produktionsvorsortierung und keine Inhalts- oder Rechtefreigabe.
 
-### 1. Personen-/Themenrecherche
+## Review und Rechte
 
-1. **Thema recherchieren** öffnen.
-2. Kanal und Person/Thema eingeben.
-3. optional das Reel-Skript einfügen.
-4. optional Pexels-, Pixabay- und Unsplash-Keys für diese Sitzung eingeben.
-5. Rechercheplan prüfen.
-6. **Alles recherchieren** starten.
-7. Bilder ansehen und Videos direkt abspielen.
-8. nur passende Treffer markieren.
-9. markierte Treffer als `review` importieren.
+Jeder externe Import beginnt auf `review`.
 
-### 2. Arsenal Builder
+Vor Freigabe werden weiterhin mindestens geprüft:
 
-Direkt im lokalen Browser:
+1. sichtbarer Inhalt
+2. Personen, Logos, Marken und sensible Elemente
+3. Quelle, Lizenz und Nutzung
+4. geplanter Einsatzkontext
 
-1. Quelle auswählen oder von **Ausbau 720** vorbereiten lassen.
-2. Kanal und Sammlung auswählen.
-3. Video oder Foto sowie Hoch- oder Querformat wählen.
-4. bei Pexels, Pixabay oder Unsplash den jeweiligen Key einmal für die aktuelle Browser-Sitzung eingeben.
-5. Vorschauen und Quellen ansehen.
-6. passende Treffer markieren.
-7. nur ausgewählte Treffer als `review` importieren.
+Besonders bei realen Personen, Firmen, Produkten, Events, Sportveranstaltungen und Broadcastmaterial bedeutet ein gefundener Treffer **nicht automatisch**, dass er in einem Reel verwendet werden darf.
 
-Mit dem Batch-Modus können bis zu fünf Sammlungen nacheinander durchsucht werden. Treffer aus allen Gruppen können markiert und anschließend **in einem Sammelimport sequenziell** verarbeitet werden. Die Seite lädt dabei erst nach Abschluss des gesamten Sammelimports neu. Bereits in der aktuellen Ansicht importierte Treffer werden gesperrt und als `importiert` markiert.
+## Eigene Dateien
 
-Falls eine Quelle keine passenden Ergebnisse liefert, bereitet **Nächste Quelle** die nächste Quelle mit derselben Sammlung, demselben Format und demselben Suchbegriff vor. Die nächste Suche wird nicht automatisch gestartet.
+Eigene Videos, Bilder, Grafiken und weitere unterstützte Medien können über die lokale Inbox importiert werden. Kanal, Sammlung, Titel, Beschreibung und Tags werden gespeichert. Eine ausdrückliche Rechtebestätigung ist Pflicht. Der Import startet auf `review`.
 
-### 3. Priorisierte Review-Warteschlange
+## Medienpakete
 
-Die Review-Warteschlange kann nach Kanal, Sammlung und Medientyp gefiltert werden. Standardmäßig steht **Größter Ausbau-Effekt** oben. Die Priorität berücksichtigt:
+Nur `approved`-Assets können in verifizierte Schnittpakete unter `exports/media-packs` ausgegeben werden. Enthalten sind unter anderem:
 
-- Freigabelücke der Sammlung
-- fehlenden Video-/Bild-Mindestmix
-- vorhandene Qualitätsbewertung
-- dokumentierten Rechte-Status
-
-Die Priorität ist nur eine Arbeitsreihenfolge. Jede Freigabe bleibt manuell und erfordert weiterhin die vollständige Vier-Punkte-Prüfung für Inhalt, Personen/Marken, Rechte und Einsatzkontext.
-
-### 4. Eigene Dateien über `inbox`
-
-Eigene MP4-, MOV-, WEBM-, MKV-, JPG-, PNG-, WEBP-, AVIF-, SVG-, GIF- und weitere unterstützte Dateien können lokal importiert werden. Die Weboberfläche ermöglicht:
-
-- Kanal- und Sammlungszuordnung
-- Titel und Beschreibung
-- zusätzliche Tags und Suchbegriffe
-- Erkennung von Auflösung, Ausrichtung und Videodauer
-- ausdrückliche Rechtebestätigung
-- sicheren Import als `review`
-
-Der Inhalt von `inbox` ist über `.gitignore` ausgeschlossen und wird nicht automatisch veröffentlicht.
-
-### 5. Freigegebene Medienpakete
-
-Favoriten können als vollständiges Schnittpaket unter `exports/media-packs` ausgegeben werden. Enthalten sind:
-
-- heruntergeladene oder kopierte Originaldateien
-- standardisierte Dateinamen
+- Medien
 - `manifest.json`
 - SHA-256-Prüfsummen
-- Quellen- und Lizenzinformationen
+- Quelle und Lizenz
 - `ATTRIBUTION.md`
 - Paket-README
 
-Nicht freigegebene Assets werden strikt blockiert. Pro Paket sind höchstens 20 Assets vorgesehen.
-
 ## Starterbibliothek
 
-Im Branch liegen sechs Grundassets. `npm run starter:import` ergänzt idempotent fünf bekannte Pexels-B-Rolls und ein Wikimedia-Commons-Foto für Kampfsport unter CC BY-SA 4.0. Die lokale Testbibliothek enthält danach:
+`npm run starter:import` erzeugt idempotent eine reale Testbibliothek mit **12 Starterassets**:
 
-- acht Pexels-Videos
-- drei eigene SVG-Grafiken
-- ein Wikimedia-Commons-Foto
-- **insgesamt zwölf reale Starterassets**
+- 8 Pexels-Videos
+- 3 eigene SVG-Grafiken
+- 1 Wikimedia-Commons-Kampfsportfoto unter CC BY-SA 4.0
 
-Alle Starterassets beginnen auf `review`. Damit sind Finanzen, KI, Elektrotechnik und Kampfsport bereits im Realtest vertreten, ohne dass etwas automatisch freigegeben wird.
-
-## Aktueller Funktionsumfang
-
-- 24 universelle und spezialisierte Hauptkategorien
-- 90 klar benannte Kanal-Sammlungen
-- 270 vorbereitete Suchbegriffe
-- fünf Medienquellen in einem lokalen Builder
-- Personen-/Themenrecherche für beliebige Reel-Themen
-- automatische Kampfsport-Bereiche wie Training, Kämpfe, Presse, Wiegen, Walkout und Portraits
-- skriptspezifische Gegner-, Event- und Jahreszahl-Suche
-- maximal 40 Provider-Suchen pro tiefer Themenrecherche
-- direkte Videowiedergabe und Bildvorschau in Rechercheergebnissen
-- dauerhafte Themenordner unter `ALLES-GEFUNDEN/05-THEMENRECHERCHEN`
-- externe Discovery-Links nur zur manuellen Sichtung, klar von Nutzungsrechten getrennt
-- Batch-Suche für bis zu fünf Sammlungen
-- gruppenübergreifender Sammelimport ausgewählter Batch-Treffer
-- manuelle Quellen-Fallbackketten
-- Ausbau-720-Dashboard mit Review-first- und Suchprioritäten
-- Smart-Medienmix für Video- und Fotolücken
-- priorisierte Review-Warteschlange mit Sammlungsfilter
-- API-Keys nur im Arbeitsspeicher der geöffneten Seite
-- deutsches Skript-Matching mit kanalbezogenen Synonymen
-- lokale Shotlist-Planung mit Zeitbereichen und Asset-Vorschlägen
-- Shotlist-Export als JSON, CSV, Markdown und SRT
-- lokale Inbox für eigene Medien
-- stabile Asset-IDs, Dateinamen, Tags und Suchaliasse
-- Rechte-, Quellen- und Lizenzverwaltung
-- Public-Domain-, CC0-, CC-BY- und CC-BY-SA-Unterstützung
-- quellenübergreifende Dublettenprüfung für offene Medien und Themenrecherche
-- Suche, Filter, Favoriten und Vorschauen
-- feste Navigation zwischen allen Arbeitsbereichen
-- Lückenempfehlungen für unvollständige Sammlungen
-- getrennte Kandidaten-, Review- und Freigabefortschritte
-- Freigabe, Einschränkung und Archivierung im Browser
-- Nutzungshistorie und Attributions-Export
-- verifizierte Medienpakete für den Schnitt
-- Backup und verifizierte Wiederherstellung
-- Secret-, URL-, Metadaten- und Integritätsprüfungen
-- gemeinsame Sperre gegen parallele Katalogänderungen
-- GitHub-Actions-Workflows ausschließlich manuell über `workflow_dispatch`
-- Regressionstest gegen versehentlich reaktivierte Push-, PR- oder Schedule-Trigger
+Alle beginnen auf `review`. Finanzen, KI, Elektrotechnik und Kampfsport sind vertreten.
 
 ## Schnellstart auf dem Mac
 
@@ -310,53 +265,17 @@ npm run check
 npm run serve
 ```
 
-Danach öffnen:
+Danach:
 
 ```text
 http://127.0.0.1:4173/web/
 ```
 
-Das Terminalfenster muss während der lokalen Nutzung geöffnet bleiben.
+## Windows
 
-## Schnellstart unter Windows
-
-1. Branch `agent/beta-release` als ZIP herunterladen und entpacken.
+1. Branch `agent/beta-release` herunterladen und entpacken.
 2. Node.js 22 oder neuer installieren.
-3. `START-HERE.cmd` doppelklicken.
-
-Die Bibliothek startet unter `http://127.0.0.1:4173/web/`.
-
-## GitHub Actions und Kostenkontrolle
-
-Alle Workflows unter `.github/workflows` sind im Beta-Branch bewusst **nur manuell** startbar. Es gibt keine automatischen `push`-, `pull_request`- oder `schedule`-Trigger. Dadurch startet kein GitHub-hosted Runner allein durch einen Commit oder Pull Request.
-
-Der lokale Test `tests/workflow-trigger-contract.test.mjs` prüft diese Regel bei `npm run check`. GitHub Actions sind damit optional; die vollständige Beta-Abnahme ist lokal möglich.
-
-## Medienpaket über die Konsole
-
-```bash
-npm run media:pack -- \
-  --ids VAH-XXXXXXXX,VAH-YYYYYYYY \
-  --name elektro-reel-01
-```
-
-Nur `approved`-Assets werden exportiert. Standardlimits:
-
-- maximal 20 Assets
-- maximal 300 MB pro Datei
-- maximal 1,5 GB pro Paket
-
-## Besondere Rechte-Regeln für MMA/UFC-Content
-
-Nicht automatisch freigeben:
-
-- UFC- und Veranstalterlogos
-- TV-, Pay-per-View- oder Broadcastausschnitte
-- echte Kampfausschnitte ohne nachgewiesene Rechte
-- geschützte Gürtel- und Eventdesigns
-- sichtbare Sponsoren- und Mikrofonmarken
-- grafische Verletzungen
-- gefährliche Weight-Cut-Darstellungen
+3. `START-HERE.cmd` starten.
 
 ## Wichtige Befehle
 
@@ -364,51 +283,56 @@ Nicht automatisch freigeben:
 npm run starter:import
 npm run cleanup:local
 npm run vault:build
-npm run entity:plan -- "Conor McGregor"
+npm run entity:plan -- "<Thema>"
 npm run script:plan -- --channel finance --file ./mein-reel.txt --duration 45
 npm run arsenal:validate
 npm run arsenal:plan
 npm run arsenal:expansion
-npm run arsenal:import -- --input <datei> --ids <id1,id2>
 npm run arsenal:report
 npm run asset:review -- --id VAH-XXXXXXXX --decision approve --reviewer <name>
 npm run usage:add -- --asset VAH-XXXXXXXX --project projekt-01 --platform tiktok
 npm run attribution:export -- --project projekt-01
 npm run media:pack -- --ids VAH-XXXXXXXX --name projekt-01
 npm run backup
-npm run restore -- --backup backups/<zeitstempel> --dry-run true
 npm run beta:verify
 npm run check
 npm run serve
 ```
 
-## Sicherheit
+## Sicherheit und Kostenkontrolle
 
-- Pexels-, Pixabay- und Unsplash-Keys werden im Browser nur im Arbeitsspeicher der aktuellen Seite gehalten; optional können CLI-Workflows lokale `.env`-Werte verwenden.
-- Auch die Personen-/Themenrecherche schreibt API-Keys niemals in Such-, Katalog- oder Recherchedateien.
-- **Sitzungs-Keys löschen** entfernt die Schlüssel sofort; bereits geladene Unsplash-Ergebnisse dürfen danach nicht mit einem alten Schlüssel importiert werden.
-- Openverse und Wikimedia benötigen keinen geheimen Key.
-- Skripttexte bleiben lokal und werden nicht automatisch gespeichert oder übertragen.
-- Themenrecherche und externe Suchlinks bedeuten keine automatische Personen-, Marken-, Event-, Broadcast- oder Lizenzfreigabe.
-- alle externen und Inbox-Importe starten auf `review`.
-- eigene Inbox-Dateien benötigen eine ausdrückliche Rechtebestätigung.
-- Nicht freigegebene Assets können nicht als Medienpaket exportiert werden.
-- externe Downloads blockieren lokale, private und reservierte Netzadressen.
-- die lokale Verwaltungs-API bindet nur an `127.0.0.1`.
-- Schreibaktionen benötigen Sitzungstoken, denselben Ursprung und eine freie gemeinsame Schreibsperre.
-- fehlerhafte Import-, Paket-, Review-, Nutzungs- und Restore-Schritte werden zurückgerollt oder sicher abgebrochen.
+- lokale Verwaltungs-APIs binden nur an Loopback
+- Schreibaktionen benötigen Sitzungstoken und Same-Origin
+- API-Keys werden nicht persistent im Browser gespeichert
+- Openverse und Wikimedia benötigen keinen geheimen Key
+- externe und Inbox-Importe starten auf `review`
+- nicht freigegebene Assets werden aus Medienpaketen blockiert
+- GitHub-Actions-Workflows sind im Beta-Branch ausschließlich manuell über `workflow_dispatch` startbar
+- keine automatischen Push-, Pull-Request- oder Schedule-Runs
+- die vollständige Beta-Abnahme kann lokal ohne GitHub-hosted Runner erfolgen
 
-## Bekannter externer Blocker
+## Realtest
 
-GitHub Actions erhält für dieses Repository aktuell keinen GitHub-hosted Runner. Die GitHub-Anmerkung verweist auf eine Billing-/Spending-Sperre. Da alle Workflows manuell sind und der lokale Workflow keine GitHub-Actions-Kosten benötigt, erfolgt die Beta-Abnahme lokal auf dem Mac beziehungsweise optional unter Windows. Issue #4 dokumentiert den externen Runner-Blocker.
+Die Beta gilt erst als vollständig real getestet, wenn unter anderem:
+
+- `npm run check` lokal grün ist
+- alle 12 Starterassets entschieden sind
+- alle fünf Medienquellen technisch getestet wurden
+- eine echte universelle Themenrecherche geprüft wurde
+- eine skriptspezifische Themenrecherche geprüft wurde
+- eigener Inbox-Import funktioniert
+- mindestens ein Asset freigegeben ist
+- ein verifiziertes Medienpaket erstellt wurde
+- eine reale Nutzung dokumentiert wurde
+- `realTestComplete: true` gemeldet wird
+
+Der Pull Request bleibt bis dahin Draft und wird nicht in `main` gemergt.
 
 ## Dokumentation
 
 - [`ALLES-GEFUNDEN/README.md`](ALLES-GEFUNDEN/README.md)
 - [`docs/REAL-TEST-QUICKSTART.md`](docs/REAL-TEST-QUICKSTART.md)
-- [`docs/SCRIPT-PLANNER.md`](docs/SCRIPT-PLANNER.md)
 - [`docs/CHANNEL-ARSENAL.md`](docs/CHANNEL-ARSENAL.md)
-- [`docs/OPERATIONS.md`](docs/OPERATIONS.md)
 - [`docs/BETA-TEST.md`](docs/BETA-TEST.md)
 - [`docs/RELEASE-CHECKLIST.md`](docs/RELEASE-CHECKLIST.md)
 - [`SECURITY.md`](SECURITY.md)
