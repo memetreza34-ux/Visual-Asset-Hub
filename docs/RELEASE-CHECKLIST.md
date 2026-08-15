@@ -27,7 +27,7 @@
 - [x] Kanäle werden als Finanzen, KI, Elektrotechnik und Kampfsport getrennt
 - [x] Sammlungen verwenden verständliche Titel
 - [x] Statusordner trennen Freigegeben, Review, Eingeschränkt und Archiv
-- [x] `05-THEMENRECHERCHEN` trennt Personen-/Themenfunde nach Kanal, Thema, Bereich und Quelle
+- [x] `05-THEMENRECHERCHEN` trennt universelle Recherchen nach Kanal, Thema, Bereich und Quelle
 - [x] `90-GEFUNDENE-KANDIDATEN` trennt normale noch nicht importierte Suchfunde vom Katalog
 - [x] lokale Medien können als echte Dateikopie übernommen werden
 - [x] externe Medien erhalten Quelle-, Medium- und Vorschau-Verknüpfungen
@@ -45,13 +45,17 @@
 - [ ] laufender Server aktualisiert den Ordner nach einer Katalogänderung automatisch
 - [ ] kein Eintrag im Ordner umgeht Review- oder Rechteprüfung
 
-## Personen- und Themenrecherche
+## Universelle Themenrecherche
 
 - [x] eigener Arbeitsbereich **Thema recherchieren** ist in Navigation und Weboberfläche integriert
-- [x] Rechercheplan unterstützt Finanzen, KI, Elektrotechnik und Kampfsport
-- [x] Kampfsportplan besitzt Bereiche für Allgemein, Training, Kämpfe, Presse, Wiegen/Staredown, Walkout, Portraits und Sieg/Reaktion
-- [x] optionales Reel-Skript kann Gegner/Personen, Eventbezeichnungen und Jahreszahlen als zusätzliche Suchbegriffe erkennen
-- [x] tiefe Recherche ist auf höchstens acht priorisierte Bereiche beziehungsweise 40 Provider-Suchen begrenzt
+- [x] Zielkanal und Rechercheart sind getrennt
+- [x] Recherchearten: Auto, Person, Firma/Marke/Organisation, Produkt/Objekt, Event/Veranstaltung, Ort/Gebäude/Region, Technik/Gerät/System, Sport/Wettkampf, Historisches Thema und Allgemeines Thema
+- [x] automatische Typ-Erkennung ist vorhanden
+- [x] jede Rechercheart besitzt eigene visuelle Motivgruppen
+- [x] optionales Reel-Skript kann konkrete Namen, Firmen, Events, Jahreszahlen und weitere Entitäten als zusätzliche Suchbegriffe erkennen
+- [x] Schnell-Recherche ist auf höchstens 6 Motivbereiche begrenzt
+- [x] Tief-Recherche ist auf höchstens 8 Motivbereiche begrenzt
+- [x] Maximal-Recherche ist auf höchstens 12 Motivbereiche beziehungsweise 60 Provider-Suchen bei fünf Quellen begrenzt
 - [x] skriptspezifische Begriffe erhalten reservierte Rechercheplätze
 - [x] Pexels/Pixabay können Foto oder Video passend zum Bereich nutzen
 - [x] Unsplash/Openverse/Wikimedia bleiben Foto-only
@@ -60,9 +64,11 @@
 - [x] Videos können direkt in der Rechercheansicht abgespielt werden
 - [x] Bilder werden direkt als Vorschau angezeigt
 - [x] Rechercheergebnisse besitzen technische Vorsortierung, aber keine automatische Inhalts-/Rechtefreigabe
-- [x] `00-RECHERCHEPLAN.md` und zusätzliche externe Discovery-Links werden im Themenordner erzeugt
-- [x] externe YouTube-/Google-/UFC-Suchlinks sind ausdrücklich nur zur Sichtung dokumentiert
-- [ ] Beispiel `Conor McGregor` erzeugt im echten Browser einen sinnvollen Rechercheplan
+- [x] `00-RECHERCHEPLAN.md` dokumentiert Rechercheart und Recherchemodus
+- [x] externe YouTube-, Google-Bilder-, Google-Video-, Google-News-, Wikipedia- und gegebenenfalls UFC-Suchlinks sind nur zur Sichtung dokumentiert
+- [ ] `Conor McGregor` erzeugt als Sport-Recherche einen sinnvollen Plan
+- [ ] mindestens eine **zweite unterschiedliche Rechercheart** wurde real geprüft, z. B. `RCD` als Technik oder `Tesla Model 3` als Produkt
+- [ ] `npm run beta:verify` meldet `multipleResearchTypesVerified: true`
 - [ ] Testskript mit `Khabib Nurmagomedov`, `UFC 229` und `2018` erzeugt skriptspezifische Suchbereiche
 - [ ] Pexels-, Pixabay- und Unsplash-Keys bleiben nur im Arbeitsspeicher der geöffneten Seite
 - [ ] Recherche ohne private Keys nutzt mindestens Openverse und Wikimedia
@@ -71,7 +77,7 @@
 - [ ] ein Bildtreffer lässt sich visuell prüfen und seine Quellseite öffnen
 - [ ] markierte Recherchetreffer werden sequenziell importiert; unmarkierte bleiben unimportiert
 - [ ] jeder Rechercheimport startet auf `review`
-- [ ] nach Import bleibt Personen-, Marken-, Event-, Broadcast- und Kontextprüfung erforderlich
+- [ ] nach Import bleiben Urheber-, Personen-, Marken-, Event-, Broadcast- und Kontextprüfung erforderlich
 - [ ] **Sitzungs-Keys löschen** entfernt alle Recherche-Keys aus dem Seitenspeicher
 - [ ] externe Discovery-Links werden im Realtest nicht als Nutzungsrecht behandelt
 
@@ -170,9 +176,8 @@
 - [ ] weder `localStorage` noch `sessionStorage` speichern API-Keys
 - [ ] Batch-Suche verarbeitet höchstens fünf Sammlungen sequenziell
 - [ ] Suchtreffer zeigen Vorschau, Creator/Quelle und Quellseite
-- [ ] Suchtreffer zeigen **Technischen Fit 0–100** mit nachvollziehbarer technischer Begründung
+- [ ] Suchtreffer zeigen **Technischen Fit 0–100**
 - [ ] Technischer Fit ändert keinen Review- oder Freigabestatus
-- [ ] vor dem Provider-Fallback werden zuerst weitere vorbereitete Suchbegriffe derselben Sammlung angeboten
 - [ ] Suchablauf ist **Suchbegriff 1 → 2 → 3 → nächste Quelle**
 - [ ] nur markierte Treffer werden importiert
 - [ ] jeder Import startet auf `review`
@@ -184,7 +189,6 @@
 - [ ] bereits importierte Karten werden deaktiviert und markiert
 - [ ] Video-Fallback Pexels → Pixabay wird nur vorbereitet
 - [ ] Foto-Fallback Unsplash → Openverse → Wikimedia → Pexels → Pixabay wird nur vorbereitet
-- [ ] Fallback übernimmt Sammlung, Format und Suchbegriff, startet aber keine API-Anfrage automatisch
 
 ## Eigene Medien und Inbox
 
@@ -194,7 +198,6 @@
 - [ ] Kanal- und Sammlungszuordnung wird gespeichert
 - [ ] binäre Videos und Bilder verwenden Git LFS
 - [ ] SVG-Grafiken dürfen im normalen Repository liegen
-- [ ] erfolgreicher Import bleibt erfolgreich, auch wenn das spätere Löschen aus `inbox` nur eine Warnung erzeugt
 - [ ] Inbox-Inhalt bleibt über `.gitignore` lokal
 
 ## Starterbibliothek und Review
@@ -208,9 +211,6 @@
 - [ ] alle drei Originalgrafiken visuell kontrolliert
 - [ ] Wikimedia-Kampfsportfoto inklusive Personen- und Lizenzprüfung kontrolliert
 - [ ] alle zwölf Asset-IDs besitzen eine dokumentierte Entscheidung
-- [ ] Titel, Tags und Kategorie stimmen mit dem sichtbaren Inhalt überein
-- [ ] Personen, Marken und Geräte wurden bewertet
-- [ ] Quelle, Creator und Lizenzseite sind erreichbar
 - [ ] CC BY-SA 4.0 Attribution und Share-Alike-Hinweis bleiben erhalten
 - [ ] Freigabe ohne vier Pflichtpunkte wird blockiert
 - [ ] Einschränkung ohne Begründung wird blockiert
@@ -219,14 +219,12 @@
 ## Auswahl und Medienpakete
 
 - [ ] Favoritenauswahl lässt sich als JSON exportieren
-- [ ] JSON warnt vor ungeprüften Assets
 - [ ] Medienpaket mit ungeprüftem Asset wird blockiert
 - [ ] Medienpaket mit ausschließlich freigegebenen Assets wird erzeugt
 - [ ] Paket enthält `media`, `manifest.json`, `ATTRIBUTION.md` und `README.md`
 - [ ] Manifest enthält SHA-256, Dateigröße, Quelle, Lizenz und Attribution
 - [ ] private oder lokale Downloadziele werden blockiert
 - [ ] Datei- und Gesamtgrößenlimits greifen
-- [ ] fehlerhafter Paketexport entfernt temporäre Dateien
 
 ## Echter Content-Test
 
@@ -254,11 +252,12 @@
 
 ## Release
 
-- [x] Changelog für `0.4.0-beta.5` vorhanden
-- [x] Paketversion auf `0.4.0-beta.5` gesetzt
+- [x] Changelog für `0.4.0-beta.6` vorhanden
+- [x] Paketversion auf `0.4.0-beta.6` gesetzt
 - [ ] Pull Request ist nicht mehr Draft
 - [ ] lokale Komplettprüfung ist grün
+- [ ] `multipleResearchTypesVerified` ist `true`
 - [ ] `realTestComplete` ist `true`
 - [ ] Beta-Tag oder Release wurde erstellt
 
-Die Beta darf erst als **real getestet** gelten, wenn ein echtes Skript geplant, eine reale Personen-/Themenrecherche mit visueller Sichtung durchgeführt, alle zwölf Starterassets geprüft, alle fünf Medienquellen technisch getestet, der `ALLES-GEFUNDEN`-Ordner lokal geprüft, mindestens ein eigener Inbox-Import erfolgreich und ein freigegebenes Asset über ein verifiziertes Medienpaket in einem echten Content-Projekt eingesetzt wurde.
+Die Beta darf erst als **real getestet** gelten, wenn ein echtes Skript geplant, mindestens zwei unterschiedliche universelle Recherchearten mit visueller Sichtung durchgeführt, alle zwölf Starterassets geprüft, alle fünf Medienquellen technisch getestet, der `ALLES-GEFUNDEN`-Ordner lokal geprüft, mindestens ein eigener Inbox-Import erfolgreich und ein freigegebenes Asset über ein verifiziertes Medienpaket in einem echten Content-Projekt eingesetzt wurde.
