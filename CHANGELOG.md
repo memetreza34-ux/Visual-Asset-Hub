@@ -1,5 +1,46 @@
 # Changelog
 
+## 0.4.0-beta.5 – 2026-08-15
+
+### Neu
+
+- eigener Browser-Arbeitsbereich **Thema recherchieren** für beliebige Personen und Reel-Themen
+- automatische Recherchepläne für Finanzen, KI, Elektrotechnik und Kampfsport
+- Kampfsport-Recherche mit Bereichen für Allgemein, Training, Kämpfe, Presse, Wiegen/Staredown, Walkout, Portraits und Sieg/Reaktion
+- optionales Reel-Skript erweitert die Recherche um erkannte Gegner/Personen, Eventbezeichnungen und Jahreszahlen
+- skriptspezifische Begriffe erhalten reservierte Plätze vor weniger wichtigen generischen Suchbereichen
+- tiefe Recherche auf maximal acht priorisierte Bereiche und 40 Provider-Suchen begrenzt
+- alle fünf integrierten Quellen können in einer Themenrecherche genutzt werden; Openverse und Wikimedia funktionieren weiterhin ohne Key
+- quellenübergreifende Themenrecherche dedupliziert Treffer über Provider-ID sowie kanonisierte Quell- und Medien-URLs
+- Bilder werden direkt angezeigt; Pexels-/Pixabay-Videotreffer können direkt im Recherchebereich abgespielt werden
+- markierte Themenfunde können gruppenübergreifend sequenziell als `review` importiert werden
+- Themenfunde erhalten eigene Tags für Person/Thema und Recherchebereich
+- neues dauerhaftes Archiv `ALLES-GEFUNDEN/05-THEMENRECHERCHEN`
+- automatische Themenstruktur nach Kanal → Thema → Recherchebereich → Quelle
+- `00-RECHERCHEPLAN.md` pro Themenrecherche mit Suchbereichen, Quellen und Rechtehinweisen
+- zusätzliche manuelle Discovery-Verknüpfungen zu YouTube, Google Bilder/Video und bei Kampfsport zur Websuche auf der offiziellen UFC-Domain
+- CLI-Rechercheplan über `npm run entity:plan -- "<Thema>"`
+
+### Verbessert
+
+- `ALLES-GEFUNDEN` archiviert jetzt Katalog-Assets, normale Suchkandidaten und Personen-/Themenrecherchen getrennt
+- Themenrecherchen bleiben auch nach Bereinigung temporärer API-Suchdateien lokal erhalten
+- Gesamtindex und Manifest unterscheiden normale Kandidaten und Themenrecherche-Funde
+- Arbeitsbereich-Navigation um **Thema recherchieren** ergänzt
+- lokale Serververwaltung bindet `/entity-api/` in dieselbe Loopback-, Same-Origin-, Token- und Schreibsperren-Logik ein
+- Recherche-Keys für Pexels, Pixabay und Unsplash bleiben ausschließlich im Arbeitsspeicher der geöffneten Seite
+- direkte Videowiedergabe wählt eine geeignete vorhandene Videorendition und lädt nur Metadaten vor
+- Release-Checkliste enthält einen eigenen Realtest für Personen-/Themenrecherche
+- README und `ALLES-GEFUNDEN`-Dokumentation auf beta.5 aktualisiert
+
+### Sicherheit und Rechte
+
+- Themenrecherche importiert nichts automatisch und setzt keinen Treffer automatisch auf `approved`
+- externe YouTube-/Google-/UFC-Suchlinks sind ausdrücklich nur Discovery-Hilfen und keine Lizenz- oder Nutzungserlaubnis
+- sichtbare Personen, Marken, Veranstalter-, Broadcast- und Nutzungskontexte bleiben Pflichtprüfung vor Veröffentlichung
+- Pexels-, Pixabay- und Unsplash-Keys werden weder in Recherche-, Such- noch Katalogdateien geschrieben
+- Openverse/Wikimedia-Lizenzdaten bleiben beim späteren Import erhalten; CC BY und CC BY-SA benötigen weiterhin Attribution
+
 ## 0.4.0-beta.4 – 2026-08-07
 
 ### Neu
