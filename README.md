@@ -4,7 +4,7 @@ Visual Asset Hub ist eine universelle, kostenlose Medienbibliothek für **B-Roll
 
 ## Spezialisierte Kanalbibliotheken
 
-Die Version `0.4.0-beta.4` enthält ein großes Arsenal für vier Content-Kanäle:
+Die Version `0.4.0-beta.5` enthält ein großes Arsenal für vier Content-Kanäle:
 
 | Kanal | Sammlungen | Suchbegriffe | empfohlenes Ausbauziel |
 |---|---:|---:|---:|
@@ -38,6 +38,68 @@ Der lokale Arsenal Builder bündelt fünf Quellen:
 Pexels-, Pixabay- und Unsplash-Keys können für die Dauer der geöffneten Browserseite ausschließlich in einer In-Memory-Map gehalten werden. Sie werden nicht in `localStorage`, `sessionStorage`, Katalogdateien oder Suchdateien geschrieben. Über **Sitzungs-Keys löschen** können sie sofort aus dem Arbeitsspeicher entfernt werden.
 
 Openverse und Wikimedia werden konservativ gefiltert. Automatisch berücksichtigt werden nur Public Domain, CC0, CC BY und CC BY-SA. Attribution und Lizenz-URL werden im Asset dokumentiert; CC BY-SA bleibt auch nach dem Import ausdrücklich als Share-Alike-Lizenz erkennbar.
+
+## Personen- und Themenrecherche
+
+Der Arbeitsbereich **Thema recherchieren** baut aus einer beliebigen Person oder einem konkreten Reel-Thema automatisch eine eigene Medienrecherche auf.
+
+Beispiel:
+
+```text
+Conor McGregor
+```
+
+Für den Kampfsport-Kanal entstehen ohne Skript bis zu acht priorisierte Bereiche:
+
+1. Allgemein
+2. Training & Gym
+3. Kämpfe & Action
+4. Presse & Interviews
+5. Wiegen & Staredown
+6. Walkout & Arena
+7. Portraits
+8. Sieg & Reaktion
+
+Optional kann das komplette Reel-Skript eingefügt werden. Der lokale Planner erkennt daraus zusätzliche Gegner-/Personennamen, Eventbezeichnungen wie `UFC 229` und Jahreszahlen. Bei tiefer Recherche bleiben insgesamt höchstens acht priorisierte Bereiche aktiv, sodass maximal **40 Provider-Suchen** entstehen. Skriptspezifische Begriffe erhalten reservierte Plätze und werden nicht hinter generischen Suchbegriffen abgeschnitten.
+
+Der Recherchelauf:
+
+- verwendet alle fünf integrierten Quellen, sofern die nötigen Sitzung-Keys vorhanden sind
+- nutzt Openverse und Wikimedia auch ohne Key
+- bevorzugt für Pexels/Pixabay je Bereich Foto oder Video passend zum Motiv
+- beschränkt Unsplash/Openverse/Wikimedia auf Fotos
+- dedupliziert Treffer über Provider-ID sowie Quell-/Medien-URLs
+- sortiert Treffer technisch nach Reel-Eignung
+- zeigt Bilder direkt und Videos mit abspielbarem Player
+- importiert nur bewusst markierte Treffer und immer zunächst als `review`
+- speichert API-Keys nicht in den Recherche- oder Suchdateien
+
+Alle Recherchefunde werden zusätzlich dauerhaft nach Thema und Bereich abgelegt:
+
+```text
+ALLES-GEFUNDEN/
+└── 05-THEMENRECHERCHEN/
+    └── 04-Kampfsport/
+        └── Conor McGregor/
+            ├── 00-RECHERCHEPLAN.md
+            ├── 01-Allgemein/
+            ├── 02-Training & Gym/
+            ├── 03-Kaempfe & Action/
+            ├── 04-Presse & Interviews/
+            ├── 05-Wiegen & Staredown/
+            ├── 06-Walkout & Arena/
+            ├── 07-Portraits/
+            ├── 08-Sieg & Reaktion/
+            └── 99-EXTERNE-SUCHLINKS/
+```
+
+Die externen Suchlinks zu YouTube und allgemeinen Bild-/Videosuchen dienen **nur zur weiteren Sichtung**. Sichtbarkeit im Web bedeutet keine Nutzungsfreigabe. TV-, Veranstalter-, Broadcast-, Marken- und Personenrechte müssen weiterhin konkret geprüft werden.
+
+Ein reiner Rechercheplan kann auch über die Konsole erzeugt werden:
+
+```bash
+npm run entity:plan -- "Conor McGregor"
+```
 
 ## Ausbau 720
 
@@ -103,9 +165,35 @@ npm run script:plan -- \
 
 Ausgabe: JSON, CSV, Markdown, SRT und eine Kopie des Skripts unter `reports/shot-plans/`.
 
+## ALLES-GEFUNDEN
+
+`ALLES-GEFUNDEN/` ist die zentrale lokale Arbeitsablage. Sie enthält:
+
+- alle Katalog-Assets nach Kanal, Sammlung und Status
+- lokale Dateikopien, wenn ein Medium lokal vorhanden ist
+- Quelle-, Medium- und Vorschau-Verknüpfungen für externe Assets
+- normale noch nicht importierte Suchkandidaten unter `90-GEFUNDENE-KANDIDATEN`
+- Personen-/Themenrecherchen unter `05-THEMENRECHERCHEN`
+- Gesamtindex als Markdown, CSV und JSON
+- dauerhafte lokale Historie auch nach Bereinigung temporärer API-Suchdateien
+
+Der Ordner wird mit `npm run vault:build`, beim Starterimport und während des lokalen Serverbetriebs automatisch aktualisiert. Die erzeugten Inhalte sind über `.gitignore` vom Repository ausgeschlossen.
+
 ## Arbeitswege
 
-### 1. Arsenal Builder
+### 1. Personen-/Themenrecherche
+
+1. **Thema recherchieren** öffnen.
+2. Kanal und Person/Thema eingeben.
+3. optional das Reel-Skript einfügen.
+4. optional Pexels-, Pixabay- und Unsplash-Keys für diese Sitzung eingeben.
+5. Rechercheplan prüfen.
+6. **Alles recherchieren** starten.
+7. Bilder ansehen und Videos direkt abspielen.
+8. nur passende Treffer markieren.
+9. markierte Treffer als `review` importieren.
+
+### 2. Arsenal Builder
 
 Direkt im lokalen Browser:
 
@@ -121,7 +209,7 @@ Mit dem Batch-Modus können bis zu fünf Sammlungen nacheinander durchsucht werd
 
 Falls eine Quelle keine passenden Ergebnisse liefert, bereitet **Nächste Quelle** die nächste Quelle mit derselben Sammlung, demselben Format und demselben Suchbegriff vor. Die nächste Suche wird nicht automatisch gestartet.
 
-### 2. Priorisierte Review-Warteschlange
+### 3. Priorisierte Review-Warteschlange
 
 Die Review-Warteschlange kann nach Kanal, Sammlung und Medientyp gefiltert werden. Standardmäßig steht **Größter Ausbau-Effekt** oben. Die Priorität berücksichtigt:
 
@@ -132,7 +220,7 @@ Die Review-Warteschlange kann nach Kanal, Sammlung und Medientyp gefiltert werde
 
 Die Priorität ist nur eine Arbeitsreihenfolge. Jede Freigabe bleibt manuell und erfordert weiterhin die vollständige Vier-Punkte-Prüfung für Inhalt, Personen/Marken, Rechte und Einsatzkontext.
 
-### 3. Eigene Dateien über `inbox`
+### 4. Eigene Dateien über `inbox`
 
 Eigene MP4-, MOV-, WEBM-, MKV-, JPG-, PNG-, WEBP-, AVIF-, SVG-, GIF- und weitere unterstützte Dateien können lokal importiert werden. Die Weboberfläche ermöglicht:
 
@@ -145,7 +233,7 @@ Eigene MP4-, MOV-, WEBM-, MKV-, JPG-, PNG-, WEBP-, AVIF-, SVG-, GIF- und weitere
 
 Der Inhalt von `inbox` ist über `.gitignore` ausgeschlossen und wird nicht automatisch veröffentlicht.
 
-### 4. Freigegebene Medienpakete
+### 5. Freigegebene Medienpakete
 
 Favoriten können als vollständiges Schnittpaket unter `exports/media-packs` ausgegeben werden. Enthalten sind:
 
@@ -176,6 +264,13 @@ Alle Starterassets beginnen auf `review`. Damit sind Finanzen, KI, Elektrotechni
 - 90 klar benannte Kanal-Sammlungen
 - 270 vorbereitete Suchbegriffe
 - fünf Medienquellen in einem lokalen Builder
+- Personen-/Themenrecherche für beliebige Reel-Themen
+- automatische Kampfsport-Bereiche wie Training, Kämpfe, Presse, Wiegen, Walkout und Portraits
+- skriptspezifische Gegner-, Event- und Jahreszahl-Suche
+- maximal 40 Provider-Suchen pro tiefer Themenrecherche
+- direkte Videowiedergabe und Bildvorschau in Rechercheergebnissen
+- dauerhafte Themenordner unter `ALLES-GEFUNDEN/05-THEMENRECHERCHEN`
+- externe Discovery-Links nur zur manuellen Sichtung, klar von Nutzungsrechten getrennt
 - Batch-Suche für bis zu fünf Sammlungen
 - gruppenübergreifender Sammelimport ausgewählter Batch-Treffer
 - manuelle Quellen-Fallbackketten
@@ -190,7 +285,7 @@ Alle Starterassets beginnen auf `review`. Damit sind Finanzen, KI, Elektrotechni
 - stabile Asset-IDs, Dateinamen, Tags und Suchaliasse
 - Rechte-, Quellen- und Lizenzverwaltung
 - Public-Domain-, CC0-, CC-BY- und CC-BY-SA-Unterstützung
-- quellenübergreifende Dublettenprüfung für offene Medien
+- quellenübergreifende Dublettenprüfung für offene Medien und Themenrecherche
 - Suche, Filter, Favoriten und Vorschauen
 - feste Navigation zwischen allen Arbeitsbereichen
 - Lückenempfehlungen für unvollständige Sammlungen
@@ -268,6 +363,8 @@ Nicht automatisch freigeben:
 ```bash
 npm run starter:import
 npm run cleanup:local
+npm run vault:build
+npm run entity:plan -- "Conor McGregor"
 npm run script:plan -- --channel finance --file ./mein-reel.txt --duration 45
 npm run arsenal:validate
 npm run arsenal:plan
@@ -288,9 +385,11 @@ npm run serve
 ## Sicherheit
 
 - Pexels-, Pixabay- und Unsplash-Keys werden im Browser nur im Arbeitsspeicher der aktuellen Seite gehalten; optional können CLI-Workflows lokale `.env`-Werte verwenden.
+- Auch die Personen-/Themenrecherche schreibt API-Keys niemals in Such-, Katalog- oder Recherchedateien.
 - **Sitzungs-Keys löschen** entfernt die Schlüssel sofort; bereits geladene Unsplash-Ergebnisse dürfen danach nicht mit einem alten Schlüssel importiert werden.
 - Openverse und Wikimedia benötigen keinen geheimen Key.
 - Skripttexte bleiben lokal und werden nicht automatisch gespeichert oder übertragen.
+- Themenrecherche und externe Suchlinks bedeuten keine automatische Personen-, Marken-, Event-, Broadcast- oder Lizenzfreigabe.
 - alle externen und Inbox-Importe starten auf `review`.
 - eigene Inbox-Dateien benötigen eine ausdrückliche Rechtebestätigung.
 - Nicht freigegebene Assets können nicht als Medienpaket exportiert werden.
@@ -305,6 +404,7 @@ GitHub Actions erhält für dieses Repository aktuell keinen GitHub-hosted Runne
 
 ## Dokumentation
 
+- [`ALLES-GEFUNDEN/README.md`](ALLES-GEFUNDEN/README.md)
 - [`docs/REAL-TEST-QUICKSTART.md`](docs/REAL-TEST-QUICKSTART.md)
 - [`docs/SCRIPT-PLANNER.md`](docs/SCRIPT-PLANNER.md)
 - [`docs/CHANNEL-ARSENAL.md`](docs/CHANNEL-ARSENAL.md)
