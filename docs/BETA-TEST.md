@@ -2,230 +2,281 @@
 
 ## Ziel
 
-Der komplette kostenlose Ablauf wird real auf dem lokalen Rechner geprüft:
+Die Beta `0.4.0-beta.5` wird vollständig lokal geprüft. Ein Merge nach `main` ist erst erlaubt, wenn Technik, Medienquellen, Personen-/Themenrecherche, Review, Rechte, Medienpaket und echte Nutzung abgenommen sind.
 
-1. Visual Asset Hub auf dem Mac starten
-2. zwölf Starterassets importieren und vollständig entscheiden
-3. ein echtes Kanalskript in eine Shotlist umwandeln
-4. die vier Kanalbibliotheken und 90 Sammlungen prüfen
-5. alle fünf Medienquellen technisch testen
-6. den priorisierten Ausbau-720-Workflow testen
-7. eine eigene lokale Datei importieren
-8. mindestens ein Asset freigeben
-9. ein verifiziertes Medienpaket erzeugen
-10. ein Asset in einem echten Content-Projekt verwenden
-11. Nutzung, Attribution und Backup dokumentieren
+Der Realtest muss mindestens nachweisen:
 
-## Starterbibliothek nach `npm run starter:import`
+1. zwölf Starterassets vorhanden und vollständig entschieden
+2. alle vier Kanäle vertreten
+3. ein echtes Kanalskript als Shotlist verarbeitet
+4. eine echte Personen-/Themenrecherche durchgeführt
+5. eine skriptspezifische Themenrecherche durchgeführt
+6. alle fünf integrierten Medienquellen technisch geprüft
+7. `ALLES-GEFUNDEN` inklusive Themenarchiv geprüft
+8. Ausbau-720- und Review-first-Workflow geprüft
+9. eine eigene lokale Datei importiert
+10. mindestens ein Asset freigegeben
+11. ein verifiziertes Medienpaket erzeugt
+12. ein Asset real verwendet und Nutzung dokumentiert
+13. `realTestComplete: true`
 
-Der Import ergänzt idempotent sechs zusätzliche Medien. Danach enthält die lokale Testbibliothek:
-
-- acht Pexels-Videos
-- drei eigene horizontale SVG-Grafiken
-- ein Wikimedia-Commons-Foto für Kampfsport unter CC BY-SA 4.0
-- insgesamt **zwölf Assets**
-- alle Assets zunächst im Status `review`
-
-### Bereits im Repository
-
-- `VAH-P6153727` – robotische Hand
-- `VAH-P8087308` – Person mit humanoidem Technologieobjekt
-- `VAH-P8328141` – Alltagsszene mit Roboter und Getränk
-- `VAH-GAINET01` – abstraktes KI-Netzwerk
-- `VAH-GBIZGR01` – Business-Wachstum
-- `VAH-GCIRCU01` – technischer Schaltplan-Hintergrund
-
-### Durch den Starterimport ergänzt
-
-- `VAH-P6120120` – Finanzanalyse mit Taschenrechner
-- `VAH-P7989872` – digitale Interaktion am Smartphone
-- `VAH-P6153455` – bionischer Arm
-- `VAH-P6153460` – Technologieszene im Labor
-- `VAH-P6153725` – robotisches Gerät in Bewegung
-- `VAH-WBOX2021` – Boxtraining, Wikimedia Commons, CC BY-SA 4.0
-
-Keines dieser Medien darf vor vollständiger Sichtprüfung als freigegeben behandelt werden.
-
-## Test A – Mac, Start und Navigation
-
-Im lokalen Clone:
+## Vorbereitung auf dem Mac
 
 ```bash
 cd ~/Downloads/Visual-Asset-Hub-clean
-git pull --ff-only
+git fetch origin
+git switch agent/beta-release
+git pull --ff-only origin agent/beta-release
 npm run starter:import
 npm run check
 npm run serve
 ```
 
-Danach:
+Danach öffnen:
 
-1. `http://127.0.0.1:4173/web/` öffnen.
-2. **Lokale Verwaltung aktiv** kontrollieren.
-3. prüfen, ob zwölf Assets sichtbar sind.
-4. Navigation testen:
-   - Bibliothek
-   - Skript planen
-   - Eigene Dateien
-   - Prüfen
-   - Medien suchen
-   - Ausbau 720
-   - 90 Kategorien
-5. prüfen, ob jede Sektion sauber angesprungen wird.
+```text
+http://127.0.0.1:4173/web/
+```
 
-## Test B – Kanal-Arsenal und Ausbau 720
+Das Terminal bleibt während des Browsertests geöffnet.
 
-1. Die vier Kanäle öffnen:
-   - Finanzen
-   - Künstliche Intelligenz
-   - Elektrotechnik
-   - Kampfsport
-2. Nach `Aktien`, `RCD`, `Boxring`, `Muay Thai`, `Roboter` und `Schaltplan` suchen.
-3. Sammlungsnamen, Tags und Suchbegriffe kontrollieren.
-4. Kandidaten, Reviews und Freigaben getrennt prüfen.
-5. Navigation **Ausbau 720** öffnen.
-6. Zielwerte kontrollieren:
-   - Finanzen 160
-   - KI 160
-   - Elektrotechnik 160
-   - Kampfsport 240
-   - Gesamt 720
-7. Bei einem Kanal **Top Suchlücken vorbereiten** drücken.
-8. prüfen, ob höchstens fünf konkrete Sammlungen an den Arsenal Builder übergeben werden.
-9. Eine Sammlung mit genügend Review-Kandidaten darf nicht unnötig erneut als Suchlücke priorisiert werden.
+## Test A – Start, Navigation und zwölf Starterassets
 
-## Test C – fünf Medienquellen
+Prüfen:
+
+- **Lokale Verwaltung aktiv** sichtbar
+- zwölf Starterassets sichtbar
+- Navigation enthält:
+  - Bibliothek
+  - Skript planen
+  - Thema recherchieren
+  - Eigene Dateien
+  - Prüfen
+  - Medien suchen
+  - Ausbau 720
+  - 90 Kategorien
+- alle Bereiche lassen sich sauber anspringen
+
+Starterbestand nach `npm run starter:import`:
+
+- acht Pexels-Videos
+- drei eigene SVG-Grafiken
+- ein Wikimedia-Commons-Kampfsportfoto unter CC BY-SA 4.0
+- alle zunächst `review`
+
+## Test B – Personen-/Themenrecherche
+
+Unter **Thema recherchieren**:
+
+1. Kanal **Kampfsport** wählen.
+2. Thema `Conor McGregor` eingeben.
+3. **Rechercheplan anzeigen** drücken.
+4. sinnvolle Bereiche prüfen, darunter Training, Kämpfe, Presse, Wiegen/Staredown, Walkout und Portraits.
+5. danach ein Testskript einfügen, das `Khabib Nurmagomedov`, `UFC 229` und `2018` enthält.
+6. erneut den Rechercheplan erzeugen.
+7. prüfen, dass skriptspezifische Bereiche reserviert werden.
+8. tiefe Recherche darf höchstens acht priorisierte Bereiche beziehungsweise 40 Provider-Suchen planen.
+
+### Recherche ohne private Keys
+
+- Pexels/Pixabay/Unsplash-Keyfelder leer lassen.
+- Recherche starten.
+- Openverse und Wikimedia müssen weiterhin nutzbar sein.
+
+### Recherche mit allen Quellen
+
+- Pexels-, Pixabay- und Unsplash-Key nur für die aktuelle Sitzung eingeben.
+- Recherche erneut durchführen.
+- die fünf integrierten Quellen technisch prüfen.
+- bei Pixabay denselben Suchlauf wiederholen und 24-Stunden-Cache kontrollieren.
+- Bilder direkt ansehen.
+- mindestens einen Pexels- oder Pixabay-Videotreffer im eingebauten Player abspielen.
+- Quellseiten öffnen und Creator/Lizenzdaten prüfen.
+- Treffer dürfen niemals automatisch markiert oder freigegeben werden.
+
+### Importtest
+
+- genau einen geeigneten Recherchetreffer markieren.
+- als `review` importieren.
+- unmarkierte Treffer dürfen nicht importiert werden.
+- dynamische Tags für Thema und Recherchebereich kontrollieren.
+- Freigabe bleibt von Personen-, Marken-, Event-, Veranstalter-, Broadcast- und Kontextprüfung abhängig.
+
+### Themenordner
+
+Prüfen:
+
+```text
+ALLES-GEFUNDEN/
+└── 05-THEMENRECHERCHEN/
+    └── 04-Kampfsport/
+        └── Conor McGregor/
+```
+
+Dort kontrollieren:
+
+- `00-RECHERCHEPLAN.md`
+- thematische Unterordner
+- Quellen-Unterordner
+- `-INFO.md`
+- `-QUELLE.url`
+- vorhandene Medium-/Vorschau-Links
+- `99-EXTERNE-SUCHLINKS`
+
+YouTube-, Google- und UFC-Websuchlinks dienen ausschließlich der zusätzlichen Sichtung. Sichtbarkeit dort bedeutet **keine Nutzungsfreigabe**.
+
+## Test C – fünf Medienquellen im normalen Arsenal Builder
+
+Unter **Medien suchen** mindestens eine Standardsuche pro Quelle ausführen:
 
 ### Pexels
 
-- Video · Hochformat wählen.
-- gültigen Pexels-Key eingeben.
-- reale Suche ausführen.
-- Vorschauen und Quelle prüfen.
+- Foto und Video testen
+- gültiger Sitzung-Key
+- Vorschau, Quelle und technischer Fit prüfen
 
 ### Pixabay
 
-- einmal Video und einmal Foto testen.
-- gültigen Pixabay-Key eingeben.
-- bei Wiederholung derselben Suche den 24-Stunden-Cache kontrollieren.
+- Foto und Video testen
+- gültiger Sitzung-Key
+- identische Suche wiederholen und 24-Stunden-Cache prüfen
 
 ### Unsplash
 
-- nur Fotoformat muss auswählbar sein.
-- gültigen Unsplash Access Key eingeben.
-- Treffer müssen Fotograf und Unsplash dokumentieren.
-- beim tatsächlichen Import muss der vorgesehene Download-Endpunkt gemeldet werden.
+- nur Fotoformat
+- gültiger Access Key
+- Fotograf und Unsplash dokumentiert
+- Download-Meldung beim tatsächlichen Import
 
 ### Openverse
 
-- kein Key-Feld erforderlich.
-- nur Fotoformat.
-- nur Public Domain, CC0, CC BY oder CC BY-SA als unterstützte offene Lizenzen übernehmen.
+- kein Key nötig
+- nur Fotoformat
+- nur unterstützte Public-Domain-/CC0-/CC-BY-/CC-BY-SA-Ergebnisse übernehmen
 
 ### Wikimedia Commons
 
-- kein Key-Feld erforderlich.
-- nur Fotoformat.
-- Lizenz, Quellseite und Attribution sichtbar prüfen.
+- kein Key nötig
+- nur Fotoformat
+- Lizenz, Quellseite und Attribution prüfen
 
-Für alle Quellen gilt:
+Für alle Quellen gilt: nur bewusst ausgewählte Treffer importieren und jeden Import zunächst auf `review` belassen.
 
-1. nichts automatisch freigeben.
-2. nur visuell geeignete Treffer markieren.
-3. als `review` importieren.
-4. Kanal- und Sammlungs-Tags kontrollieren.
-5. keine UFC-Logos, Broadcastausschnitte, fremden Eventgrafiken oder gefährlichen Weight-Cut-Inhalte blind übernehmen.
+## Test D – Suchbegriff-, Fallback- und Batch-Workflow
 
-## Test D – Batch-Suche
+Prüfen:
 
-1. In **Ausbau 720** einen Kanal wählen.
-2. **Top Suchlücken vorbereiten** drücken.
-3. im Builder Quelle und Format auswählen.
-4. Batch starten.
-5. kontrollieren, dass maximal fünf Sammlungen sequenziell durchsucht werden.
-6. jede Ergebnisgruppe muss separat auswählbar sein.
-7. nur ausgewählte Medien importieren.
-8. nach dem Import muss der Bestand aktualisiert werden.
+- technischer Fit 0–100 sortiert nur technisch und ändert keinen Status
+- Suchreihenfolge innerhalb einer Sammlung: **Suchbegriff 1 → 2 → 3 → nächste Quelle**
+- Video-Fallback: Pexels → Pixabay
+- Foto-Fallback: Unsplash → Openverse → Wikimedia → Pexels → Pixabay
+- Fallback startet keine API-Suche automatisch
+- Batch enthält höchstens fünf Sammlungen
+- mehrere Ergebnisgruppen können markiert werden
+- Sammelimport läuft sequenziell
+- Seite lädt erst am Ende einmal neu
+- importierte Karten werden gesperrt und markiert
+- tatsächliche Importzahl und übersprungene Dubletten werden getrennt angezeigt
 
-## Test E – Sitzungs-Keys
+## Test E – Ausbau 720 und Review-first
 
-1. Pexels-Key eingeben und eine Suche durchführen.
-2. eine zweite Pexels-Suche ohne erneute Eingabe starten.
-3. dasselbe mit Pixabay und Unsplash testen.
-4. **Sitzungs-Keys löschen** drücken.
-5. danach muss eine neue Key-Eingabe nötig sein.
-6. Browserseite neu laden; Keys dürfen danach nicht mehr vorhanden sein.
-7. im Browser-Code darf weder `localStorage` noch `sessionStorage` für API-Keys benutzt werden.
+Unter **Ausbau 720** prüfen:
 
-## Test F – eigene Datei
+- Finanzen 160
+- KI 160
+- Elektrotechnik 160
+- Kampfsport 240
+- Gesamtziel 720
+- globale **Nächste Aufgaben** zeigt höchstens sechs Prioritäten
+- Review-Aufgaben stehen vor unnötiger neuer Suche
+- Freigabe-Mix und echte Such-Mix-Lücke bleiben getrennt
+- vorhandene Review-Videos/Fotos verhindern redundante Nachsuche
+- Suchlücken werden mit passendem Medientyp, Quelle und Format vorbereitet
+- höchstens fünf priorisierte Sammlungen werden an den Builder übergeben
 
-1. Eine eigene Testdatei über **Eigene Dateien** bereitstellen.
-2. Vorschau, Dateityp und Dateigröße prüfen.
-3. Kanal und Sammlung auswählen.
-4. Titel, Beschreibung und Tags eintragen.
-5. Nutzungsrechte ausdrücklich bestätigen.
+## Test F – Sitzungs-Keys
+
+Für Arsenal Builder und Themenrecherche prüfen:
+
+- Key einmal eingeben und weitere Suche derselben Sitzung ohne erneute Eingabe starten
+- **Sitzungs-Keys löschen** entfernt die Schlüssel sofort
+- danach ist neue Eingabe nötig
+- Browserseite neu laden; Keys sind weg
+- weder `localStorage` noch `sessionStorage` enthalten Provider-Keys
+- Such-, Recherche- und Katalogdateien enthalten keine Provider-Keys
+
+## Test G – ALLES-GEFUNDEN
+
+`npm run vault:build` ausführen und prüfen:
+
+- `00-GESAMTINDEX.md`
+- `00-GESAMTINDEX.csv`
+- `00-MANIFEST.json`
+- vier Kanalordner
+- `05-THEMENRECHERCHEN`
+- `90-GEFUNDENE-KANDIDATEN`
+- mindestens eine echte lokale Dateikopie
+- externe Quelle-/Medium-/Vorschau-Verknüpfungen
+- klare Statusordner für Katalogassets
+
+Danach temporäre Suchdaten im vorgesehenen Cleanup-Workflow bereinigen beziehungsweise einen weiteren Vault-Build ausführen. Historische normale Suchfunde und Themenrecherchen müssen erhalten bleiben.
+
+## Test H – eigene Datei
+
+Unter **Eigene Dateien**:
+
+1. eigene Testdatei bereitstellen.
+2. Vorschau, Dateityp und technische Daten prüfen.
+3. Kanal und Sammlung wählen.
+4. Titel/Beschreibung/Tags ergänzen.
+5. Rechte ausdrücklich bestätigen.
 6. als `review` importieren.
-7. kontrollieren, ob das Asset im Katalog erscheint.
+7. Asset im Katalog und in `ALLES-GEFUNDEN` kontrollieren.
 
-## Test G – alle zwölf Starterassets prüfen
+## Test I – alle zwölf Starterassets entscheiden
 
-1. Navigation **Prüfen** öffnen.
-2. alle zwölf Starterassets vollständig öffnen und bewerten.
-3. Bei jedem Asset prüfen:
-   - sichtbarer Inhalt stimmt mit Titel und Tags überein
-   - Auflösung und Ausrichtung sind brauchbar
-   - Personen, Logos, Marken und Kennzeichen wurden kontrolliert
-   - Quelle und Lizenzseite sind nachvollziehbar
-   - geplanter Einsatzkontext ist passend
-4. Prüfer, Qualität und Notiz eintragen.
-5. Entscheidung speichern:
-   - freigeben
-   - einschränken
-   - archivieren
-6. nach einer Entscheidung muss automatisch das nächste offene Asset erscheinen.
+Unter **Prüfen** jedes Starterasset vollständig ansehen und kontrollieren:
 
-Für die Beta-Abnahme müssen **zwölf unterschiedliche Starter-IDs** eine dokumentierte Entscheidung besitzen.
+- sichtbarer Inhalt passt zu Titel und Tags
+- technische Qualität ausreichend
+- Personen, Logos, Marken und Kennzeichen geprüft
+- Quelle und Lizenz nachvollziehbar
+- Einsatzkontext geprüft
 
-Für `VAH-WBOX2021` zusätzlich prüfen:
+Erlaubte Entscheidungen:
 
-- sichtbare Personen
-- Attribution `Dotun55 / Wikimedia Commons`
-- Lizenz CC BY-SA 4.0
-- Share-Alike-Pflichten bei Bearbeitungen
+- freigeben
+- einschränken
+- archivieren
 
-## Test H – Freigabe und Negativtests
+Für die Beta-Abnahme müssen zwölf unterschiedliche Starter-IDs eine dokumentierte Entscheidung besitzen.
 
-Empfohlenes erstes Freigabe-Testasset: `VAH-GCIRCU01`, sofern die Sichtprüfung bestanden wurde.
+Für `VAH-WBOX2021` zusätzlich Attribution, sichtbare Personen, CC BY-SA 4.0 und Share-Alike-Pflichten prüfen.
 
-Vor Freigabe alle Pflichtpunkte bestätigen:
+## Test J – Freigabe-Negativtests
 
-- Asset vollständig angesehen
-- Personen, Logos und Marken geprüft
-- Quelle, Lizenz und Nutzung geprüft
-- geplanter Einsatzkontext geprüft
+Prüfen:
 
-Negativtests:
+- Freigabe mit fehlendem Pflichtpunkt wird blockiert
+- Einschränkung ohne Begründung wird blockiert
+- ungeprüftes Asset kann nicht in ein Medienpaket
+- zweite parallele Schreibaktion wird mit HTTP 409 blockiert
 
-- Freigabe mit fehlendem Pflichtpunkt muss blockiert werden.
-- Einschränkung ohne Begründung muss blockiert werden.
-- ungeprüftes Asset darf nicht in ein Medienpaket exportiert werden.
-- während einer laufenden Schreibaktion muss eine zweite Schreibaktion mit HTTP 409 blockiert werden.
+Mindestens ein eindeutig geeignetes Asset nach vollständiger Vier-Punkte-Prüfung freigeben.
 
-## Test I – Skript-Planer
+## Test K – Skript-Planer
 
-1. **Skript planen** öffnen.
-2. ein echtes Skript mit mindestens vier Sätzen verwenden.
-3. Kanal, Zieldauer und Format wählen.
-4. Shotlist erzeugen.
-5. kontrollieren:
-   - Szenen sinnvoll getrennt
-   - letzter Zeitwert entspricht der Zieldauer
-   - Sammlungen passen zum Sprechtext
-   - vorhandene Assets zeigen Status
-   - ungeprüfte Assets zeigen Warnung
-   - fehlende Motive liefern Suchbegriffe
-6. JSON, CSV und Markdown exportieren.
-7. zusätzlich CLI-Test:
+Ein echtes Skript eines Kanals verarbeiten und prüfen:
+
+- sinnvolle Szenentrennung
+- exakte Zieldauer
+- passende Sammlungen
+- Assetstatus sichtbar
+- Warnung bei ungeprüften Assets
+- fehlende Motive liefern Suchbegriffe
+- JSON-, CSV- und Markdown-Export
+
+Zusätzlich CLI:
 
 ```bash
 npm run script:plan -- \
@@ -235,49 +286,18 @@ npm run script:plan -- \
   --orientation vertical
 ```
 
-Unter `reports/shot-plans` prüfen:
+Unter `reports/shot-plans` müssen JSON, CSV, Markdown, SRT und Skriptkopie vorhanden sein.
 
-- `shotlist.json`
-- `shotlist.csv`
-- `shotlist.md`
-- `shotlist.srt`
-- `script.txt`
+## Test L – Medienpaket und echte Nutzung
 
-## Test J – Medienpaket
+1. nur freigegebene Assets favorisieren.
+2. verifiziertes Medienpaket erzeugen.
+3. Manifest, SHA-256, Quelle, Lizenz und Attribution prüfen.
+4. ein freigegebenes Asset aus dem Paket in echtem Content verwenden.
+5. Projekt und Plattform dokumentieren.
+6. Attribution exportieren.
 
-1. mindestens ein freigegebenes Asset favorisieren.
-2. optional ein Review-Asset zusätzlich markieren und den Negativtest ausführen.
-3. nur freigegebene Favoriten für das endgültige Paket verwenden.
-4. verifiziertes Medienpaket erstellen.
-5. unter `exports/media-packs` prüfen:
-
-```text
-media/
-manifest.json
-ATTRIBUTION.md
-README.md
-```
-
-Im Manifest prüfen:
-
-- Asset-ID
-- Dateiname
-- Dateigröße
-- SHA-256
-- Quelle
-- Lizenz
-- Attribution
-- lokaler Medienpfad
-
-## Test K – echter Content-Einsatz
-
-1. ein freigegebenes Asset aus dem Medienpaket in einem echten Content-Projekt verwenden.
-2. Projekt-ID, Projektname und Plattform dokumentieren.
-3. optional Veröffentlichungslink und Nutzungsnotiz ergänzen.
-4. Attribution exportieren.
-5. Nutzung nach dem Neuladen kontrollieren.
-
-## Test L – Berichte, Backup und Abschluss
+## Test M – Berichte, Backup und Abschluss
 
 ```bash
 npm run arsenal:expansion
@@ -289,31 +309,19 @@ npm run check
 
 Prüfen:
 
-- `reports/arsenal-expansion-plan.json`
-- `reports/arsenal-expansion-plan.csv`
-- `reports/channel-coverage.json`
-- `reports/channel-coverage.md`
-- Beta-Bericht
+- Ausbauplan JSON/CSV
+- Kanalabdeckung JSON/Markdown
+- Beta-Readiness JSON/Markdown
 - Backup-Manifest und Prüfsummen
+- `topicResearchGenerated: true`
+- `scriptSpecificTopicResearch: true`
+- `starterAssetsReviewed: true`
+- `verifiedMediaPackCreated: true`
+- `realUsageRecorded: true`
+- `realTestComplete: true`
 
 ## Abnahmekriterien
 
-- technische lokale Projektprüfung erfolgreich
-- zwölf Starterassets sichtbar
-- alle zwölf Starterassets mit einer Entscheidung protokolliert
-- alle vier Kanäle vertreten
-- fünf Medienquellen technisch geprüft
-- Openverse und Wikimedia ohne API-Key verwendbar
-- Pexels/Pixabay/Unsplash-Keys nur im Seitenspeicher gehalten
-- Ausbau-720-Priorisierung funktioniert
-- Review-first-Logik verhindert unnötige Nachsuche
-- Skript-Planer erzeugt plausible Shotlist und Exporte
-- mindestens ein eigener Inbox-Import erfolgreich
-- mindestens ein Asset freigegeben
-- verifiziertes Medienpaket erfolgreich erzeugt
-- mindestens eine echte Nutzung dokumentiert
-- Attribution und Backup erfolgreich erzeugt
-- `realTestComplete: true`
-- keine API-Schlüssel oder vertraulichen URLs im Repository
+Die Beta gilt erst als **real getestet**, wenn alle oben genannten technischen und manuellen Prüfungen erfüllt sind. Insbesondere ist eine sichtbare Person oder ein bekannter Name im Rechercheergebnis niemals automatisch ein Nachweis für Identität oder Nutzungsrecht. Der konkrete Inhalt und die Rechte werden vor jeder Veröffentlichung separat geprüft.
 
-Die Beta gilt als **real getestet**, sobald alle Kriterien erfüllt sind. Ein Merge in `main` erfolgt erst danach.
+Der Pull Request bleibt bis dahin Draft und wird nicht in `main` gemergt.
