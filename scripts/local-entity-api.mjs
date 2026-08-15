@@ -1,4 +1,4 @@
-import { randomBytes } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
@@ -14,6 +14,7 @@ const PROVIDERS = ['pexels', 'pixabay', 'unsplash', 'openverse', 'wikimedia'];
 const KEYLESS = new Set(['openverse', 'wikimedia']);
 const PHOTO_ONLY = new Set(['unsplash', 'openverse', 'wikimedia']);
 const MAX_TASKS = 40;
+const PIXABAY_CACHE_MS = 24 * 60 * 60 * 1000;
 const CHANNEL_FOLDERS = { finance: '01-Finanzen', ai: '02-KI', electro: '03-Elektrotechnik', 'combat-sports': '04-Kampfsport' };
 
 export function createLocalEntityApi({ root = process.cwd(), token, searchers = defaultSearchers() } = {}) {
@@ -58,7 +59,8 @@ export function createLocalEntityApi({ root = process.cwd(), token, searchers = 
 
           for (const task of tasks) {
             try {
-              const result = await executeTask(task, keys, perPage, searchers);
+              const execution = await executeTaskCached(task, keys, perPage, searchers, searchDirectory);
+              const result = execution.result;
               const filtered = [];
               for (const asset of result.assets ?? []) {
                 const keysForAsset = assetKeys(task.provider, asset);
@@ -75,7 +77,8 @@ export function createLocalEntityApi({ root = process.cwd(), token, searchers = 
                 searchId,
                 provider: task.provider,
                 searchedAt: new Date().toISOString(),
-                cached: false,
+                expiresAt: execution.expiresAt ?? null,
+                cached: execution.cached,
                 research: { topic: plan.topic, topicSlug: plan.topicSlug, section: task.facet.id, sectionLabel: task.facet.label },
                 arsenalJob: job,
                 result
@@ -98,7 +101,8 @@ export function createLocalEntityApi({ root = process.cwd(), token, searchers = 
             groups,
             errors,
             assets: groups.reduce((sum, group) => sum + group.assets.length, 0),
-            searches: groups.length
+            searches: groups.length,
+            cachedSearches: groups.filter((group) => group.cached).length
           });
         }
         return sendJson(response, 404, { error: 'Themenrecherche-Aktion nicht gefunden.' });
@@ -148,6 +152,48 @@ function buildJob({ plan, channel, facet, provider, perPage }) {
     researchSection: facet.id,
     researchSectionLabel: facet.label
   };
+}
+
+async function executeTaskCached(task, keys, perPage, searchers, searchDirectory) {
+  if (task.provider !== 'pixabay') return { result: await executeTask(task, keys, perPage, searchers), cached: false, expiresAt: null };
+  const cacheDirectory = path.join(searchDirectory, 'pixabay-cache');
+  fs.mkdirSync(cacheDirectory, { recursive: true });
+  const request = pixabayCacheRequest(task, perPage);
+  const cacheKey = createHash('sha256').update(JSON.stringify(request)).digest('hex').slice(0, 32);
+  const cacheFile = path.join(cacheDirectory, `${cacheKey}.json`);
+  const cachedEntry = readFreshPixabayCache(cacheFile);
+  if (cachedEntry) return { result: structuredClone(cachedEntry.result), cached: true, expiresAt: cachedEntry.expiresAt };
+
+  const result = await executeTask(task, keys, perPage, searchers);
+  const expiresAt = new Date(Date.now() + PIXABAY_CACHE_MS).toISOString();
+  fs.writeFileSync(cacheFile, `${JSON.stringify({
+    version: 1,
+    provider: 'pixabay',
+    cacheKey,
+    fetchedAt: new Date().toISOString(),
+    expiresAt,
+    request,
+    result
+  }, null, 2)}\n`, { mode: 0o600 });
+  return { result, cached: false, expiresAt };
+}
+
+function readFreshPixabayCache(file) {
+  if (!fs.existsSync(file)) return null;
+  try {
+    const stat = fs.statSync(file);
+    const entry = readJson(file);
+    if (entry?.provider !== 'pixabay' || !Array.isArray(entry?.result?.assets)) return null;
+    if (Date.now() - stat.mtimeMs >= PIXABAY_CACHE_MS) return null;
+    if (entry.expiresAt && Date.parse(entry.expiresAt) <= Date.now()) return null;
+    return entry;
+  } catch {
+    return null;
+  }
+}
+
+function pixabayCacheRequest(task, perPage) {
+  return { query: task.facet.query, type: task.type, orientation: 'vertical', perPage, locale: 'de', page: 1 };
 }
 
 async function executeTask(task, keys, perPage, searchers) {
@@ -217,7 +263,7 @@ function responsePayload(wrapper) {
   return {
     ok: true,
     provider: wrapper.provider,
-    cached: false,
+    cached: Boolean(wrapper.cached),
     searchId: wrapper.searchId,
     job: wrapper.arsenalJob,
     research: wrapper.research,
@@ -250,6 +296,7 @@ function writeResearchGuide(root, plan, channel, providers, groups, errors) {
     `- Kanal: **${channel.label}**`,
     `- Recherchemodus: **${plan.depth === 'deep' ? 'tief' : 'schnell'}**`,
     `- erfolgreiche Suchgruppen: **${groups.length}**`,
+    `- davon aus 24-Stunden-Cache: **${groups.filter((group) => group.cached).length}**`,
     `- eindeutige API-Treffer: **${groups.reduce((sum, group) => sum + group.assets.length, 0)}**`,
     `- verwendete API-Quellen: **${providers.map(providerLabel).join(', ')}**`,
     `- fehlgeschlagene Einzelsuchen: **${errors.length}**`, '',
