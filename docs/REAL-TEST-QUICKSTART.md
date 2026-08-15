@@ -20,7 +20,7 @@ Navigation **Thema recherchieren** öffnen.
 
 - Zielkanal **Kampfsport** wählen.
 - Thema `Conor McGregor` eingeben.
-- Rechercheart **Sport / Wettkampf** oder Auto verwenden.
+- Rechercheart **Sport / Kampf / Athletik** oder Auto verwenden.
 - zuerst **Rechercheplan anzeigen** wählen.
 - prüfen, dass sinnvolle Bereiche wie Training, Wettkampf, Arena, Presse, Wiegen, Walkout, Team und Reaktionen erscheinen.
 - zusätzlich ein kurzes Testskript mit `Khabib Nurmagomedov`, `UFC 229` und `2018` einfügen.
