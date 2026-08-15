@@ -49,7 +49,7 @@
 
 - [x] eigener Arbeitsbereich **Thema recherchieren** ist in Navigation und Weboberfläche integriert
 - [x] Zielkanal und Rechercheart sind getrennt
-- [x] Recherchearten: Auto, Person, Firma/Marke/Organisation, Produkt/Objekt, Event/Veranstaltung, Ort/Gebäude/Region, Technik/Gerät/System, Sport/Wettkampf, Historisches Thema und Allgemeines Thema
+- [x] Recherchearten: Auto, Person, Firma/Marke/Organisation, Produkt/Objekt, Event/Veranstaltung, Ort/Gebäude/Region, Technik/Gerät/System, Sport/Kampf/Athletik, Historisches Thema und Allgemeines Thema/Konzept
 - [x] automatische Typ-Erkennung ist vorhanden
 - [x] jede Rechercheart besitzt eigene visuelle Motivgruppen
 - [x] optionales Reel-Skript kann konkrete Namen, Firmen, Events, Jahreszahlen und weitere Entitäten als zusätzliche Suchbegriffe erkennen
@@ -66,7 +66,7 @@
 - [x] Rechercheergebnisse besitzen technische Vorsortierung, aber keine automatische Inhalts-/Rechtefreigabe
 - [x] `00-RECHERCHEPLAN.md` dokumentiert Rechercheart und Recherchemodus
 - [x] externe YouTube-, Google-Bilder-, Google-Video-, Google-News-, Wikipedia- und gegebenenfalls UFC-Suchlinks sind nur zur Sichtung dokumentiert
-- [ ] `Conor McGregor` erzeugt als Sport-Recherche einen sinnvollen Plan
+- [ ] `Conor McGregor` erzeugt als **Sport / Kampf / Athletik**-Recherche einen sinnvollen Plan
 - [ ] mindestens eine **zweite unterschiedliche Rechercheart** wurde real geprüft, z. B. `RCD` als Technik oder `Tesla Model 3` als Produkt
 - [ ] `npm run beta:verify` meldet `multipleResearchTypesVerified: true`
 - [ ] Testskript mit `Khabib Nurmagomedov`, `UFC 229` und `2018` erzeugt skriptspezifische Suchbereiche
