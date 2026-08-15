@@ -27,6 +27,7 @@ const importers = {
   openverse: 'scripts/open-media-import-selected.mjs',
   wikimedia: 'scripts/open-media-import-selected.mjs'
 };
+const aliases = [...new Set([job.channelLabel, job.collectionLabel, job.collection].map(safeAlias).filter(Boolean))];
 const childArgs = [
   importers[provider],
   '--input', tempInput,
@@ -35,7 +36,7 @@ const childArgs = [
   '--orientation', job.orientation,
   '--query', job.query,
   '--tags', [...new Set(job.tags ?? [])].join(','),
-  '--aliases', [job.channelLabel, job.collectionLabel, job.collection].filter(Boolean).join(','),
+  '--aliases', aliases.join(','),
   '--scopes', args.scopes ?? 'organic-social,youtube,website',
   '--quality', args.quality ?? '3',
   '--created-by', args['created-by'] ?? `arsenal-${provider}-selected-import`
@@ -62,5 +63,6 @@ if (run.stdout) process.stdout.write(run.stdout);
 if (run.stderr) process.stderr.write(run.stderr);
 if (run.status !== 0) process.exit(run.status ?? 1);
 
+function safeAlias(value) { const text = String(value ?? '').replace(/\s+/g, ' ').trim(); return text.length >= 2 ? text.slice(0, 80) : ''; }
 function parseArgs(values) { const result = {}; for (let i = 0; i < values.length; i += 1) { const token = values[i]; if (!token.startsWith('--')) fail(`Unbekanntes Argument: ${token}`); const [key, inline] = token.slice(2).split('=', 2); const next = values[i + 1]; result[key] = inline ?? (next && !next.startsWith('--') ? values[++i] : 'true'); } return result; }
 function fail(message) { console.error(message); process.exit(1); }
