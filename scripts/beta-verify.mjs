@@ -175,9 +175,9 @@ function findValidTopicResearch(directory) {
     'Event / Veranstaltung',
     'Ort / Gebäude / Region',
     'Technik / Gerät / System',
-    'Sport / Wettkampf',
+    'Sport / Kampf / Athletik',
     'Historisches Thema',
-    'Allgemeines Thema'
+    'Allgemeines Thema / Konzept'
   ]);
   for (const channelEntry of fs.readdirSync(directory, { withFileTypes: true })) {
     if (!channelEntry.isDirectory() || channelEntry.name.startsWith('.')) continue;
