@@ -20,24 +20,40 @@ function render(health) {
   const header = el('div', 'entity-header');
   const headerCopy = el('div');
   headerCopy.append(
-    text('span', 'Personen- & Themenrecherche', 'eyebrow'),
-    text('h2', 'Ein Reel-Thema → eigene Medienrecherche'),
-    text('p', 'Beispiel: „Conor McGregor“. Der Hub baut automatisch mehrere Suchbereiche auf, durchsucht die verfügbaren Quellen und legt alle Funde dauerhaft unter ALLES-GEFUNDEN/05-THEMENRECHERCHEN ab. Treffer sind noch keine Freigabe.')
+    text('span', 'Universelle Medienrecherche', 'eyebrow'),
+    text('h2', 'Beliebiges Thema → komplette Medienrecherche'),
+    text('p', 'Person, Firma, Produkt, Event, Ort, Technik, Sport, Historie oder irgendein Reel-Thema eingeben. Der Hub baut passende Suchbereiche auf, durchsucht die verfügbaren Quellen und archiviert die Funde dauerhaft unter ALLES-GEFUNDEN/05-THEMENRECHERCHEN. Treffer sind noch keine Freigabe.')
   );
   header.append(headerCopy);
 
   const form = document.createElement('form');
   form.className = 'entity-form';
-  const topic = field('Person oder Thema', 'text', { required: true, minlength: 2, maxlength: 120, placeholder: 'z. B. Conor McGregor' });
-  const channel = selectField('Kanal', [
+  const topic = field('Was willst du recherchieren?', 'text', { required: true, minlength: 2, maxlength: 120, placeholder: 'z. B. Conor McGregor, Tesla Model 3, Berlin, RCD, NVIDIA …' });
+  const channel = selectField('Zielkanal', [
     ['combat-sports', 'Kampfsport'],
     ['finance', 'Finanzen'],
     ['ai', 'Künstliche Intelligenz'],
     ['electro', 'Elektrotechnik']
   ]);
-  const depth = selectField('Recherche', [['deep', 'Tief · bis 8 Suchbereiche'], ['quick', 'Schnell · bis 6 Suchbereiche']]);
+  const researchType = selectField('Rechercheart', [
+    ['auto', 'Automatisch erkennen'],
+    ['person', 'Person'],
+    ['organization', 'Firma / Marke / Organisation'],
+    ['product', 'Produkt / Objekt'],
+    ['event', 'Event / Veranstaltung'],
+    ['place', 'Ort / Gebäude / Region'],
+    ['technology', 'Technik / Gerät / System'],
+    ['sport', 'Sport / Kampf / Athletik'],
+    ['history', 'Historisches Thema'],
+    ['concept', 'Allgemeines Thema / Konzept']
+  ]);
+  const depth = selectField('Rechercheumfang', [
+    ['deep', 'Tief · bis 8 Bereiche'],
+    ['quick', 'Schnell · bis 6 Bereiche'],
+    ['max', 'Maximal · bis 12 Bereiche']
+  ]);
   const perPage = field('Treffer je Suche', 'number', { min: 3, max: 12, value: 6, required: true });
-  const script = textareaField('Optional: Reel-Skript', { maxlength: 12000, placeholder: 'Skript einfügen. Namen, Gegner, Events und Jahreszahlen werden als zusätzliche Suchbegriffe erkannt.' });
+  const script = textareaField('Optional: Reel-Skript', { maxlength: 12000, placeholder: 'Skript einfügen. Namen, Gegner, Firmen, Events, Jahreszahlen und weitere konkrete Begriffe werden als zusätzliche Suchen erkannt.' });
   script.wrapper.classList.add('entity-script-field');
 
   const pexels = field('Pexels Key · optional', 'password', { minlength: 8, maxlength: 300, autocomplete: 'off', placeholder: 'Nur für diese Sitzung' });
@@ -75,7 +91,7 @@ function render(health) {
     try {
       const data = await post('/entity-api/plan', payload(), health.token);
       renderPlan(planArea, data.plan);
-      showStatus(status, `${data.plan.facets.length} Suchbereiche für „${data.plan.topic}“ vorbereitet.`, true);
+      showStatus(status, `${data.plan.facets.length} Suchbereiche für „${data.plan.topic}“ als ${data.plan.researchTypeLabel} vorbereitet.`, true);
     } catch (error) {
       showStatus(status, error.message, false);
     } finally { setBusy(false); }
@@ -86,7 +102,7 @@ function render(health) {
     rememberTypedKeys();
     setBusy(true);
     results.replaceChildren();
-    showStatus(status, 'Recherche läuft sequenziell über alle verfügbaren Quellen. Das kann bei tiefer Recherche etwas dauern …', true);
+    showStatus(status, 'Recherche läuft sequenziell über alle verfügbaren Quellen. Maximal-Recherche kann etwas länger dauern …', true);
     try {
       const data = await post('/entity-api/search', { ...payload(), keys: Object.fromEntries(researchKeys), perPage: Number(perPage.input.value) }, health.token);
       clearVisibleKeys();
@@ -95,7 +111,7 @@ function render(health) {
       const skipped = data.skippedProviders.length ? ` · ohne Key ausgelassen: ${data.skippedProviders.map(providerLabel).join(', ')}` : '';
       const errors = data.errors.length ? ` · ${data.errors.length} Einzelsuchen mit Fehler` : '';
       const cache = data.cachedSearches ? ` · ${data.cachedSearches} Pixabay-Suchen aus 24h-Cache` : '';
-      showStatus(status, `${data.assets} eindeutige Treffer aus ${data.searches} erfolgreichen Suchgruppen gespeichert${cache}${skipped}${errors}. Alles liegt zusätzlich unter ALLES-GEFUNDEN/05-THEMENRECHERCHEN/${safeDisplay(data.research.topic)}.`, true);
+      showStatus(status, `${data.assets} eindeutige Treffer aus ${data.searches} erfolgreichen Suchgruppen gespeichert${cache}${skipped}${errors}. Rechercheart: ${data.research.researchTypeLabel}.`, true);
     } catch (error) {
       clearVisibleKeys();
       showStatus(status, error.message, false);
@@ -103,7 +119,13 @@ function render(health) {
   });
 
   function payload() {
-    return { topic: topic.input.value.trim(), channel: channel.input.value, depth: depth.input.value, script: script.input.value.trim() };
+    return {
+      topic: topic.input.value.trim(),
+      channel: channel.input.value,
+      researchType: researchType.input.value,
+      depth: depth.input.value,
+      script: script.input.value.trim()
+    };
   }
 
   function rememberTypedKeys() {
@@ -126,27 +148,29 @@ function render(health) {
     clearKeys.disabled = value;
   }
 
-  form.append(topic.wrapper, channel.wrapper, depth.wrapper, perPage.wrapper, pexels.wrapper, pixabay.wrapper, unsplash.wrapper, script.wrapper, planButton, searchButton, clearKeys, status);
+  form.append(topic.wrapper, channel.wrapper, researchType.wrapper, depth.wrapper, perPage.wrapper, pexels.wrapper, pixabay.wrapper, unsplash.wrapper, script.wrapper, planButton, searchButton, clearKeys, status);
   section.replaceChildren(header, form, planArea, results);
 }
 
 function renderPlan(container, plan) {
   const title = text('strong', `Rechercheplan · ${plan.topic}`);
-  const note = text('span', `${plan.facets.length} Bereiche · ${plan.depth === 'deep' ? 'tiefe' : 'schnelle'} Recherche · maximal ${plan.maxSearchTasks} Provider-Suchen`);
+  const mode = plan.depth === 'max' ? 'maximale' : plan.depth === 'deep' ? 'tiefe' : 'schnelle';
+  const auto = plan.requestedResearchType === 'auto' ? ' · automatisch erkannt' : '';
+  const note = text('span', `${plan.researchTypeLabel}${auto} · ${plan.facets.length} Bereiche · ${mode} Recherche · maximal ${plan.maxSearchTasks} Provider-Suchen`);
   const chips = el('div', 'entity-plan-chips');
   for (const facet of plan.facets) {
     const chip = el('div', 'entity-plan-chip');
     chip.append(text('b', `${facet.order}. ${facet.label}`), text('span', facet.query), text('small', facet.preferredMedia === 'video' ? 'Video bevorzugt' : 'Foto bevorzugt'));
     chips.append(chip);
   }
-  const warning = text('p', 'Wichtig: Personen-, Event-, Marken- und Broadcastrechte werden nicht automatisch freigegeben. Die Recherche sammelt Kandidaten; Veröffentlichung bleibt eine bewusste Review-Entscheidung.', 'entity-rights-warning');
+  const warning = text('p', 'Wichtig: Urheber-, Personen-, Event-, Marken- und Broadcastrechte werden nicht automatisch freigegeben. Die Recherche sammelt Kandidaten; Veröffentlichung bleibt immer eine bewusste Review-Entscheidung.', 'entity-rights-warning');
   container.replaceChildren(title, note, chips, warning);
 }
 
 function renderResults(container, data, token) {
   const toolbar = el('div', 'entity-result-toolbar');
   const copy = el('div');
-  copy.append(text('strong', `${data.assets} Treffer · ${data.research.topic}`), text('span', `${data.searchedProviders.map(providerLabel).join(' · ')} · Videos direkt abspielbar · Rechte weiterhin prüfen`));
+  copy.append(text('strong', `${data.assets} Treffer · ${data.research.topic}`), text('span', `${data.research.researchTypeLabel} · ${data.searchedProviders.map(providerLabel).join(' · ')} · Videos direkt abspielbar · Rechte weiterhin prüfen`));
   const importAll = button('Alle markierten als Review importieren', 'entity-primary');
   toolbar.append(copy, importAll);
   const importStatus = text('p', '', 'entity-status');
@@ -335,8 +359,8 @@ function mediaArea(item) { return (Number(item?.width) || 0) * (Number(item?.hei
 
 function rightsHint(provider, section) {
   if (provider === 'openverse' || provider === 'wikimedia') return 'Offene Lizenz möglich · konkrete Lizenz/Attribution vor Nutzung prüfen.';
-  if (['fight', 'press', 'weigh-in', 'walkout'].includes(section)) return 'Person/Event/Broadcast/Marken-Kontext besonders prüfen; Quelle allein bedeutet keine Nutzungsfreigabe.';
-  return 'Quellenlizenz, Person und Marken vor Nutzung prüfen.';
+  if (['action', 'event', 'press', 'weigh-in', 'walkout', 'branding', 'campaign', 'advertising'].includes(section)) return 'Urheber-/Person-/Event-/Marken-/Broadcast-Kontext besonders prüfen; Quelle allein bedeutet keine Nutzungsfreigabe.';
+  return 'Quellenlizenz, Urheber, Personen, Marken und Nutzungskontext vor Veröffentlichung prüfen.';
 }
 
 function markImported(container, ids) {
@@ -364,4 +388,3 @@ function el(tag, className = '') { const item = document.createElement(tag); if 
 function text(tag, value, className = '') { const item = el(tag, className); item.textContent = value; return item; }
 function showStatus(item, value, ok) { item.hidden = false; item.className = `entity-status ${ok ? 'success' : 'error'}`; item.textContent = value; }
 function providerLabel(value) { return providerLabels[value] ?? value; }
-function safeDisplay(value) { return String(value ?? '').replace(/[\\/:*?"<>|]/g, ' ').trim(); }
