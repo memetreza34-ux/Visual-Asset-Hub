@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 const root = process.cwd();
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const coreScript = path.join(scriptDir, 'build-found-media-vault-core.mjs');
+const topicAugmentScript = path.join(scriptDir, 'augment-topic-vault.mjs');
 const vaultRoot = path.join(root, 'ALLES-GEFUNDEN');
 const archives = [
   { name: 'Kandidaten', root: path.join(vaultRoot, '90-GEFUNDENE-KANDIDATEN'), backup: path.join(root, '.local-storage', 'vault-candidate-history') },
@@ -37,6 +38,18 @@ if (result.status !== 0) {
 restoreArchives();
 cleanupBackups();
 
+const augment = spawnSync(process.execPath, [topicAugmentScript], {
+  cwd: root,
+  encoding: 'utf8',
+  shell: false,
+  maxBuffer: 8 * 1024 * 1024
+});
+if (augment.status !== 0) {
+  if (augment.stdout) process.stdout.write(augment.stdout);
+  if (augment.stderr) process.stderr.write(augment.stderr);
+  process.exit(augment.status ?? 1);
+}
+
 const candidateFiles = listFiles(archives[0].root, (name) => name.endsWith('-INFO.md'));
 const topicFiles = listFiles(archives[1].root, (name) => name.endsWith('-INFO.md'));
 writeHistoryIndex(archives[0].root, candidateFiles, 'Historisches Kandidatenarchiv', 'Diese Liste enthält auch Funde aus älteren normalen Suchläufen.');
@@ -44,6 +57,7 @@ writeHistoryIndex(archives[1].root, topicFiles, 'Historische Themenrecherchen', 
 augmentMainIndexes(candidateFiles, topicFiles);
 
 if (result.stdout) process.stdout.write(result.stdout);
+if (augment.stdout) process.stdout.write(augment.stdout);
 console.log(`Historische Suchfunde bleiben erhalten: ${candidateFiles.length} normale Kandidaten + ${topicFiles.length} Themenrecherche-Einträge.`);
 
 function restoreArchives() {
