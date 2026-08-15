@@ -12,30 +12,45 @@
 
 ## Test in der Weboberfläche
 
-### 1. Personen-/Themenrecherche real testen
+### 1. Universelle Themenrecherche real testen
 
-Navigation **Thema recherchieren** öffnen und als Kampfsport-Thema eingeben:
+Navigation **Thema recherchieren** öffnen.
 
-```text
-Conor McGregor
-```
+#### Recherche 1 – Sport
 
-Danach:
-
+- Zielkanal **Kampfsport** wählen.
+- Thema `Conor McGregor` eingeben.
+- Rechercheart **Sport / Wettkampf** oder Auto verwenden.
 - zuerst **Rechercheplan anzeigen** wählen.
-- prüfen, dass sinnvolle Bereiche wie Training, Kämpfe, Presse, Wiegen/Staredown, Walkout und Portraits erscheinen.
+- prüfen, dass sinnvolle Bereiche wie Training, Wettkampf, Arena, Presse, Wiegen, Walkout, Team und Reaktionen erscheinen.
 - zusätzlich ein kurzes Testskript mit `Khabib Nurmagomedov`, `UFC 229` und `2018` einfügen.
 - prüfen, dass skriptspezifische Suchbereiche entstehen.
-- ohne private Keys mindestens Openverse und Wikimedia testen.
-- danach Pexels-, Pixabay- und Unsplash-Keys nur für die Sitzung eingeben und alle fünf Quellen prüfen.
-- **Alles recherchieren** starten.
-- Bildtreffer visuell kontrollieren.
-- mindestens einen Pexels- oder Pixabay-Videotreffer direkt im eingebauten Player abspielen.
-- Quellseite und Rechtewarnung kontrollieren.
-- prüfen, dass `ALLES-GEFUNDEN/05-THEMENRECHERCHEN/04-Kampfsport/Conor McGregor/` aufgebaut wurde.
-- `00-RECHERCHEPLAN.md` und `99-EXTERNE-SUCHLINKS` kontrollieren.
-- externe YouTube-/Google-/UFC-Suchlinks ausschließlich als Recherchehilfe behandeln, nicht als Nutzungsrecht.
-- nur einen eindeutig gewünschten Treffer markieren und als `review` importieren; unmarkierte Treffer dürfen nicht importiert werden.
+
+#### Recherche 2 – andere Art
+
+Mindestens eine zweite Rechercheart real durchführen, z. B.:
+
+- `RCD` → **Technik / Gerät / System**
+- `Tesla Model 3` → **Produkt / Objekt**
+- `NVIDIA` → **Firma / Marke / Organisation**
+- `Berlin` → **Ort / Gebäude / Region**
+
+Der zweite Plan muss andere Motivgruppen erzeugen. Für den Abschluss muss `beta:verify` später **mindestens zwei unterschiedliche Recherchearten** erkennen.
+
+#### Umfang und Quellen
+
+- Schnell: maximal 6 Motivbereiche
+- Tief: maximal 8 Motivbereiche
+- Maximal: maximal 12 Motivbereiche beziehungsweise 60 Provider-Suchen bei fünf Quellen
+- ohne private Keys mindestens Openverse und Wikimedia testen
+- danach Pexels-, Pixabay- und Unsplash-Keys nur für die Sitzung eingeben und alle fünf Quellen prüfen
+- **Alles recherchieren** starten
+- Bildtreffer visuell kontrollieren
+- mindestens einen Pexels- oder Pixabay-Videotreffer direkt im eingebauten Player abspielen
+- Quellseite und Rechtewarnung kontrollieren
+- `00-RECHERCHEPLAN.md` muss Zielkanal, Rechercheart und Recherchemodus dokumentieren
+- externe YouTube-/Google-/Wikipedia-/gegebenenfalls UFC-Suchlinks ausschließlich als Recherchehilfe behandeln
+- nur einen eindeutig gewünschten Treffer markieren und als `review` importieren; unmarkierte Treffer dürfen nicht importiert werden
 
 ### 2. Zwölf Starterassets prüfen
 
@@ -71,7 +86,7 @@ Pexels und Pixabay auch mit einem Videoformat testen. Unsplash, Openverse und Wi
 - `00-GESAMTINDEX.md`, CSV und Manifest öffnen.
 - kontrollieren, dass zwölf Starterassets nach dem Starterimport enthalten sind.
 - normale Arsenal-Suchfunde unter `90-GEFUNDENE-KANDIDATEN` kontrollieren.
-- Themenfunde unter `05-THEMENRECHERCHEN` kontrollieren.
+- mindestens zwei Themenrecherchen mit unterschiedlichen dokumentierten Recherchearten unter `05-THEMENRECHERCHEN` kontrollieren.
 - mindestens eine echte lokale Dateikopie und eine externe `.url`-Verknüpfung prüfen.
 - nach einem weiteren `npm run vault:build` kontrollieren, dass historische Themenfunde erhalten bleiben.
 
@@ -106,8 +121,10 @@ Pexels und Pixabay auch mit einem Videoformat testen. Unsplash, Openverse und Wi
 
 Die Oberfläche beziehungsweise `npm run beta:verify` muss am Ende bestätigen beziehungsweise die Release-Checkliste muss dokumentieren:
 
-- Personen-/Themenrecherche mit visueller Bild- und Video-Sichtung erfolgreich
-- skriptspezifische Gegner-/Event-/Jahreszahl-Recherche erfolgreich
+- universelle Themenrecherche mit visueller Bild- und Video-Sichtung erfolgreich
+- mindestens zwei unterschiedliche Recherchearten erfolgreich
+- `multipleResearchTypesVerified: true`
+- skriptspezifische Recherche erfolgreich
 - alle fünf Medienquellen technisch geprüft
 - `ALLES-GEFUNDEN` inklusive Themenordner und Historie geprüft
 - alle zwölf Starterassets entschieden
