@@ -35,7 +35,7 @@ function render(health) {
     ['ai', 'Künstliche Intelligenz'],
     ['electro', 'Elektrotechnik']
   ]);
-  const depth = selectField('Recherche', [['deep', 'Tief · bis 12 Suchbereiche'], ['quick', 'Schnell · bis 6 Suchbereiche']]);
+  const depth = selectField('Recherche', [['deep', 'Tief · bis 8 Suchbereiche'], ['quick', 'Schnell · bis 6 Suchbereiche']]);
   const perPage = field('Treffer je Suche', 'number', { min: 3, max: 12, value: 6, required: true });
   const script = textareaField('Optional: Reel-Skript', { maxlength: 12000, placeholder: 'Skript einfügen. Namen, Gegner, Events und Jahreszahlen werden als zusätzliche Suchbegriffe erkannt.' });
   script.wrapper.classList.add('entity-script-field');
@@ -131,7 +131,7 @@ function render(health) {
 
 function renderPlan(container, plan) {
   const title = text('strong', `Rechercheplan · ${plan.topic}`);
-  const note = text('span', `${plan.facets.length} Bereiche · ${plan.depth === 'deep' ? 'tiefe' : 'schnelle'} Recherche`);
+  const note = text('span', `${plan.facets.length} Bereiche · ${plan.depth === 'deep' ? 'tiefe' : 'schnelle'} Recherche · maximal ${plan.maxSearchTasks} Provider-Suchen`);
   const chips = el('div', 'entity-plan-chips');
   for (const facet of plan.facets) {
     const chip = el('div', 'entity-plan-chip');
@@ -145,7 +145,7 @@ function renderPlan(container, plan) {
 function renderResults(container, data, token) {
   const toolbar = el('div', 'entity-result-toolbar');
   const copy = el('div');
-  copy.append(text('strong', `${data.assets} Treffer · ${data.research.topic}`), text('span', `${data.searchedProviders.map(providerLabel).join(' · ')} · technisch/inhaltlich noch zu prüfen`));
+  copy.append(text('strong', `${data.assets} Treffer · ${data.research.topic}`), text('span', `${data.searchedProviders.map(providerLabel).join(' · ')} · Videos direkt abspielbar · Rechte weiterhin prüfen`));
   const importAll = button('Alle markierten als Review importieren', 'entity-primary');
   toolbar.append(copy, importAll);
   const importStatus = text('p', '', 'entity-status');
@@ -248,12 +248,26 @@ function resultCard(item, group) {
   check.type = 'checkbox';
   check.value = asset.provider_id;
   const preview = el('div', 'entity-result-preview');
-  if (asset.preview_url) {
+  const videoUrl = asset.type === 'video' ? playableVideoUrl(asset.files) : '';
+  if (videoUrl) {
+    const video = document.createElement('video');
+    video.src = videoUrl;
+    if (asset.preview_url) video.poster = asset.preview_url;
+    video.controls = true;
+    video.muted = true;
+    video.playsInline = true;
+    video.preload = 'metadata';
+    video.addEventListener('click', (event) => event.stopPropagation());
+    video.addEventListener('pointerdown', (event) => event.stopPropagation());
+    preview.append(video);
+  } else if (asset.preview_url) {
     const img = document.createElement('img');
     img.src = asset.preview_url;
     img.alt = asset.title || '';
     img.loading = 'lazy';
     preview.append(img);
+  } else {
+    preview.append(text('span', asset.type === 'video' ? 'Video ohne direkte Vorschau' : 'Keine Vorschau', 'entity-no-preview'));
   }
   const body = el('div', 'entity-result-body');
   const rights = rightsHint(group.provider, group.job.researchSection);
@@ -264,13 +278,15 @@ function resultCard(item, group) {
     text('small', rights, 'entity-rights-hint')
   );
   if (asset.creator) body.append(text('small', `Creator: ${asset.creator}`));
-  const link = document.createElement('a');
-  link.href = asset.source_url;
-  link.target = '_blank';
-  link.rel = 'noopener noreferrer';
-  link.textContent = 'Quelle öffnen';
-  link.addEventListener('click', (event) => event.stopPropagation());
-  body.append(link);
+  if (asset.source_url) {
+    const link = document.createElement('a');
+    link.href = asset.source_url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.textContent = 'Quelle öffnen';
+    link.addEventListener('click', (event) => event.stopPropagation());
+    body.append(link);
+  }
   card.append(check, preview, body);
   return card;
 }
@@ -306,6 +322,17 @@ function techScore(asset, job) {
   }
   return Math.min(100, score);
 }
+
+function playableVideoUrl(files) {
+  if (!Array.isArray(files)) return '';
+  const choices = files.filter((item) => item?.url && /^https?:\/\//i.test(item.url));
+  if (!choices.length) return '';
+  const sorted = [...choices].sort((a, b) => mediaArea(a) - mediaArea(b));
+  const suitable = sorted.find((item) => Math.min(Number(item.width) || 0, Number(item.height) || 0) >= 720);
+  return (suitable ?? sorted.at(-1))?.url ?? '';
+}
+
+function mediaArea(item) { return (Number(item?.width) || 0) * (Number(item?.height) || 0); }
 
 function rightsHint(provider, section) {
   if (provider === 'openverse' || provider === 'wikimedia') return 'Offene Lizenz möglich · konkrete Lizenz/Attribution vor Nutzung prüfen.';
