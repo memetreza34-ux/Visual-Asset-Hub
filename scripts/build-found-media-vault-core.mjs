@@ -106,7 +106,19 @@ function writeSearchCandidates() {
     const collectionLabel = collection?.label ?? job.collectionLabel ?? job.collection ?? 'Ohne-Zuordnung';
     const collectionFolder = `${String((collectionIndex >= 0 ? collectionIndex : 98) + 1).padStart(2, '0')}-${safeName(collectionLabel, 70)}`;
     const providerFolder = safeName(providerLabel(provider), 50);
-    const destination = path.join(outputRoot, '90-GEFUNDENE-KANDIDATEN', channelFolder, collectionFolder, providerFolder);
+    const researchTopic = String(job.researchTopic ?? wrapper.research?.topic ?? '').trim();
+    const researchSection = String(job.researchSection ?? wrapper.research?.section ?? '').trim();
+    const researchSectionLabel = String(job.researchSectionLabel ?? wrapper.research?.sectionLabel ?? collectionLabel).trim();
+    const destination = researchTopic
+      ? path.join(
+          outputRoot,
+          '05-THEMENRECHERCHEN',
+          channelFolder,
+          safeName(researchTopic, 70),
+          `${String(researchSectionOrder(researchSection)).padStart(2, '0')}-${safeName(researchSectionLabel, 70)}`,
+          providerFolder
+        )
+      : path.join(outputRoot, '90-GEFUNDENE-KANDIDATEN', channelFolder, collectionFolder, providerFolder);
     fs.mkdirSync(destination, { recursive: true });
 
     for (const candidate of assets) {
@@ -118,7 +130,7 @@ function writeSearchCandidates() {
       if (seen.has(dedupe)) continue;
       seen.add(dedupe);
 
-      const number = nextCounter(`candidate|${channelFolder}|${collectionFolder}|${providerFolder}`);
+      const number = nextCounter(`candidate|${destination}|${providerFolder}`);
       const title = candidateTitle(candidate, job, provider);
       const baseName = `${String(number).padStart(3, '0')}-${safeName(title, 95)}-${safeName(providerId, 48)}`;
       const sourceUrl = candidate.source_url || candidate.page_url || '';
@@ -128,13 +140,15 @@ function writeSearchCandidates() {
       if (mediaUrl) writeInternetShortcut(path.join(destination, `${baseName}-MEDIUM.url`), mediaUrl);
       if (previewUrl) writeInternetShortcut(path.join(destination, `${baseName}-VORSCHAU.url`), previewUrl);
       const infoFile = path.join(destination, `${baseName}-INFO.md`);
-      fs.writeFileSync(infoFile, candidateMarkdown(candidate, { provider, providerId, title, job, channel, collectionLabel, sourceUrl, mediaUrl, previewUrl, searchFile: path.relative(root, file) }));
+      fs.writeFileSync(infoFile, candidateMarkdown(candidate, { provider, providerId, title, job, channel, collectionLabel, sourceUrl, mediaUrl, previewUrl, searchFile: path.relative(root, file), researchTopic, researchSectionLabel }));
       candidateRows.push({
         provider,
         providerId,
         title,
         channel: channel?.label ?? job.channelLabel ?? job.channel ?? 'Sonstiges',
         collection: collectionLabel,
+        researchTopic,
+        researchSection: researchSectionLabel,
         type: candidate.type ?? job.type ?? '',
         sourceUrl,
         info: path.relative(outputRoot, infoFile)
@@ -168,7 +182,9 @@ function resolvePlacement(asset) {
 
 function humanizeCollectionTag(asset) {
   const tag = (asset.tags ?? []).find((value) => String(value).startsWith('collection-'));
-  return tag ? String(tag).slice('collection-'.length).replaceAll('-', ' ') : '';
+  if (!tag) return '';
+  const raw = String(tag).slice('collection-'.length).replace(/^topic-/, '').replaceAll('-', ' ');
+  return raw.replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 function locateLocalFile(asset) {
@@ -233,18 +249,21 @@ function assetMarkdown(asset, meta) {
 }
 
 function candidateMarkdown(candidate, meta) {
-  return `# ${meta.title}\n\n> NOCH NICHT IMPORTIERT. Dieser Treffer wurde nur bei einer Mediensuche gefunden und besitzt noch keine Freigabe im Katalog.\n\n## Fundstelle\n\n- **Quelle:** ${providerLabel(meta.provider)}\n- **Provider-ID:** ${meta.providerId}\n- **Kanal:** ${meta.channel?.label ?? meta.job.channelLabel ?? meta.job.channel ?? '–'}\n- **Sammlung:** ${meta.collectionLabel}\n- **Suchbegriff:** ${meta.job.query ?? '–'}\n- **Typ:** ${candidate.type ?? meta.job.type ?? '–'}\n- **Ausrichtung:** ${candidate.orientation ?? meta.job.orientation ?? '–'}\n- **Lokale Suchdatei:** ${meta.searchFile}\n\n## Technische Daten\n\n- Auflösung: ${candidate.width ?? '?'} × ${candidate.height ?? '?'}\n- Dauer: ${candidate.duration_seconds ?? '–'}${candidate.duration_seconds ? ' s' : ''}\n- Creator: ${candidate.creator ?? '–'}\n- Lizenzhinweis: ${candidate.license ?? '–'}\n\n## Links\n\n- Quellseite: ${meta.sourceUrl || '–'}\n- Medium: ${meta.mediaUrl || '–'}\n- Vorschau: ${meta.previewUrl || '–'}\n\n## Hinweis\n\nVor einer Nutzung muss der Treffer zuerst bewusst ausgewählt, in den Katalog importiert und nach den normalen Rechte- und Sichtprüfungen freigegeben werden.\n`;
+  const research = meta.researchTopic ? `\n- **Themenrecherche:** ${meta.researchTopic}\n- **Recherchebereich:** ${meta.researchSectionLabel}` : '';
+  return `# ${meta.title}\n\n> NOCH NICHT IMPORTIERT. Dieser Treffer wurde nur bei einer Mediensuche gefunden und besitzt noch keine Freigabe im Katalog.\n\n## Fundstelle\n\n- **Quelle:** ${providerLabel(meta.provider)}\n- **Provider-ID:** ${meta.providerId}\n- **Kanal:** ${meta.channel?.label ?? meta.job.channelLabel ?? meta.job.channel ?? '–'}\n- **Sammlung:** ${meta.collectionLabel}${research}\n- **Suchbegriff:** ${meta.job.query ?? '–'}\n- **Typ:** ${candidate.type ?? meta.job.type ?? '–'}\n- **Ausrichtung:** ${candidate.orientation ?? meta.job.orientation ?? '–'}\n- **Lokale Suchdatei:** ${meta.searchFile}\n\n## Technische Daten\n\n- Auflösung: ${candidate.width ?? '?'} × ${candidate.height ?? '?'}\n- Dauer: ${candidate.duration_seconds ?? '–'}${candidate.duration_seconds ? ' s' : ''}\n- Creator: ${candidate.creator ?? '–'}\n- Lizenzhinweis: ${candidate.license ?? '–'}\n\n## Links\n\n- Quellseite: ${meta.sourceUrl || '–'}\n- Medium: ${meta.mediaUrl || '–'}\n- Vorschau: ${meta.previewUrl || '–'}\n\n## Hinweis\n\nVor einer Nutzung muss der Treffer zuerst bewusst ausgewählt, in den Katalog importiert und nach den normalen Rechte- und Sichtprüfungen freigegeben werden. Sichtbare Personen, Marken, Veranstalter- und Broadcastmaterial benötigen besondere Prüfung.\n`;
 }
 
 function writeIndexes(assetRows, foundRows) {
   const generatedAt = new Date().toISOString();
   const byStatus = countBy(assetRows, (row) => row.status);
   const byChannel = countBy(assetRows, (row) => row.channel);
+  const researchCount = foundRows.filter((row) => row.researchTopic).length;
   const markdown = [
     '# Alles gefunden – Gesamtindex', '',
     `Erzeugt: ${generatedAt}`, '',
     `- Katalog-Assets insgesamt: **${assetRows.length}**`,
     `- Noch nicht importierte Suchkandidaten: **${foundRows.length}**`,
+    `- Davon Themen-/Personenrecherche: **${researchCount}**`,
     `- Freigegeben: **${byStatus.approved ?? 0}**`,
     `- Review/Inbox: **${(byStatus.review ?? 0) + (byStatus.inbox ?? 0)}**`,
     `- Eingeschränkt: **${byStatus.restricted ?? 0}**`,
@@ -256,18 +275,18 @@ function writeIndexes(assetRows, foundRows) {
     '|---|---|---|---|---|---|',
     ...assetRows.map((row) => `| ${escapeTable(row.title)} | ${escapeTable(row.channel)} | ${escapeTable(row.collection)} | ${row.status} | ${row.type} | ${escapeTable(row.source)} |`), '',
     '## Noch nicht importierte Suchfunde', '',
-    '| Titel | Kanal | Sammlung | Quelle | Typ |',
-    '|---|---|---|---|---|',
-    ...foundRows.map((row) => `| ${escapeTable(row.title)} | ${escapeTable(row.channel)} | ${escapeTable(row.collection)} | ${providerLabel(row.provider)} | ${row.type} |`), '',
+    '| Titel | Kanal | Sammlung/Thema | Bereich | Quelle | Typ |',
+    '|---|---|---|---|---|---|',
+    ...foundRows.map((row) => `| ${escapeTable(row.title)} | ${escapeTable(row.channel)} | ${escapeTable(row.researchTopic || row.collection)} | ${escapeTable(row.researchSection || '–')} | ${providerLabel(row.provider)} | ${row.type} |`), '',
     '> Wichtig: Der Ordner ist ein Arbeitsarchiv. Suchkandidaten sowie Review-, Inbox-, eingeschränkte und archivierte Assets sind keine automatische Veröffentlichungserlaubnis.'
   ].join('\n');
   fs.writeFileSync(path.join(outputRoot, '00-GESAMTINDEX.md'), `${markdown}\n`);
-  fs.writeFileSync(path.join(outputRoot, '00-MANIFEST.json'), `${JSON.stringify({ version: 2, generatedAt, assets: assetRows, candidates: foundRows }, null, 2)}\n`);
-  const header = ['Art','ID','Titel','Kanal','Sammlung','Status','Typ','Quelle','Lizenz','Lokale Kopie','Info','Quellseite'];
+  fs.writeFileSync(path.join(outputRoot, '00-MANIFEST.json'), `${JSON.stringify({ version: 3, generatedAt, assets: assetRows, candidates: foundRows }, null, 2)}\n`);
+  const header = ['Art','ID','Titel','Kanal','Sammlung/Thema','Bereich','Status','Typ','Quelle','Lizenz','Lokale Kopie','Info','Quellseite'];
   const csvRows = [
     header,
-    ...assetRows.map((row) => ['asset',row.id,row.title,row.channel,row.collection,row.status,row.type,row.source,row.license,row.localCopy,row.info,row.sourceUrl]),
-    ...foundRows.map((row) => ['candidate',row.providerId,row.title,row.channel,row.collection,'not-imported',row.type,providerLabel(row.provider),'','',row.info,row.sourceUrl])
+    ...assetRows.map((row) => ['asset',row.id,row.title,row.channel,row.collection,'',row.status,row.type,row.source,row.license,row.localCopy,row.info,row.sourceUrl]),
+    ...foundRows.map((row) => ['candidate',row.providerId,row.title,row.channel,row.researchTopic || row.collection,row.researchSection || '','not-imported',row.type,providerLabel(row.provider),'','',row.info,row.sourceUrl])
   ];
   fs.writeFileSync(path.join(outputRoot, '00-GESAMTINDEX.csv'), `${csvRows.map((row) => row.map(csv).join(',')).join('\n')}\n`);
 }
@@ -301,6 +320,12 @@ function candidateTitle(candidate, job, provider) {
   const type = candidate.type === 'video' || job.type === 'video' ? 'Video' : 'Bild';
   const creator = candidate.creator ? ` von ${candidate.creator}` : '';
   return `${job.collectionLabel ?? job.collection ?? 'Medienfund'} – ${type}${creator}`;
+}
+
+function researchSectionOrder(value) {
+  const order = { overview: 1, training: 2, fight: 3, press: 4, 'weigh-in': 5, walkout: 6, portrait: 7, celebration: 8 };
+  if (String(value).startsWith('script-')) return 90;
+  return order[value] ?? 80;
 }
 
 function bestMediaUrl(files) {
