@@ -1,6 +1,6 @@
 {
   "name": "visual-asset-hub",
-  "version": "0.4.0-beta.4",
+  "version": "0.4.0-beta.5",
   "private": true,
   "type": "module",
   "engines": { "node": ">=22" },
@@ -15,6 +15,7 @@
     "media:pack": "node scripts/export-media-pack.mjs",
     "script:plan": "node scripts/plan-script.mjs",
     "script:benchmark": "node scripts/benchmark-script-planner.mjs",
+    "entity:plan": "node scripts/entity-research-plan.mjs",
     "backup": "node scripts/catalog-backup.mjs",
     "restore": "node scripts/catalog-restore.mjs",
     "beta:verify": "node scripts/beta-verify.mjs",
