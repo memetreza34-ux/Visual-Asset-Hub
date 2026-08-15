@@ -94,7 +94,8 @@ function render(health) {
       renderResults(results, data, health.token);
       const skipped = data.skippedProviders.length ? ` · ohne Key ausgelassen: ${data.skippedProviders.map(providerLabel).join(', ')}` : '';
       const errors = data.errors.length ? ` · ${data.errors.length} Einzelsuchen mit Fehler` : '';
-      showStatus(status, `${data.assets} eindeutige Treffer aus ${data.searches} erfolgreichen Suchgruppen gespeichert${skipped}${errors}. Alles liegt zusätzlich unter ALLES-GEFUNDEN/05-THEMENRECHERCHEN/${safeDisplay(data.research.topic)}.`, true);
+      const cache = data.cachedSearches ? ` · ${data.cachedSearches} Pixabay-Suchen aus 24h-Cache` : '';
+      showStatus(status, `${data.assets} eindeutige Treffer aus ${data.searches} erfolgreichen Suchgruppen gespeichert${cache}${skipped}${errors}. Alles liegt zusätzlich unter ALLES-GEFUNDEN/05-THEMENRECHERCHEN/${safeDisplay(data.research.topic)}.`, true);
     } catch (error) {
       clearVisibleKeys();
       showStatus(status, error.message, false);
@@ -242,11 +243,12 @@ function renderProviderGroup(group) {
 
 function resultCard(item, group) {
   const asset = item.asset;
-  const card = document.createElement('label');
+  const card = document.createElement('article');
   card.className = 'entity-result-card';
   const check = document.createElement('input');
   check.type = 'checkbox';
   check.value = asset.provider_id;
+  check.setAttribute('aria-label', `Treffer auswählen: ${asset.title || asset.provider_id}`);
   const preview = el('div', 'entity-result-preview');
   const videoUrl = asset.type === 'video' ? playableVideoUrl(asset.files) : '';
   if (videoUrl) {
@@ -257,8 +259,6 @@ function resultCard(item, group) {
     video.muted = true;
     video.playsInline = true;
     video.preload = 'metadata';
-    video.addEventListener('click', (event) => event.stopPropagation());
-    video.addEventListener('pointerdown', (event) => event.stopPropagation());
     preview.append(video);
   } else if (asset.preview_url) {
     const img = document.createElement('img');
@@ -284,7 +284,6 @@ function resultCard(item, group) {
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
     link.textContent = 'Quelle öffnen';
-    link.addEventListener('click', (event) => event.stopPropagation());
     body.append(link);
   }
   card.append(check, preview, body);
