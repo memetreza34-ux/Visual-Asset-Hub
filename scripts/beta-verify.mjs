@@ -43,6 +43,8 @@ const mediaPacks = findValidMediaPacks(path.join(root, 'exports', 'media-packs')
 const scriptPlans = findValidScriptPlans(path.join(root, '.local-storage', 'operations', 'script-plans.json'));
 const topicResearches = findValidTopicResearch(path.join(root, 'ALLES-GEFUNDEN', '05-THEMENRECHERCHEN'));
 const scriptSpecificResearches = topicResearches.filter((entry) => entry.scriptSpecific);
+const researchTypes = [...new Set(topicResearches.map((entry) => entry.researchType).filter(Boolean))];
+const requiredResearchTypeCount = 2;
 
 const technicalChecks = {
   projectCheck: Boolean(results.find((entry) => entry.name === 'Projektprüfung')?.success),
@@ -57,6 +59,7 @@ const realTestChecks = {
   starterMediaPresent: videos.length >= 3 && staticVisuals.length >= 3,
   scriptPlanGenerated: scriptPlans.length >= 1,
   topicResearchGenerated: topicResearches.length >= 1,
+  multipleResearchTypesVerified: researchTypes.length >= requiredResearchTypeCount,
   scriptSpecificTopicResearch: scriptSpecificResearches.length >= 1,
   starterAssetsReviewed: assets.length >= requiredReviewCount && reviewedAssets.length >= requiredReviewCount,
   fourChannelsRepresented: allChannelsRepresented,
@@ -72,7 +75,8 @@ const overallPercentage = Math.round(technicalPercentage * 0.7 + realTestPercent
 const nextActions = [];
 if (videos.length < 3 || staticVisuals.length < 3) nextActions.push('Mindestens drei Videos und drei statische Bilder oder Grafiken bereitstellen.');
 if (scriptPlans.length < 1) nextActions.push('Ein echtes Kanalskript mit dem CLI-Planer verarbeiten und die erzeugte Shotlist prüfen.');
-if (topicResearches.length < 1) nextActions.push('Eine echte Personen-/Themenrecherche durchführen, Treffer visuell prüfen und den Themenordner kontrollieren.');
+if (topicResearches.length < 1) nextActions.push('Eine echte universelle Themenrecherche durchführen, Treffer visuell prüfen und den Themenordner kontrollieren.');
+if (researchTypes.length < requiredResearchTypeCount) nextActions.push(`${requiredResearchTypeCount - researchTypes.length} weitere unterschiedliche Rechercheart(en) real durchführen und im Themenarchiv nachweisen.`);
 if (scriptSpecificResearches.length < 1) nextActions.push('Eine Themenrecherche mit Reel-Skript durchführen, sodass mindestens ein skriptspezifischer Recherchebereich entsteht.');
 if (reviewedAssets.length < requiredReviewCount) nextActions.push(`${requiredReviewCount - reviewedAssets.length} weitere Starterassets vollständig prüfen und eine Entscheidung speichern.`);
 if (!allChannelsRepresented) {
@@ -112,6 +116,9 @@ const report = {
     validScriptPlans: scriptPlans.length,
     validTopicResearches: topicResearches.length,
     scriptSpecificTopicResearches: scriptSpecificResearches.length,
+    distinctResearchTypes: researchTypes.length,
+    requiredResearchTypes: requiredResearchTypeCount,
+    researchTypes,
     channelCounts
   },
   scriptPlans,
@@ -138,13 +145,14 @@ const md = [
   `- Freigegeben: **${approved.length}**`,
   `- Verifizierte Skriptpläne: **${scriptPlans.length}**`,
   `- Verifizierte Themenrecherchen: **${topicResearches.length}** (${scriptSpecificResearches.length} mit Skriptbezug)`,
+  `- Unterschiedliche Recherchearten: **${researchTypes.length}/${requiredResearchTypeCount}**${researchTypes.length ? ` · ${researchTypes.join(', ')}` : ''}`,
   `- Eigene Inbox-Assets: **${inboxAssets.length}**`,
   `- Verifizierte Medienpakete: **${mediaPacks.length}**`,
   `- Nutzungen: **${usageCount}**`, '',
   '## Kanalabdeckung',
   ...requiredChannels.map((tag) => `- ${channelLabel(tag)}: **${channelCounts[tag]} Assets**`), '',
   '## Themenrecherchen',
-  ...(topicResearches.length ? topicResearches.map((entry) => `- ${entry.channel} / ${entry.topic}: **${entry.candidates} Kandidaten** · ${entry.scriptSpecific ? 'mit Skriptbezug' : 'ohne Skriptbezug'} · ${entry.providers.join(', ') || 'Quelle unbekannt'}`) : ['- Noch keine verifizierte Themenrecherche.']), '',
+  ...(topicResearches.length ? topicResearches.map((entry) => `- ${entry.channel} / ${entry.topic}: **${entry.candidates} Kandidaten** · ${entry.researchType || 'Rechercheart unbekannt'} · ${entry.scriptSpecific ? 'mit Skriptbezug' : 'ohne Skriptbezug'} · ${entry.providers.join(', ') || 'Quelle unbekannt'}`) : ['- Noch keine verifizierte Themenrecherche.']), '',
   '## Prüfschritte',
   ...results.map((entry) => `- ${entry.success ? 'OK' : 'FEHLER'} – ${entry.name}`), '',
   '## Realtest-Kriterien',
@@ -160,6 +168,17 @@ if (!technicalReady) process.exitCode = 1;
 function findValidTopicResearch(directory) {
   if (!fs.existsSync(directory)) return [];
   const found = [];
+  const allowedResearchTypes = new Set([
+    'Person',
+    'Firma / Marke / Organisation',
+    'Produkt / Objekt',
+    'Event / Veranstaltung',
+    'Ort / Gebäude / Region',
+    'Technik / Gerät / System',
+    'Sport / Wettkampf',
+    'Historisches Thema',
+    'Allgemeines Thema'
+  ]);
   for (const channelEntry of fs.readdirSync(directory, { withFileTypes: true })) {
     if (!channelEntry.isDirectory() || channelEntry.name.startsWith('.')) continue;
     const channelPath = path.join(directory, channelEntry.name);
@@ -175,10 +194,13 @@ function findValidTopicResearch(directory) {
         if (!candidates.length) continue;
         const providerMatch = guide.match(/- verwendete API-Quellen: \*\*(.+?)\*\*/);
         const providers = providerMatch ? providerMatch[1].split(',').map((value) => value.trim()).filter(Boolean) : [];
+        const researchTypeMatch = guide.match(/- Rechercheart: \*\*(.+?)\*\*/);
+        const researchType = researchTypeMatch?.[1]?.trim() ?? '';
         found.push({
           channel: channelEntry.name,
           topic: topicEntry.name,
           candidates: candidates.length,
+          researchType: allowedResearchTypes.has(researchType) ? researchType : '',
           scriptSpecific: guide.includes('**Skript:'),
           providers,
           guide: path.relative(root, guidePath)
