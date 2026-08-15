@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { spawnSync } from 'node:child_process';
-import { buildEntityResearchPlan, validateChannel, validateScript, validateTopic } from './entity-research-plan.mjs';
+import { buildEntityResearchPlan, validateChannel, validateResearchType, validateScript, validateTopic } from './entity-research-plan.mjs';
 import { searchPexels } from './lib/pexels.mjs';
 import { searchPixabay } from './lib/pixabay.mjs';
 import { searchUnsplash } from './lib/unsplash.mjs';
@@ -13,7 +13,7 @@ import { searchWikimedia } from './lib/wikimedia.mjs';
 const PROVIDERS = ['pexels', 'pixabay', 'unsplash', 'openverse', 'wikimedia'];
 const KEYLESS = new Set(['openverse', 'wikimedia']);
 const PHOTO_ONLY = new Set(['unsplash', 'openverse', 'wikimedia']);
-const MAX_TASKS = 40;
+const MAX_TASKS = 60;
 const PIXABAY_CACHE_MS = 24 * 60 * 60 * 1000;
 const CHANNEL_FOLDERS = { finance: '01-Finanzen', ai: '02-KI', electro: '03-Elektrotechnik', 'combat-sports': '04-Kampfsport' };
 
@@ -73,13 +73,20 @@ export function createLocalEntityApi({ root = process.cwd(), token, searchers = 
               const searchId = createSearchId();
               const job = buildJob({ plan, channel, facet: task.facet, provider: task.provider, perPage });
               const wrapper = {
-                version: 7,
+                version: 8,
                 searchId,
                 provider: task.provider,
                 searchedAt: new Date().toISOString(),
                 expiresAt: execution.expiresAt ?? null,
                 cached: execution.cached,
-                research: { topic: plan.topic, topicSlug: plan.topicSlug, section: task.facet.id, sectionLabel: task.facet.label },
+                research: {
+                  topic: plan.topic,
+                  topicSlug: plan.topicSlug,
+                  researchType: plan.researchType,
+                  researchTypeLabel: plan.researchTypeLabel,
+                  section: task.facet.id,
+                  sectionLabel: task.facet.label
+                },
                 arsenalJob: job,
                 result
               };
@@ -94,7 +101,15 @@ export function createLocalEntityApi({ root = process.cwd(), token, searchers = 
           const guidePath = writeResearchGuide(root, plan, channel, enabledProviders, groups, errors);
           return sendJson(response, 200, {
             ok: true,
-            research: { topic: plan.topic, topicSlug: plan.topicSlug, channel: plan.channel, depth: plan.depth, guidePath },
+            research: {
+              topic: plan.topic,
+              topicSlug: plan.topicSlug,
+              channel: plan.channel,
+              researchType: plan.researchType,
+              researchTypeLabel: plan.researchTypeLabel,
+              depth: plan.depth,
+              guidePath
+            },
             plan,
             searchedProviders: enabledProviders,
             skippedProviders: PROVIDERS.filter((provider) => !enabledProviders.includes(provider)),
@@ -119,8 +134,9 @@ export function validateEntityPayload(payload) {
   return {
     topic: validateTopic(payload?.topic),
     channel: validateChannel(payload?.channel ?? 'combat-sports'),
+    researchType: validateResearchType(payload?.researchType ?? 'auto'),
     script: validateScript(payload?.script ?? ''),
-    depth: payload?.depth === 'quick' ? 'quick' : 'deep'
+    depth: payload?.depth === 'quick' ? 'quick' : payload?.depth === 'max' ? 'max' : 'deep'
   };
 }
 
@@ -140,18 +156,41 @@ function buildJob({ plan, channel, facet, provider, perPage }) {
     channelLabel: channel.label,
     collection,
     collectionLabel: `${plan.topic} · ${facet.label}`,
-    category: channel.primaryCategory,
+    category: researchCategory(plan.researchType, channel),
     query: facet.query,
     type: PHOTO_ONLY.has(provider) ? 'photo' : facet.preferredMedia,
     orientation: 'vertical',
     perPage,
-    tags: [...new Set([channel.channelTag, `collection-${collection}`, `topic-${plan.topicSlug}`, `topic-section-${facet.id}`, 'entity-research'])],
-    reviewNotes: `Themenrecherche zu ${plan.topic}. Sichtbare Personen, Marken, Veranstalter-, Broadcast- und Kontextrechte vor Freigabe prüfen.`,
+    tags: [...new Set([
+      channel.channelTag,
+      `collection-${collection}`,
+      `topic-${plan.topicSlug}`,
+      `topic-type-${plan.researchType}`,
+      `topic-section-${facet.id}`,
+      'entity-research'
+    ])],
+    reviewNotes: `Universelle Themenrecherche zu ${plan.topic} (${plan.researchTypeLabel}). Urheber-, Personen-, Marken-, Event-, Broadcast- und Kontextrechte vor Freigabe prüfen.`,
     researchTopic: plan.topic,
     researchTopicSlug: plan.topicSlug,
+    researchType: plan.researchType,
+    researchTypeLabel: plan.researchTypeLabel,
     researchSection: facet.id,
     researchSectionLabel: facet.label
   };
+}
+
+function researchCategory(type, channel) {
+  return ({
+    person: 'people-lifestyle',
+    organization: 'business-work',
+    product: 'objects-products',
+    event: 'news-events',
+    place: 'travel-places',
+    technology: channel.id === 'ai' ? 'technology-ai' : 'science-engineering',
+    sport: 'combat-sports',
+    history: 'culture-entertainment',
+    concept: channel.primaryCategory
+  })[type] ?? channel.primaryCategory;
 }
 
 async function executeTaskCached(task, keys, perPage, searchers, searchDirectory) {
@@ -285,16 +324,20 @@ function writeResearchGuide(root, plan, channel, providers, groups, errors) {
   const broadLinks = [
     ['YouTube-Suche', `https://www.youtube.com/results?search_query=${encodeURIComponent(plan.topic)}`],
     ['Google-Bilder', `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(plan.topic)}`],
-    ['Google-Videos', `https://www.google.com/search?tbm=vid&q=${encodeURIComponent(plan.topic)}`]
+    ['Google-Videos', `https://www.google.com/search?tbm=vid&q=${encodeURIComponent(plan.topic)}`],
+    ['Google-News', `https://www.google.com/search?tbm=nws&q=${encodeURIComponent(plan.topic)}`],
+    ['Wikipedia-Suche', `https://de.wikipedia.org/w/index.php?search=${encodeURIComponent(plan.topic)}`]
   ];
   if (channel.id === 'combat-sports') broadLinks.push(['Offizielle-UFC-Websuche', `https://www.google.com/search?q=${encodeURIComponent(`site:ufc.com "${plan.topic}"`)}`]);
   for (const [name, url] of broadLinks) writeShortcut(path.join(linksRoot, `${name}.url`), url);
 
+  const modeLabel = plan.depth === 'max' ? 'maximal' : plan.depth === 'deep' ? 'tief' : 'schnell';
   const lines = [
     `# Rechercheplan – ${plan.topic}`, '',
     '> Dieser Ordner sammelt Recherchekandidaten. Externe Suchlinks und gefundene Medien sind keine automatische Nutzungs- oder Veröffentlichungserlaubnis.', '',
-    `- Kanal: **${channel.label}**`,
-    `- Recherchemodus: **${plan.depth === 'deep' ? 'tief' : 'schnell'}**`,
+    `- Zielkanal: **${channel.label}**`,
+    `- Rechercheart: **${plan.researchTypeLabel}**`,
+    `- Recherchemodus: **${modeLabel}**`,
     `- erfolgreiche Suchgruppen: **${groups.length}**`,
     `- davon aus 24-Stunden-Cache: **${groups.filter((group) => group.cached).length}**`,
     `- eindeutige API-Treffer: **${groups.reduce((sum, group) => sum + group.assets.length, 0)}**`,
@@ -306,9 +349,11 @@ function writeResearchGuide(root, plan, channel, providers, groups, errors) {
     '- `99-EXTERNE-SUCHLINKS/YouTube-Suche.url`',
     '- `99-EXTERNE-SUCHLINKS/Google-Bilder.url`',
     '- `99-EXTERNE-SUCHLINKS/Google-Videos.url`',
+    '- `99-EXTERNE-SUCHLINKS/Google-News.url`',
+    '- `99-EXTERNE-SUCHLINKS/Wikipedia-Suche.url`',
     ...(channel.id === 'combat-sports' ? ['- `99-EXTERNE-SUCHLINKS/Offizielle-UFC-Websuche.url`'] : []), '',
     '## Rechtehinweis', '',
-    'Material von TV-Sendern, Veranstaltern, Social-Media-Accounts, Presseagenturen oder anderen Rechteinhabern darf nicht allein deshalb verwendet werden, weil es über einen Suchlink sichtbar ist. Vor Reel-Nutzung müssen Quelle, Lizenz, Personen-/Markenrechte und der konkrete Nutzungskontext geprüft werden.'
+    'Material von TV-Sendern, Veranstaltern, Social-Media-Accounts, Presseagenturen, Marken oder anderen Rechteinhabern darf nicht allein deshalb verwendet werden, weil es über einen Suchlink sichtbar ist. Vor Reel-Nutzung müssen Quelle, Lizenz, Urheber-, Personen-/Markenrechte und der konkrete Nutzungskontext geprüft werden.'
   ];
   const guide = path.join(topicRoot, '00-RECHERCHEPLAN.md');
   fs.writeFileSync(guide, `${lines.join('\n')}\n`);
