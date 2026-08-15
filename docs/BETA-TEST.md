@@ -72,9 +72,9 @@ Die Oberfläche muss anbieten:
 - Event / Veranstaltung
 - Ort / Gebäude / Region
 - Technik / Gerät / System
-- Sport / Wettkampf
+- Sport / Kampf / Athletik
 - Historisches Thema
-- Allgemeines Thema
+- Allgemeines Thema / Konzept
 
 Der **Zielkanal** bestimmt nur die spätere Content-Zuordnung. Die **Rechercheart** bestimmt die visuellen Motivgruppen.
 
@@ -89,7 +89,7 @@ Der **Zielkanal** bestimmt nur die spätere Content-Zuordnung. Die **Recherchear
 
 1. Zielkanal **Kampfsport** wählen.
 2. Thema `Conor McGregor` eingeben.
-3. Rechercheart **Sport / Wettkampf** oder Auto verwenden.
+3. Rechercheart **Sport / Kampf / Athletik** oder Auto verwenden.
 4. **Rechercheplan anzeigen** drücken.
 5. sinnvolle Bereiche wie Training, Wettkampf, Arena, Presse, Wiegen, Walkout, Team und Reaktionen prüfen.
 6. ein Testskript einfügen, das `Khabib Nurmagomedov`, `UFC 229` und `2018` enthält.
