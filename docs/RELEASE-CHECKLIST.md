@@ -10,6 +10,7 @@
 - [ ] `npm run arsenal:report` erzeugt den Abdeckungsbericht
 - [ ] `npm run links:check -- --strict true` prüft externe Medien- und Quelllinks
 - [ ] `npm run vault:build` erzeugt `ALLES-GEFUNDEN`
+- [ ] `npm run entity:plan -- "Conor McGregor"` erzeugt einen gültigen Rechercheplan
 - [ ] statische Website wird mit `npm run site:build` erzeugt
 - [ ] Mac-Start über `npm run serve` funktioniert
 - [ ] optional Windows-Start über `START-HERE.cmd` funktioniert
@@ -26,19 +27,53 @@
 - [x] Kanäle werden als Finanzen, KI, Elektrotechnik und Kampfsport getrennt
 - [x] Sammlungen verwenden verständliche Titel
 - [x] Statusordner trennen Freigegeben, Review, Eingeschränkt und Archiv
-- [x] `90-GEFUNDENE-KANDIDATEN` trennt noch nicht importierte Suchfunde vom Katalog
+- [x] `05-THEMENRECHERCHEN` trennt Personen-/Themenfunde nach Kanal, Thema, Bereich und Quelle
+- [x] `90-GEFUNDENE-KANDIDATEN` trennt normale noch nicht importierte Suchfunde vom Katalog
 - [x] lokale Medien können als echte Dateikopie übernommen werden
 - [x] externe Medien erhalten Quelle-, Medium- und Vorschau-Verknüpfungen
 - [x] jeder Katalogeintrag erhält eine INFO-Datei mit Quelle, Lizenz und Prüfhinweisen
 - [x] Gesamtindex wird als Markdown, CSV und JSON erzeugt
+- [x] normale Suchfunde und Themenrecherchen besitzen eine lokale Historie
 - [x] erzeugte Inhalte bleiben über `.gitignore` lokal
 - [ ] `npm run vault:build` läuft im echten lokalen Repository fehlerfrei
 - [ ] nach `npm run starter:import` enthält der Gesamtindex zwölf Starterassets
 - [ ] ein lokales Asset liegt als echte Datei im passenden Kategorieordner
 - [ ] ein externer Treffer besitzt funktionierende `.url`-Verknüpfungen
 - [ ] Suchfunde aus dem Arsenal Builder erscheinen unter `90-GEFUNDENE-KANDIDATEN`
+- [ ] Themenfunde erscheinen unter `05-THEMENRECHERCHEN/<Kanal>/<Thema>/<Bereich>/<Quelle>`
+- [ ] Themenfunde bleiben nach Bereinigung ihrer temporären Suchdatei im lokalen Historienarchiv erhalten
 - [ ] laufender Server aktualisiert den Ordner nach einer Katalogänderung automatisch
 - [ ] kein Eintrag im Ordner umgeht Review- oder Rechteprüfung
+
+## Personen- und Themenrecherche
+
+- [x] eigener Arbeitsbereich **Thema recherchieren** ist in Navigation und Weboberfläche integriert
+- [x] Rechercheplan unterstützt Finanzen, KI, Elektrotechnik und Kampfsport
+- [x] Kampfsportplan besitzt Bereiche für Allgemein, Training, Kämpfe, Presse, Wiegen/Staredown, Walkout, Portraits und Sieg/Reaktion
+- [x] optionales Reel-Skript kann Gegner/Personen, Eventbezeichnungen und Jahreszahlen als zusätzliche Suchbegriffe erkennen
+- [x] tiefe Recherche ist auf höchstens acht priorisierte Bereiche beziehungsweise 40 Provider-Suchen begrenzt
+- [x] skriptspezifische Begriffe erhalten reservierte Rechercheplätze
+- [x] Pexels/Pixabay können Foto oder Video passend zum Bereich nutzen
+- [x] Unsplash/Openverse/Wikimedia bleiben Foto-only
+- [x] Openverse und Wikimedia funktionieren ohne geheimen Key
+- [x] Recherche dedupliziert über Provider-ID sowie Quell-/Medien-URLs
+- [x] Videos können direkt in der Rechercheansicht abgespielt werden
+- [x] Bilder werden direkt als Vorschau angezeigt
+- [x] Rechercheergebnisse besitzen technische Vorsortierung, aber keine automatische Inhalts-/Rechtefreigabe
+- [x] `00-RECHERCHEPLAN.md` und zusätzliche externe Discovery-Links werden im Themenordner erzeugt
+- [x] externe YouTube-/Google-/UFC-Suchlinks sind ausdrücklich nur zur Sichtung dokumentiert
+- [ ] Beispiel `Conor McGregor` erzeugt im echten Browser einen sinnvollen Rechercheplan
+- [ ] Testskript mit `Khabib Nurmagomedov`, `UFC 229` und `2018` erzeugt skriptspezifische Suchbereiche
+- [ ] Pexels-, Pixabay- und Unsplash-Keys bleiben nur im Arbeitsspeicher der geöffneten Seite
+- [ ] Recherche ohne private Keys nutzt mindestens Openverse und Wikimedia
+- [ ] Recherche mit allen drei privaten Sitzung-Keys nutzt alle fünf integrierten Quellen
+- [ ] ein Pexels/Pixabay-Videotreffer lässt sich direkt im Player vollständig sichten
+- [ ] ein Bildtreffer lässt sich visuell prüfen und seine Quellseite öffnen
+- [ ] markierte Recherchetreffer werden sequenziell importiert; unmarkierte bleiben unimportiert
+- [ ] jeder Rechercheimport startet auf `review`
+- [ ] nach Import bleibt Personen-, Marken-, Event-, Broadcast- und Kontextprüfung erforderlich
+- [ ] **Sitzungs-Keys löschen** entfernt alle Recherche-Keys aus dem Seitenspeicher
+- [ ] externe Discovery-Links werden im Realtest nicht als Nutzungsrecht behandelt
 
 ## Reel- und Skript-Planer
 
@@ -219,11 +254,11 @@
 
 ## Release
 
-- [x] Changelog für `0.4.0-beta.4` vorhanden
-- [x] Paketversion auf `0.4.0-beta.4` gesetzt
+- [x] Changelog für `0.4.0-beta.5` vorhanden
+- [x] Paketversion auf `0.4.0-beta.5` gesetzt
 - [ ] Pull Request ist nicht mehr Draft
 - [ ] lokale Komplettprüfung ist grün
 - [ ] `realTestComplete` ist `true`
 - [ ] Beta-Tag oder Release wurde erstellt
 
-Die Beta darf erst als **real getestet** gelten, wenn ein echtes Skript geplant, alle zwölf Starterassets geprüft, alle fünf Medienquellen technisch getestet, der `ALLES-GEFUNDEN`-Ordner lokal geprüft, mindestens ein eigener Inbox-Import erfolgreich und ein freigegebenes Asset über ein verifiziertes Medienpaket in einem echten Content-Projekt eingesetzt wurde.
+Die Beta darf erst als **real getestet** gelten, wenn ein echtes Skript geplant, eine reale Personen-/Themenrecherche mit visueller Sichtung durchgeführt, alle zwölf Starterassets geprüft, alle fünf Medienquellen technisch getestet, der `ALLES-GEFUNDEN`-Ordner lokal geprüft, mindestens ein eigener Inbox-Import erfolgreich und ein freigegebenes Asset über ein verifiziertes Medienpaket in einem echten Content-Projekt eingesetzt wurde.
