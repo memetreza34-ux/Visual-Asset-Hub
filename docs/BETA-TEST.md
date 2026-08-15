@@ -2,23 +2,24 @@
 
 ## Ziel
 
-Die Beta `0.4.0-beta.5` wird vollständig lokal geprüft. Ein Merge nach `main` ist erst erlaubt, wenn Technik, Medienquellen, Personen-/Themenrecherche, Review, Rechte, Medienpaket und echte Nutzung abgenommen sind.
+Die Beta `0.4.0-beta.6` wird vollständig lokal geprüft. Ein Merge nach `main` ist erst erlaubt, wenn Technik, Medienquellen, universelle Themenrecherche, Review, Rechte, Medienpaket und echte Nutzung abgenommen sind.
 
 Der Realtest muss mindestens nachweisen:
 
 1. zwölf Starterassets vorhanden und vollständig entschieden
 2. alle vier Kanäle vertreten
 3. ein echtes Kanalskript als Shotlist verarbeitet
-4. eine echte Personen-/Themenrecherche durchgeführt
-5. eine skriptspezifische Themenrecherche durchgeführt
-6. alle fünf integrierten Medienquellen technisch geprüft
-7. `ALLES-GEFUNDEN` inklusive Themenarchiv geprüft
-8. Ausbau-720- und Review-first-Workflow geprüft
-9. eine eigene lokale Datei importiert
-10. mindestens ein Asset freigegeben
-11. ein verifiziertes Medienpaket erzeugt
-12. ein Asset real verwendet und Nutzung dokumentiert
-13. `realTestComplete: true`
+4. mindestens eine echte universelle Themenrecherche durchgeführt
+5. mindestens **zwei unterschiedliche Recherchearten** real geprüft
+6. eine skriptspezifische Themenrecherche durchgeführt
+7. alle fünf integrierten Medienquellen technisch geprüft
+8. `ALLES-GEFUNDEN` inklusive Themenarchiv geprüft
+9. Ausbau-720- und Review-first-Workflow geprüft
+10. eine eigene lokale Datei importiert
+11. mindestens ein Asset freigegeben
+12. ein verifiziertes Medienpaket erzeugt
+13. ein Asset real verwendet und Nutzung dokumentiert
+14. `realTestComplete: true`
 
 ## Vorbereitung auf dem Mac
 
@@ -46,15 +47,7 @@ Prüfen:
 
 - **Lokale Verwaltung aktiv** sichtbar
 - zwölf Starterassets sichtbar
-- Navigation enthält:
-  - Bibliothek
-  - Skript planen
-  - Thema recherchieren
-  - Eigene Dateien
-  - Prüfen
-  - Medien suchen
-  - Ausbau 720
-  - 90 Kategorien
+- Navigation enthält Bibliothek, Skript planen, Thema recherchieren, Eigene Dateien, Prüfen, Medien suchen, Ausbau 720 und 90 Kategorien
 - alle Bereiche lassen sich sauber anspringen
 
 Starterbestand nach `npm run starter:import`:
@@ -64,18 +57,55 @@ Starterbestand nach `npm run starter:import`:
 - ein Wikimedia-Commons-Kampfsportfoto unter CC BY-SA 4.0
 - alle zunächst `review`
 
-## Test B – Personen-/Themenrecherche
+## Test B – universelle Themenrecherche
 
-Unter **Thema recherchieren**:
+Unter **Thema recherchieren** prüfen:
 
-1. Kanal **Kampfsport** wählen.
+### Recherchearten
+
+Die Oberfläche muss anbieten:
+
+- Auto
+- Person
+- Firma / Marke / Organisation
+- Produkt / Objekt
+- Event / Veranstaltung
+- Ort / Gebäude / Region
+- Technik / Gerät / System
+- Sport / Wettkampf
+- Historisches Thema
+- Allgemeines Thema
+
+Der **Zielkanal** bestimmt nur die spätere Content-Zuordnung. Die **Rechercheart** bestimmt die visuellen Motivgruppen.
+
+### Rechercheumfang
+
+- Schnell: höchstens 6 Motivbereiche
+- Tief: höchstens 8 Motivbereiche
+- Maximal: höchstens 12 Motivbereiche
+- bei fünf verfügbaren Quellen höchstens **60 sequenzielle Provider-Suchen** im Maximalmodus
+
+### Pflicht-Test 1 – Sport/Personenbezug
+
+1. Zielkanal **Kampfsport** wählen.
 2. Thema `Conor McGregor` eingeben.
-3. **Rechercheplan anzeigen** drücken.
-4. sinnvolle Bereiche prüfen, darunter Training, Kämpfe, Presse, Wiegen/Staredown, Walkout und Portraits.
-5. danach ein Testskript einfügen, das `Khabib Nurmagomedov`, `UFC 229` und `2018` enthält.
-6. erneut den Rechercheplan erzeugen.
-7. prüfen, dass skriptspezifische Bereiche reserviert werden.
-8. tiefe Recherche darf höchstens acht priorisierte Bereiche beziehungsweise 40 Provider-Suchen planen.
+3. Rechercheart **Sport / Wettkampf** oder Auto verwenden.
+4. **Rechercheplan anzeigen** drücken.
+5. sinnvolle Bereiche wie Training, Wettkampf, Arena, Presse, Wiegen, Walkout, Team und Reaktionen prüfen.
+6. ein Testskript einfügen, das `Khabib Nurmagomedov`, `UFC 229` und `2018` enthält.
+7. erneut den Rechercheplan erzeugen.
+8. prüfen, dass skriptspezifische Suchbereiche reserviert werden.
+
+### Pflicht-Test 2 – andere Rechercheart
+
+Eine zweite, klar andere Rechercheart real durchführen, zum Beispiel:
+
+- `RCD` → **Technik / Gerät / System**
+- `Tesla Model 3` → **Produkt / Objekt**
+- `NVIDIA` → **Firma / Marke / Organisation**
+- `Berlin` → **Ort / Gebäude / Region**
+
+Der Rechercheplan muss andere Motivgruppen als beim Kampfsport-Test erzeugen. `npm run beta:verify` muss später mindestens zwei unterschiedliche dokumentierte Recherchearten erkennen.
 
 ### Recherche ohne private Keys
 
@@ -87,7 +117,7 @@ Unter **Thema recherchieren**:
 
 - Pexels-, Pixabay- und Unsplash-Key nur für die aktuelle Sitzung eingeben.
 - Recherche erneut durchführen.
-- die fünf integrierten Quellen technisch prüfen.
+- alle fünf integrierten Quellen technisch prüfen.
 - bei Pixabay denselben Suchlauf wiederholen und 24-Stunden-Cache kontrollieren.
 - Bilder direkt ansehen.
 - mindestens einen Pexels- oder Pixabay-Videotreffer im eingebauten Player abspielen.
@@ -99,12 +129,12 @@ Unter **Thema recherchieren**:
 - genau einen geeigneten Recherchetreffer markieren.
 - als `review` importieren.
 - unmarkierte Treffer dürfen nicht importiert werden.
-- dynamische Tags für Thema und Recherchebereich kontrollieren.
-- Freigabe bleibt von Personen-, Marken-, Event-, Veranstalter-, Broadcast- und Kontextprüfung abhängig.
+- dynamische Tags für Thema, Rechercheart und Recherchebereich kontrollieren.
+- Freigabe bleibt von Urheber-, Personen-, Marken-, Event-, Veranstalter-, Broadcast- und Kontextprüfung abhängig.
 
 ### Themenordner
 
-Prüfen:
+Beispiel:
 
 ```text
 ALLES-GEFUNDEN/
@@ -116,6 +146,7 @@ ALLES-GEFUNDEN/
 Dort kontrollieren:
 
 - `00-RECHERCHEPLAN.md`
+- dokumentierte **Rechercheart** und Recherchemodus
 - thematische Unterordner
 - Quellen-Unterordner
 - `-INFO.md`
@@ -123,7 +154,7 @@ Dort kontrollieren:
 - vorhandene Medium-/Vorschau-Links
 - `99-EXTERNE-SUCHLINKS`
 
-YouTube-, Google- und UFC-Websuchlinks dienen ausschließlich der zusätzlichen Sichtung. Sichtbarkeit dort bedeutet **keine Nutzungsfreigabe**.
+YouTube-, Google-Bilder-, Google-Video-, Google-News-, Wikipedia- und gegebenenfalls UFC-Websuchlinks dienen ausschließlich der zusätzlichen Sichtung. Sichtbarkeit dort bedeutet **keine Nutzungsfreigabe**.
 
 ## Test C – fünf Medienquellen im normalen Arsenal Builder
 
@@ -243,11 +274,7 @@ Unter **Prüfen** jedes Starterasset vollständig ansehen und kontrollieren:
 - Quelle und Lizenz nachvollziehbar
 - Einsatzkontext geprüft
 
-Erlaubte Entscheidungen:
-
-- freigeben
-- einschränken
-- archivieren
+Erlaubte Entscheidungen: freigeben, einschränken oder archivieren.
 
 Für die Beta-Abnahme müssen zwölf unterschiedliche Starter-IDs eine dokumentierte Entscheidung besitzen.
 
@@ -314,6 +341,7 @@ Prüfen:
 - Beta-Readiness JSON/Markdown
 - Backup-Manifest und Prüfsummen
 - `topicResearchGenerated: true`
+- `multipleResearchTypesVerified: true`
 - `scriptSpecificTopicResearch: true`
 - `starterAssetsReviewed: true`
 - `verifiedMediaPackCreated: true`
@@ -322,6 +350,6 @@ Prüfen:
 
 ## Abnahmekriterien
 
-Die Beta gilt erst als **real getestet**, wenn alle oben genannten technischen und manuellen Prüfungen erfüllt sind. Insbesondere ist eine sichtbare Person oder ein bekannter Name im Rechercheergebnis niemals automatisch ein Nachweis für Identität oder Nutzungsrecht. Der konkrete Inhalt und die Rechte werden vor jeder Veröffentlichung separat geprüft.
+Die Beta gilt erst als **real getestet**, wenn alle oben genannten technischen und manuellen Prüfungen erfüllt sind. Insbesondere ist eine sichtbare Person, Marke, Firma, ein Produkt, Ort oder Event im Rechercheergebnis niemals automatisch ein Nachweis für Identität oder Nutzungsrecht. Der konkrete Inhalt und die Rechte werden vor jeder Veröffentlichung separat geprüft.
 
 Der Pull Request bleibt bis dahin Draft und wird nicht in `main` gemergt.
