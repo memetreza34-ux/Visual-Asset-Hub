@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="./inbox-importer.css" />
   <link rel="stylesheet" href="./inbox-uploader.css" />
   <link rel="stylesheet" href="./review-queue.css" />
+  <link rel="stylesheet" href="./entity-research.css" />
   <link rel="stylesheet" href="./arsenal-builder.css" />
   <link rel="stylesheet" href="./expansion-dashboard.css" />
   <link rel="stylesheet" href="./channel-arsenal.css" />
@@ -30,6 +31,7 @@
   <script type="module" src="./inbox-importer.js"></script>
   <script type="module" src="./inbox-uploader.js"></script>
   <script type="module" src="./review-queue.js"></script>
+  <script type="module" src="./entity-research.js"></script>
   <script type="module" src="./arsenal-builder.js"></script>
   <script type="module" src="./expansion-dashboard.js"></script>
   <script type="module" src="./channel-arsenal.js"></script>
@@ -71,6 +73,7 @@
 
     <section id="release-status" class="release-status" hidden aria-label="Beta-Fortschritt"></section>
     <section id="script-planner" class="script-planner" hidden aria-label="Reel- und Skript-Planer"></section>
+    <section id="entity-research" class="entity-research" hidden aria-label="Personen- und Themenrecherche für Reels"></section>
     <section id="inbox-importer" class="inbox-importer" hidden aria-label="Import eigener lokaler Medien"></section>
     <section id="review-queue" class="review-queue" hidden aria-label="Schnelle Review-Warteschlange"></section>
     <section id="arsenal-builder" class="arsenal-builder" hidden aria-label="Medienquellen durchsuchen"></section>
@@ -94,7 +97,7 @@
     <section class="result-bar" aria-live="polite"><strong id="result-count">0 Assets</strong><span id="catalog-date"></span></section>
     <section id="asset-grid" class="asset-grid" aria-label="Gefundene Assets"></section>
     <button id="load-more" class="load-more" type="button" hidden>Mehr anzeigen</button>
-    <section id="empty-state" class="empty-state" hidden><h2>Keine Assets gefunden</h2><p>Filter ändern oder über „Medien suchen“ neue Treffer aus Pexels, Pixabay, Unsplash, Openverse oder Wikimedia Commons als Review importieren.</p></section>
+    <section id="empty-state" class="empty-state" hidden><h2>Keine Assets gefunden</h2><p>Filter ändern, „Person/Thema recherchieren“ nutzen oder über „Medien suchen“ neue Treffer aus Pexels, Pixabay, Unsplash, Openverse oder Wikimedia Commons als Review importieren.</p></section>
   </main>
 
   <dialog id="asset-dialog"><button class="dialog-close" type="button" aria-label="Detailansicht schließen">×</button><div id="dialog-content"></div></dialog>
