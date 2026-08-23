@@ -2,7 +2,70 @@
 
 Visual Asset Hub ist eine lokale Medienbibliothek und Rechercheoberfläche für **B-Rolls, Bilder, Animationen, Grafiken, Overlays, Screen-Recordings, Icons und Mockups**. Sie ist für Reels, Shorts, YouTube, Webseiten, Präsentationen und weitere Content-Projekte ausgelegt.
 
-Aktueller Beta-Stand: **`0.4.0-beta.6`**.
+Aktueller Beta-Stand: **`0.4.0-beta.7`**.
+
+## Skript rein → Visuals raus
+
+Der neue Hauptarbeitsbereich **Skript → Visuals** ist für fertige Sprechertexte gedacht. Die Anwendung schreibt, verbessert oder erweitert das Skript **nicht**. Der Nutzer liefert den fertigen Text; Visual Asset Hub kümmert sich ausschließlich um die visuelle Recherche.
+
+Ablauf:
+
+```text
+fertiges Skript
+→ visuelle Einheiten / Szenen
+→ visuelle Absicht pro Szene
+→ mehrere Suchqueries
+→ Bilder und B-Rolls aus den vorhandenen Quellen
+→ mehrere Kandidaten pro Szene
+→ Hauptvisual / Alternativen auswählen
+→ bewusst als Review importieren
+→ Shotlist und lokales Projektarchiv
+```
+
+Unterstützt werden kurze Reels ebenso wie längere Skripte bis **40.000 Zeichen** und maximal **120 visuelle Einheiten**. Die Szenen können automatisch, satzweise oder absatzweise gebildet werden. Lange Sätze können in mehrere visuelle Einheiten geteilt werden, während der vollständige eingegebene Originaltext unverändert im Projekt erhalten bleibt.
+
+### Pro Szene
+
+Jede visuelle Einheit enthält unter anderem:
+
+- exakten Originaltext der Einheit
+- Zeitbereich
+- visuelle Absicht
+- erkannte Entitäten und Konzepte
+- 3 bis 5 dynamische Suchqueries
+- bevorzugten Medientyp
+- reale Kandidaten aus den vorhandenen Medienquellen
+- technischen Fit
+- Quellseite und Creator, soweit vorhanden
+- Hauptvisual und Alternativen
+- Importstatus
+
+Direkte Treffer können konkret sein, etwa eine Person, ein Produkt, ein Ort oder ein technisches Gerät. Bei abstrakten Aussagen kann der Hub stattdessen **symbolische / kontextuelle B-Rolls** vorschlagen und kennzeichnet diesen Fall.
+
+### Lange Skripte
+
+Die Web-App recherchiert lange Projekte bewusst **szeneweise und sequenziell**. Bereits abgeschlossene Szenen bleiben erhalten, auch wenn eine spätere Quellensuche fehlschlägt. Die Recherche kann gestoppt und später fortgesetzt werden.
+
+Pro Szene beendet die Suchlogik den Lauf, sobald je nach Modus genügend eindeutige Kandidaten aus ausreichend unterschiedlichen Quellen vorhanden sind. Dadurch werden nicht unnötig alle Queries gegen alle Provider abgefeuert.
+
+### Projektordner
+
+Script-Visual-Projekte werden lokal gespeichert und nach `ALLES-GEFUNDEN/06-SKRIPT-PROJEKTE` gespiegelt:
+
+```text
+06-SKRIPT-PROJEKTE/
+└── <Projektname>-<Projekt-ID>/
+    ├── 00-SKRIPT.txt
+    ├── 00-PROJEKT.json
+    ├── 00-SZENENPLAN.md
+    ├── 00-SHOTLIST.json
+    ├── 00-SHOTLIST.csv
+    ├── 001-SCENE-001/
+    ├── 002-SCENE-002/
+    └── ...
+```
+
+Die Projekte liegen zusätzlich in `.local-storage/script-visual-projects`, damit sie nach einem Browser-Neuladen wieder geöffnet und fortgesetzt werden können. Skripte und Projektdateien werden durch `.gitignore` nicht automatisch in Git eingecheckt.
 
 ## Vier spezialisierte Kanalbibliotheken
 
@@ -14,7 +77,7 @@ Aktueller Beta-Stand: **`0.4.0-beta.6`**.
 | Kampfsport | 30 | 90 | 240 freigegebene Assets |
 | **Gesamt** | **90** | **270** | **720 freigegebene Assets** |
 
-Jede Sammlung ist für Video und Foto sowie Hoch- und Querformat vorbereitet. Die Kanalbibliotheken bilden die wiederverwendbare Grundversorgung; konkrete Reel-Themen können zusätzlich über die universelle Themenrecherche aufgebaut werden.
+Jede Sammlung ist für Video und Foto sowie Hoch- und Querformat vorbereitet. Diese vier Bibliotheken bleiben die wiederverwendbare Grundversorgung. Der Script Visual Finder besitzt zusätzlich einen neutralen **Allgemein**-Projektmodus, der nicht in die 720 Ausbauziele eingerechnet wird.
 
 ## Fünf Medienquellen
 
@@ -26,13 +89,15 @@ Jede Sammlung ist für Video und Foto sowie Hoch- und Querformat vorbereitet. Di
 | Openverse | ja | nein | nein |
 | Wikimedia Commons | ja | nein | nein |
 
-Pexels-, Pixabay- und Unsplash-Keys werden im Browser nur im Arbeitsspeicher der geöffneten Seite gehalten. Sie werden nicht in `localStorage`, `sessionStorage`, Katalogdateien oder Suchdateien gespeichert. **Sitzungs-Keys löschen** entfernt sie sofort.
+Pexels-, Pixabay- und Unsplash-Keys werden im Browser nur im Arbeitsspeicher der geöffneten Seite gehalten. Sie werden nicht in `localStorage`, `sessionStorage`, Katalog-, Projekt- oder Suchdateien gespeichert. **Sitzungs-Keys löschen** entfernt sie sofort.
 
 Openverse und Wikimedia werden konservativ auf unterstützte offene Lizenzen begrenzt: Public Domain, CC0, CC BY und CC BY-SA. Attribution und Lizenzinformationen bleiben dokumentiert.
 
+Script Visual Finder, Themenrecherche und normaler Arsenal Builder verwenden dieselben bestehenden Provideradapter. Pixabay behält seinen 24-Stunden-Cache.
+
 ## Universelle Themenrecherche
 
-Der Arbeitsbereich **Thema recherchieren** ist nicht auf Personen oder Kampfsport beschränkt. Eingaben können praktisch jedes visuelle Reel-Thema sein, zum Beispiel:
+Der separate Arbeitsbereich **Thema recherchieren** bleibt für Recherche ohne fertigen Szenentext erhalten. Eingaben können praktisch jedes visuelle Thema sein, zum Beispiel:
 
 ```text
 Conor McGregor
@@ -45,9 +110,7 @@ Inflation
 Humanoide Roboter
 ```
 
-### Recherchearten
-
-Der Hub bietet:
+Recherchearten:
 
 - **Automatisch erkennen**
 - **Person**
@@ -60,45 +123,15 @@ Der Hub bietet:
 - **Historisches Thema**
 - **Allgemeines Thema / Konzept**
 
-Die Rechercheart bestimmt die visuellen Blickwinkel. Der **Zielkanal** bestimmt nur, in welchem Content-Kontext die später importierten Assets verwendet werden.
-
-Beispiele für automatisch vorbereitete Blickwinkel:
-
-- Person: Portrait, Karriere, Interviews, Events, Alltag, wichtige Orte, Reaktionen
-- Firma/Marke: Branding, Standorte, Führung, Team, Produkte, Events, Geschichte, Kampagnen
-- Produkt: Hero Shots, Close-ups, Nutzung, Unboxing, Vergleich, Produktion, Zubehör, Reparatur
-- Event: Venue, Ankunft, Hauptgeschehen, Bühne, Publikum, Presse, Backstage, Reaktionen
-- Ort: Wahrzeichen, Luftaufnahmen, Straßen, Innenräume, Menschen, Tag/Nacht, Verkehr, Geschichte
-- Technik: Hardware, Komponenten, Betrieb, Installation, Wartung, UI, Diagramme, Produktion
-- Sport/Kampf: Training, Wettkampf, Arena, Presse, Wiegen, Walkout, Portraits, Team, Reaktionen
-- Historie: Archiv, Personen, Orte, Artefakte, Karten, Zeitleiste, Schlüsselereignisse, Vermächtnis
-- Allgemeines Thema: Menschen, Objekte, Prozesse, Arbeit, Daten, News, Historie, Zukunft, symbolische B-Rolls
-
-### Rechercheumfang
+Rechercheumfang:
 
 - **Schnell**: bis zu 6 Motivbereiche
 - **Tief**: bis zu 8 Motivbereiche
 - **Maximal**: bis zu 12 Motivbereiche
 
-Im Maximalmodus entstehen bei allen fünf verfügbaren Quellen höchstens **60 sequenzielle Provider-Suchen**. Der Modus wird nur auf ausdrückliche Auswahl gestartet.
+Im Maximalmodus entstehen bei allen fünf verfügbaren Quellen höchstens **60 sequenzielle Provider-Suchen**.
 
-### Skript als Kontext
-
-Optional kann das komplette Reel-Skript eingefügt werden. Der lokale Planner erkennt zusätzliche konkrete Begriffe, unter anderem Namen, Gegner, Events, Jahreszahlen und zitierte Begriffe. Dafür werden Suchplätze reserviert, damit skriptspezifische Motive nicht hinter allgemeinen Suchen verschwinden.
-
-### Rechercheergebnis
-
-Der Recherchelauf:
-
-- durchsucht alle verfügbaren integrierten Quellen
-- nutzt Openverse und Wikimedia ohne Key
-- bevorzugt je Motiv Foto oder Video
-- dedupliziert Treffer über Provider-ID sowie kanonisierte Quell- und Medien-URLs
-- sortiert Treffer nach technischem Fit
-- zeigt Bilder direkt und Videos mit Player
-- importiert ausschließlich bewusst markierte Treffer
-- setzt jeden Import zunächst auf `review`
-- speichert keine API-Keys in Recherchedateien
+Die Themenrecherche dedupliziert Treffer, zeigt Bilder und Videos direkt und importiert ausschließlich bewusst markierte Treffer. Jeder Import beginnt auf `review`.
 
 ## ALLES-GEFUNDEN
 
@@ -114,44 +147,14 @@ ALLES-GEFUNDEN/
 ├── 03-Elektrotechnik/
 ├── 04-Kampfsport/
 ├── 05-THEMENRECHERCHEN/
+├── 06-SKRIPT-PROJEKTE/
 ├── 90-GEFUNDENE-KANDIDATEN/
 └── 99-Sonstiges/
 ```
 
-Eine konkrete Recherche wird beispielsweise so abgelegt:
+Katalogassets, normale Suchkandidaten, Themenrecherchen und Script-Visual-Projekte bleiben voneinander getrennt. Skriptprojekte und historische Suchfunde werden beim normalen Vault-Neuaufbau erhalten.
 
-```text
-05-THEMENRECHERCHEN/
-└── 04-Kampfsport/
-    └── Conor McGregor/
-        ├── 00-RECHERCHEPLAN.md
-        ├── 00-IMPORTIERTE-ASSETS.md
-        ├── 01-Allgemein/
-        ├── 02-Training & Vorbereitung/
-        ├── 03-Wettkampf & Action/
-        ├── ...
-        ├── 90-IMPORTIERT/
-        └── 99-EXTERNE-SUCHLINKS/
-```
-
-Die Ordnerstruktur hängt von der gewählten Rechercheart ab. Ein Produkt erhält andere Unterordner als eine Person, ein Ort oder ein technisches System.
-
-Pro Fund werden je nach Quelle verständliche INFO-, Quellen-, Medium- und Vorschau-Verknüpfungen erzeugt. Lokale Katalogmedien können als echte Dateikopie gespiegelt werden. Importierte Themenfunde werden klar von noch nicht importierten Recherchekandidaten getrennt.
-
-Normale Suchfunde und Themenrecherchen bleiben lokal historisiert, auch wenn temporäre API-Suchdateien später bereinigt werden.
-
-## Zusätzliche externe Recherchelinks
-
-Pro Themenrecherche entstehen Links für zusätzliche manuelle Sichtung, unter anderem:
-
-- YouTube-Suche
-- Google Bilder
-- Google Videos
-- Google News
-- Wikipedia-Suche
-- bei Kampfsport zusätzlich eine Websuche auf der offiziellen UFC-Domain
-
-Diese Links sind **nur Recherchehilfen**. Sichtbarkeit im Web ist keine Lizenz- oder Nutzungserlaubnis.
+Pro externem Fund können verständliche INFO-, Quellen-, Medium- und Vorschau-Verknüpfungen entstehen. Lokale Katalogmedien können als echte Dateikopie gespiegelt werden.
 
 ## Ausbau 720
 
@@ -171,21 +174,16 @@ Für neue Lücken gilt grundsätzlich:
 - Video: Pexels → Pixabay
 - Foto: Unsplash → Openverse → Wikimedia Commons → Pexels → Pixabay
 
-Suchbegriffe und Quellen-Fallbacks werden nur vorbereitet und starten nicht automatisch.
+## Bestehender Reel- und Skript-Planer
 
-## Reel- und Skript-Planer
+Der bisherige **Skript planen**-Bereich bleibt erhalten. Er ordnet einen Sprechtext den 90 festen Kanal-Sammlungen und bereits vorhandenen Assets zu und kann JSON-, CSV-, Markdown- und SRT-Ausgaben erzeugen.
 
-Ein deutscher Sprechtext kann lokal in eine Shotlist umgewandelt werden. Der Planer erzeugt:
+Er ist vom neuen Script Visual Finder getrennt:
 
-- Szenen und Zeitbereiche
-- empfohlenen Medientyp
-- passende Kanal-Sammlungen
-- vorhandene Asset-Vorschläge
-- Status- und Rechtewarnungen
-- Suchbegriffe für fehlende Motive
-- JSON-, CSV-, Markdown- und SRT-Ausgaben
+- **Skript planen**: vorhandene Sammlungen und Bibliotheksassets zuordnen
+- **Skript → Visuals**: dynamische Queries erzeugen und echte Bilder/B-Rolls pro Szene recherchieren
 
-CLI-Beispiel:
+CLI-Beispiel des bestehenden Planers:
 
 ```bash
 npm run script:plan -- \
@@ -193,12 +191,6 @@ npm run script:plan -- \
   --file ./mein-reel.txt \
   --duration 45 \
   --orientation vertical
-```
-
-Ein reiner Rechercheplan kann ebenfalls erzeugt werden:
-
-```bash
-npm run entity:plan -- "Conor McGregor"
 ```
 
 ## Arsenal Builder
@@ -218,7 +210,7 @@ Der technische Fit ist nur eine Produktionsvorsortierung und keine Inhalts- oder
 
 ## Review und Rechte
 
-Jeder externe Import beginnt auf `review`.
+Jeder externe Import beginnt auf `review` – auch jeder Import aus **Skript → Visuals**.
 
 Vor Freigabe werden weiterhin mindestens geprüft:
 
@@ -227,11 +219,11 @@ Vor Freigabe werden weiterhin mindestens geprüft:
 3. Quelle, Lizenz und Nutzung
 4. geplanter Einsatzkontext
 
-Besonders bei realen Personen, Firmen, Produkten, Events, Sportveranstaltungen und Broadcastmaterial bedeutet ein gefundener Treffer **nicht automatisch**, dass er in einem Reel verwendet werden darf.
+Besonders bei realen Personen, Firmen, Produkten, Events, Sportveranstaltungen und Broadcastmaterial bedeutet ein gefundener Treffer **nicht automatisch**, dass er verwendet werden darf.
 
 ## Eigene Dateien
 
-Eigene Videos, Bilder, Grafiken und weitere unterstützte Medien können über die lokale Inbox importiert werden. Kanal, Sammlung, Titel, Beschreibung und Tags werden gespeichert. Eine ausdrückliche Rechtebestätigung ist Pflicht. Der Import startet auf `review`.
+Eigene Videos, Bilder, Grafiken und weitere unterstützte Medien können über die lokale Inbox importiert werden. Eine ausdrückliche Rechtebestätigung ist Pflicht. Der Import startet auf `review`.
 
 ## Medienpakete
 
@@ -256,6 +248,8 @@ Alle beginnen auf `review`. Finanzen, KI, Elektrotechnik und Kampfsport sind ver
 
 ## Schnellstart auf dem Mac
 
+Der lokale Kompletttest wird erst zur finalen Abnahme ausgeführt:
+
 ```bash
 cd ~/Downloads/Visual-Asset-Hub-clean
 git pull --ff-only
@@ -270,12 +264,6 @@ Danach:
 ```text
 http://127.0.0.1:4173/web/
 ```
-
-## Windows
-
-1. Branch `agent/beta-release` herunterladen und entpacken.
-2. Node.js 22 oder neuer installieren.
-3. `START-HERE.cmd` starten.
 
 ## Wichtige Befehle
 
@@ -304,6 +292,7 @@ npm run serve
 - lokale Verwaltungs-APIs binden nur an Loopback
 - Schreibaktionen benötigen Sitzungstoken und Same-Origin
 - API-Keys werden nicht persistent im Browser gespeichert
+- Script-Visual-Projekte und Skripte bleiben lokal und werden nicht in Git eingecheckt
 - Openverse und Wikimedia benötigen keinen geheimen Key
 - externe und Inbox-Importe starten auf `review`
 - nicht freigegebene Assets werden aus Medienpaketen blockiert
@@ -316,10 +305,13 @@ npm run serve
 Die Beta gilt erst als vollständig real getestet, wenn unter anderem:
 
 - `npm run check` lokal grün ist
+- mindestens ein echtes **Skript → Visuals**-Projekt erstellt wurde
+- mindestens zwei Szenen daraus real recherchiert wurden
+- im Script Visual Finder mindestens ein Video- und ein Bildkandidat gefunden wurden
+- mindestens ein Kandidat daraus bewusst als `review` importiert wurde
 - alle 12 Starterassets entschieden sind
 - alle fünf Medienquellen technisch getestet wurden
-- eine echte universelle Themenrecherche geprüft wurde
-- eine skriptspezifische Themenrecherche geprüft wurde
+- die universelle Themenrecherche mit mindestens zwei Recherchearten geprüft wurde
 - eigener Inbox-Import funktioniert
 - mindestens ein Asset freigegeben ist
 - ein verifiziertes Medienpaket erstellt wurde
