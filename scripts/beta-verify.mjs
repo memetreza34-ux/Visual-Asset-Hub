@@ -41,6 +41,7 @@ const allChannelsRepresented = requiredChannels.every((tag) => channelCounts[tag
 const inboxAssets = assets.filter((asset) => asset.createdBy === 'local-inbox-browser');
 const mediaPacks = findValidMediaPacks(path.join(root, 'exports', 'media-packs'));
 const scriptPlans = findValidScriptPlans(path.join(root, '.local-storage', 'operations', 'script-plans.json'));
+const scriptVisualProjects = findValidScriptVisualProjects(path.join(root, '.local-storage', 'script-visual-projects'));
 const topicResearches = findValidTopicResearch(path.join(root, 'ALLES-GEFUNDEN', '05-THEMENRECHERCHEN'));
 const scriptSpecificResearches = topicResearches.filter((entry) => entry.scriptSpecific);
 const researchTypes = [...new Set(topicResearches.map((entry) => entry.researchType).filter(Boolean))];
@@ -58,6 +59,10 @@ const technicalPercentage = Math.round(100 * Object.values(technicalChecks).filt
 const realTestChecks = {
   starterMediaPresent: videos.length >= 3 && staticVisuals.length >= 3,
   scriptPlanGenerated: scriptPlans.length >= 1,
+  scriptVisualProjectGenerated: scriptVisualProjects.length >= 1,
+  scriptVisualMultipleScenesSearched: scriptVisualProjects.some((entry) => entry.searchedScenes >= 2),
+  scriptVisualMixedMediaFound: scriptVisualProjects.some((entry) => entry.videoCandidates >= 1 && entry.photoCandidates >= 1),
+  scriptVisualReviewImported: scriptVisualProjects.some((entry) => entry.importedAssets >= 1),
   topicResearchGenerated: topicResearches.length >= 1,
   multipleResearchTypesVerified: researchTypes.length >= requiredResearchTypeCount,
   scriptSpecificTopicResearch: scriptSpecificResearches.length >= 1,
@@ -75,6 +80,10 @@ const overallPercentage = Math.round(technicalPercentage * 0.7 + realTestPercent
 const nextActions = [];
 if (videos.length < 3 || staticVisuals.length < 3) nextActions.push('Mindestens drei Videos und drei statische Bilder oder Grafiken bereitstellen.');
 if (scriptPlans.length < 1) nextActions.push('Ein echtes Kanalskript mit dem CLI-Planer verarbeiten und die erzeugte Shotlist prüfen.');
+if (scriptVisualProjects.length < 1) nextActions.push('Ein echtes Projekt unter „Skript → Visuals“ aus einem fertigen Skript erstellen.');
+if (!scriptVisualProjects.some((entry) => entry.searchedScenes >= 2)) nextActions.push('Im Script Visual Finder mindestens zwei Szenen real über Medienquellen recherchieren.');
+if (!scriptVisualProjects.some((entry) => entry.videoCandidates >= 1 && entry.photoCandidates >= 1)) nextActions.push('Im Script Visual Finder mindestens einen Video- und einen Bildkandidaten real sichten.');
+if (!scriptVisualProjects.some((entry) => entry.importedAssets >= 1)) nextActions.push('Mindestens einen Script-Visual-Kandidaten bewusst als Review-Asset importieren.');
 if (topicResearches.length < 1) nextActions.push('Eine echte universelle Themenrecherche durchführen, Treffer visuell prüfen und den Themenordner kontrollieren.');
 if (researchTypes.length < requiredResearchTypeCount) nextActions.push(`${requiredResearchTypeCount - researchTypes.length} weitere unterschiedliche Rechercheart(en) real durchführen und im Themenarchiv nachweisen.`);
 if (scriptSpecificResearches.length < 1) nextActions.push('Eine Themenrecherche mit Reel-Skript durchführen, sodass mindestens ein skriptspezifischer Recherchebereich entsteht.');
@@ -114,6 +123,7 @@ const report = {
     inboxAssets: inboxAssets.length,
     validMediaPacks: mediaPacks.length,
     validScriptPlans: scriptPlans.length,
+    validScriptVisualProjects: scriptVisualProjects.length,
     validTopicResearches: topicResearches.length,
     scriptSpecificTopicResearches: scriptSpecificResearches.length,
     distinctResearchTypes: researchTypes.length,
@@ -122,6 +132,7 @@ const report = {
     channelCounts
   },
   scriptPlans,
+  scriptVisualProjects,
   topicResearches,
   mediaPacks,
   steps: results,
@@ -144,11 +155,14 @@ const md = [
   `- Dokumentiert geprüft: **${reviewedAssets.length}/${requiredReviewCount}**`,
   `- Freigegeben: **${approved.length}**`,
   `- Verifizierte Skriptpläne: **${scriptPlans.length}**`,
+  `- Script-Visual-Projekte: **${scriptVisualProjects.length}**`,
   `- Verifizierte Themenrecherchen: **${topicResearches.length}** (${scriptSpecificResearches.length} mit Skriptbezug)`,
   `- Unterschiedliche Recherchearten: **${researchTypes.length}/${requiredResearchTypeCount}**${researchTypes.length ? ` · ${researchTypes.join(', ')}` : ''}`,
   `- Eigene Inbox-Assets: **${inboxAssets.length}**`,
   `- Verifizierte Medienpakete: **${mediaPacks.length}**`,
   `- Nutzungen: **${usageCount}**`, '',
+  '## Script Visual Finder',
+  ...(scriptVisualProjects.length ? scriptVisualProjects.map((entry) => `- ${entry.projectId} / ${entry.title}: **${entry.searchedScenes}/${entry.sceneCount} Szenen** · ${entry.videoCandidates} Video- und ${entry.photoCandidates} Bildkandidaten · ${entry.importedAssets} importiert`) : ['- Noch kein verifiziertes Script-Visual-Projekt.']), '',
   '## Kanalabdeckung',
   ...requiredChannels.map((tag) => `- ${channelLabel(tag)}: **${channelCounts[tag]} Assets**`), '',
   '## Themenrecherchen',
@@ -164,6 +178,40 @@ fs.writeFileSync(markdownPath, `${md}\n`);
 syncFinalReport([jsonPath, markdownPath]);
 console.log(md);
 if (!technicalReady) process.exitCode = 1;
+
+function findValidScriptVisualProjects(directory) {
+  if (!fs.existsSync(directory)) return [];
+  const found = [];
+  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    if (!entry.isFile() || !/^SVP-[A-F0-9]{12}\.json$/.test(entry.name)) continue;
+    try {
+      const project = JSON.parse(fs.readFileSync(path.join(directory, entry.name), 'utf8'));
+      if (project.format !== 'visual-asset-hub-script-visual-project' || project.version !== 1) continue;
+      if (!/^SVP-[A-F0-9]{12}$/.test(project.projectId ?? '')) continue;
+      if (typeof project.script !== 'string' || project.script.length < 10 || project.script.length > 40000) continue;
+      if (!/^[a-f0-9]{64}$/.test(project.scriptSha256 ?? '')) continue;
+      const scriptHash = createHash('sha256').update(project.script, 'utf8').digest('hex');
+      if (scriptHash !== project.scriptSha256) continue;
+      if (!Array.isArray(project.scenes) || project.scenes.length < 1 || project.scenes.length > 120) continue;
+      if (!project.scenes.every((scene, index) => scene.id === `SCENE-${String(index + 1).padStart(3, '0')}` && typeof scene.originalText === 'string' && scene.originalText.length > 0 && Array.isArray(scene.queries))) continue;
+      const candidates = project.scenes.flatMap((scene) => Array.isArray(scene.candidates) ? scene.candidates : []);
+      const importedAssets = new Set(candidates.flatMap((candidate) => candidate.importedAssetIds ?? []));
+      found.push({
+        projectId: project.projectId,
+        title: project.title ?? project.projectId,
+        sceneCount: project.scenes.length,
+        searchedScenes: project.scenes.filter((scene) => scene.searchedAt && (scene.candidates?.length ?? 0) > 0).length,
+        selectedScenes: project.scenes.filter((scene) => scene.selectedPrimary || (scene.selectedAlternatives?.length ?? 0) > 0).length,
+        videoCandidates: candidates.filter((candidate) => candidate.type === 'video').length,
+        photoCandidates: candidates.filter((candidate) => candidate.type !== 'video').length,
+        importedAssets: importedAssets.size
+      });
+    } catch {
+      // Unvollständige lokale Projekte zählen nicht als Realtest-Nachweis.
+    }
+  }
+  return found;
+}
 
 function findValidTopicResearch(directory) {
   if (!fs.existsSync(directory)) return [];
