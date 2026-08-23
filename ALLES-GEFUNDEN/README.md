@@ -2,7 +2,7 @@
 
 Dieser Ordner ist die zentrale, automatisch erzeugte Medienablage des Visual Asset Hub.
 
-Hier findest du **Katalog-Assets**, **normale Suchkandidaten** und **universelle Themenrecherchen** klar getrennt. Eine Recherche kann sich auf eine Person, Firma, Marke, Produkt, Event, Ort, Technik, Sport, Historie oder ein allgemeines Thema beziehen.
+Hier findest du **Katalog-Assets**, **normale Suchkandidaten**, **universelle Themenrecherchen** und **Skript-zu-Visual-Projekte** klar getrennt.
 
 ## Struktur
 
@@ -16,9 +16,61 @@ ALLES-GEFUNDEN/
 ├── 03-Elektrotechnik/
 ├── 04-Kampfsport/
 ├── 05-THEMENRECHERCHEN/
+├── 06-SKRIPT-PROJEKTE/
 ├── 90-GEFUNDENE-KANDIDATEN/
 └── 99-Sonstiges/
 ```
+
+## Skript → Visuals
+
+Der Arbeitsbereich **Skript → Visuals** ist für den Kernworkflow gedacht:
+
+```text
+fertiges Skript
+→ visuelle Einheiten
+→ mehrere Suchqueries pro Szene
+→ Bilder und B-Rolls
+→ Hauptvisual / Alternativen
+→ Review-Import
+```
+
+Der Hub schreibt oder verbessert dabei **kein Skript**. Der eingegebene Originaltext wird unverändert als Projektgrundlage gespeichert.
+
+Jedes Projekt liegt separat unter:
+
+```text
+06-SKRIPT-PROJEKTE/
+└── <Projektname>-<Projekt-ID>/
+    ├── 00-SKRIPT.txt
+    ├── 00-PROJEKT.json
+    ├── 00-SZENENPLAN.md
+    ├── 00-SHOTLIST.json
+    ├── 00-SHOTLIST.csv
+    ├── 001-SCENE-001/
+    ├── 002-SCENE-002/
+    └── ...
+```
+
+Pro Szene werden gespeichert:
+
+- exakter Originaltext
+- Zeitbereich
+- visuelle Absicht
+- erzeugte Suchqueries
+- gefundene Kandidaten
+- Provider und Quellseite
+- technischer Fit
+- Hauptvisual / Alternativen
+- Importstatus
+
+Bei externen Kandidaten entstehen je nach Treffer zusätzlich:
+
+- `-INFO.md`
+- `-QUELLE.url`
+- `-MEDIUM.url`
+- `-VORSCHAU.url`
+
+Skriptprojekte bleiben auch beim normalen `vault:build` erhalten.
 
 ## Katalog-Assets
 
@@ -96,7 +148,7 @@ Ein optionales Reel-Skript kann zusätzliche konkrete Suchbereiche erzeugen, bei
 
 ## Quellen
 
-Die integrierte Recherche kann verwenden:
+Script Visual Finder, universelle Recherche und normaler Arsenal Builder verwenden die bestehenden Provider:
 
 - Pexels
 - Pixabay
@@ -106,29 +158,17 @@ Die integrierte Recherche kann verwenden:
 
 Openverse und Wikimedia benötigen keinen privaten Key.
 
-Je Bereich werden die Funde nach Quelle getrennt. Dubletten werden soweit möglich über Provider-ID sowie Quell- und Medien-URLs entfernt.
+Dubletten werden soweit möglich über Provider-ID sowie Quell- und Medien-URLs reduziert. Im Script Visual Finder werden bereits in anderen Szenen gefundene Medien zusätzlich niedriger priorisiert.
 
-## Nach dem Import eines Themenfunds
+## Nach dem Import
 
-Der ursprüngliche Recherchefund bleibt als Historie erhalten, wird aber als **bereits importiert** markiert.
+Jeder externe Import startet als **`review`**. Ein Treffer wird niemals nur deshalb freigegeben, weil er in einem Skriptprojekt oder einer Themenrecherche sichtbar ist.
 
-Das aktuelle Katalogasset wird zusätzlich im gleichen Themenbereich gespiegelt:
-
-```text
-Bereich/
-└── Quelle/
-    └── 90-IMPORTIERT/
-        ├── 01-FREIGEGEBEN/
-        ├── 02-REVIEW/
-        ├── 03-EINGESCHRAENKT/
-        └── 04-ARCHIV/
-```
-
-`00-IMPORTIERTE-ASSETS.md` zeigt den aktuellen Katalogstatus der importierten Themenassets.
+Themenfunde werden im Themenarchiv als bereits importiert markiert. Script-Visual-Projekte speichern die importierten Katalog-Asset-IDs direkt am jeweiligen Kandidaten.
 
 ## Externe Suchlinks
 
-`99-EXTERNE-SUCHLINKS` kann zusätzliche manuelle Recherchehilfen enthalten:
+`05-THEMENRECHERCHEN/.../99-EXTERNE-SUCHLINKS` kann zusätzliche manuelle Recherchehilfen enthalten:
 
 - YouTube-Suche
 - Google Bilder
@@ -150,25 +190,13 @@ Unter `90-GEFUNDENE-KANDIDATEN` liegen Treffer aus dem normalen Arsenal Builder,
         └── Quelle/
 ```
 
-## Was pro Fund erzeugt wird
-
-Je nach vorhandenem Material erzeugt der Hub:
-
-- verständlichen Titel beziehungsweise Dateinamen
-- `-INFO.md`
-- `-QUELLE.url`
-- `-MEDIUM.url`
-- `-VORSCHAU.url`
-- bei lokalen Katalog-Assets eine echte Dateikopie
-
-Nicht importierte Recherchetreffer werden ausdrücklich als **NOCH NICHT IMPORTIERT** gekennzeichnet.
-
 ## Dauerhafte lokale Historie
 
-Normale Suchfunde und Themenrecherchen bleiben beim Neuaufbau erhalten, auch wenn temporäre API-Suchdateien später bereinigt werden.
+Normale Suchfunde, Themenrecherchen und Script-Visual-Projekte bleiben beim Neuaufbau erhalten, auch wenn temporäre API-Suchdateien später bereinigt werden.
 
 ```text
 05-THEMENRECHERCHEN/00-HISTORIE.md
+06-SKRIPT-PROJEKTE/
 90-GEFUNDENE-KANDIDATEN/00-HISTORIE.md
 ```
 
@@ -178,10 +206,10 @@ Normale Suchfunde und Themenrecherchen bleiben beim Neuaufbau erhalten, auch wen
 npm run vault:build
 ```
 
-Zusätzlich aktualisieren Starterimport, laufender lokaler Server und Themenrecherche den Ordner automatisch.
+Zusätzlich aktualisieren Starterimport, laufender lokaler Server, Themenrecherche und Script Visual Finder die lokale Arbeitsablage.
 
 ## Wichtig
 
-`ALLES-GEFUNDEN` ist ein **Arbeits- und Recherchearchiv**, keine automatische Rechtefreigabe. Review-, Inbox-, eingeschränkte oder archivierte Assets sowie nicht importierte Such- und Themenkandidaten dürfen nicht allein deshalb veröffentlicht werden, weil sie hier sichtbar sind.
+`ALLES-GEFUNDEN` ist ein **Arbeits- und Recherchearchiv**, keine automatische Rechtefreigabe. Review-, Inbox-, eingeschränkte oder archivierte Assets sowie nicht importierte Such-, Themen- und Skriptkandidaten dürfen nicht allein deshalb veröffentlicht werden, weil sie hier sichtbar sind.
 
 Die erzeugten Inhalte bleiben lokal und werden nicht automatisch in Git eingecheckt.
