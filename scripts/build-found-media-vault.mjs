@@ -11,7 +11,8 @@ const topicAugmentScript = path.join(scriptDir, 'augment-topic-vault.mjs');
 const vaultRoot = path.join(root, 'ALLES-GEFUNDEN');
 const archives = [
   { name: 'Kandidaten', root: path.join(vaultRoot, '90-GEFUNDENE-KANDIDATEN'), backup: path.join(root, '.local-storage', 'vault-candidate-history') },
-  { name: 'Themenrecherchen', root: path.join(vaultRoot, '05-THEMENRECHERCHEN'), backup: path.join(root, '.local-storage', 'vault-topic-history') }
+  { name: 'Themenrecherchen', root: path.join(vaultRoot, '05-THEMENRECHERCHEN'), backup: path.join(root, '.local-storage', 'vault-topic-history') },
+  { name: 'Skriptprojekte', root: path.join(vaultRoot, '06-SKRIPT-PROJEKTE'), backup: path.join(root, '.local-storage', 'vault-script-project-history') }
 ];
 
 fs.mkdirSync(path.join(root, '.local-storage'), { recursive: true });
@@ -52,13 +53,14 @@ if (augment.status !== 0) {
 
 const candidateFiles = listFiles(archives[0].root, (name) => name.endsWith('-INFO.md'));
 const topicFiles = listFiles(archives[1].root, (name) => name.endsWith('-INFO.md'));
+const scriptProjectFiles = listFiles(archives[2].root, (name) => name === '00-PROJEKT.json');
 writeHistoryIndex(archives[0].root, candidateFiles, 'Historisches Kandidatenarchiv', 'Diese Liste enthält auch Funde aus älteren normalen Suchläufen.');
 writeHistoryIndex(archives[1].root, topicFiles, 'Historische Themenrecherchen', 'Diese Liste enthält auch Personen-/Themenfunde aus älteren Rechercheläufen.');
-augmentMainIndexes(candidateFiles, topicFiles);
+augmentMainIndexes(candidateFiles, topicFiles, scriptProjectFiles);
 
 if (result.stdout) process.stdout.write(result.stdout);
 if (augment.stdout) process.stdout.write(augment.stdout);
-console.log(`Historische Suchfunde bleiben erhalten: ${candidateFiles.length} normale Kandidaten + ${topicFiles.length} Themenrecherche-Einträge.`);
+console.log(`Historische Suchfunde bleiben erhalten: ${candidateFiles.length} normale Kandidaten + ${topicFiles.length} Themenrecherche-Einträge + ${scriptProjectFiles.length} Skriptprojekte.`);
 
 function restoreArchives() {
   for (const archive of archives) {
@@ -95,7 +97,7 @@ function writeHistoryIndex(directory, files, title, copy) {
   fs.writeFileSync(path.join(directory, '00-HISTORIE.md'), `${lines.join('\n')}\n`);
 }
 
-function augmentMainIndexes(candidateFiles, topicFiles) {
+function augmentMainIndexes(candidateFiles, topicFiles, scriptProjectFiles) {
   const marker = '<!-- VAULT-HISTORY -->';
   const indexFile = path.join(vaultRoot, '00-GESAMTINDEX.md');
   if (fs.existsSync(indexFile)) {
@@ -106,9 +108,11 @@ function augmentMainIndexes(candidateFiles, topicFiles) {
       '## Dauerhafte lokale Archive', '',
       `- Historisch erhaltene normale Suchfunde: **${candidateFiles.length}**`,
       `- Historisch erhaltene Themen-/Personenfunde: **${topicFiles.length}**`,
+      `- Erhaltene Script-Visual-Projekte: **${scriptProjectFiles.length}**`,
       '- Normale Funde: `90-GEFUNDENE-KANDIDATEN/00-HISTORIE.md`',
-      '- Themenrecherchen: `05-THEMENRECHERCHEN/00-HISTORIE.md`', '',
-      '> Beide Archive bleiben lokal erhalten, auch wenn temporäre API-Suchdateien später bereinigt werden.'
+      '- Themenrecherchen: `05-THEMENRECHERCHEN/00-HISTORIE.md`',
+      '- Skriptprojekte: `06-SKRIPT-PROJEKTE/`', '',
+      '> Die Archive bleiben lokal erhalten, auch wenn temporäre API-Suchdateien später bereinigt werden.'
     ].join('\n');
     fs.writeFileSync(indexFile, `${base}${extra}\n`);
   }
@@ -120,6 +124,8 @@ function augmentMainIndexes(candidateFiles, topicFiles) {
     manifest.historicalCandidateIndex = '90-GEFUNDENE-KANDIDATEN/00-HISTORIE.md';
     manifest.historicalTopicResearchCount = topicFiles.length;
     manifest.historicalTopicResearchIndex = '05-THEMENRECHERCHEN/00-HISTORIE.md';
+    manifest.scriptVisualProjectCount = scriptProjectFiles.length;
+    manifest.scriptVisualProjectRoot = '06-SKRIPT-PROJEKTE/';
     fs.writeFileSync(manifestFile, `${JSON.stringify(manifest, null, 2)}\n`);
   }
 }
