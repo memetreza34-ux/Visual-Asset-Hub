@@ -1,137 +1,151 @@
 # Realtest-Schnellstart
 
-## Vorbereitung auf dem Mac
+Zielstand: **`0.4.0-beta.7`**.
 
-1. Im lokalen Clone auf Branch `agent/beta-release` wechseln.
-2. `git pull --ff-only` ausführen.
-3. Node.js 22 oder neuer verwenden.
-4. `npm run starter:import` ausführen.
-5. `npm run check` ausführen.
-6. `npm run serve` starten und das Terminalfenster geöffnet lassen.
-7. `http://127.0.0.1:4173/web/` öffnen.
+Dieser Ablauf wird erst beim späteren vollständigen lokalen Endtest verwendet.
 
-## Test in der Weboberfläche
+## Vorbereitung
 
-### 1. Universelle Themenrecherche real testen
+1. lokalen Clone auf `agent/beta-release` aktualisieren
+2. `npm run starter:import`
+3. `npm run check`
+4. `npm run serve`
+5. `http://127.0.0.1:4173/web/` öffnen
 
-Navigation **Thema recherchieren** öffnen.
+## 1. Skript → Visuals real testen
 
-#### Recherche 1 – Sport
+Navigation **Skript → Visuals** öffnen.
 
-- Zielkanal **Kampfsport** wählen.
-- Thema `Conor McGregor` eingeben.
-- Rechercheart **Sport / Kampf / Athletik** oder Auto verwenden.
-- zuerst **Rechercheplan anzeigen** wählen.
-- prüfen, dass sinnvolle Bereiche wie Training, Wettkampf, Arena, Presse, Wiegen, Walkout, Team und Reaktionen erscheinen.
-- zusätzlich ein kurzes Testskript mit `Khabib Nurmagomedov`, `UFC 229` und `2018` einfügen.
-- prüfen, dass skriptspezifische Suchbereiche entstehen.
+Ein fertiges Skript von ungefähr einer Minute einfügen, z. B. über **KI-Roboter bis 2035**.
 
-#### Recherche 2 – andere Art
+Prüfen:
 
-Mindestens eine zweite Rechercheart real durchführen, z. B.:
+- nur **Fertiges Skript** ist Pflicht
+- Projekt erstellen
+- sinnvolle Szenen / visuelle Einheiten erscheinen
+- Originaltext wird nicht umgeschrieben
+- pro Szene mehrere Queries sichtbar
+- abstrakte Aussagen werden bei Bedarf als symbolische Visuals markiert
+- **Alle Szenen recherchieren** starten
+- mindestens zwei Szenen real recherchieren
+- Bilder direkt ansehen
+- mindestens einen Videokandidaten direkt abspielen
+- Hauptvisual auswählen
+- mindestens eine Alternative auswählen
+- Projekt neu öffnen und Auswahl kontrollieren
+- genau einen passenden Kandidaten bewusst **als Review importieren**
 
-- `RCD` → **Technik / Gerät / System**
-- `Tesla Model 3` → **Produkt / Objekt**
-- `NVIDIA` → **Firma / Marke / Organisation**
-- `Berlin` → **Ort / Gebäude / Region**
+Danach unter `ALLES-GEFUNDEN/06-SKRIPT-PROJEKTE/` prüfen:
 
-Der zweite Plan muss andere Motivgruppen erzeugen. Für den Abschluss muss `beta:verify` später **mindestens zwei unterschiedliche Recherchearten** erkennen.
+- `00-SKRIPT.txt`
+- `00-PROJEKT.json`
+- `00-SZENENPLAN.md`
+- `00-SHOTLIST.json`
+- `00-SHOTLIST.csv`
+- Szenenordner mit Kandidaten-INFO und Quelllinks
 
-#### Umfang und Quellen
+Anschließend zusätzlich ein längeres Skript testen:
 
-- Schnell: maximal 6 Motivbereiche
-- Tief: maximal 8 Motivbereiche
-- Maximal: maximal 12 Motivbereiche beziehungsweise 60 Provider-Suchen bei fünf Quellen
-- ohne private Keys mindestens Openverse und Wikimedia testen
-- danach Pexels-, Pixabay- und Unsplash-Keys nur für die Sitzung eingeben und alle fünf Quellen prüfen
-- **Alles recherchieren** starten
-- Bildtreffer visuell kontrollieren
-- mindestens einen Pexels- oder Pixabay-Videotreffer direkt im eingebauten Player abspielen
-- Quellseite und Rechtewarnung kontrollieren
-- `00-RECHERCHEPLAN.md` muss Zielkanal, Rechercheart und Recherchemodus dokumentieren
-- externe YouTube-/Google-/Wikipedia-/gegebenenfalls UFC-Suchlinks ausschließlich als Recherchehilfe behandeln
-- nur einen eindeutig gewünschten Treffer markieren und als `review` importieren; unmarkierte Treffer dürfen nicht importiert werden
+- sequenzielle Suche
+- Fortschrittsanzeige
+- Stoppen
+- Fortsetzen
+- bereits fertige Szenen bleiben erhalten
 
-### 2. Zwölf Starterassets prüfen
+## 2. Universelle Themenrecherche
 
-- Navigation **Prüfen** öffnen.
-- alle zwölf Starterassets vollständig ansehen.
-- für jedes Asset eine nachvollziehbare Entscheidung speichern.
-- mindestens ein eindeutig geeignetes Asset freigeben.
-- das Wikimedia-Kampfsportfoto nur nach Prüfung der sichtbaren Personen und unter Beachtung von CC BY-SA 4.0 freigeben.
+Unter **Thema recherchieren**:
 
-### 3. Fünf Medienquellen real testen
+- `Conor McGregor` als **Sport / Kampf / Athletik** prüfen
+- zweite andere Rechercheart prüfen, z. B. `RCD` als Technik oder `Tesla Model 3` als Produkt
+- mindestens eine skriptspezifische Recherche durchführen
 
-Unter **Medien suchen** mindestens eine reale Standardsuche je Quelle ausführen:
+Erwartung später:
 
-- Pexels – API-Key erforderlich
-- Pixabay – API-Key erforderlich
-- Unsplash – Access Key erforderlich
-- Openverse – kein Key erforderlich
-- Wikimedia Commons – kein Key erforderlich
+```text
+multipleResearchTypesVerified: true
+scriptSpecificTopicResearch: true
+```
 
-Pexels und Pixabay auch mit einem Videoformat testen. Unsplash, Openverse und Wikimedia Commons nur mit Fotoformaten testen. Nur visuell brauchbare Treffer als `review` importieren; nichts blind freigeben.
+## 3. Fünf Quellen
 
-### 4. Ausbau-720 prüfen
+Real prüfen:
 
-- Navigation **Ausbau 720** öffnen.
-- die vier Kanalkarten und die globale Liste **Nächste Aufgaben** prüfen.
-- kontrollieren, dass Review-Aufgaben vor unnötigen neuen Suchjobs priorisiert werden.
-- bei einer echten Suchlücke den priorisierten Batch vorbereiten.
-- kontrollieren, dass höchstens fünf priorisierte Sammlungen an den Builder übergeben werden.
-- technischen Fit, Suchbegriff-Kette und manuellen Quellen-Fallback prüfen.
+- Pexels – Foto + Video
+- Pixabay – Foto + Video + 24h-Cache
+- Unsplash – Foto + Attribution
+- Openverse – keylos
+- Wikimedia Commons – keylos
 
-### 5. ALLES-GEFUNDEN prüfen
+Provider-Keys bleiben nur in der laufenden Browserseite und verschwinden nach Neuladen beziehungsweise **Sitzungs-Keys löschen**.
 
-- `00-GESAMTINDEX.md`, CSV und Manifest öffnen.
-- kontrollieren, dass zwölf Starterassets nach dem Starterimport enthalten sind.
-- normale Arsenal-Suchfunde unter `90-GEFUNDENE-KANDIDATEN` kontrollieren.
-- mindestens zwei Themenrecherchen mit unterschiedlichen dokumentierten Recherchearten unter `05-THEMENRECHERCHEN` kontrollieren.
-- mindestens eine echte lokale Dateikopie und eine externe `.url`-Verknüpfung prüfen.
-- nach einem weiteren `npm run vault:build` kontrollieren, dass historische Themenfunde erhalten bleiben.
+## 4. Zwölf Starterassets
 
-### 6. Eigenes Medium testen
+Unter **Prüfen**:
 
-- Navigation **Eigene Dateien** öffnen.
-- eine eigene Testdatei auswählen oder in den lokalen Inbox-Workflow geben.
-- Kanal und Sammlung wählen.
-- Rechte ausdrücklich bestätigen.
-- als `review` importieren.
+- alle zwölf Starterassets ansehen
+- für jedes eine Entscheidung speichern
+- Personen/Marken/Quelle/Lizenz/Kontext prüfen
+- mindestens ein geeignetes Asset freigeben
+- Wikimedia-Starter einschließlich CC BY-SA 4.0 prüfen
 
-### 7. Skript planen
+## 5. Ausbau 720
 
-- ein echtes Skript eines der vier Kanäle verarbeiten.
-- vollständige Shotlist erzeugen.
-- vorgeschlagene Sammlungen und vorhandene Assets kontrollieren.
+- vier Kanalkarten prüfen
+- 160 / 160 / 160 / 240
+- Review-first prüfen
+- globale nächste Aufgaben prüfen
+- Video-/Fotolücken prüfen
+- Batch und Fallbacks prüfen
 
-### 8. Schnittpaket erstellen
+## 6. ALLES-GEFUNDEN
 
-- nur freigegebene Assets favorisieren.
-- ein verifiziertes Medienpaket erstellen.
-- Paket unter `exports/media-packs` prüfen.
+Kontrollieren:
 
-### 9. Echte Nutzung
+- Gesamtindex / CSV / Manifest
+- `05-THEMENRECHERCHEN`
+- `06-SKRIPT-PROJEKTE`
+- `90-GEFUNDENE-KANDIDATEN`
+- lokale Dateikopie
+- externe `.url`-Links
+- erneuter `vault:build` löscht Script-Visual-Projekt nicht
 
-- ein freigegebenes Asset aus dem Paket in einem echten Reel, Video, Post oder einer Präsentation verwenden.
-- Projekt und Plattform als Nutzung dokumentieren.
-- Attribution exportieren.
-- Backup erzeugen.
+## 7. Eigenes Medium
 
-## Bestanden
+- eigene Datei importieren
+- Rechte bestätigen
+- Import als `review`
 
-Die Oberfläche beziehungsweise `npm run beta:verify` muss am Ende bestätigen beziehungsweise die Release-Checkliste muss dokumentieren:
+## 8. Bestehenden Skript-Planer prüfen
 
-- universelle Themenrecherche mit visueller Bild- und Video-Sichtung erfolgreich
-- mindestens zwei unterschiedliche Recherchearten erfolgreich
-- `multipleResearchTypesVerified: true`
-- skriptspezifische Recherche erfolgreich
-- alle fünf Medienquellen technisch geprüft
-- `ALLES-GEFUNDEN` inklusive Themenordner und Historie geprüft
-- alle zwölf Starterassets entschieden
-- alle vier Kanäle mit Assets vertreten
-- eigenes Medium importiert
-- mindestens ein Asset freigegeben
-- echtes Skript mit Shotlist verarbeitet
-- verifiziertes Schnittpaket erzeugt
-- echte Nutzung dokumentiert
-- `realTestComplete: true`
+- **Skript planen** öffnen
+- echte Shotlist erzeugen
+- Sammlungen und vorhandene Assets kontrollieren
+- Exporte prüfen
+
+## 9. Medienpaket und echte Nutzung
+
+- nur freigegebene Assets in Medienpaket
+- Manifest / SHA-256 / Attribution prüfen
+- mindestens ein Asset real verwenden
+- Nutzung dokumentieren
+- Backup erzeugen
+
+## 10. Abschluss
+
+Am Ende müssen insbesondere folgende Kriterien wahr sein:
+
+```text
+scriptVisualProjectGenerated: true
+scriptVisualMultipleScenesSearched: true
+scriptVisualMixedMediaFound: true
+scriptVisualReviewImported: true
+multipleResearchTypesVerified: true
+scriptSpecificTopicResearch: true
+starterAssetsReviewed: true
+verifiedMediaPackCreated: true
+realUsageRecorded: true
+realTestComplete: true
+```
+
+Erst danach PR #3 aus Draft nehmen und nach `main` mergen.
