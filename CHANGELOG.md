@@ -1,5 +1,46 @@
 # Changelog
 
+## 0.4.0-beta.7 – 2026-08-23
+
+### Neu
+
+- neuer Hauptarbeitsbereich **Skript → Visuals / Script Visual Finder** für fertige Sprechertexte
+- der eingegebene Skripttext wird nicht geschrieben, verbessert oder umformuliert; die Funktion dient ausschließlich der Visualsuche
+- lokale Script-Visual-Projekte mit bis zu 40.000 Zeichen und maximal 120 visuellen Einheiten
+- Szenenmodi **Auto**, **Satzweise** und **Absatzweise**
+- automatische Zerlegung sehr langer Sätze in kleinere visuelle Einheiten; Nummerierungs- und Aufzählungspräfixe werden nicht als eigene Szene behandelt
+- pro Szene visuelle Absicht, Entitäten, Konzepte, bevorzugter Medientyp und mehrere dynamische Queries
+- direkter Zugriff auf Pexels, Pixabay, Unsplash, Openverse und Wikimedia Commons über die vorhandenen Provideradapter
+- intelligente Suchbegrenzung pro Szene statt blind alle Queries gegen alle Provider abzufragen
+- lange Projekte werden sequenziell Szene für Szene recherchiert und können gestoppt beziehungsweise später fortgesetzt werden
+- vorhandene Ergebnisse bleiben erhalten, wenn eine spätere Einzelsuche fehlschlägt
+- visuelles Szenenboard mit Bildern, abspielbaren Videos, technischem Fit, Provider, Query und Quellseite
+- pro Szene **Hauptvisual** und mehrere **Alternativen** auswählbar
+- bereits in anderen Szenen gefundene Medien werden projektweit niedriger priorisiert
+- bewusster Import einzelner Kandidaten über die bestehende Review-Pipeline; kein automatischer Import und keine automatische Freigabe
+- lokaler Projektbestand unter `.local-storage/script-visual-projects`
+- neue lokale Ablage `ALLES-GEFUNDEN/06-SKRIPT-PROJEKTE`
+- pro Projekt `00-SKRIPT.txt`, `00-PROJEKT.json`, `00-SZENENPLAN.md`, `00-SHOTLIST.json`, `00-SHOTLIST.csv` und Szenenordner
+- Script-Visual-Projekte bleiben bei `vault:build` erhalten
+- neutraler **Allgemein**-Projektmodus außerhalb der vier festen Ausbau-720-Kanäle
+
+### Abnahme und Tests
+
+- neue Tests für Segmentierung, lange Skripte, visuelle Intents, Query-Erzeugung und Kanal-Autoerkennung
+- neue Browser-Vertragstests für Navigation, Bild-/Videoansicht, Hauptvisual/Alternativen, Fortschritt und Sitzungs-Keys
+- neue API-Vertragstests für Loopback-/Same-Origin-/Token-Schutz, fünf Provider, Pixabay-Cache, Projektpersistenz und Review-Import
+- neuer Vault-Vertragstest für dauerhafte `06-SKRIPT-PROJEKTE`
+- `beta:verify` verlangt für die endgültige Abnahme ein echtes Script-Visual-Projekt, mindestens zwei real recherchierte Szenen, mindestens einen Video- und einen Bildkandidaten sowie mindestens einen bewusst als Review importierten Script-Visual-Treffer
+
+### Sicherheit und Rechte
+
+- Pexels-, Pixabay- und Unsplash-Keys bleiben auch im Script Visual Finder nur im Arbeitsspeicher der geöffneten Browserseite
+- Skripte und lokale Projektdateien werden durch `.gitignore` nicht in Git veröffentlicht
+- jeder externe Import aus einem Skriptprojekt startet auf `review`
+- technische Trefferbewertung ist keine Inhalts-, Identitäts- oder Rechtefreigabe
+- konkrete Personen, Marken, Events, Broadcastmaterial und symbolische B-Rolls müssen vor Veröffentlichung weiterhin manuell geprüft werden
+- GitHub Actions bleiben optional und werden für die lokale Beta-Abnahme nicht benötigt
+
 ## 0.4.0-beta.6 – 2026-08-15
 
 ### Neu
