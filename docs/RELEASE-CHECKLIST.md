@@ -1,263 +1,239 @@
 # Release-Checkliste
 
+Aktueller Zielstand: **`0.4.0-beta.7`**.
+
+Die Beta wird erst nach dem späteren vollständigen lokalen Realtest aus Draft genommen. Die folgenden technischen Funktionen sind implementiert, aber nicht allein dadurch real abgenommen.
+
 ## Technische Prüfung
 
 - [ ] `npm run check` läuft lokal ohne Fehler
 - [ ] `npm run beta:verify` meldet technisch bereit
 - [ ] `npm run arsenal:validate` bestätigt Kanaldateien und Planerlexikon
 - [ ] `npm run arsenal:plan` erzeugt JSON und CSV
-- [ ] `npm run arsenal:expansion` erzeugt Ausbauplan Version 4 als JSON und CSV
+- [ ] `npm run arsenal:expansion` erzeugt Ausbauplan Version 4
 - [ ] `npm run arsenal:report` erzeugt den Abdeckungsbericht
 - [ ] `npm run links:check -- --strict true` prüft externe Medien- und Quelllinks
 - [ ] `npm run vault:build` erzeugt `ALLES-GEFUNDEN`
-- [ ] `npm run entity:plan -- "Conor McGregor"` erzeugt einen gültigen Rechercheplan
 - [ ] statische Website wird mit `npm run site:build` erzeugt
-- [ ] Mac-Start über `npm run serve` funktioniert
-- [ ] optional Windows-Start über `START-HERE.cmd` funktioniert
-- [ ] Leiste `Lokale Verwaltung aktiv` wird angezeigt
-- [ ] feste Arbeitsbereich-Navigation funktioniert
-- [ ] lokale APIs akzeptieren nur Loopback, Sitzungstoken und denselben Ursprung
-- [ ] gemeinsame Schreibsperre blockiert parallele Änderungen mit HTTP 409
+- [ ] `npm run serve` startet lokal
+- [ ] feste Navigation funktioniert
+- [ ] lokale APIs akzeptieren nur Loopback, Same-Origin und gültiges Sitzungstoken
+- [ ] gemeinsame Schreibsperre blockiert parallele Schreibaktionen
 - [ ] keine Secrets oder signierten URLs befinden sich im Repository
 - [ ] Katalog und Suchindex enthalten dieselben Asset-IDs
 
-## Alles-Gefunden-Ordner
+## Script Visual Finder – Skript rein → Visuals raus
 
-- [x] zentraler Ordner `ALLES-GEFUNDEN` ist definiert
-- [x] Kanäle werden als Finanzen, KI, Elektrotechnik und Kampfsport getrennt
-- [x] Sammlungen verwenden verständliche Titel
-- [x] Statusordner trennen Freigegeben, Review, Eingeschränkt und Archiv
-- [x] `05-THEMENRECHERCHEN` trennt universelle Recherchen nach Kanal, Thema, Bereich und Quelle
-- [x] `90-GEFUNDENE-KANDIDATEN` trennt normale noch nicht importierte Suchfunde vom Katalog
-- [x] lokale Medien können als echte Dateikopie übernommen werden
-- [x] externe Medien erhalten Quelle-, Medium- und Vorschau-Verknüpfungen
-- [x] jeder Katalogeintrag erhält eine INFO-Datei mit Quelle, Lizenz und Prüfhinweisen
-- [x] Gesamtindex wird als Markdown, CSV und JSON erzeugt
-- [x] normale Suchfunde und Themenrecherchen besitzen eine lokale Historie
-- [x] erzeugte Inhalte bleiben über `.gitignore` lokal
-- [ ] `npm run vault:build` läuft im echten lokalen Repository fehlerfrei
-- [ ] nach `npm run starter:import` enthält der Gesamtindex zwölf Starterassets
-- [ ] ein lokales Asset liegt als echte Datei im passenden Kategorieordner
-- [ ] ein externer Treffer besitzt funktionierende `.url`-Verknüpfungen
-- [ ] Suchfunde aus dem Arsenal Builder erscheinen unter `90-GEFUNDENE-KANDIDATEN`
-- [ ] Themenfunde erscheinen unter `05-THEMENRECHERCHEN/<Kanal>/<Thema>/<Bereich>/<Quelle>`
-- [ ] Themenfunde bleiben nach Bereinigung ihrer temporären Suchdatei im lokalen Historienarchiv erhalten
-- [ ] laufender Server aktualisiert den Ordner nach einer Katalogänderung automatisch
-- [ ] kein Eintrag im Ordner umgeht Review- oder Rechteprüfung
+### Implementiert
+
+- [x] eigener Arbeitsbereich **Skript → Visuals** in Navigation und Web-App
+- [x] nur **Fertiges Skript** ist Pflichtfeld
+- [x] Projekttitel und Zuordnung sind optional
+- [x] die Funktion schreibt, verbessert oder ergänzt das Skript nicht
+- [x] Originalskript wird mit SHA-256 dokumentiert und lokal gespeichert
+- [x] bis zu 40.000 Zeichen und maximal 120 visuelle Einheiten
+- [x] Szenenmodi Auto, Satzweise und Absatzweise
+- [x] lange Sätze können in kleinere visuelle Einheiten geteilt werden
+- [x] Listen-/Nummerierungspräfixe werden nicht zu eigenen Szenen
+- [x] stabile Szenen-IDs `SCENE-001`, `SCENE-002` usw.
+- [x] automatische Zeitbereiche
+- [x] visuelle Absicht, Entitäten und Konzepte pro Szene
+- [x] mehrere dynamische Queries pro Szene
+- [x] Symbolbilder / kontextuelle B-Rolls werden als solche gekennzeichnet
+- [x] Auto-Zuordnung zu Finanzen, KI, Elektrotechnik, Kampfsport oder neutral Allgemein
+- [x] Allgemein beeinflusst die 720 Kanalziele nicht
+- [x] Pexels, Pixabay, Unsplash, Openverse und Wikimedia werden wiederverwendet
+- [x] Pixabay-24h-Cache bleibt aktiv
+- [x] Foto-only-Provider werden nicht als Videoquelle behandelt
+- [x] Szene-für-Szene-Suche statt unkontrollierter Massensuche
+- [x] Schnell/Tief/Maximal besitzen begrenzte Kandidaten- und Task-Ziele pro Szene
+- [x] lange Projekte können gestoppt und später fortgesetzt werden
+- [x] bereits fertige Szenen bleiben bei späteren Suchfehlern erhalten
+- [x] Bilder direkt sichtbar
+- [x] geeignete Videos direkt abspielbar
+- [x] technischer Fit sichtbar
+- [x] Quellseite und Creator soweit vorhanden sichtbar
+- [x] Hauptvisual auswählbar
+- [x] mehrere Alternativen auswählbar
+- [x] bereits in anderen Szenen gefundene Medien werden niedriger priorisiert
+- [x] Import nur nach bewusster Auswahl
+- [x] jeder Import läuft über bestehende Asset-Pipeline und startet auf `review`
+- [x] Projekte persistieren unter `.local-storage/script-visual-projects`
+- [x] Projektübersicht und Wiederöffnen nach Browser-Neuladen
+- [x] Spiegelung unter `ALLES-GEFUNDEN/06-SKRIPT-PROJEKTE`
+- [x] `00-SKRIPT.txt`, `00-PROJEKT.json`, `00-SZENENPLAN.md`, `00-SHOTLIST.json`, `00-SHOTLIST.csv`
+- [x] Kandidaten pro Szene mit INFO-/Quellen-/Medium-/Vorschau-Dateien
+- [x] `vault:build` bewahrt Skriptprojekte
+- [x] Provider-Keys werden nicht in Projektdateien geschrieben
+- [x] Browser verwendet für Provider-Keys weder `localStorage` noch `sessionStorage`
+- [x] neue Unit-/Browser-/API-/Vault-/Beta-Vertragstests vorhanden
+
+### Später real prüfen
+
+- [ ] echtes 1-Minuten-Skript erzeugt sinnvolle visuelle Einheiten
+- [ ] längeres Skript von mehreren Minuten bleibt übersichtlich und stabil
+- [ ] Originalskript ist nach Speicherung inhaltlich unverändert
+- [ ] mindestens zwei Szenen werden real über Provider recherchiert
+- [ ] mindestens ein echter Video-Kandidat wird direkt abgespielt
+- [ ] mindestens ein echter Bild-Kandidat wird sichtbar geprüft
+- [ ] mehrere Kandidaten pro Szene sind praktisch brauchbar
+- [ ] **Alle Szenen recherchieren** zeigt korrekten Fortschritt
+- [ ] **Stoppen** und Fortsetzen funktioniert
+- [ ] einzelne Providerfehler zerstören keine bereits fertigen Szenen
+- [ ] Hauptvisual und Alternativen bleiben nach Neuladen erhalten
+- [ ] ein ausgewählter Kandidat wird bewusst als `review` importiert
+- [ ] ungewählte Kandidaten werden nicht importiert
+- [ ] Unsplash-Import benötigt weiterhin einen gültigen Sitzung-Key
+- [ ] `.local-storage/script-visual-projects` enthält keine Provider-Keys
+- [ ] `06-SKRIPT-PROJEKTE` enthält das echte Testprojekt
+- [ ] Shotlist JSON/CSV/Markdown stimmt mit den Szenen überein
+- [ ] `beta:verify` meldet `scriptVisualProjectGenerated: true`
+- [ ] `beta:verify` meldet `scriptVisualMultipleScenesSearched: true`
+- [ ] `beta:verify` meldet `scriptVisualMixedMediaFound: true`
+- [ ] `beta:verify` meldet `scriptVisualReviewImported: true`
 
 ## Universelle Themenrecherche
 
-- [x] eigener Arbeitsbereich **Thema recherchieren** ist in Navigation und Weboberfläche integriert
-- [x] Zielkanal und Rechercheart sind getrennt
-- [x] Recherchearten: Auto, Person, Firma/Marke/Organisation, Produkt/Objekt, Event/Veranstaltung, Ort/Gebäude/Region, Technik/Gerät/System, Sport/Kampf/Athletik, Historisches Thema und Allgemeines Thema/Konzept
-- [x] automatische Typ-Erkennung ist vorhanden
-- [x] jede Rechercheart besitzt eigene visuelle Motivgruppen
-- [x] optionales Reel-Skript kann konkrete Namen, Firmen, Events, Jahreszahlen und weitere Entitäten als zusätzliche Suchbegriffe erkennen
-- [x] Schnell-Recherche ist auf höchstens 6 Motivbereiche begrenzt
-- [x] Tief-Recherche ist auf höchstens 8 Motivbereiche begrenzt
-- [x] Maximal-Recherche ist auf höchstens 12 Motivbereiche beziehungsweise 60 Provider-Suchen bei fünf Quellen begrenzt
-- [x] skriptspezifische Begriffe erhalten reservierte Rechercheplätze
-- [x] Pexels/Pixabay können Foto oder Video passend zum Bereich nutzen
-- [x] Unsplash/Openverse/Wikimedia bleiben Foto-only
-- [x] Openverse und Wikimedia funktionieren ohne geheimen Key
-- [x] Recherche dedupliziert über Provider-ID sowie Quell-/Medien-URLs
-- [x] Videos können direkt in der Rechercheansicht abgespielt werden
-- [x] Bilder werden direkt als Vorschau angezeigt
-- [x] Rechercheergebnisse besitzen technische Vorsortierung, aber keine automatische Inhalts-/Rechtefreigabe
-- [x] `00-RECHERCHEPLAN.md` dokumentiert Rechercheart und Recherchemodus
-- [x] externe YouTube-, Google-Bilder-, Google-Video-, Google-News-, Wikipedia- und gegebenenfalls UFC-Suchlinks sind nur zur Sichtung dokumentiert
-- [ ] `Conor McGregor` erzeugt als **Sport / Kampf / Athletik**-Recherche einen sinnvollen Plan
-- [ ] mindestens eine **zweite unterschiedliche Rechercheart** wurde real geprüft, z. B. `RCD` als Technik oder `Tesla Model 3` als Produkt
-- [ ] `npm run beta:verify` meldet `multipleResearchTypesVerified: true`
-- [ ] Testskript mit `Khabib Nurmagomedov`, `UFC 229` und `2018` erzeugt skriptspezifische Suchbereiche
-- [ ] Pexels-, Pixabay- und Unsplash-Keys bleiben nur im Arbeitsspeicher der geöffneten Seite
-- [ ] Recherche ohne private Keys nutzt mindestens Openverse und Wikimedia
-- [ ] Recherche mit allen drei privaten Sitzung-Keys nutzt alle fünf integrierten Quellen
-- [ ] ein Pexels/Pixabay-Videotreffer lässt sich direkt im Player vollständig sichten
-- [ ] ein Bildtreffer lässt sich visuell prüfen und seine Quellseite öffnen
-- [ ] markierte Recherchetreffer werden sequenziell importiert; unmarkierte bleiben unimportiert
-- [ ] jeder Rechercheimport startet auf `review`
-- [ ] nach Import bleiben Urheber-, Personen-, Marken-, Event-, Broadcast- und Kontextprüfung erforderlich
-- [ ] **Sitzungs-Keys löschen** entfernt alle Recherche-Keys aus dem Seitenspeicher
-- [ ] externe Discovery-Links werden im Realtest nicht als Nutzungsrecht behandelt
+- [x] Auto, Person, Firma/Marke/Organisation, Produkt/Objekt, Event, Ort, Technik, Sport/Kampf/Athletik, Historie und allgemeines Konzept
+- [x] Schnell maximal 6 Motivbereiche
+- [x] Tief maximal 8 Motivbereiche
+- [x] Maximal maximal 12 Motivbereiche beziehungsweise 60 Provider-Suchen bei fünf Quellen
+- [x] optionale Skriptbegriffe können Namen, Events und Jahreszahlen ergänzen
+- [x] Bilder und Videos werden visuell dargestellt
+- [x] jeder Import startet als `review`
+- [x] externe Discovery-Links sind als reine Recherchehilfe gekennzeichnet
+- [ ] echte Sport-Recherche z. B. Conor McGregor geprüft
+- [ ] mindestens eine zweite reale Rechercheart geprüft
+- [ ] skriptspezifische Themenrecherche geprüft
+- [ ] `multipleResearchTypesVerified: true`
 
-## Reel- und Skript-Planer
-
-- [x] Planer ist für Finanzen, KI, Elektrotechnik und Kampfsport definiert
-- [x] Fachbegriffe und Synonyme werden gegen vorhandene Sammlungen validiert
-- [ ] Navigation **Skript planen** öffnet den Planer
-- [ ] deutsches Skript wird sinnvoll in Szenen zerlegt
-- [ ] letzter Zeitwert entspricht exakt der gewählten Zieldauer
-- [ ] passende Sammlungen werden für alle vier Kanäle erkannt
-- [ ] vorhandene Assets werden mit Status und Qualität vorgeschlagen
-- [ ] Modus **Nur freigegebene Assets** schließt Review-Assets aus
-- [ ] fehlende Motive liefern einen passenden Suchbegriff
-- [ ] **Motiv suchen** konfiguriert den Arsenal Builder korrekt
-- [ ] Planer-Favoriten aktualisieren die Projektauswahl
-- [ ] JSON-, CSV- und Markdown-Export im Browser funktionieren
-- [ ] CLI erzeugt JSON, CSV, Markdown, SRT und Skriptkopie
-- [ ] Skripttext wird nicht automatisch gespeichert oder extern übertragen
-
-## Kanal-Arsenal und Ausbau 720
-
-- [x] vier spezialisierte Kanäle vorhanden
-- [x] 90 Sammlungen definiert
-- [x] 270 Suchbegriffe definiert
-- [x] 360 Grundformat-Suchaufträge planbar
-- [x] Zielgröße 720 freigegebene Kanal-Assets dokumentiert
-- [x] Ausbauplaner unterscheidet `search`, `review-first` und `complete`
-- [x] Ausbauplan nennt Medientyp, Format, Primärquelle und Fallbackquellen
-- [ ] Finanzen-, KI-, Elektro- und Kampfsport-Bereiche vollständig sichtbar
-- [ ] Kandidaten-, Review- und Freigabezahlen stimmen
-- [ ] **Ausbau 720** zeigt 160/160/160/240 als Kanalziele
-- [ ] globale **Nächste Aufgaben** zeigt höchstens sechs kanalübergreifende Prioritäten
-- [ ] Review-Aufgaben stehen in der globalen Liste vor Suchjobs
-- [ ] Video- und Fotolücken werden korrekt erkannt
-- [ ] Freigabe-Mix-Lücke und echte Such-Mix-Lücke bleiben getrennt
-- [ ] vorhandene Review-Videos/Fotos verhindern redundante Suche desselben Medientyps
-- [ ] vorhandener ausreichender Review-Vorrat führt direkt in die Review-Warteschlange
-- [ ] echte Suchlücken werden mit passender Quelle und passendem Format vorbereitet
-- [ ] höchstens fünf priorisierte Sammlungen werden an den Builder übergeben
-- [ ] UFC-, Event- und Broadcast-Risikohinweise werden angezeigt
-
-## Priorisierte Review-Warteschlange
-
-- [ ] Filter nach Kanal funktioniert
-- [ ] Filter nach Sammlung funktioniert
-- [ ] Filter nach Medientyp funktioniert
-- [ ] Standardreihenfolge **Größter Ausbau-Effekt** funktioniert
-- [ ] sichtbare Ausbau-Priorität enthält eine nachvollziehbare Begründung
-- [ ] Entscheidung aktualisiert die verbleibende Priorität
-- [ ] Review-Empfehlung aus **Ausbau 720** öffnet die passende Sammlung
-- [ ] keine Prioritätslogik umgeht die Vier-Punkte-Freigabeprüfung
-- [ ] Freigabe, Einschränkung und Archivierung bleiben Einzelentscheidungen
-
-## Medienquellen-Builder
+## Fünf Medienquellen
 
 ### Pexels
-
-- [ ] echte Suche erfolgreich
-- [ ] Foto und Video unterstützt
-- [ ] API-Key kann für die aktuelle Seite im Arbeitsspeicher gehalten werden
+- [ ] echte Fotosuche erfolgreich
+- [ ] echte Videosuche erfolgreich
+- [ ] Sitzung-Key funktioniert
 
 ### Pixabay
-
-- [ ] echte Suche erfolgreich
-- [ ] Foto und Video unterstützt
-- [ ] 24-Stunden-Cache für gleiche Suchen funktioniert
-- [ ] Cache-Antwort übernimmt niemals falsche Kanal- oder Sammlungsmetadaten
-- [ ] API-Key kann für die aktuelle Seite im Arbeitsspeicher gehalten werden
+- [ ] echte Fotosuche erfolgreich
+- [ ] echte Videosuche erfolgreich
+- [ ] 24-Stunden-Cache für identische Suche funktioniert
+- [ ] Cache vermischt keine Kanal-/Projektmetadaten
 
 ### Unsplash
-
 - [ ] echte Fotosuche erfolgreich
-- [ ] Videoformat ist nicht auswählbar
-- [ ] Fotograf und Unsplash werden dokumentiert
-- [ ] Download-Ereignis wird beim Import gemeldet
-- [ ] Access Key kann für die aktuelle Seite im Arbeitsspeicher gehalten werden
-- [ ] nach **Sitzungs-Keys löschen** kann ein bereits geladenes Ergebnis nicht mit einem alten Key importiert werden
+- [ ] Creator/Attribution korrekt
+- [ ] Download-Meldung beim Import korrekt
+- [ ] nach Löschen des Sitzung-Keys kein alter Schlüssel nutzbar
 
 ### Openverse
-
-- [ ] Suche funktioniert ohne geheimen Key
-- [ ] nur Fotoformat
+- [ ] Suche ohne geheimen Key funktioniert
 - [ ] nur unterstützte offene Lizenztypen werden übernommen
 
 ### Wikimedia Commons
+- [ ] Suche ohne geheimen Key funktioniert
+- [ ] Lizenz und Attribution werden angezeigt
 
-- [ ] Suche funktioniert ohne geheimen Key
-- [ ] nur Fotoformat
-- [ ] Lizenzmetadaten und Attribution werden angezeigt
-
-### Gemeinsame Builder-Regeln
-
-- [ ] **Sitzungs-Keys löschen** entfernt alle drei gespeicherten Keys aus dem Arbeitsspeicher
-- [ ] Neuladen der Seite entfernt die Sitzungs-Keys
-- [ ] weder `localStorage` noch `sessionStorage` speichern API-Keys
-- [ ] Batch-Suche verarbeitet höchstens fünf Sammlungen sequenziell
-- [ ] Suchtreffer zeigen Vorschau, Creator/Quelle und Quellseite
-- [ ] Suchtreffer zeigen **Technischen Fit 0–100**
-- [ ] Technischer Fit ändert keinen Review- oder Freigabestatus
-- [ ] Suchablauf ist **Suchbegriff 1 → 2 → 3 → nächste Quelle**
+### Gemeinsame Regeln
+- [ ] Provider-Keys verschwinden nach Neuladen
+- [ ] keine Provider-Keys in `localStorage` oder `sessionStorage`
+- [ ] technischer Fit verändert keinen Reviewstatus
 - [ ] nur markierte Treffer werden importiert
 - [ ] jeder Import startet auf `review`
-- [ ] Kanal- und Sammlungs-Tags werden korrekt gesetzt
-- [ ] tatsächliche Importzahl und übersprungene Dubletten werden getrennt gemeldet
-- [ ] Openverse/Wikimedia-Dubletten werden auch über Original-Medien-URL erkannt
-- [ ] gruppenübergreifender Sammelimport verarbeitet ausgewählte Batch-Gruppen nacheinander
-- [ ] Sammelimport lädt die Seite erst nach Abschluss einmal neu
-- [ ] bereits importierte Karten werden deaktiviert und markiert
-- [ ] Video-Fallback Pexels → Pixabay wird nur vorbereitet
-- [ ] Foto-Fallback Unsplash → Openverse → Wikimedia → Pexels → Pixabay wird nur vorbereitet
+- [ ] Dublettenprüfung funktioniert
 
-## Eigene Medien und Inbox
+## ALLES-GEFUNDEN
 
-- [ ] eigene Video- oder Bilddatei lokal erkannt
-- [ ] Vorschau, Dateityp, Größe und technische Daten sichtbar
-- [ ] Import ohne Rechtebestätigung wird blockiert
-- [ ] Kanal- und Sammlungszuordnung wird gespeichert
-- [ ] binäre Videos und Bilder verwenden Git LFS
-- [ ] SVG-Grafiken dürfen im normalen Repository liegen
-- [ ] Inbox-Inhalt bleibt über `.gitignore` lokal
+- [x] Katalog-Assets nach Kanal/Sammlung/Status
+- [x] `05-THEMENRECHERCHEN`
+- [x] `06-SKRIPT-PROJEKTE`
+- [x] `90-GEFUNDENE-KANDIDATEN`
+- [x] lokale Suchhistorie bleibt erhalten
+- [x] Script-Visual-Projekte bleiben bei Vault-Neuaufbau erhalten
+- [x] erzeugte Inhalte bleiben über `.gitignore` lokal
+- [ ] `npm run vault:build` läuft im echten lokalen Repository fehlerfrei
+- [ ] Gesamtindex enthält nach Starterimport zwölf Starterassets
+- [ ] lokale Dateikopie geprüft
+- [ ] externe `.url`-Verknüpfungen geprüft
+- [ ] echtes Script-Visual-Projekt bleibt nach erneutem Vault-Build erhalten
+- [ ] kein Vault-Eintrag umgeht Review- oder Rechteprüfung
+
+## Ausbau 720 und Review-first
+
+- [x] vier spezialisierte Kanäle
+- [x] 90 Sammlungen
+- [x] 270 Suchbegriffe
+- [x] Ziele 160 / 160 / 160 / 240 = 720
+- [x] Ausbauplan unterscheidet `review-first`, `search`, `complete`
+- [x] Video-/Fotolücken getrennt
+- [ ] reale Zahlen im Browser stimmen
+- [ ] Review-Aufgaben stehen vor unnötiger Nachsuche
+- [ ] globale nächste Aufgaben funktionieren
+- [ ] priorisierte Batchübergabe funktioniert
+
+## Bestehender Skript-Planer
+
+- [x] bestehender Bereich **Skript planen** bleibt getrennt vom Script Visual Finder
+- [ ] echte Shotlist mit vorhandenen Kanal-Sammlungen prüfen
+- [ ] JSON/CSV/Markdown/SRT prüfen
+- [ ] `scriptPlanGenerated: true`
 
 ## Starterbibliothek und Review
 
-- [x] sechs Grundassets im Repository vorhanden
-- [x] fünf zusätzliche Pexels-Starterassets vorbereitet
-- [x] ein CC-BY-SA-Wikimedia-Kampfsport-Starter vorbereitet
-- [ ] `npm run starter:import` ergänzt die Bibliothek idempotent auf zwölf Assets
-- [ ] alle vier Kanäle sind nach dem Starterimport vertreten
-- [ ] alle acht Videos vollständig abgespielt und bewertet
-- [ ] alle drei Originalgrafiken visuell kontrolliert
-- [ ] Wikimedia-Kampfsportfoto inklusive Personen- und Lizenzprüfung kontrolliert
-- [ ] alle zwölf Asset-IDs besitzen eine dokumentierte Entscheidung
-- [ ] CC BY-SA 4.0 Attribution und Share-Alike-Hinweis bleiben erhalten
-- [ ] Freigabe ohne vier Pflichtpunkte wird blockiert
+- [x] acht Pexels-Videos vorgesehen
+- [x] drei eigene SVG-Grafiken vorgesehen
+- [x] ein Wikimedia-Commons-Foto CC BY-SA 4.0 vorgesehen
+- [ ] `npm run starter:import` erzeugt idempotent 12 Starterassets
+- [ ] alle vier festen Kanäle vertreten
+- [ ] alle zwölf Starterassets vollständig entschieden
+- [ ] mindestens ein Asset freigegeben
+- [ ] Freigabe ohne vier Pflichtprüfungen wird blockiert
 - [ ] Einschränkung ohne Begründung wird blockiert
-- [ ] mindestens ein Asset wurde freigegeben
 
-## Auswahl und Medienpakete
+## Eigene Medien
 
-- [ ] Favoritenauswahl lässt sich als JSON exportieren
-- [ ] Medienpaket mit ungeprüftem Asset wird blockiert
-- [ ] Medienpaket mit ausschließlich freigegebenen Assets wird erzeugt
-- [ ] Paket enthält `media`, `manifest.json`, `ATTRIBUTION.md` und `README.md`
-- [ ] Manifest enthält SHA-256, Dateigröße, Quelle, Lizenz und Attribution
-- [ ] private oder lokale Downloadziele werden blockiert
-- [ ] Datei- und Gesamtgrößenlimits greifen
+- [ ] eigener Dateiimport funktioniert
+- [ ] Rechtebestätigung ist Pflicht
+- [ ] Import startet auf `review`
+- [ ] Inbox bleibt lokal
 
-## Echter Content-Test
+## Medienpaket und echte Nutzung
 
-- [ ] freigegebenes Asset wurde aus einem Medienpaket in einem realen Projekt verwendet
-- [ ] Nutzung wurde direkt im Browser dokumentiert
-- [ ] Attribution wurde direkt im Browser erzeugt
-- [ ] fertiger Content wurde auf Quellen- und Rechteangaben geprüft
-- [ ] Bereitschaftsbericht meldet `realUsageRecorded: true`
+- [ ] ungeprüfte Assets werden aus Medienpaketen blockiert
+- [ ] Paket ausschließlich mit `approved`-Assets erzeugt
+- [ ] `manifest.json`, SHA-256, Quelle und Attribution geprüft
+- [ ] mindestens ein freigegebenes Asset real verwendet
+- [ ] Nutzung dokumentiert
+- [ ] `realUsageRecorded: true`
 
-## Datensicherung
+## Backup / Restore
 
-- [ ] Browser-Backup wurde erzeugt
-- [ ] Backup enthält Katalog, Reviews, Nutzungen und Prüfsummenmanifest
-- [ ] Restore-Dry-Run wurde erfolgreich ausgeführt
-- [ ] Sicherheitsbackup und Rollback wurden kontrolliert
+- [ ] Backup erzeugt
+- [ ] Prüfsummenmanifest geprüft
+- [ ] Restore-Dry-Run erfolgreich
+- [ ] Rollback/Sicherheitsbackup geprüft
 
 ## GitHub Actions und Kostenkontrolle
 
-- [x] alle Workflows im Beta-Branch besitzen `workflow_dispatch`
-- [x] automatische `push`-Trigger entfernt
-- [x] automatische `pull_request`-Trigger entfernt
-- [x] automatische `schedule`-Trigger ausgeschlossen
-- [x] lokaler Vertragstest blockiert versehentlich reaktivierte automatische Trigger
-- [ ] keine manuelle GitHub-Action ist für die lokale Beta-Abnahme erforderlich
+- [x] Workflows ausschließlich manuell über `workflow_dispatch`
+- [x] keine automatischen `push`-Trigger
+- [x] keine automatischen `pull_request`-Trigger
+- [x] keine automatischen `schedule`-Trigger
+- [x] lokaler Vertragstest schützt diese Regel
+- [ ] keine GitHub Action ist für die lokale Beta-Abnahme erforderlich
 
 ## Release
 
-- [x] Changelog für `0.4.0-beta.6` vorhanden
-- [x] Paketversion auf `0.4.0-beta.6` gesetzt
-- [ ] Pull Request ist nicht mehr Draft
-- [ ] lokale Komplettprüfung ist grün
-- [ ] `multipleResearchTypesVerified` ist `true`
-- [ ] `realTestComplete` ist `true`
-- [ ] Beta-Tag oder Release wurde erstellt
+- [x] Paketversion `0.4.0-beta.7`
+- [x] README auf beta.7
+- [x] Changelog beta.7
+- [x] PR #3 bleibt bis zum Realtest Draft
+- [ ] lokale Komplettprüfung grün
+- [ ] alle neuen Script-Visual-Realtest-Kriterien `true`
+- [ ] bestehende Realtest-Kriterien `true`
+- [ ] `realTestComplete: true`
+- [ ] PR aus Draft nehmen
+- [ ] nach erfolgreicher Abnahme nach `main` mergen
+- [ ] optional Beta-Tag/Release erstellen
 
-Die Beta darf erst als **real getestet** gelten, wenn ein echtes Skript geplant, mindestens zwei unterschiedliche universelle Recherchearten mit visueller Sichtung durchgeführt, alle zwölf Starterassets geprüft, alle fünf Medienquellen technisch getestet, der `ALLES-GEFUNDEN`-Ordner lokal geprüft, mindestens ein eigener Inbox-Import erfolgreich und ein freigegebenes Asset über ein verifiziertes Medienpaket in einem echten Content-Projekt eingesetzt wurde.
+Die Beta gilt erst als real getestet, wenn der komplette lokale Ablauf inklusive **Skript rein → Visuals raus**, realen Provider-Suchen, Review, Rechteprüfung, Medienpaket und dokumentierter echter Nutzung erfolgreich abgenommen wurde.
