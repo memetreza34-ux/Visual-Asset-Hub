@@ -6,6 +6,7 @@ import { spawnSync } from 'node:child_process';
 import { createLocalAdminApi } from './local-admin-api.mjs';
 import { createLocalArsenalApi } from './local-arsenal-api.mjs';
 import { createLocalEntityApi } from './local-entity-api.mjs';
+import { createLocalScriptVisualApi } from './local-script-visual-api.mjs';
 import { createLocalInboxApi } from './local-inbox-api.mjs';
 import { createLocalUploadApi } from './local-upload-api.mjs';
 
@@ -13,7 +14,7 @@ const root = process.cwd();
 const host = process.env.HOST || '127.0.0.1';
 const port = Number(process.env.PORT || 4173);
 const allowedHosts = new Set(['127.0.0.1', 'localhost', '::1']);
-const apiPrefixes = ['/api/', '/arsenal-api/', '/entity-api/', '/inbox-api/', '/upload-api/'];
+const apiPrefixes = ['/api/', '/arsenal-api/', '/entity-api/', '/script-visual-api/', '/inbox-api/', '/upload-api/'];
 
 if (!Number.isInteger(port) || port < 1 || port > 65535) {
   console.error('PORT muss zwischen 1 und 65535 liegen.');
@@ -30,7 +31,7 @@ const mimeTypes = {
   '.js': 'text/javascript; charset=utf-8',
   '.mjs': 'text/javascript; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
-  '.webmanifest': 'application/manifest+json; charset=utf-8',
+  '.webmanifest': 'application/manifest+json',
   '.svg': 'image/svg+xml',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
@@ -52,6 +53,7 @@ watchCatalogForVaultUpdates();
 const adminApi = createLocalAdminApi({ root });
 const arsenalApi = createLocalArsenalApi({ root, token: adminApi.token });
 const entityApi = createLocalEntityApi({ root, token: adminApi.token });
+const scriptVisualApi = createLocalScriptVisualApi({ root, token: adminApi.token });
 const inboxApi = createLocalInboxApi({ root, token: adminApi.token });
 const uploadApi = createLocalUploadApi({ root, token: adminApi.token });
 let activeWriteAction = null;
@@ -83,6 +85,7 @@ const server = http.createServer(async (request, response) => {
       try {
         if (await uploadApi.handle(request, response, url)) return;
         if (await inboxApi.handle(request, response, url)) return;
+        if (await scriptVisualApi.handle(request, response, url)) return;
         if (await entityApi.handle(request, response, url)) return;
         if (await arsenalApi.handle(request, response, url)) return;
         if (await adminApi.handle(request, response, url)) return;
@@ -142,7 +145,7 @@ const server = http.createServer(async (request, response) => {
 
 server.listen(port, host, () => {
   console.log(`Visual Asset Hub: http://${host}:${port}`);
-  console.log('Lokale Verwaltung aktiv: Themenrecherche, Skriptplanung, Browser-Upload, Review, Freigabe, Nutzung, Medienpakete, Inbox und Arsenal-Suche stehen bereit.');
+  console.log('Lokale Verwaltung aktiv: Script Visual Finder, Themenrecherche, Skriptplanung, Browser-Upload, Review, Freigabe, Nutzung, Medienpakete, Inbox und Arsenal-Suche stehen bereit.');
   console.log('Alles-gefunden-Ordner aktiv: catalog/assets.json wird automatisch nach ALLES-GEFUNDEN/ gespiegelt.');
 });
 
