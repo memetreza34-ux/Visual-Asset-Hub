@@ -12,6 +12,7 @@ async function initWorkspaceNavigation() {
   const inbox = inboxResponse?.ok ? await inboxResponse.json() : { files: [] };
   const items = [
     { id: 'library', label: 'Bibliothek', count: index.assetCount ?? index.records?.length ?? 0, target: '#asset-grid' },
+    { id: 'script-visuals', label: 'Skript → Visuals', count: null, target: '#script-visual-finder' },
     { id: 'planner', label: 'Skript planen', count: null, target: '#script-planner' },
     { id: 'research', label: 'Thema recherchieren', count: null, target: '#entity-research' },
     { id: 'inbox', label: 'Eigene Dateien', count: inbox.files?.length ?? 0, target: '#inbox-importer' },
