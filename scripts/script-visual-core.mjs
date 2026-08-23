@@ -88,6 +88,8 @@ export function segmentScript(value, mode = 'auto') {
   const sentences = script
     .replace(/\r/g, '')
     .split(/\n+/)
+    .map((line) => line.replace(/^\s*(?:[-–—•]\s*|\d{1,4}[.)]\s*)/, '').trim())
+    .filter(Boolean)
     .flatMap((line) => line.split(/(?<=[.!?])\s+(?=[A-ZÄÖÜ0-9„“"'])/u))
     .map((part) => part.trim())
     .filter(Boolean);
@@ -240,7 +242,7 @@ function requireScript(value) {
   if (typeof value !== 'string') throw new Error('Skript muss Text sein.');
   const text = value.replace(/\r/g, '').trim();
   if (text.length < 10 || text.length > MAX_SCRIPT_CHARS) throw new Error(`Skript muss zwischen 10 und ${MAX_SCRIPT_CHARS} Zeichen lang sein.`);
-  if (/\u0000/.test(text)) throw new Error('Skript enthält ungültige Zeichen.');
+  if (/[\x00]/.test(text)) throw new Error('Skript enthält ungültige Zeichen.');
   return text;
 }
 function cleanTitle(value) { const text = String(value ?? '').replace(/[\u0000-\u001F\u007F]/g, ' ').replace(/\s+/g, ' ').trim(); return text.slice(0, 100); }
