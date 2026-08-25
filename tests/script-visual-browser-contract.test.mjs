@@ -46,6 +46,15 @@ test('Gemischt-Modus zeigt Video-/Bildverteilung pro Szene sichtbar an', () => {
   assert.match(source, /mediaPreferenceLabel/);
 });
 
+test('übernommener Szenenkontext wird transparent im Board angezeigt', () => {
+  const source = read('web/script-visual-finder.js');
+  assert.match(source, /scene\.contextInherited/);
+  assert.match(source, /scene\.contextEntities/);
+  assert.match(source, /scene\.contextConcepts/);
+  assert.match(source, /Kontext übernommen: \$\{contextLabel\}/);
+  assert.match(source, /original\.textContent = scene\.originalText/);
+});
+
 test('Mehr Treffer zeigt die echte nächste Suchseite und ein festes Maximum', () => {
   const source = read('web/script-visual-finder.js');
   assert.match(source, /const MAX_SEARCH_PAGE = 100/);
