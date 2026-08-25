@@ -64,3 +64,22 @@ test('bereits vorhandene Katalog-Assets werden mit der Skriptszene verknüpft st
   assert.match(browser, /data\.linkedExisting/);
   assert.match(browser, /war bereits im Katalog und wurde mit/);
 });
+
+test('Mehr Treffer verwendet echte Folgeseiten statt erneut Seite 1', () => {
+  assert.match(api, /const MAX_SEARCH_PAGE = 100/);
+  assert.match(api, /const previousRound = Number\.isInteger\(scene\.searchRound\)/);
+  assert.match(api, /const searchPage = force \? Math\.min\(MAX_SEARCH_PAGE, Math\.max\(2, previousRound \+ 1\)\) : 1/);
+  assert.match(api, /searchScene\(\{ root, project, scene, keys, enabledProviders, perPage, page: searchPage/);
+  assert.match(api, /executeSearch\(\{ provider, query, type, orientation: project\.settings\.orientation, perPage, page/);
+  assert.match(api, /request = \{ query, type, orientation, perPage, locale: 'de', page \}/);
+  assert.match(api, /searchers\.pexels\(\{ apiKey, query, type, orientation, locale: 'de-DE', page, perPage \}\)/);
+  assert.match(api, /searchers\.unsplash\(\{ apiKey, query, orientation, page, perPage/);
+  assert.match(api, /searchers\.openverse\(\{ query, orientation, page, perPage \}\)/);
+  assert.match(api, /searchers\.wikimedia\(\{ query, orientation, page, perPage \}\)/);
+});
+
+test('Suchseite wird nur nach mindestens einem erfolgreichen Providerlauf erhöht', () => {
+  assert.match(api, /const successful = providersUsed\.size > 0/);
+  assert.match(api, /searchRound: successful \? page : \(Number\.isInteger\(scene\.searchRound\) \? scene\.searchRound : 0\)/);
+  assert.match(api, /searchedAt: successful \? new Date\(\)\.toISOString\(\) : \(scene\.searchedAt \?\? null\)/);
+});
