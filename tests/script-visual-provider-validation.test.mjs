@@ -35,7 +35,15 @@ test('Gemischt-Modus wartet nach Möglichkeit auf Video und Bild', () => {
   assert.match(api, /const mixedMediaPossible = mixedRequested && enabledProviders\.some/);
   assert.match(api, /searchTypeForProvider\(provider, scene\.preferredMediaType, mixedRequested\)/);
   assert.match(api, /const mixedMediaReady = !mixedMediaPossible \|\| hasMixedMediaCandidates\(candidates\)/);
-  assert.match(api, /providersUsed\.size >= settings\.minProviders && mixedMediaReady/);
+  assert.match(api, /providersUsed\.size >= requiredProviders && mixedMediaReady/);
+});
+
+test('Rechercheumfang nutzt 1, 3 und 5 Quellen und passt sich an verfügbare Provider an', () => {
+  assert.match(api, /quick: \{ candidates: 4, minProviders: 1, maxTasks: 4 \}/);
+  assert.match(api, /deep: \{ candidates: 6, minProviders: 3, maxTasks: 8 \}/);
+  assert.match(api, /max: \{ candidates: 8, minProviders: 5, maxTasks: 12 \}/);
+  assert.match(api, /const requiredProviders = Math\.min\(settings\.minProviders, providerOrder\.length\)/);
+  assert.match(api, /providersUsed\.size >= requiredProviders/);
 });
 
 test('Gemischt-Modus nutzt Videoquellen für B-Roll und Fotoquellen für Standbilder', () => {
