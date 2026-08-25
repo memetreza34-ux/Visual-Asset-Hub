@@ -46,6 +46,17 @@ test('Gemischt-Modus zeigt Video-/Bildverteilung pro Szene sichtbar an', () => {
   assert.match(source, /mediaPreferenceLabel/);
 });
 
+test('Mehr Treffer zeigt die echte nächste Suchseite und ein festes Maximum', () => {
+  const source = read('web/script-visual-finder.js');
+  assert.match(source, /const MAX_SEARCH_PAGE = 100/);
+  assert.match(source, /Visuals suchen · Seite 1/);
+  assert.match(source, /`Mehr Treffer · Seite \$\{currentPage \+ 1\}`/);
+  assert.match(source, /Maximale Suchseite erreicht/);
+  assert.match(source, /search\.disabled = maxPageReached/);
+  assert.match(source, /Seite \$\{updated\.searchRound \|\| expectedPage\}/);
+  assert.match(source, /Seite \$\{candidate\.job\?\.page \?\? 1\}/);
+});
+
 test('Browser unterstützt lange sequenzielle Recherche mit Fortschritt und Stoppen', () => {
   const source = read('web/script-visual-finder.js');
   assert.match(source, /Alle Szenen recherchieren/);
