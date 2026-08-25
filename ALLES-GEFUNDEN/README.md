@@ -31,10 +31,10 @@ fertiges Skript
 → mehrere Suchqueries pro Szene
 → Bilder und B-Rolls
 → Hauptvisual / Alternativen
-→ Review-Import
+→ Review-Import oder Verknüpfung mit vorhandenem Katalogasset
 ```
 
-Der Hub schreibt oder verbessert dabei **kein Skript**. Der eingegebene Originaltext wird unverändert als Projektgrundlage gespeichert.
+Der Hub schreibt oder verbessert dabei **kein Skript**. Der eingegebene Originaltext wird unverändert als Projektgrundlage gespeichert. Nummerierungen und Aufzählungszeichen bleiben ebenfalls im Szenen-Originaltext erhalten.
 
 Jedes Projekt liegt separat unter:
 
@@ -57,11 +57,13 @@ Pro Szene werden gespeichert:
 - Zeitbereich
 - visuelle Absicht
 - erzeugte Suchqueries
+- aktuelle erfolgreiche Suchseite (`searchRound`)
 - gefundene Kandidaten
+- Video-/Bildtyp
 - Provider und Quellseite
 - technischer Fit
 - Hauptvisual / Alternativen
-- Importstatus
+- Import- oder Katalogverknüpfungsstatus
 
 Bei externen Kandidaten entstehen je nach Treffer zusätzlich:
 
@@ -71,6 +73,27 @@ Bei externen Kandidaten entstehen je nach Treffer zusätzlich:
 - `-VORSCHAU.url`
 
 Skriptprojekte bleiben auch beim normalen `vault:build` erhalten.
+
+### Medienmix
+
+Bei **Gemischt** versucht der Script Visual Finder pro Szene nach Möglichkeit sowohl Video-B-Roll als auch Bilder zu sammeln.
+
+- Pexels/Pixabay dienen als Videoquellen.
+- Unsplash/Openverse/Wikimedia liefern Bildmaterial.
+- Die Web-App zeigt Video- und Bildanzahl sowie den Mix-Status.
+- Hauptvisuals und Alternativen bleiben beim Nachladen weiterer Treffer geschützt.
+
+### Weitere Suchseiten
+
+**Mehr Treffer** verwendet echte Folgeseiten:
+
+```text
+Seite 1 → Seite 2 → Seite 3 → ... → maximal Seite 100
+```
+
+`searchRound` wird im Projekt gespeichert. Eine komplett fehlgeschlagene Zusatzrunde erhöht diese Zahl nicht.
+
+Die fünf Provider erhalten die echte Seitennummer. Wikimedia Commons berechnet den Suchoffset passend zur Seitengröße, damit keine Trefferbereiche übersprungen werden.
 
 ## Katalog-Assets
 
@@ -136,7 +159,7 @@ Beispiel Technik:
         └── ...
 ```
 
-## Rechercheumfang
+## Rechercheumfang der Themenrecherche
 
 - **Schnell:** bis zu 6 Motivbereiche
 - **Tief:** bis zu 8 Motivbereiche
@@ -158,13 +181,15 @@ Script Visual Finder, universelle Recherche und normaler Arsenal Builder verwend
 
 Openverse und Wikimedia benötigen keinen privaten Key.
 
-Dubletten werden soweit möglich über Provider-ID sowie Quell- und Medien-URLs reduziert. Im Script Visual Finder werden bereits in anderen Szenen gefundene Medien zusätzlich niedriger priorisiert.
+Dubletten werden soweit möglich über Provider-ID sowie kanonisierte Quell-, Original- und Medien-URLs reduziert. Im Script Visual Finder werden bereits in anderen Szenen gefundene Medien zusätzlich niedriger priorisiert.
 
 ## Nach dem Import
 
-Jeder externe Import startet als **`review`**. Ein Treffer wird niemals nur deshalb freigegeben, weil er in einem Skriptprojekt oder einer Themenrecherche sichtbar ist.
+Jeder **neu angelegte externe Import** startet als **`review`**. Ein Treffer wird niemals nur deshalb freigegeben, weil er in einem Skriptprojekt oder einer Themenrecherche sichtbar ist.
 
-Themenfunde werden im Themenarchiv als bereits importiert markiert. Script-Visual-Projekte speichern die importierten Katalog-Asset-IDs direkt am jeweiligen Kandidaten.
+Existiert dieselbe Quelle oder Medienreferenz bereits im Katalog, erzeugt der Script Visual Finder kein unnötiges Duplikat. Er verknüpft den Kandidaten mit der bestehenden Katalog-Asset-ID. Der bereits vorhandene Katalogstatus wird dadurch nicht automatisch verändert.
+
+Themenfunde werden im Themenarchiv als bereits importiert markiert. Script-Visual-Projekte speichern importierte oder verknüpfte Katalog-Asset-IDs direkt am jeweiligen Kandidaten.
 
 ## Externe Suchlinks
 
