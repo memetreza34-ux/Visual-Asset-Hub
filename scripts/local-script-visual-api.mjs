@@ -91,7 +91,7 @@ export function createLocalScriptVisualApi({ root = process.cwd(), token, search
           const perPage = integer(payload?.perPage ?? 6, 3, 12, 'perPage');
           const force = Boolean(payload?.force);
           if (scene.searchedAt && scene.candidates.length && !force) {
-            return sendJson(response, 200, { ok: true, projectId, scene, cachedProjectScene: true });
+            return sendJson(response, 200, { ok: true, projectId, scene, cachedProjectScene: true, searchedProviders: [], validatedKeyProviders: [] });
           }
 
           const outcome = await searchScene({ root, project, scene, keys, enabledProviders, perPage, searchDirectory, searchers });
@@ -100,7 +100,15 @@ export function createLocalScriptVisualApi({ root = process.cwd(), token, search
           refreshProgress(project);
           writeProject(projectDirectory, project);
           writeProjectMirror(root, project);
-          return sendJson(response, 200, { ok: true, projectId, scene, searchedProviders: enabledProviders, tasks: outcome.tasks, errors: scene.searchErrors });
+          return sendJson(response, 200, {
+            ok: true,
+            projectId,
+            scene,
+            searchedProviders: outcome.successfulProviders,
+            validatedKeyProviders: outcome.validatedKeyProviders,
+            tasks: outcome.tasks,
+            errors: scene.searchErrors
+          });
         }
 
         if (url.pathname === '/script-visual-api/select') {
@@ -132,11 +140,11 @@ export function createLocalScriptVisualApi({ root = process.cwd(), token, search
         if (url.pathname === '/script-visual-api/import') {
           const projectId = validateProjectId(payload?.projectId);
           const sceneId = validateSceneId(payload?.sceneId);
-          const candidateKey = requireText(payload?.candidateKey, 'candidateKey', 3, 260);
+          const candidateKeyValue = requireText(payload?.candidateKey, 'candidateKey', 3, 260);
           const project = readProject(projectDirectory, projectId);
           const scene = project.scenes.find((item) => item.id === sceneId);
           if (!scene) throw new Error('Szene wurde im Projekt nicht gefunden.');
-          const candidate = scene.candidates.find((item) => item.key === candidateKey);
+          const candidate = scene.candidates.find((item) => item.key === candidateKeyValue);
           if (!candidate) throw new Error('Kandidat wurde in dieser Szene nicht gefunden.');
           const env = candidate.provider === 'unsplash' ? { UNSPLASH_ACCESS_KEY: requireText(payload?.apiKey, 'apiKey', 8, 300) } : {};
           const catalogPath = path.join(root, 'catalog', 'assets.json');
@@ -177,11 +185,12 @@ export function createLocalScriptVisualApi({ root = process.cwd(), token, search
 async function searchScene({ root, project, scene, keys, enabledProviders, perPage, searchDirectory, searchers }) {
   const settings = DEPTH_TARGETS[project.settings.depth] ?? DEPTH_TARGETS.deep;
   const providerOrder = orderProviders(scene.preferredMediaType).filter((provider) => enabledProviders.includes(provider));
-  const localSeen = new Set((scene.candidates ?? []).map((item) => item.key));
-  const projectSeen = new Set(project.scenes.flatMap((item) => item.id === scene.id ? [] : (item.candidates ?? []).map((candidate) => candidate.key)));
+  const localSeen = new Set((scene.candidates ?? []).flatMap(candidateIdentities));
+  const projectSeen = new Set(project.scenes.flatMap((item) => item.id === scene.id ? [] : (item.candidates ?? []).flatMap(candidateIdentities)));
   const candidates = [...(scene.candidates ?? [])];
   const errors = [];
   const providersUsed = new Set();
+  const validatedKeyProviders = new Set();
   let tasks = 0;
 
   outer:
@@ -192,6 +201,8 @@ async function searchScene({ root, project, scene, keys, enabledProviders, perPa
       try {
         const type = PHOTO_ONLY.has(provider) ? 'photo' : scene.preferredMediaType;
         const execution = await executeSearch({ provider, query, type, orientation: project.settings.orientation, perPage, apiKey: keys[provider], searchers, searchDirectory });
+        providersUsed.add(provider);
+        if (!KEYLESS.has(provider) && !execution.cached) validatedKeyProviders.add(provider);
         const searchId = createSearchId();
         const job = buildJob(project, scene, query, provider, type, perPage);
         const result = execution.result;
@@ -207,14 +218,16 @@ async function searchScene({ root, project, scene, keys, enabledProviders, perPa
           result
         };
         fs.writeFileSync(path.join(searchDirectory, `${searchId}.json`), `${JSON.stringify(wrapper, null, 2)}\n`, { mode: 0o600 });
-        providersUsed.add(provider);
         for (const asset of result.assets ?? []) {
           const providerId = String(asset.provider_id ?? asset.id ?? '').trim();
           if (!providerId || !PROVIDER_ID.test(providerId)) continue;
+          const identities = assetIdentities(provider, asset);
+          if (!identities.length || identities.some((identity) => localSeen.has(identity))) continue;
+          for (const identity of identities) localSeen.add(identity);
           const key = candidateKey(provider, asset);
-          if (!key || localSeen.has(key)) continue;
-          localSeen.add(key);
-          const reusePenalty = projectSeen.has(key) ? 22 : 0;
+          if (!key) continue;
+          const reusedElsewhere = identities.some((identity) => projectSeen.has(identity));
+          const reusePenalty = reusedElsewhere ? 22 : 0;
           candidates.push({
             key,
             provider,
@@ -233,7 +246,7 @@ async function searchScene({ root, project, scene, keys, enabledProviders, perPa
             previewUrl: asset.preview_url || '',
             license: asset.license || null,
             technicalFit: Math.max(0, techScore(asset, type, project.settings.orientation) - reusePenalty),
-            reusedElsewhere: reusePenalty > 0,
+            reusedElsewhere,
             importedAssetIds: [],
             asset
           });
@@ -249,6 +262,8 @@ async function searchScene({ root, project, scene, keys, enabledProviders, perPa
   candidates.sort((a, b) => Number(Boolean(a.reusedElsewhere)) - Number(Boolean(b.reusedElsewhere)) || b.technicalFit - a.technicalFit || a.title.localeCompare(b.title, 'de'));
   return {
     tasks,
+    successfulProviders: [...providersUsed],
+    validatedKeyProviders: [...validatedKeyProviders],
     scene: {
       candidates: candidates.slice(0, 20),
       searchedAt: new Date().toISOString(),
@@ -418,6 +433,8 @@ function validateProjectId(value) { const id = requireText(value, 'projectId', 1
 function validateSceneId(value) { const id = requireText(value, 'sceneId', 9, 9); if (!SCENE_ID.test(id)) throw new Error('Ungültige sceneId.'); return id; }
 function validateKeys(value) { const input = value && typeof value === 'object' ? value : {}; const result = {}; for (const provider of ['pexels','pixabay','unsplash']) { const raw = typeof input[provider] === 'string' ? input[provider].trim() : ''; if (raw && (raw.length < 8 || raw.length > 300 || /[\u0000-\u001F\u007F]/.test(raw))) throw new Error(`${provider} API-Key ist ungültig.`); result[provider] = raw; } return result; }
 function orderProviders(type) { return type === 'photo' ? ['unsplash','openverse','wikimedia','pexels','pixabay'] : ['pexels','pixabay','unsplash','openverse','wikimedia']; }
+function assetIdentities(provider, asset) { return [...new Set([`${provider}|${asset?.provider_id ?? asset?.id ?? ''}`, canonicalUrl(asset?.source_url), canonicalUrl(asset?.original_url), canonicalUrl(bestMediaUrl(asset?.files))].filter(Boolean))]; }
+function candidateIdentities(candidate) { return assetIdentities(candidate?.provider ?? '', candidate?.asset ?? {}); }
 function candidateKey(provider, asset) { const id = String(asset.provider_id ?? asset.id ?? '').trim(); if (id) return `${provider}:${id}`; const source = canonicalUrl(asset.source_url) || canonicalUrl(bestMediaUrl(asset.files)); return source ? `${provider}:${createHash('sha256').update(source).digest('hex').slice(0, 20)}` : ''; }
 function canonicalUrl(value) { if (!value || typeof value !== 'string') return ''; try { const url = new URL(value); url.hash = ''; for (const key of [...url.searchParams.keys()]) if (/^(utm_|auto$|cs$|fit$|h$|w$|ixid$)/i.test(key)) url.searchParams.delete(key); return url.toString(); } catch { return ''; } }
 function bestMediaUrl(files) { if (Array.isArray(files)) return files.find((item) => item?.url)?.url ?? ''; if (!files || typeof files !== 'object') return ''; for (const key of ['original','large','medium','small']) { const value = files[key]; if (typeof value === 'string') return value; if (value?.url) return value.url; } return ''; }
