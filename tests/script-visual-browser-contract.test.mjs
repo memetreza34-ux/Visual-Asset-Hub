@@ -36,6 +36,16 @@ test('Browser zeigt Bilder, direkte Video-Player und mehrere Kandidaten pro Szen
   assert.match(source, /Als Alternative/);
 });
 
+test('Gemischt-Modus zeigt Video-/Bildverteilung pro Szene sichtbar an', () => {
+  const source = read('web/script-visual-finder.js');
+  assert.match(source, /Gemischt · \$\{preference\} zuerst/);
+  assert.match(source, /function candidateSummary\(scene, project\)/);
+  assert.match(source, /Videos · \$\{photos\} Bilder/);
+  assert.match(source, /Mix erfüllt/);
+  assert.match(source, /Mix noch unvollständig/);
+  assert.match(source, /mediaPreferenceLabel/);
+});
+
 test('Browser unterstützt lange sequenzielle Recherche mit Fortschritt und Stoppen', () => {
   const source = read('web/script-visual-finder.js');
   assert.match(source, /Alle Szenen recherchieren/);
