@@ -43,10 +43,19 @@ Optional beziehungsweise vorbelegt:
 
 - maximal 40.000 Skriptzeichen
 - maximal 120 visuelle Einheiten
+- maximal 100 Suchseiten pro Szene
 - keine automatische Skripterstellung
 - keine automatische Inhaltsfreigabe
 - keine automatische Rechtefreigabe
 - keine automatische Auswahl eines Hauptvisuals
+
+## Originaltext und Segmentierung
+
+Das vollständige eingegebene Skript bleibt unverändert im Projekt gespeichert. Auch Nummerierungs- und Aufzählungspräfixe wie `1.`, `2.` oder `-` bleiben im jeweiligen Szenen-Originaltext erhalten.
+
+Sie werden lediglich bei der visuellen Segmentierungslogik so behandelt, dass daraus keine leeren oder bedeutungslosen Extra-Szenen entstehen.
+
+Lange Sätze dürfen in mehrere visuelle Einheiten aufgeteilt werden. Jede Einheit verweist weiterhin auf ihren tatsächlichen Originaltext; der Hub erzeugt keinen Ersatztext.
 
 ## Visuelle Analyse
 
@@ -78,6 +87,18 @@ Es werden die bestehenden Adapter wiederverwendet:
 
 Pixabay verwendet weiterhin den bestehenden 24-Stunden-Cache.
 
+## Medienmix
+
+Bei **Gemischt** versucht der Finder pro Szene bewusst sowohl Video-B-Roll als auch Bildmaterial zu sammeln, sofern mindestens eine Videoquelle verfügbar ist.
+
+- Pexels und Pixabay werden im Gemischt-Modus für Video-B-Roll genutzt.
+- Unsplash, Openverse und Wikimedia Commons liefern Bildkandidaten.
+- Die Szene wird nicht nur wegen einer hohen Gesamttrefferzahl beendet, solange der gewünschte Mix technisch noch erreichbar, aber noch nicht vorhanden ist.
+- Die Oberfläche zeigt pro Szene sichtbar an, wie viele Videos und Bilder vorhanden sind und ob der Mix erfüllt ist.
+- Beim Kandidatenlimit bleiben ausgewählte Hauptvisuals und Alternativen geschützt; bei Gemischt werden außerdem Kandidaten beider Medientypen bewahrt.
+
+Wenn keine Videoquelle verfügbar ist, blockiert die fehlende Videoseite die Recherche nicht.
+
 ## Recherche pro Szene
 
 Die Suche feuert nicht blind jede Query gegen jede Quelle ab.
@@ -85,22 +106,48 @@ Die Suche feuert nicht blind jede Query gegen jede Quelle ab.
 ### Schnell
 
 - Ziel: ungefähr 4 eindeutige Kandidaten
-- mindestens 1 Provider
-- maximal 4 Suchtasks pro Szene
+- mindestens 1 erfolgreiche verfügbare Quelle
+- maximal 4 Suchtasks pro Szene und Suchseite
 
 ### Tief
 
 - Ziel: ungefähr 6 Kandidaten
-- mindestens 2 Provider
-- maximal 8 Suchtasks pro Szene
+- nach Möglichkeit mindestens 3 unterschiedliche verfügbare Quellen
+- maximal 8 Suchtasks pro Szene und Suchseite
 
 ### Maximal
 
 - Ziel: ungefähr 8 Kandidaten
-- mindestens 3 Provider
-- maximal 12 Suchtasks pro Szene
+- nach Möglichkeit alle 5 verfügbaren Quellen mindestens einmal berücksichtigen
+- fehlen Provider-Keys, passt sich die notwendige Providerzahl automatisch an die tatsächlich verfügbaren Quellen an
+- maximal 12 Suchtasks pro Szene und Suchseite
 
-Sobald das Kandidatenziel und die gewünschte Providerbreite erreicht sind, endet der Suchlauf für diese Szene.
+Sobald Kandidatenziel, Providerbreite und gegebenenfalls Medienmix erreicht sind, endet der Suchlauf für diese Szene.
+
+## Mehr Treffer / Pagination
+
+**Mehr Treffer** wiederholt nicht einfach Seite 1.
+
+Eine Szene führt einen eigenen `searchRound`:
+
+```text
+Erste Suche  → Seite 1
+Mehr Treffer → Seite 2
+Mehr Treffer → Seite 3
+...
+```
+
+Die Seitenzahl wird nur nach mindestens einer erfolgreichen Providerabfrage fortgeschrieben. Schlägt eine komplette Runde fehl, bleibt die vorherige Suchseite erhalten und kann sauber erneut versucht werden.
+
+Die Provider erhalten die tatsächliche Seitennummer:
+
+- Pexels: echte API-Seite
+- Pixabay: echte API-Seite und seitenspezifischer 24h-Cache
+- Unsplash: echte API-Seite
+- Openverse: echte API-Seite
+- Wikimedia Commons: `gsroffset` wird passend zu `perPage` berechnet, damit zwischen den Seiten keine Treffer übersprungen werden
+
+Die Weboberfläche zeigt die aktuelle Suchseite und deaktiviert weitere Seiten nach Seite 100.
 
 ## Lange Skripte
 
@@ -114,6 +161,7 @@ Dadurch:
 - später fortsetzbar
 - fertige Szenen bleiben gespeichert
 - einzelne Providerfehler zerstören kein komplettes Projekt
+- zusätzliche Treffer können gezielt nur für einzelne Szenen nachgeladen werden
 
 ## Kandidaten
 
@@ -125,6 +173,7 @@ Die Weboberfläche zeigt pro Treffer:
 - Medientyp
 - technischer Fit
 - verwendete Query
+- Suchseite
 - Creator soweit vorhanden
 - Quellseite
 - Wiederverwendungshinweis
@@ -139,13 +188,15 @@ Bereits in anderen Szenen vorkommende Kandidaten werden niedriger priorisiert, a
 
 Ein Kandidat wird nur nach ausdrücklichem Klick importiert.
 
-Der Import verwendet die vorhandene Arsenal-Importpipeline und setzt das Asset auf:
+Der Import verwendet die vorhandene Arsenal-Importpipeline und setzt ein neu angelegtes Asset auf:
 
 ```text
 review
 ```
 
 Importierte Katalog-Asset-IDs werden im Script-Visual-Projekt am Kandidaten gespeichert.
+
+Falls dieselbe Quelle beziehungsweise Medienreferenz bereits im Katalog vorhanden ist, legt der Finder kein unnötiges Duplikat an. Stattdessen wird der Skriptkandidat mit der bestehenden Katalog-Asset-ID verknüpft und in der Oberfläche als bereits importiert behandelt.
 
 ## Lokale Persistenz
 
@@ -174,7 +225,7 @@ Pro Projekt:
 ...
 ```
 
-`vault:build` bewahrt diese Projekte.
+`searchRound`, Kandidaten, Auswahl und Importverknüpfungen werden im Projekt persistiert. `vault:build` bewahrt diese Projekte.
 
 ## API-Sicherheit
 
