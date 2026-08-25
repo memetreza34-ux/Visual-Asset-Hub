@@ -55,6 +55,20 @@ test('übernommener Szenenkontext wird transparent im Board angezeigt', () => {
   assert.match(source, /original\.textContent = scene\.originalText/);
 });
 
+test('manuelle Web-Recherche bleibt klar von Import und Rechtefreigabe getrennt', () => {
+  const source = read('web/script-visual-finder.js');
+  assert.match(source, /Weitere Web-Recherche/);
+  assert.match(source, /function externalResearchPanel\(scene\)/);
+  assert.match(source, /Nur manuelle Recherche\. Sichtbarkeit im Web ist keine Nutzungs- oder Rechtefreigabe/);
+  assert.match(source, /www\.youtube\.com\/results\?search_query=/);
+  assert.match(source, /www\.google\.com\/search\?tbm=isch/);
+  assert.match(source, /www\.google\.com\/search\?tbm=vid/);
+  assert.match(source, /www\.google\.com\/search\?tbm=nws/);
+  assert.match(source, /de\.wikipedia\.org\/w\/index\.php\?search=/);
+  assert.match(source, /link\.target = '_blank'/);
+  assert.match(source, /link\.rel = 'noopener noreferrer'/);
+});
+
 test('Mehr Treffer zeigt die echte nächste Suchseite und ein festes Maximum', () => {
   const source = read('web/script-visual-finder.js');
   assert.match(source, /const MAX_SEARCH_PAGE = 100/);
