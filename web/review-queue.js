@@ -122,6 +122,8 @@ function renderQueue(state) {
     for (const record of records) {
       if (!['review', 'inbox'].includes(record.status)) continue;
       const recordTags = record.tags ?? [];
+      const channelTags = recordTags.filter((tag) => tag.startsWith('channel-'));
+      if (channelValue === 'untagged' && channelTags.length) continue;
       if (!['all', 'untagged'].includes(channelValue) && !recordTags.includes(channelValue)) continue;
       for (const tag of recordTags.filter((value) => value.startsWith('collection-'))) tags.set(tag, label(tag.replace(/^collection-/, '')));
     }
