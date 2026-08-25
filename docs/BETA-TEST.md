@@ -43,15 +43,16 @@ Prüfen:
 2. Projekt ohne manuell gewählten Kanal/Titel erzeugen
 3. vollständiger eingegebener Skripttext bleibt in `00-SKRIPT.txt` unverändert
 4. Auto-Modus bildet sinnvolle visuelle Einheiten
-5. jede Szene besitzt stabil `SCENE-001`, `SCENE-002` usw.
-6. pro Szene entstehen mehrere sinnvolle Queries
-7. konkrete Aussagen erhalten konkrete Visualrichtungen
-8. abstrakte Aussagen können als symbolische / kontextuelle B-Rolls markiert werden
-9. Zeitbereiche sind monoton und schließen sauber aneinander an
+5. nummerierte beziehungsweise Aufzählungs-Zeilen behalten `1.`, `2.`, `-` usw. im Szenen-Originaltext
+6. jede Szene besitzt stabil `SCENE-001`, `SCENE-002` usw.
+7. pro Szene entstehen mehrere sinnvolle Queries
+8. konkrete Aussagen erhalten konkrete Visualrichtungen
+9. abstrakte Aussagen können als symbolische / kontextuelle B-Rolls markiert werden
+10. Zeitbereiche sind monoton und schließen sauber aneinander an
 
 ### B2 – echte Medienrecherche
 
-Mindestens zwei Szenen real recherchieren.
+Mindestens zwei Szenen real recherchieren. Medienpräferenz zunächst auf **Gemischt** stellen.
 
 Prüfen:
 
@@ -62,11 +63,38 @@ Prüfen:
 - technischer Fit ist sichtbar
 - Quellseite lässt sich öffnen
 - mehrere Kandidaten pro Szene erscheinen
+- pro Szene werden Video- und Bildanzahl angezeigt
+- mindestens eine Szene erreicht bei verfügbarer Videoquelle **Mix erfüllt**
 - mindestens ein Video- und ein Bildkandidat im Projekt
 - bereits in anderen Szenen vorhandene Treffer werden niedriger priorisiert
+- Dubletten aus erneut gefundenen Quell-/Original-/Medien-URLs werden nicht mehrfach als eigenständige Kandidaten behandelt
 - kein Kandidat wird automatisch ausgewählt oder freigegeben
 
-### B3 – Auswahl
+Rechercheumfang zusätzlich prüfen:
+
+- **Schnell** bleibt sparsam
+- **Tief** versucht nach Möglichkeit mindestens drei verfügbare Quellen einzubeziehen
+- **Maximal** versucht nach Möglichkeit alle fünf tatsächlich verfügbaren Quellen mindestens einmal einzubeziehen
+- fehlen Keys, blockiert dies Maximal nicht; die erforderliche Providerzahl passt sich an die verfügbaren Quellen an
+
+### B3 – Mehr Treffer / Suchseiten
+
+Bei einer bereits recherchierten Szene **Mehr Treffer** verwenden.
+
+Prüfen:
+
+1. erste Suche steht auf Seite 1
+2. erster Klick **Mehr Treffer** lädt Seite 2
+3. nächster Klick kann Seite 3 laden
+4. neue Treffer werden zu den vorhandenen Kandidaten ergänzt statt Seite 1 nur zu wiederholen
+5. ausgewähltes Hauptvisual und Alternativen bleiben beim Nachladen erhalten
+6. `searchRound` bleibt nach Browser-Neuladen erhalten
+7. eine komplett fehlgeschlagene Zusatzrunde erhöht die Suchseite nicht
+8. Pixabay verwendet pro Seite einen getrennten Cacheeintrag
+9. Wikimedia liefert auf Seite 2 einen neuen, lückenlosen Trefferbereich über den passenden `gsroffset`
+10. nach Seite 100 wird weiteres Nachladen blockiert
+
+### B4 – Auswahl
 
 Prüfen:
 
@@ -75,17 +103,36 @@ Prüfen:
 - Auswahl wieder lösen
 - Browser neu laden und Projekt erneut öffnen
 - Auswahl bleibt erhalten
+- Auswahl bleibt auch nach **Mehr Treffer** erhalten
 
-### B4 – Review-Import
+### B5 – Review-Import und Katalogverknüpfung
 
-- genau einen gewünschten Kandidaten importieren
-- Import startet auf `review`
+- genau einen gewünschten neuen Kandidaten importieren
+- neu angelegtes Katalogasset startet auf `review`
 - ungewählte Kandidaten bleiben unimportiert
 - Script-Visual-Projekt speichert die neue Katalog-Asset-ID
 - Unsplash-Import benötigt aktuellen Sitzung-Key
 - keine Provider-Keys stehen in Projektdateien
 
-### B5 – langes Skript
+Zusätzlich einen Treffer testen, dessen Quelle bereits im Katalog existiert:
+
+- kein zweites Katalogasset anlegen
+- vorhandene Katalog-Asset-ID mit dem Script-Visual-Kandidaten verknüpfen
+- Oberfläche zeigt den Kandidaten danach als importiert
+- vorhandener Katalogstatus wird durch die Verknüpfung nicht automatisch verändert
+
+### B6 – Provider-Key-Härtung
+
+Für Pexels, Pixabay und Unsplash prüfen:
+
+- neuer gültiger Key wird erst nach erfolgreicher Anfrage genau dieses Providers für die Sitzung gemerkt
+- falscher neuer Key bleibt nach fehlgeschlagener Provideranfrage nicht gespeichert
+- erfolgreicher Openverse-/Wikimedia-Lauf bestätigt keinen fehlerhaften Key eines anderen Providers
+- reiner Pixabay-Cachetreffer validiert keinen neu eingegebenen Pixabay-Key
+- **Sitzungs-Keys löschen** entfernt alle gemerkten Keys
+- Seitenreload entfernt alle Sitzungsschlüssel
+
+### B7 – langes Skript
 
 Ein längeres Skript mit mehreren Minuten Sprechertext verwenden.
 
@@ -97,8 +144,9 @@ Prüfen:
 - **Stoppen** beendet nach der laufenden Szene
 - **Recherche fortsetzen** setzt bei noch offenen Szenen fort
 - ein Fehler einer Quelle entfernt bereits fertige Szenen nicht
+- einzelne Szenen können später separat über weitere Seiten vertieft werden
 
-### B6 – Projektordner
+### B8 – Projektordner
 
 Prüfen:
 
@@ -115,7 +163,7 @@ ALLES-GEFUNDEN/
         └── ...
 ```
 
-Pro recherchierter Szene mindestens INFO-/Quellenverknüpfungen prüfen. Danach `vault:build` erneut ausführen; das Script-Visual-Projekt muss erhalten bleiben.
+Pro recherchierter Szene mindestens INFO-/Quellenverknüpfungen prüfen. `00-PROJEKT.json` muss Suchseite, Kandidaten, Auswahl und Importverknüpfungen enthalten. Danach `vault:build` erneut ausführen; das Script-Visual-Projekt muss erhalten bleiben.
 
 ## Test C – universelle Themenrecherche
 
@@ -136,27 +184,32 @@ Erwartung:
 ### Pexels
 - Foto + Video
 - Sitzung-Key
+- Seite 2 liefert neue Treffer
 
 ### Pixabay
 - Foto + Video
 - Sitzung-Key
-- identische Suche erneut ausführen und 24h-Cache prüfen
+- identische Suche auf derselben Seite erneut ausführen und 24h-Cache prüfen
+- Seite 2 besitzt einen eigenen Cachekontext
 
 ### Unsplash
 - Foto
 - Sitzung-Key
 - Creator/Attribution
 - Import-Downloadmeldung
+- Seite 2 liefert neue Treffer
 
 ### Openverse
 - keylos
 - nur unterstützte offene Lizenztypen
+- Seite 2 liefert neue Treffer
 
 ### Wikimedia Commons
 - keylos
 - Lizenz/Attribution
+- lückenlose Seitennavigation über `gsroffset`
 
-Für alle: nur bewusst ausgewählte Treffer importieren; Import beginnt auf `review`.
+Für alle: nur bewusst ausgewählte Treffer importieren; jeder neu angelegte externe Import beginnt auf `review`.
 
 ## Test E – Provider-Keys
 
@@ -168,6 +221,7 @@ Für Script Visual Finder, Themenrecherche und Arsenal Builder:
 - keine Keys in `localStorage`
 - keine Keys in `sessionStorage`
 - keine Keys in Projekt-, Such- oder Katalogdateien
+- ungültiger neu eingegebener Key bleibt nach fehlgeschlagener Suche nicht gemerkt
 
 ## Test F – ALLES-GEFUNDEN
 
@@ -181,6 +235,7 @@ Prüfen:
 - lokale Dateikopie
 - externe `.url`-Verknüpfungen
 - Historie bleibt nach erneutem Build erhalten
+- Script-Visual-Suchseiten und Auswahl bleiben nach erneutem Build erhalten
 
 ## Test G – Ausbau 720 / Review-first
 
