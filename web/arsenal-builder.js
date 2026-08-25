@@ -147,7 +147,7 @@ function render({ health, channelIndex, channels }) {
     resultArea.replaceChildren();
     try {
       const data = await post('/arsenal-api/search', searchPayload(transientApiKey), health.token);
-      rememberProviderKey(provider.input.value, transientApiKey);
+      rememberProviderKey(provider.input.value, transientApiKey, data.provider !== 'pixabay' || !data.cached);
       apiKey.input.value = '';
       updateKeyPlaceholder();
       const cacheText = data.cached ? ' · aus 24-Stunden-Cache' : '';
@@ -181,7 +181,8 @@ function render({ health, channelIndex, channels }) {
     showStatus(status, `${providerLabel(provider.input.value)} durchsucht ${collections.length} Sammlungen nacheinander …`, true);
     try {
       const data = await post('/arsenal-api/batch-search', { ...searchPayload(transientApiKey), collections }, health.token);
-      rememberProviderKey(provider.input.value, transientApiKey);
+      const keyWasValidated = data.provider !== 'pixabay' || (data.groups ?? []).some((group) => !group.cached);
+      rememberProviderKey(provider.input.value, transientApiKey, keyWasValidated);
       apiKey.input.value = '';
       updateKeyPlaceholder();
       plannedBatchCollections = [];
@@ -281,8 +282,8 @@ function render({ health, channelIndex, channels }) {
     return value;
   }
 
-  function rememberProviderKey(providerName, value) {
-    if (keylessProviders.has(providerName) || !value) return;
+  function rememberProviderKey(providerName, value, validated = true) {
+    if (!validated || keylessProviders.has(providerName) || !value) return;
     sessionKeys.set(providerName, value);
   }
 
