@@ -9,6 +9,7 @@ test('Script Visual Finder verändert den gelieferten Skripttext nicht', () => {
   assert.equal(plan.scriptSha256.length, 64);
   assert.ok(plan.scenes.length >= 2);
   assert.equal(plan.scenes.map((scene) => scene.originalText).join(' '), script);
+  assert.ok(plan.scenes.every((scene) => scene.searchRound === 0 && scene.searchedAt === null));
 });
 
 test('nummerierte und Aufzählungs-Zeilen bleiben im Szenen-Originaltext erhalten', () => {
