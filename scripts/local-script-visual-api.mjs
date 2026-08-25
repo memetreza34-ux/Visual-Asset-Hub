@@ -23,8 +23,8 @@ const CHANNEL_LABELS = { general: 'Allgemein', finance: 'Finanzen', ai: 'Künstl
 const CHANNEL_TAGS = { finance: 'channel-finance', ai: 'channel-ai', electro: 'channel-electro', 'combat-sports': 'channel-combat-sports' };
 const DEPTH_TARGETS = {
   quick: { candidates: 4, minProviders: 1, maxTasks: 4 },
-  deep: { candidates: 6, minProviders: 2, maxTasks: 8 },
-  max: { candidates: 8, minProviders: 3, maxTasks: 12 }
+  deep: { candidates: 6, minProviders: 3, maxTasks: 8 },
+  max: { candidates: 8, minProviders: 5, maxTasks: 12 }
 };
 
 export function createLocalScriptVisualApi({ root = process.cwd(), token, searchers = defaultSearchers() } = {}) {
@@ -198,6 +198,7 @@ export function createLocalScriptVisualApi({ root = process.cwd(), token, search
 async function searchScene({ root, project, scene, keys, enabledProviders, perPage, page = 1, searchDirectory, searchers }) {
   const settings = DEPTH_TARGETS[project.settings.depth] ?? DEPTH_TARGETS.deep;
   const providerOrder = orderProviders(scene.preferredMediaType).filter((provider) => enabledProviders.includes(provider));
+  const requiredProviders = Math.min(settings.minProviders, providerOrder.length);
   const mixedRequested = project.settings.mediaPreference === 'mixed';
   const mixedMediaPossible = mixedRequested && enabledProviders.some((provider) => !PHOTO_ONLY.has(provider));
   const localSeen = new Set((scene.candidates ?? []).flatMap(candidateIdentities));
@@ -268,7 +269,7 @@ async function searchScene({ root, project, scene, keys, enabledProviders, perPa
         }
         const fresh = candidates.filter((item) => !item.reusedElsewhere).length;
         const mixedMediaReady = !mixedMediaPossible || hasMixedMediaCandidates(candidates);
-        if (candidates.length >= settings.candidates && fresh >= Math.min(3, settings.candidates) && providersUsed.size >= settings.minProviders && mixedMediaReady) break outer;
+        if (candidates.length >= settings.candidates && fresh >= Math.min(3, settings.candidates) && providersUsed.size >= requiredProviders && mixedMediaReady) break outer;
       } catch (error) {
         errors.push({ provider, query, page, error: message(error) });
       }
