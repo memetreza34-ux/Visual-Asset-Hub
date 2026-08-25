@@ -210,7 +210,7 @@ function buildScenes(pieces, timings, options) {
 
 function buildScene(originalText, index, timing, options, previousContext = { entities: [], concepts: [] }) {
   const visual = analyzeVisualIntent(originalText, options);
-  const contextInherited = shouldInheritContext(originalText, visual, previousContext);
+  const contextInherited = shouldInheritContext(originalText, previousContext);
   const contextEntities = contextInherited ? unique(previousContext.entities ?? []).slice(0, 2) : [];
   const contextConcepts = contextInherited ? unique(previousContext.concepts ?? []).slice(0, 3) : [];
   const queryAnalysis = {
@@ -245,12 +245,10 @@ function buildScene(originalText, index, timing, options, previousContext = { en
   };
 }
 
-function shouldInheritContext(text, visual, previousContext) {
+function shouldInheritContext(text, previousContext) {
   if (!(previousContext?.entities?.length || previousContext?.concepts?.length)) return false;
   const normalized = normalize(text);
-  const contextLead = /^(?:er|sie|es|ihn|ihm|ihnen|diese|dieser|dieses|diesen|diesem|deren|dessen|dabei|dadurch|damit|dort|dann|so|anschliessend|anschließend|spaeter|später)\b/;
-  if (!contextLead.test(normalized)) return false;
-  return visual.entities.length === 0 || /^(?:er|sie|es|ihn|ihm|ihnen|diese|dieser|dieses|diesen|diesem|deren|dessen)\b/.test(normalized);
+  return /^(?:er|sie|es|ihn|ihm|ihnen|diese|dieser|dieses|diesen|diesem|deren|dessen|dabei|dadurch|damit|dort|dann|so|anschliessend|anschließend|spaeter|später)\b/.test(normalized);
 }
 
 function splitScriptLine(line) {
