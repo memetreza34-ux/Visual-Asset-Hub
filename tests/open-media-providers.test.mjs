@@ -101,3 +101,19 @@ test('Wikimedia übernimmt nur Bilder mit unterstützter freier Lizenz', async (
   assert.equal(result.assets[0].creator, 'Jane Doe');
   assert.equal(result.assets[0].orientation, 'horizontal');
 });
+
+test('Wikimedia nutzt für weitere Treffer echte Suchseiten über gsroffset', async () => {
+  let requested;
+  const result = await searchWikimedia({
+    query: 'humanoid robot',
+    page: 3,
+    perPage: 5,
+    fetchImpl: async (url) => {
+      requested = new URL(url);
+      return new Response(JSON.stringify({ query: { pages: [] } }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+  });
+  assert.equal(requested.searchParams.get('gsroffset'), '40');
+  assert.equal(requested.searchParams.get('gsrlimit'), '20');
+  assert.equal(result.page, 3);
+});
