@@ -24,6 +24,8 @@ fertiges Skript
 
 Unterstützt werden kurze Reels ebenso wie längere Skripte bis **40.000 Zeichen** und maximal **120 visuelle Einheiten**. Die Szenen können automatisch, satzweise oder absatzweise gebildet werden. Lange Sätze können in mehrere visuelle Einheiten geteilt werden, während der vollständige eingegebene Originaltext unverändert im Projekt erhalten bleibt.
 
+Auch Nummerierungen und Aufzählungszeichen wie `1.`, `2.` oder `-` bleiben im Szenen-Originaltext erhalten. Sie werden lediglich so interpretiert, dass daraus keine bedeutungslosen Extra-Szenen entstehen.
+
 ### Pro Szene
 
 Jede visuelle Einheit enthält unter anderem:
@@ -37,16 +39,54 @@ Jede visuelle Einheit enthält unter anderem:
 - reale Kandidaten aus den vorhandenen Medienquellen
 - technischen Fit
 - Quellseite und Creator, soweit vorhanden
+- aktuelle Suchseite
 - Hauptvisual und Alternativen
 - Importstatus
 
 Direkte Treffer können konkret sein, etwa eine Person, ein Produkt, ein Ort oder ein technisches Gerät. Bei abstrakten Aussagen kann der Hub stattdessen **symbolische / kontextuelle B-Rolls** vorschlagen und kennzeichnet diesen Fall.
 
+### Videos + Bilder
+
+Bei der Einstellung **Gemischt** versucht der Finder pro Szene bewusst sowohl Video-B-Rolls als auch Bilder bereitzustellen, sofern eine Videoquelle verfügbar ist.
+
+- Pexels und Pixabay liefern Video-B-Rolls.
+- Unsplash, Openverse und Wikimedia Commons liefern Bildmaterial.
+- Die Oberfläche zeigt pro Szene die Anzahl der Videos und Bilder sowie **Mix erfüllt** oder **Mix noch unvollständig**.
+- Ausgewählte Hauptvisuals und Alternativen bleiben beim Nachladen weiterer Treffer geschützt.
+- Wenn technisch möglich, werden beim Kandidatenlimit Treffer beider Medientypen erhalten.
+
+### Rechercheumfang pro Szene
+
+Die Suchlogik arbeitet begrenzt und stoppt nicht nur nach Trefferzahl, sondern berücksichtigt Providerbreite und bei **Gemischt** den Medienmix.
+
+- **Schnell:** ungefähr 4 Kandidaten, mindestens 1 erfolgreiche verfügbare Quelle, maximal 4 Suchtasks pro Suchseite.
+- **Tief:** ungefähr 6 Kandidaten, nach Möglichkeit mindestens 3 unterschiedliche verfügbare Quellen, maximal 8 Suchtasks pro Suchseite.
+- **Maximal:** ungefähr 8 Kandidaten, nach Möglichkeit alle 5 verfügbaren Quellen mindestens einmal, maximal 12 Suchtasks pro Suchseite.
+
+Fehlen Pexels-, Pixabay- oder Unsplash-Keys, passt sich die notwendige Providerzahl automatisch an die tatsächlich verfügbaren Quellen an.
+
+### Mehr Treffer
+
+**Mehr Treffer** lädt nicht erneut dieselbe erste Ergebnisseite.
+
+Pro Szene wird eine eigene Suchrunde gespeichert:
+
+```text
+Visuals suchen → Seite 1
+Mehr Treffer   → Seite 2
+Mehr Treffer   → Seite 3
+...
+```
+
+Pexels, Pixabay, Unsplash, Openverse und Wikimedia erhalten die echte Seitennummer. Bei Wikimedia wird der Suchoffset passend zur gewählten Seitengröße berechnet, damit keine Treffer zwischen den Seiten übersprungen werden.
+
+Eine komplett fehlgeschlagene Runde erhöht die Suchseite nicht. Maximal werden 100 Suchseiten pro Szene zugelassen.
+
 ### Lange Skripte
 
 Die Web-App recherchiert lange Projekte bewusst **szeneweise und sequenziell**. Bereits abgeschlossene Szenen bleiben erhalten, auch wenn eine spätere Quellensuche fehlschlägt. Die Recherche kann gestoppt und später fortgesetzt werden.
 
-Pro Szene beendet die Suchlogik den Lauf, sobald je nach Modus genügend eindeutige Kandidaten aus ausreichend unterschiedlichen Quellen vorhanden sind. Dadurch werden nicht unnötig alle Queries gegen alle Provider abgefeuert.
+Zusätzliche Treffer können gezielt pro Szene nachgeladen werden, ohne bereits ausgewählte Hauptvisuals oder Alternativen zu verlieren.
 
 ### Projektordner
 
@@ -66,6 +106,14 @@ Script-Visual-Projekte werden lokal gespeichert und nach `ALLES-GEFUNDEN/06-SKRI
 ```
 
 Die Projekte liegen zusätzlich in `.local-storage/script-visual-projects`, damit sie nach einem Browser-Neuladen wieder geöffnet und fortgesetzt werden können. Skripte und Projektdateien werden durch `.gitignore` nicht automatisch in Git eingecheckt.
+
+Suchseite, Kandidaten, Auswahl und Importverknüpfungen werden im Projekt gespeichert.
+
+### Import ohne unnötige Dubletten
+
+Jeder bewusst importierte externe Treffer startet weiterhin auf `review`.
+
+Falls dieselbe Quelle beziehungsweise Medienreferenz bereits als Katalogasset existiert, wird kein unnötiges zweites Asset erzeugt. Der Script Visual Finder verknüpft den Treffer stattdessen mit der vorhandenen Katalog-Asset-ID und behandelt ihn anschließend als bereits importiert.
 
 ## Vier spezialisierte Kanalbibliotheken
 
@@ -90,6 +138,8 @@ Jede Sammlung ist für Video und Foto sowie Hoch- und Querformat vorbereitet. Di
 | Wikimedia Commons | ja | nein | nein |
 
 Pexels-, Pixabay- und Unsplash-Keys werden im Browser nur im Arbeitsspeicher der geöffneten Seite gehalten. Sie werden nicht in `localStorage`, `sessionStorage`, Katalog-, Projekt- oder Suchdateien gespeichert. **Sitzungs-Keys löschen** entfernt sie sofort.
+
+Ein neu eingegebener Key wird erst für die Sitzung gemerkt, wenn genau der dazugehörige Provider erfolgreich mit diesem Key angesprochen wurde. Ein erfolgreicher Openverse-/Wikimedia-Lauf kann also keinen falschen Key eines anderen Providers bestätigen. Ein reiner Pixabay-Cachetreffer gilt ebenfalls nicht als Validierung eines neu eingegebenen Pixabay-Keys.
 
 Openverse und Wikimedia werden konservativ auf unterstützte offene Lizenzen begrenzt: Public Domain, CC0, CC BY und CC BY-SA. Attribution und Lizenzinformationen bleiben dokumentiert.
 
@@ -210,7 +260,7 @@ Der technische Fit ist nur eine Produktionsvorsortierung und keine Inhalts- oder
 
 ## Review und Rechte
 
-Jeder externe Import beginnt auf `review` – auch jeder Import aus **Skript → Visuals**.
+Jeder externe Import beginnt auf `review` – auch jeder neue Import aus **Skript → Visuals**.
 
 Vor Freigabe werden weiterhin mindestens geprüft:
 
@@ -308,7 +358,9 @@ Die Beta gilt erst als vollständig real getestet, wenn unter anderem:
 - mindestens ein echtes **Skript → Visuals**-Projekt erstellt wurde
 - mindestens zwei Szenen daraus real recherchiert wurden
 - im Script Visual Finder mindestens ein Video- und ein Bildkandidat gefunden wurden
-- mindestens ein Kandidat daraus bewusst als `review` importiert wurde
+- mindestens eine Szene den Gemischt-Medienmix praktisch geprüft hat
+- **Mehr Treffer** bei mindestens einer Szene nachweislich eine weitere Suchseite lädt
+- mindestens ein Kandidat daraus bewusst als `review` importiert oder korrekt mit einem bereits vorhandenen Katalogasset verknüpft wurde
 - alle 12 Starterassets entschieden sind
 - alle fünf Medienquellen technisch getestet wurden
 - die universelle Themenrecherche mit mindestens zwei Recherchearten geprüft wurde
@@ -322,6 +374,7 @@ Der Pull Request bleibt bis dahin Draft und wird nicht in `main` gemergt.
 
 ## Dokumentation
 
+- [`docs/SCRIPT-VISUAL-FINDER.md`](docs/SCRIPT-VISUAL-FINDER.md)
 - [`ALLES-GEFUNDEN/README.md`](ALLES-GEFUNDEN/README.md)
 - [`docs/REAL-TEST-QUICKSTART.md`](docs/REAL-TEST-QUICKSTART.md)
 - [`docs/CHANNEL-ARSENAL.md`](docs/CHANNEL-ARSENAL.md)
