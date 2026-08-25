@@ -106,7 +106,7 @@ function renderWorkspace(projects) {
 function renderProject(container, project, keyFields, perPage, status) {
   const head = el('div', 'svf-project-head');
   const info = el('div');
-  info.append(text('span', project.projectId, 'svf-project-id'), text('h3', project.title), text('p', `${project.scenes.length} visuelle Einheiten · ${channelLabel(project.channel)} · Originaltext bleibt unverändert`));
+  info.append(text('span', project.projectId, 'svf-project-id'), text('h3', project.title), text('p', `${project.scenes.length} visuelle Einheiten · ${channelLabel(project.channel)} · ${mediaPreferenceLabel(project.settings?.mediaPreference)} · Originaltext bleibt unverändert`));
   const controls = el('div', 'svf-project-controls');
   const searchAll = button('Alle Szenen recherchieren', 'svf-primary');
   const stop = button('Stoppen');
@@ -165,7 +165,9 @@ function sceneCard(project, scene, keyFields, perPage, status) {
   const number = el('div');
   number.append(text('strong', `${scene.id} · ${formatTime(scene.startSeconds)}–${formatTime(scene.endSeconds)}`), text('span', scene.visualIntent));
   const flags = el('div', 'svf-scene-flags');
-  flags.append(text('span', scene.preferredMediaType === 'video' ? 'Video bevorzugt' : 'Bild bevorzugt'), ...(scene.symbolic ? [text('span', 'Symbolisches Visual')] : []));
+  const mixed = project.settings?.mediaPreference === 'mixed';
+  const preference = scene.preferredMediaType === 'video' ? 'Video' : 'Bild';
+  flags.append(text('span', mixed ? `Gemischt · ${preference} zuerst` : `${preference} bevorzugt`), ...(scene.symbolic ? [text('span', 'Symbolisches Visual')] : []));
   top.append(number, flags);
 
   const original = document.createElement('blockquote');
@@ -176,7 +178,7 @@ function sceneCard(project, scene, keyFields, perPage, status) {
   const actions = el('div', 'svf-scene-actions');
   const search = button(scene.searchedAt ? 'Mehr Treffer' : 'Visuals suchen');
   actions.append(search);
-  const resultStatus = text('span', scene.searchedAt ? `${scene.candidates.length} Kandidaten` : 'Noch nicht recherchiert');
+  const resultStatus = text('span', scene.searchedAt ? candidateSummary(scene, project) : 'Noch nicht recherchiert');
   actions.append(resultStatus);
 
   const grid = el('div', 'svf-candidate-grid');
@@ -188,7 +190,7 @@ function sceneCard(project, scene, keyFields, perPage, status) {
       const updated = await searchOneScene(scene, keyFields, perPage, Boolean(scene.searchedAt));
       const parent = article.parentElement;
       if (parent) replaceSceneCard(parent, currentProject, updated, keyFields, perPage, status);
-      showStatus(status, `${scene.id}: ${updated.candidates.length} eindeutige Visual-Kandidaten gespeichert.`, true);
+      showStatus(status, `${scene.id}: ${candidateSummary(updated, currentProject)} gespeichert.`, true);
     } catch (error) { showStatus(status, error.message, false); search.disabled = false; }
   });
 
@@ -316,6 +318,15 @@ function updateProgress(project, fill, copy) {
   copy.textContent = `${searched}/${total} Szenen recherchiert · ${project.scenes.filter((scene) => scene.selectedPrimary || scene.selectedAlternatives.length).length} mit Auswahl`;
 }
 
+function candidateSummary(scene, project) {
+  const candidates = scene.candidates ?? [];
+  const videos = candidates.filter((item) => item.type === 'video').length;
+  const photos = candidates.length - videos;
+  const mixed = project?.settings?.mediaPreference === 'mixed';
+  const mixState = mixed ? (videos && photos ? ' · Mix erfüllt' : ' · Mix noch unvollständig') : '';
+  return `${candidates.length} Kandidaten · ${videos} Videos · ${photos} Bilder${mixState}`;
+}
+function mediaPreferenceLabel(value) { return value === 'mixed' ? 'Videos + Bilder' : value === 'photo' ? 'Bilder bevorzugt' : 'Videos bevorzugt'; }
 function typedKeys(fields) { return Object.fromEntries(Object.entries(fields).map(([provider, item]) => [provider, item.input.value.trim()]).filter(([, value]) => value)); }
 function currentKey(provider, fields) { return fields[provider]?.input.value.trim() || sessionKeys.get(provider) || ''; }
 function clearVisibleKeys(fields) { for (const [provider, item] of Object.entries(fields)) { item.input.value = ''; item.input.placeholder = sessionKeys.has(provider) ? 'Für diese Sitzung gespeichert' : 'Nur für diese Sitzung'; } }
