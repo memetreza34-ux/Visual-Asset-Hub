@@ -11,6 +11,19 @@ test('Script Visual Finder verändert den gelieferten Skripttext nicht', () => {
   assert.equal(plan.scenes.map((scene) => scene.originalText).join(' '), script);
 });
 
+test('nummerierte und Aufzählungs-Zeilen bleiben im Szenen-Originaltext erhalten', () => {
+  const script = '1. Humanoide Roboter arbeiten in Fabriken.\n2. Sie könnten später auch im Alltag helfen.\n- Medizinrobotik unterstützt Ärzte.';
+  const units = segmentScript(script, 'sentence');
+  assert.deepEqual(units, [
+    '1. Humanoide Roboter arbeiten in Fabriken.',
+    '2. Sie könnten später auch im Alltag helfen.',
+    '- Medizinrobotik unterstützt Ärzte.'
+  ]);
+  const plan = createScriptVisualPlan({ script, segmentation: 'sentence' });
+  assert.equal(plan.script, script);
+  assert.deepEqual(plan.scenes.map((scene) => scene.originalText), units);
+});
+
 test('Auto, Satz- und Absatzmodus erzeugen stabile visuelle Einheiten', () => {
   const script = 'Erster Satz über Robotik. Zweiter Satz über Fabriken.\n\nDritter Absatz über Medizinrobotik.';
   assert.equal(segmentScript(script, 'sentence').length, 3);
@@ -51,6 +64,8 @@ test('Projekt unterstützt lange Skripte bis zur vorgesehenen Szenengrenze', () 
   const script = Array.from({ length: 80 }, (_, index) => `${index + 1}. ${sentence}`).join('\n');
   const plan = createScriptVisualPlan({ script, segmentation: 'sentence', depth: 'quick' });
   assert.equal(plan.scenes.length, 80);
+  assert.equal(plan.scenes[0].originalText, `1. ${sentence}`);
+  assert.equal(plan.scenes.at(-1).originalText, `80. ${sentence}`);
   assert.equal(plan.scenes.at(-1).sequence, 80);
   assert.ok(plan.settings.durationSeconds > 60);
 });
