@@ -185,6 +185,8 @@ export function createLocalScriptVisualApi({ root = process.cwd(), token, search
 async function searchScene({ root, project, scene, keys, enabledProviders, perPage, searchDirectory, searchers }) {
   const settings = DEPTH_TARGETS[project.settings.depth] ?? DEPTH_TARGETS.deep;
   const providerOrder = orderProviders(scene.preferredMediaType).filter((provider) => enabledProviders.includes(provider));
+  const mixedRequested = project.settings.mediaPreference === 'mixed';
+  const mixedMediaPossible = mixedRequested && enabledProviders.some((provider) => !PHOTO_ONLY.has(provider));
   const localSeen = new Set((scene.candidates ?? []).flatMap(candidateIdentities));
   const projectSeen = new Set(project.scenes.flatMap((item) => item.id === scene.id ? [] : (item.candidates ?? []).flatMap(candidateIdentities)));
   const candidates = [...(scene.candidates ?? [])];
@@ -199,7 +201,7 @@ async function searchScene({ root, project, scene, keys, enabledProviders, perPa
       if (tasks >= settings.maxTasks) break outer;
       tasks += 1;
       try {
-        const type = PHOTO_ONLY.has(provider) ? 'photo' : scene.preferredMediaType;
+        const type = searchTypeForProvider(provider, scene.preferredMediaType, mixedRequested);
         const execution = await executeSearch({ provider, query, type, orientation: project.settings.orientation, perPage, apiKey: keys[provider], searchers, searchDirectory });
         providersUsed.add(provider);
         if (!KEYLESS.has(provider) && !execution.cached) validatedKeyProviders.add(provider);
@@ -252,7 +254,8 @@ async function searchScene({ root, project, scene, keys, enabledProviders, perPa
           });
         }
         const fresh = candidates.filter((item) => !item.reusedElsewhere).length;
-        if (candidates.length >= settings.candidates && fresh >= Math.min(3, settings.candidates) && providersUsed.size >= settings.minProviders) break outer;
+        const mixedMediaReady = !mixedMediaPossible || hasMixedMediaCandidates(candidates);
+        if (candidates.length >= settings.candidates && fresh >= Math.min(3, settings.candidates) && providersUsed.size >= settings.minProviders && mixedMediaReady) break outer;
       } catch (error) {
         errors.push({ provider, query, error: message(error) });
       }
@@ -265,7 +268,7 @@ async function searchScene({ root, project, scene, keys, enabledProviders, perPa
     successfulProviders: [...providersUsed],
     validatedKeyProviders: [...validatedKeyProviders],
     scene: {
-      candidates: candidates.slice(0, 20),
+      candidates: retainSceneCandidates(candidates, scene, mixedRequested, 20),
       searchedAt: new Date().toISOString(),
       searchErrors: errors
     }
@@ -433,6 +436,21 @@ function validateProjectId(value) { const id = requireText(value, 'projectId', 1
 function validateSceneId(value) { const id = requireText(value, 'sceneId', 9, 9); if (!SCENE_ID.test(id)) throw new Error('Ungültige sceneId.'); return id; }
 function validateKeys(value) { const input = value && typeof value === 'object' ? value : {}; const result = {}; for (const provider of ['pexels','pixabay','unsplash']) { const raw = typeof input[provider] === 'string' ? input[provider].trim() : ''; if (raw && (raw.length < 8 || raw.length > 300 || /[\u0000-\u001F\u007F]/.test(raw))) throw new Error(`${provider} API-Key ist ungültig.`); result[provider] = raw; } return result; }
 function orderProviders(type) { return type === 'photo' ? ['unsplash','openverse','wikimedia','pexels','pixabay'] : ['pexels','pixabay','unsplash','openverse','wikimedia']; }
+function searchTypeForProvider(provider, preferredType, mixedRequested) { if (PHOTO_ONLY.has(provider)) return 'photo'; if (mixedRequested) return 'video'; return preferredType; }
+function hasMixedMediaCandidates(candidates) { return candidates.some((item) => item.type === 'video') && candidates.some((item) => item.type !== 'video'); }
+function retainSceneCandidates(candidates, scene, mixedRequested, limit = 20) {
+  const protectedKeys = new Set([scene.selectedPrimary, ...(scene.selectedAlternatives ?? [])].filter(Boolean));
+  const selectedKeys = new Set(protectedKeys);
+  if (mixedRequested && hasMixedMediaCandidates(candidates)) {
+    for (const item of candidates.filter((candidate) => candidate.type === 'video').slice(0, 4)) selectedKeys.add(item.key);
+    for (const item of candidates.filter((candidate) => candidate.type !== 'video').slice(0, 4)) selectedKeys.add(item.key);
+  }
+  for (const item of candidates) {
+    if (selectedKeys.size >= limit) break;
+    selectedKeys.add(item.key);
+  }
+  return candidates.filter((item) => selectedKeys.has(item.key)).slice(0, Math.max(limit, protectedKeys.size));
+}
 function assetIdentities(provider, asset) { return [...new Set([`${provider}|${asset?.provider_id ?? asset?.id ?? ''}`, canonicalUrl(asset?.source_url), canonicalUrl(asset?.original_url), canonicalUrl(bestMediaUrl(asset?.files))].filter(Boolean))]; }
 function candidateIdentities(candidate) { return assetIdentities(candidate?.provider ?? '', candidate?.asset ?? {}); }
 function candidateKey(provider, asset) { const id = String(asset.provider_id ?? asset.id ?? '').trim(); if (id) return `${provider}:${id}`; const source = canonicalUrl(asset.source_url) || canonicalUrl(bestMediaUrl(asset.files)); return source ? `${provider}:${createHash('sha256').update(source).digest('hex').slice(0, 20)}` : ''; }
