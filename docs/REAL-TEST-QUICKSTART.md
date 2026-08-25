@@ -24,16 +24,23 @@ Prüfen:
 - Projekt erstellen
 - sinnvolle Szenen / visuelle Einheiten erscheinen
 - Originaltext wird nicht umgeschrieben
+- Nummerierungen/Aufzählungszeichen bleiben im Szenen-Originaltext erhalten
 - pro Szene mehrere Queries sichtbar
 - abstrakte Aussagen werden bei Bedarf als symbolische Visuals markiert
+- Medienmodus **Gemischt** verwenden
 - **Alle Szenen recherchieren** starten
 - mindestens zwei Szenen real recherchieren
 - Bilder direkt ansehen
 - mindestens einen Videokandidaten direkt abspielen
+- mindestens eine Szene zeigt **Mix erfüllt** mit Video + Bild
 - Hauptvisual auswählen
 - mindestens eine Alternative auswählen
-- Projekt neu öffnen und Auswahl kontrollieren
-- genau einen passenden Kandidaten bewusst **als Review importieren**
+- bei einer Szene **Mehr Treffer** drücken und prüfen, dass Seite 2 statt erneut Seite 1 geladen wird
+- noch einmal **Mehr Treffer** und Seite 3 prüfen
+- Hauptvisual/Alternative müssen beim Nachladen erhalten bleiben
+- Projekt neu öffnen und Auswahl sowie Suchseite kontrollieren
+- genau einen passenden neuen Kandidaten bewusst **als Review importieren**
+- wenn möglich zusätzlich einen bereits im Katalog vorhandenen Treffer testen: er muss verknüpft statt dupliziert werden
 
 Danach unter `ALLES-GEFUNDEN/06-SKRIPT-PROJEKTE/` prüfen:
 
@@ -43,6 +50,7 @@ Danach unter `ALLES-GEFUNDEN/06-SKRIPT-PROJEKTE/` prüfen:
 - `00-SHOTLIST.json`
 - `00-SHOTLIST.csv`
 - Szenenordner mit Kandidaten-INFO und Quelllinks
+- `searchRound` entspricht der zuletzt erfolgreichen Suchseite
 
 Anschließend zusätzlich ein längeres Skript testen:
 
@@ -51,8 +59,28 @@ Anschließend zusätzlich ein längeres Skript testen:
 - Stoppen
 - Fortsetzen
 - bereits fertige Szenen bleiben erhalten
+- einzelne Szenen können später separat mit weiteren Suchseiten vertieft werden
 
-## 2. Universelle Themenrecherche
+Rechercheumfang kurz gegenprüfen:
+
+- **Schnell** bleibt sparsam
+- **Tief** versucht nach Möglichkeit drei verfügbare Quellen
+- **Maximal** versucht nach Möglichkeit alle fünf tatsächlich verfügbaren Quellen
+
+## 2. Provider-Key-Härtung kurz prüfen
+
+Für mindestens einen Key-Provider:
+
+- gültigen Key eingeben und erfolgreiche Suche durchführen
+- prüfen, dass der Key für die Sitzung gemerkt wird
+- **Sitzungs-Keys löschen** prüfen
+- absichtlich ungültigen neuen Key verwenden und Suche scheitern lassen
+- der ungültige Key darf danach nicht als gespeichert gelten
+- ein erfolgreicher Openverse-/Wikimedia-Lauf darf den falschen Key nicht bestätigen
+
+Bei Pixabay zusätzlich: Ein reiner Cachetreffer darf einen neu eingegebenen Key nicht als validiert markieren.
+
+## 3. Universelle Themenrecherche
 
 Unter **Thema recherchieren**:
 
@@ -67,19 +95,19 @@ multipleResearchTypesVerified: true
 scriptSpecificTopicResearch: true
 ```
 
-## 3. Fünf Quellen
+## 4. Fünf Quellen
 
 Real prüfen:
 
-- Pexels – Foto + Video
-- Pixabay – Foto + Video + 24h-Cache
-- Unsplash – Foto + Attribution
-- Openverse – keylos
-- Wikimedia Commons – keylos
+- Pexels – Foto + Video + neue Treffer auf Seite 2
+- Pixabay – Foto + Video + 24h-Cache + getrennte Suchseiten
+- Unsplash – Foto + Attribution + neue Treffer auf Seite 2
+- Openverse – keylos + neue Treffer auf Seite 2
+- Wikimedia Commons – keylos + lückenlose Pagination über `gsroffset`
 
 Provider-Keys bleiben nur in der laufenden Browserseite und verschwinden nach Neuladen beziehungsweise **Sitzungs-Keys löschen**.
 
-## 4. Zwölf Starterassets
+## 5. Zwölf Starterassets
 
 Unter **Prüfen**:
 
@@ -89,7 +117,7 @@ Unter **Prüfen**:
 - mindestens ein geeignetes Asset freigeben
 - Wikimedia-Starter einschließlich CC BY-SA 4.0 prüfen
 
-## 5. Ausbau 720
+## 6. Ausbau 720
 
 - vier Kanalkarten prüfen
 - 160 / 160 / 160 / 240
@@ -98,7 +126,7 @@ Unter **Prüfen**:
 - Video-/Fotolücken prüfen
 - Batch und Fallbacks prüfen
 
-## 6. ALLES-GEFUNDEN
+## 7. ALLES-GEFUNDEN
 
 Kontrollieren:
 
@@ -109,21 +137,22 @@ Kontrollieren:
 - lokale Dateikopie
 - externe `.url`-Links
 - erneuter `vault:build` löscht Script-Visual-Projekt nicht
+- Suchseite, Auswahl und Importverknüpfungen bleiben erhalten
 
-## 7. Eigenes Medium
+## 8. Eigenes Medium
 
 - eigene Datei importieren
 - Rechte bestätigen
 - Import als `review`
 
-## 8. Bestehenden Skript-Planer prüfen
+## 9. Bestehenden Skript-Planer prüfen
 
 - **Skript planen** öffnen
 - echte Shotlist erzeugen
 - Sammlungen und vorhandene Assets kontrollieren
 - Exporte prüfen
 
-## 9. Medienpaket und echte Nutzung
+## 10. Medienpaket und echte Nutzung
 
 - nur freigegebene Assets in Medienpaket
 - Manifest / SHA-256 / Attribution prüfen
@@ -131,7 +160,7 @@ Kontrollieren:
 - Nutzung dokumentieren
 - Backup erzeugen
 
-## 10. Abschluss
+## 11. Abschluss
 
 Am Ende müssen insbesondere folgende Kriterien wahr sein:
 
