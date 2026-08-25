@@ -182,6 +182,7 @@ function sceneCard(project, scene, keyFields, perPage, status) {
   original.textContent = scene.originalText;
   const queries = el('div', 'svf-queries');
   for (const query of scene.queries) queries.append(text('code', query));
+  const discovery = externalResearchPanel(scene);
 
   const actions = el('div', 'svf-scene-actions');
   const currentPage = Number(scene.searchRound || 0);
@@ -213,7 +214,7 @@ function sceneCard(project, scene, keyFields, perPage, status) {
     } catch (error) { showStatus(status, error.message, false); search.disabled = false; }
   });
 
-  article.append(top, original, queries, actions, grid);
+  article.append(top, original, queries, discovery, actions, grid);
   if (scene.searchErrors?.length) {
     const details = document.createElement('details');
     const summary = document.createElement('summary');
@@ -228,6 +229,44 @@ function sceneCard(project, scene, keyFields, perPage, status) {
     article.append(details);
   }
   return article;
+}
+
+function externalResearchPanel(scene) {
+  const details = document.createElement('details');
+  details.className = 'svf-external-research';
+  const summary = document.createElement('summary');
+  summary.textContent = 'Weitere Web-Recherche';
+  const warning = text('small', 'Nur manuelle Recherche. Sichtbarkeit im Web ist keine Nutzungs- oder Rechtefreigabe; diese Links importieren nichts automatisch.', 'svf-rights');
+  const rows = el('div', 'svf-external-links');
+  const queries = [...new Set((scene.queries ?? []).filter(Boolean))].slice(0, 3);
+  for (const query of queries) {
+    const row = el('div', 'svf-external-row');
+    row.append(text('code', query));
+    const links = el('div', 'svf-candidate-actions');
+    for (const [label, url] of externalSearchLinks(query)) {
+      const link = document.createElement('a');
+      link.href = url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.textContent = label;
+      links.append(link);
+    }
+    row.append(links);
+    rows.append(row);
+  }
+  details.append(summary, warning, rows);
+  return details;
+}
+
+function externalSearchLinks(query) {
+  const encoded = encodeURIComponent(query);
+  return [
+    ['YouTube', `https://www.youtube.com/results?search_query=${encoded}`],
+    ['Google Bilder', `https://www.google.com/search?tbm=isch&q=${encoded}`],
+    ['Google Videos', `https://www.google.com/search?tbm=vid&q=${encoded}`],
+    ['Google News', `https://www.google.com/search?tbm=nws&q=${encoded}`],
+    ['Wikipedia', `https://de.wikipedia.org/w/index.php?search=${encoded}`]
+  ];
 }
 
 function renderCandidates(grid, project, scene, keyFields, perPage, status) {
