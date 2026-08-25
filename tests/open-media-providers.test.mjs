@@ -102,7 +102,7 @@ test('Wikimedia übernimmt nur Bilder mit unterstützter freier Lizenz', async (
   assert.equal(result.assets[0].orientation, 'horizontal');
 });
 
-test('Wikimedia nutzt für weitere Treffer echte Suchseiten über gsroffset', async () => {
+test('Wikimedia nutzt lückenlose Suchseiten über perPage und gsroffset', async () => {
   let requested;
   const result = await searchWikimedia({
     query: 'humanoid robot',
@@ -113,7 +113,8 @@ test('Wikimedia nutzt für weitere Treffer echte Suchseiten über gsroffset', as
       return new Response(JSON.stringify({ query: { pages: [] } }), { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
   });
-  assert.equal(requested.searchParams.get('gsroffset'), '40');
-  assert.equal(requested.searchParams.get('gsrlimit'), '20');
+  assert.equal(requested.searchParams.get('gsroffset'), '10');
+  assert.equal(requested.searchParams.get('gsrlimit'), '5');
   assert.equal(result.page, 3);
+  assert.equal(result.per_page, 5);
 });
