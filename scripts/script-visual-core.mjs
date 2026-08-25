@@ -88,9 +88,9 @@ export function segmentScript(value, mode = 'auto') {
   const sentences = script
     .replace(/\r/g, '')
     .split(/\n+/)
-    .map((line) => line.replace(/^\s*(?:[-–—•]\s*|\d{1,4}[.)]\s*)/, '').trim())
+    .map((line) => line.trim())
     .filter(Boolean)
-    .flatMap((line) => line.split(/(?<=[.!?])\s+(?=[A-ZÄÖÜ0-9„“"'])/u))
+    .flatMap(splitScriptLine)
     .map((part) => part.trim())
     .filter(Boolean);
   if (mode === 'sentence') return sentences.flatMap((part) => splitOversized(part, 42));
@@ -187,6 +187,15 @@ function buildScene(originalText, index, timing, options) {
     searchedAt: null,
     searchErrors: []
   };
+}
+
+function splitScriptLine(line) {
+  const match = line.match(/^(\s*(?:[-–—•]\s*|\d{1,4}[.)]\s*))(.+)$/u);
+  const prefix = match?.[1] ?? '';
+  const body = (match?.[2] ?? line).trim();
+  const parts = body.split(/(?<=[.!?])\s+(?=[A-ZÄÖÜ0-9„“"'])/u).map((part) => part.trim()).filter(Boolean);
+  if (prefix && parts.length) parts[0] = `${prefix}${parts[0]}`.trim();
+  return parts;
 }
 
 function splitOversized(text, targetWords) {
