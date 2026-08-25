@@ -60,12 +60,6 @@ function render(health) {
   const pixabay = field('Pixabay Key · optional', 'password', { minlength: 8, maxlength: 300, autocomplete: 'off', placeholder: 'Nur für diese Sitzung' });
   const unsplash = field('Unsplash Key · optional', 'password', { minlength: 8, maxlength: 300, autocomplete: 'off', placeholder: 'Nur für diese Sitzung' });
   const keyFields = { pexels, pixabay, unsplash };
-  for (const [provider, item] of Object.entries(keyFields)) {
-    item.input.addEventListener('input', () => {
-      const value = item.input.value.trim();
-      if (value) researchKeys.set(provider, value);
-    });
-  }
 
   const planButton = button('Rechercheplan anzeigen');
   const searchButton = button('Alles recherchieren', 'entity-primary');
@@ -99,12 +93,14 @@ function render(health) {
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    rememberTypedKeys();
+    const typedKeys = readTypedKeys();
+    const keysForRequest = { ...Object.fromEntries(researchKeys), ...typedKeys };
     setBusy(true);
     results.replaceChildren();
     showStatus(status, 'Recherche läuft sequenziell über alle verfügbaren Quellen. Maximal-Recherche kann etwas länger dauern …', true);
     try {
-      const data = await post('/entity-api/search', { ...payload(), keys: Object.fromEntries(researchKeys), perPage: Number(perPage.input.value) }, health.token);
+      const data = await post('/entity-api/search', { ...payload(), keys: keysForRequest, perPage: Number(perPage.input.value) }, health.token);
+      rememberValidatedKeys(typedKeys);
       clearVisibleKeys();
       renderPlan(planArea, data.plan);
       renderResults(results, data, health.token);
@@ -128,11 +124,14 @@ function render(health) {
     };
   }
 
-  function rememberTypedKeys() {
-    for (const [provider, item] of Object.entries(keyFields)) {
-      const value = item.input.value.trim();
-      if (value) researchKeys.set(provider, value);
-    }
+  function readTypedKeys() {
+    return Object.fromEntries(Object.entries(keyFields)
+      .map(([provider, item]) => [provider, item.input.value.trim()])
+      .filter(([, value]) => value));
+  }
+
+  function rememberValidatedKeys(values) {
+    for (const [provider, value] of Object.entries(values)) if (value) researchKeys.set(provider, value);
   }
 
   function clearVisibleKeys() {
