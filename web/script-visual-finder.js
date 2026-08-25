@@ -292,7 +292,8 @@ async function searchOneScene(scene, keyFields, perPage, force) {
   const typed = typedKeys(keyFields);
   const keys = { ...Object.fromEntries(sessionKeys), ...typed };
   const data = await post('/script-visual-api/search-scene', { projectId: currentProject.projectId, sceneId: scene.id, keys, perPage: Number(perPage.input.value), force });
-  for (const [provider, value] of Object.entries(typed)) if (value) sessionKeys.set(provider, value);
+  const validated = new Set(data.validatedKeyProviders ?? []);
+  for (const [provider, value] of Object.entries(typed)) if (value && validated.has(provider)) sessionKeys.set(provider, value);
   clearVisibleKeys(keyFields);
   const index = currentProject.scenes.findIndex((item) => item.id === scene.id);
   if (index >= 0) currentProject.scenes[index] = data.scene;
