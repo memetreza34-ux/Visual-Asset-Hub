@@ -131,6 +131,8 @@ Die Weboberfläche zeigt pro Treffer:
 
 Der Nutzer kann einen Kandidaten als **Hauptvisual** oder **Alternative** markieren.
 
+Dubletten werden nicht nur über die Provider-ID erkannt. Der Finder berücksichtigt zusätzlich kanonisierte Quellseiten, Original-Medien-URLs und direkte Medienreferenzen. Dadurch können gleiche Aufnahmen auch dann erkannt werden, wenn sie über unterschiedliche Suchläufe erneut auftauchen.
+
 Bereits in anderen Szenen vorkommende Kandidaten werden niedriger priorisiert, aber nicht vollständig verboten.
 
 ## Import
@@ -190,7 +192,9 @@ Sie ist Teil derselben lokalen Schutzarchitektur:
 - gemeinsame Server-Schreibsperre
 - begrenzte Requestgröße
 
-Provider-Keys werden nicht in Projekten oder Suchmetadaten gespeichert.
+Provider-Keys werden nicht in Projekten oder Suchmetadaten gespeichert. Ein neu eingegebener Pexels-, Pixabay- oder Unsplash-Key wird im Browser erst für die laufende Sitzung gemerkt, wenn genau dieser Provider erfolgreich angesprochen wurde. Ein erfolgreicher keyloser Provider kann dadurch keinen fehlerhaften Key eines anderen Providers versehentlich bestätigen.
+
+Ein reiner Pixabay-Cachetreffer gilt ebenfalls nicht als Prüfung eines neu eingegebenen Pixabay-Keys, weil bei diesem Treffer keine echte Anfrage mit dem neuen Schlüssel stattgefunden hat.
 
 ## Rechte
 
