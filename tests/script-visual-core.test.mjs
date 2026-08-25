@@ -103,6 +103,37 @@ test('abstrakte Aussagen erhalten einen eigenen symbolischen B-Roll-Fallback', (
   assert.ok(queries.some((query) => /work/i.test(query)));
 });
 
+test('kontextabhängige Folgesätze erben die vorherige Entität nur für die Visualsuche', () => {
+  const script = 'OpenAI entwickelt humanoide Roboter. Sie sollen später in Fabriken arbeiten.';
+  const plan = createScriptVisualPlan({ script, segmentation: 'sentence', depth: 'max' });
+  assert.equal(plan.scenes.length, 2);
+  assert.equal(plan.scenes[0].contextInherited, false);
+  assert.equal(plan.scenes[1].originalText, 'Sie sollen später in Fabriken arbeiten.');
+  assert.equal(plan.scenes[1].contextInherited, true);
+  assert.ok(plan.scenes[1].contextEntities.some((value) => /OpenAI/i.test(value)));
+  assert.ok(plan.scenes[1].queries.some((query) => /OpenAI/i.test(query)));
+  assert.equal(plan.script, script);
+  assert.equal(plan.summary.contextInherited, 1);
+});
+
+test('neuer expliziter Szenenbezug übernimmt nicht unnötig die vorherige Entität', () => {
+  const script = 'OpenAI entwickelt humanoide Roboter. Tesla entwickelt ein eigenes Robotersystem.';
+  const plan = createScriptVisualPlan({ script, segmentation: 'sentence', depth: 'max' });
+  assert.equal(plan.scenes.length, 2);
+  assert.equal(plan.scenes[1].contextInherited, false);
+  assert.ok(plan.scenes[1].entities.some((value) => /Tesla/i.test(value)));
+  assert.ok(plan.scenes[1].queries.some((query) => /Tesla/i.test(query)));
+});
+
+test('Ortsbezug mit Dort kann Kontext aus der vorherigen Szene für die Suche übernehmen', () => {
+  const script = 'Berlin baut neue Rechenzentren. Dort entstehen große Serverhallen.';
+  const plan = createScriptVisualPlan({ script, segmentation: 'sentence', depth: 'max' });
+  assert.equal(plan.scenes[1].contextInherited, true);
+  assert.ok(plan.scenes[1].contextEntities.some((value) => /Berlin/i.test(value)));
+  assert.ok(plan.scenes[1].queries.some((query) => /Berlin/i.test(query)));
+  assert.equal(plan.scenes[1].originalText, 'Dort entstehen große Serverhallen.');
+});
+
 test('Projekt unterstützt lange Skripte bis zur vorgesehenen Szenengrenze', () => {
   const sentence = 'Humanoide Roboter helfen Menschen bei einer klar beschriebenen Aufgabe.';
   const script = Array.from({ length: 80 }, (_, index) => `${index + 1}. ${sentence}`).join('\n');
