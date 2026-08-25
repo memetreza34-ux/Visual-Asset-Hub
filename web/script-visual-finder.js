@@ -168,7 +168,14 @@ function sceneCard(project, scene, keyFields, perPage, status) {
   const flags = el('div', 'svf-scene-flags');
   const mixed = project.settings?.mediaPreference === 'mixed';
   const preference = scene.preferredMediaType === 'video' ? 'Video' : 'Bild';
-  flags.append(text('span', mixed ? `Gemischt · ${preference} zuerst` : `${preference} bevorzugt`), ...(scene.symbolic ? [text('span', 'Symbolisches Visual')] : []));
+  const contextLabel = scene.contextInherited
+    ? [...(scene.contextEntities ?? []), ...(scene.contextConcepts ?? [])].slice(0, 3).join(', ')
+    : '';
+  flags.append(
+    text('span', mixed ? `Gemischt · ${preference} zuerst` : `${preference} bevorzugt`),
+    ...(scene.symbolic ? [text('span', 'Symbolisches Visual')] : []),
+    ...(contextLabel ? [text('span', `Kontext übernommen: ${contextLabel}`)] : [])
+  );
   top.append(number, flags);
 
   const original = document.createElement('blockquote');
