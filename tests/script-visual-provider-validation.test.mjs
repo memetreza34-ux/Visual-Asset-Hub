@@ -29,3 +29,28 @@ test('Finder dedupliziert über Provider-ID und kanonisierte Medienreferenzen', 
   assert.match(api, /localSeen\.has\(identity\)/);
   assert.match(api, /projectSeen\.has\(identity\)/);
 });
+
+test('Gemischt-Modus wartet nach Möglichkeit auf Video und Bild', () => {
+  assert.match(api, /const mixedRequested = project\.settings\.mediaPreference === 'mixed'/);
+  assert.match(api, /const mixedMediaPossible = mixedRequested && enabledProviders\.some/);
+  assert.match(api, /searchTypeForProvider\(provider, scene\.preferredMediaType, mixedRequested\)/);
+  assert.match(api, /const mixedMediaReady = !mixedMediaPossible \|\| hasMixedMediaCandidates\(candidates\)/);
+  assert.match(api, /providersUsed\.size >= settings\.minProviders && mixedMediaReady/);
+});
+
+test('Gemischt-Modus nutzt Videoquellen für B-Roll und Fotoquellen für Standbilder', () => {
+  assert.match(api, /function searchTypeForProvider\(provider, preferredType, mixedRequested\)/);
+  assert.match(api, /PHOTO_ONLY\.has\(provider\).*return 'photo'/);
+  assert.match(api, /if \(mixedRequested\) return 'video'/);
+  assert.match(api, /function hasMixedMediaCandidates\(candidates\)/);
+  assert.match(api, /item\.type === 'video'/);
+  assert.match(api, /item\.type !== 'video'/);
+});
+
+test('Kandidatenlimit bewahrt Auswahl und hält im Gemischt-Modus beide Medientypen', () => {
+  assert.match(api, /function retainSceneCandidates\(candidates, scene, mixedRequested, limit = 20\)/);
+  assert.match(api, /scene\.selectedPrimary/);
+  assert.match(api, /scene\.selectedAlternatives/);
+  assert.match(api, /candidate\.type === 'video'/);
+  assert.match(api, /candidate\.type !== 'video'/);
+});
