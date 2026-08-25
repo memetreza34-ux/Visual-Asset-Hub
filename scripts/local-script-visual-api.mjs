@@ -166,12 +166,21 @@ export function createLocalScriptVisualApi({ root = process.cwd(), token, search
           }
           const afterAssets = readJson(catalogPath).assets ?? [];
           const importedIds = afterAssets.map((asset) => asset.id).filter((id) => !before.has(id));
-          candidate.importedAssetIds = [...new Set([...(candidate.importedAssetIds ?? []), ...importedIds])];
+          const existingIds = importedIds.length ? [] : findExistingCatalogAssetIds(afterAssets, candidate);
+          const linkedIds = [...new Set([...importedIds, ...existingIds])];
+          candidate.importedAssetIds = [...new Set([...(candidate.importedAssetIds ?? []), ...linkedIds])];
           project.updatedAt = new Date().toISOString();
           refreshProgress(project);
           writeProject(projectDirectory, project);
           writeProjectMirror(root, project);
-          return sendJson(response, 200, { ok: true, imported: importedIds.length, assetIds: importedIds, scene, progress: project.progress });
+          return sendJson(response, 200, {
+            ok: true,
+            imported: importedIds.length,
+            linkedExisting: existingIds.length,
+            assetIds: linkedIds,
+            scene,
+            progress: project.progress
+          });
         }
 
         return sendJson(response, 404, { error: 'Script-Visual-Aktion nicht gefunden.' });
@@ -453,6 +462,19 @@ function retainSceneCandidates(candidates, scene, mixedRequested, limit = 20) {
 }
 function assetIdentities(provider, asset) { return [...new Set([`${provider}|${asset?.provider_id ?? asset?.id ?? ''}`, canonicalUrl(asset?.source_url), canonicalUrl(asset?.original_url), canonicalUrl(bestMediaUrl(asset?.files))].filter(Boolean))]; }
 function candidateIdentities(candidate) { return assetIdentities(candidate?.provider ?? '', candidate?.asset ?? {}); }
+function findExistingCatalogAssetIds(assets, candidate) {
+  const candidateUrls = new Set([
+    canonicalUrl(candidate?.sourceUrl),
+    canonicalUrl(candidate?.asset?.source_url),
+    canonicalUrl(candidate?.asset?.original_url),
+    canonicalUrl(bestMediaUrl(candidate?.asset?.files))
+  ].filter(Boolean));
+  if (!candidateUrls.size) return [];
+  return (assets ?? []).filter((asset) => [
+    canonicalUrl(asset?.rights?.sourceUrl),
+    canonicalUrl(asset?.storage?.externalUrl)
+  ].some((url) => url && candidateUrls.has(url))).map((asset) => asset.id);
+}
 function candidateKey(provider, asset) { const id = String(asset.provider_id ?? asset.id ?? '').trim(); if (id) return `${provider}:${id}`; const source = canonicalUrl(asset.source_url) || canonicalUrl(bestMediaUrl(asset.files)); return source ? `${provider}:${createHash('sha256').update(source).digest('hex').slice(0, 20)}` : ''; }
 function canonicalUrl(value) { if (!value || typeof value !== 'string') return ''; try { const url = new URL(value); url.hash = ''; for (const key of [...url.searchParams.keys()]) if (/^(utm_|auto$|cs$|fit$|h$|w$|ixid$)/i.test(key)) url.searchParams.delete(key); return url.toString(); } catch { return ''; } }
 function bestMediaUrl(files) { if (Array.isArray(files)) return files.find((item) => item?.url)?.url ?? ''; if (!files || typeof files !== 'object') return ''; for (const key of ['original','large','medium','small']) { const value = files[key]; if (typeof value === 'string') return value; if (value?.url) return value.url; } return ''; }
