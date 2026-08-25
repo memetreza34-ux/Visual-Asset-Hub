@@ -19,7 +19,7 @@ const INTENT_RULES = [
   ['technology', ['ki','ai','roboter','robot','software','hardware','gerät','geraet','system','motor','rcd','transformator','sensor','chip','server','computer','maschine']],
   ['finance', ['aktie','etf','börse','boerse','geld','inflation','rendite','markt','bitcoin','krypto','zins']],
   ['process', ['produziert','hergestellt','montiert','arbeitet','funktioniert','operiert','trainiert','entwickelt','baut','erstellt','fährt','faehrt','läuft','laeuft']],
-  ['action', ['kämpft','kaempft','schlägt','schlaegt','rennt','springt','fährt','faehrt','fliegt','bewegt','greift','schießt','schiesst']],
+  ['action', ['kämpft','kaempft','kämpfte','kaempfte','besiegt','besiegte','schlägt','schlaegt','schlug','gewinnt','gewann','verliert','verlor','rennt','springt','fährt','faehrt','fliegt','bewegt','greift','schießt','schiesst','knockout']],
   ['product', ['produkt','modell','gerät','geraet','auto','smartphone','telefon','maschine','fahrzeug','app','software']],
   ['abstract', ['zukunft','gefahr','risiko','chance','verändert','veraendert','einfluss','problem','wachstum','krise','fortschritt']]
 ];
@@ -40,11 +40,23 @@ const INTENT_META = {
 
 const TRANSLATIONS = new Map([
   ['künstliche intelligenz','artificial intelligence'], ['kuenstliche intelligenz','artificial intelligence'], ['ki','AI'],
-  ['roboter','robot'], ['fabrik','factory'], ['fabriken','factory'], ['krankenhaus','hospital'], ['krankenhäuser','hospital'],
-  ['operation','surgery'], ['operationen','surgery'], ['arzt','doctor'], ['ärzte','doctors'], ['alltag','daily life'],
-  ['zukunft','future'], ['arbeitsplatz','workplace'], ['arbeitsplätze','workplace'], ['stadt','city'], ['strom','electricity'],
-  ['motor','electric motor'], ['transformator','transformer'], ['aktien','stocks'], ['börse','stock market'], ['geld','money'],
-  ['training','training'], ['kampf','fight'], ['kämpfer','fighter'], ['auto','car'], ['fahrzeug','vehicle']
+  ['roboter','robot'], ['robotik','robotics'], ['humanoid','humanoid'], ['automatisierung','automation'], ['industrie','industry'],
+  ['fabrik','factory'], ['fabriken','factory'], ['produktion','production'], ['montage','assembly'], ['arbeit','work'], ['arbeiten','working'],
+  ['arbeitsplatz','workplace'], ['arbeitsplätze','jobs'], ['arbeitsplaetze','jobs'], ['menschen','people'], ['mensch','person'],
+  ['alltag','daily life'], ['haushalt','home'], ['haushalte','homes'], ['zuhause','home'],
+  ['krankenhaus','hospital'], ['krankenhäuser','hospital'], ['krankenhaeuser','hospital'], ['medizin','medicine'], ['gesundheit','healthcare'],
+  ['operation','surgery'], ['operationen','surgery'], ['arzt','doctor'], ['ärzte','doctors'], ['aerzte','doctors'],
+  ['forschung','research'], ['forscher','researcher'], ['wissenschaft','science'], ['labor','laboratory'],
+  ['zukunft','future'], ['gefahr','risk'], ['risiko','risk'], ['chance','opportunity'], ['fortschritt','progress'], ['krise','crisis'],
+  ['stadt','city'], ['straße','street'], ['strasse','street'], ['gebäude','building'], ['gebaeude','building'], ['arena','arena'], ['stadion','stadium'],
+  ['strom','electricity'], ['spannung','voltage'], ['motor','electric motor'], ['transformator','transformer'], ['sensor','sensor'], ['kabel','cable'],
+  ['computer','computer'], ['software','software'], ['hardware','hardware'], ['chip','semiconductor chip'], ['server','server'], ['rechenzentrum','data center'], ['daten','data'],
+  ['aktien','stocks'], ['aktie','stock'], ['börse','stock market'], ['boerse','stock market'], ['geld','money'], ['markt','market'], ['bank','bank'],
+  ['inflation','inflation'], ['bitcoin','bitcoin'], ['krypto','cryptocurrency'], ['zins','interest rates'], ['trading','trading'],
+  ['training','training'], ['kampf','fight'], ['kämpfer','fighter'], ['kaempfer','fighter'], ['boxen','boxing'], ['mma','MMA'],
+  ['auto','car'], ['fahrzeug','vehicle'], ['smartphone','smartphone'], ['produkt','product'], ['modell','model'],
+  ['energie','energy'], ['klima','climate'], ['umwelt','environment'], ['weltraum','space'], ['satellit','satellite'],
+  ['krieg','war'], ['wahl','election'], ['politik','politics'], ['regierung','government'], ['unternehmen','company'], ['firma','company']
 ]);
 
 export function createScriptVisualPlan(input = {}) {
@@ -131,15 +143,35 @@ export function analyzeVisualIntent(text, options = {}) {
 
 export function generateVisualQueries(text, analysis = analyzeVisualIntent(text), depth = 'deep') {
   const limit = depth === 'quick' ? 3 : depth === 'max' ? 5 : 4;
-  const entities = analysis.entities.slice(0, 2);
-  const concepts = analysis.concepts.slice(0, 5);
-  const translated = translateTerms([...entities, ...concepts]);
-  const baseTerms = unique([...entities, ...translated, ...concepts]).filter(Boolean);
-  const base = baseTerms.slice(0, 5).join(' ').trim() || text.slice(0, 90).trim();
   const meta = INTENT_META[analysis.intent] ?? INTENT_META.general;
-  const queries = [base];
-  for (const modifier of meta.modifiers) queries.push(`${base} ${modifier}`);
-  if (analysis.symbolic && concepts.length) queries.push(`${translated.slice(0, 3).join(' ') || concepts.slice(0, 3).join(' ')} symbolic b roll`);
+  const entities = unique((analysis.entities ?? []).slice(0, 3));
+  const concepts = unique((analysis.concepts ?? []).slice(0, 6));
+  const translatedConcepts = unique(translateTerms(concepts));
+  const conceptCore = unique([...translatedConcepts, ...concepts]).slice(0, 3).join(' ').trim();
+  const primaryEntity = entities[0] ?? '';
+  const secondaryEntity = entities[1] ?? '';
+  const conciseContext = unique([primaryEntity, ...translatedConcepts.slice(0, 2)]).join(' ').trim();
+  const fallbackBase = cleanQuery(conciseContext || conceptCore || text.slice(0, 90));
+  const queries = [];
+
+  if (primaryEntity) {
+    queries.push([primaryEntity, ...translatedConcepts.slice(0, 2)].filter(Boolean).join(' '));
+  }
+  if (primaryEntity && secondaryEntity) {
+    queries.push([primaryEntity, secondaryEntity, translatedConcepts[0]].filter(Boolean).join(' '));
+  }
+  if (conceptCore) {
+    queries.push(`${conceptCore} ${meta.modifiers[0] ?? 'b roll'}`);
+  }
+  queries.push(`${fallbackBase} ${meta.modifiers[1] ?? 'documentary footage'}`);
+  queries.push(`${primaryEntity || conceptCore || fallbackBase} ${meta.modifiers[2] ?? 'close up'}`);
+
+  if (analysis.symbolic) {
+    const symbolicCore = translatedConcepts.slice(0, 3).join(' ') || conceptCore || fallbackBase;
+    queries.push(`${symbolicCore} symbolic b roll`);
+  }
+
+  queries.push(cleanQuery(text.slice(0, 90)));
   return unique(queries.map(cleanQuery).filter((query) => query.length >= 2)).slice(0, limit);
 }
 
