@@ -32,3 +32,9 @@ test('Freigabe nutzt dieselben vier Pflichtprüfungen wie die lokale API', () =>
   assert.match(script, /X-VAH-Token/);
   assert.doesNotMatch(script, /innerHTML\s*=\s*record\./);
 });
+
+test('Untagged-Filter begrenzt Queue und Sammlungsoptionen auf Assets ohne Kanal-Tag', () => {
+  const guard = /const channelTags = recordTags\.filter\(\(tag\) => tag\.startsWith\('channel-'\)\);\s*if \(channelValue === 'untagged' && channelTags\.length\) continue;/;
+  assert.match(script, guard);
+  assert.match(script, /if \(channelValue === 'untagged' && channelTags\.length\) return false;/);
+});
