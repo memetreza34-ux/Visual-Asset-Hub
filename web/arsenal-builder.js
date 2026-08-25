@@ -86,10 +86,6 @@ function render({ health, channelIndex, channels }) {
     plannedBatchCollections = [];
     updateBatchButtonCopy();
   });
-  apiKey.input.addEventListener('input', () => {
-    const value = apiKey.input.value.trim();
-    if (!keylessProviders.has(provider.input.value) && value) sessionKeys.set(provider.input.value, value);
-  });
   provider.input.addEventListener('change', () => {
     updateVariants();
     updateProviderCopy();
@@ -151,6 +147,7 @@ function render({ health, channelIndex, channels }) {
     resultArea.replaceChildren();
     try {
       const data = await post('/arsenal-api/search', searchPayload(transientApiKey), health.token);
+      rememberProviderKey(provider.input.value, transientApiKey);
       apiKey.input.value = '';
       updateKeyPlaceholder();
       const cacheText = data.cached ? ' · aus 24-Stunden-Cache' : '';
@@ -184,6 +181,7 @@ function render({ health, channelIndex, channels }) {
     showStatus(status, `${providerLabel(provider.input.value)} durchsucht ${collections.length} Sammlungen nacheinander …`, true);
     try {
       const data = await post('/arsenal-api/batch-search', { ...searchPayload(transientApiKey), collections }, health.token);
+      rememberProviderKey(provider.input.value, transientApiKey);
       apiKey.input.value = '';
       updateKeyPlaceholder();
       plannedBatchCollections = [];
@@ -274,7 +272,6 @@ function render({ health, channelIndex, channels }) {
   function getApiKeyOrError() {
     if (keylessProviders.has(provider.input.value)) return '';
     const typed = apiKey.input.value.trim();
-    if (typed) sessionKeys.set(provider.input.value, typed);
     const value = typed || sessionKeys.get(provider.input.value) || '';
     if (value.length < 8) {
       showStatus(status, `${providerLabel(provider.input.value)} benötigt einen API-Key.`, false);
@@ -282,6 +279,11 @@ function render({ health, channelIndex, channels }) {
       return null;
     }
     return value;
+  }
+
+  function rememberProviderKey(providerName, value) {
+    if (keylessProviders.has(providerName) || !value) return;
+    sessionKeys.set(providerName, value);
   }
 
   function resolveProviderKey(providerName) {
