@@ -100,7 +100,7 @@ function render(health) {
     showStatus(status, 'Recherche läuft sequenziell über alle verfügbaren Quellen. Maximal-Recherche kann etwas länger dauern …', true);
     try {
       const data = await post('/entity-api/search', { ...payload(), keys: keysForRequest, perPage: Number(perPage.input.value) }, health.token);
-      rememberValidatedKeys(typedKeys);
+      rememberValidatedKeys(typedKeys, data.groups ?? []);
       clearVisibleKeys();
       renderPlan(planArea, data.plan);
       renderResults(results, data, health.token);
@@ -130,8 +130,13 @@ function render(health) {
       .filter(([, value]) => value));
   }
 
-  function rememberValidatedKeys(values) {
-    for (const [provider, value] of Object.entries(values)) if (value) researchKeys.set(provider, value);
+  function rememberValidatedKeys(values, groups) {
+    const validatedProviders = new Set((groups ?? [])
+      .filter((group) => group?.provider && (group.provider !== 'pixabay' || !group.cached))
+      .map((group) => group.provider));
+    for (const [provider, value] of Object.entries(values)) {
+      if (value && validatedProviders.has(provider)) researchKeys.set(provider, value);
+    }
   }
 
   function clearVisibleKeys() {
