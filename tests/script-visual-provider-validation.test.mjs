@@ -54,3 +54,13 @@ test('Kandidatenlimit bewahrt Auswahl und hält im Gemischt-Modus beide Medienty
   assert.match(api, /candidate\.type === 'video'/);
   assert.match(api, /candidate\.type !== 'video'/);
 });
+
+test('bereits vorhandene Katalog-Assets werden mit der Skriptszene verknüpft statt erneut importiert', () => {
+  assert.match(api, /findExistingCatalogAssetIds\(afterAssets, candidate\)/);
+  assert.match(api, /linkedExisting: existingIds\.length/);
+  assert.match(api, /candidate\.importedAssetIds = \[\.\.\.new Set/);
+  assert.match(api, /asset\?\.rights\?\.sourceUrl/);
+  assert.match(api, /asset\?\.storage\?\.externalUrl/);
+  assert.match(browser, /data\.linkedExisting/);
+  assert.match(browser, /war bereits im Katalog und wurde mit/);
+});
