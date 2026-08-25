@@ -1,5 +1,6 @@
 const section = document.querySelector('#script-visual-finder');
 const providerLabels = { pexels: 'Pexels', pixabay: 'Pixabay', unsplash: 'Unsplash', openverse: 'Openverse', wikimedia: 'Wikimedia Commons' };
+const MAX_SEARCH_PAGE = 100;
 const sessionKeys = new Map();
 let currentProject = null;
 let token = '';
@@ -135,7 +136,7 @@ function renderProject(container, project, keyFields, perPage, status) {
     if (!pending.length) {
       searchAll.disabled = false;
       stop.disabled = true;
-      showStatus(status, 'Alle Szenen wurden bereits recherchiert. Einzelne Szenen können mit „Mehr Treffer“ erweitert werden.', true);
+      showStatus(status, 'Alle Szenen wurden bereits recherchiert. Einzelne Szenen können mit „Mehr Treffer“ auf der nächsten Suchseite erweitert werden.', true);
       return;
     }
     let completed = 0;
@@ -176,21 +177,32 @@ function sceneCard(project, scene, keyFields, perPage, status) {
   for (const query of scene.queries) queries.append(text('code', query));
 
   const actions = el('div', 'svf-scene-actions');
-  const search = button(scene.searchedAt ? 'Mehr Treffer' : 'Visuals suchen');
+  const currentPage = Number(scene.searchRound || 0);
+  const maxPageReached = currentPage >= MAX_SEARCH_PAGE;
+  const searchLabel = !scene.searchedAt
+    ? 'Visuals suchen · Seite 1'
+    : maxPageReached
+      ? 'Maximale Suchseite erreicht'
+      : `Mehr Treffer · Seite ${currentPage + 1}`;
+  const search = button(searchLabel);
+  search.disabled = maxPageReached;
   actions.append(search);
-  const resultStatus = text('span', scene.searchedAt ? candidateSummary(scene, project) : 'Noch nicht recherchiert');
+  const resultStatus = text('span', scene.searchedAt ? `${candidateSummary(scene, project)} · zuletzt Seite ${currentPage || 1}` : 'Noch nicht recherchiert');
   actions.append(resultStatus);
 
   const grid = el('div', 'svf-candidate-grid');
   renderCandidates(grid, project, scene, keyFields, perPage, status);
 
   search.addEventListener('click', async () => {
+    if (Number(scene.searchRound || 0) >= MAX_SEARCH_PAGE) return;
     search.disabled = true;
+    const expectedPage = scene.searchedAt ? Number(scene.searchRound || 1) + 1 : 1;
+    showStatus(status, `${scene.id}: Suchseite ${expectedPage} wird geladen …`, true);
     try {
       const updated = await searchOneScene(scene, keyFields, perPage, Boolean(scene.searchedAt));
       const parent = article.parentElement;
       if (parent) replaceSceneCard(parent, currentProject, updated, keyFields, perPage, status);
-      showStatus(status, `${scene.id}: ${candidateSummary(updated, currentProject)} gespeichert.`, true);
+      showStatus(status, `${scene.id}: Seite ${updated.searchRound || expectedPage} · ${candidateSummary(updated, currentProject)} gespeichert.`, true);
     } catch (error) { showStatus(status, error.message, false); search.disabled = false; }
   });
 
@@ -200,7 +212,11 @@ function sceneCard(project, scene, keyFields, perPage, status) {
     const summary = document.createElement('summary');
     summary.textContent = `${scene.searchErrors.length} fehlgeschlagene Einzelsuchen`;
     const list = document.createElement('ul');
-    for (const item of scene.searchErrors) { const li = document.createElement('li'); li.textContent = `${providerLabel(item.provider)} · ${item.query}: ${item.error}`; list.append(li); }
+    for (const item of scene.searchErrors) {
+      const li = document.createElement('li');
+      li.textContent = `${providerLabel(item.provider)} · Seite ${item.page ?? scene.searchRound ?? 1} · ${item.query}: ${item.error}`;
+      list.append(li);
+    }
     details.append(summary, list);
     article.append(details);
   }
@@ -239,7 +255,7 @@ function candidateCard(project, scene, candidate, keyFields, perPage, status) {
 
   const body = el('div', 'svf-candidate-body');
   const title = text('strong', candidate.title);
-  const meta = text('span', `${providerLabel(candidate.provider)} · ${candidate.type === 'video' ? 'Video' : 'Bild'} · Fit ${candidate.technicalFit}/100${candidate.reusedElsewhere ? ' · schon in anderer Szene gefunden' : ''}`);
+  const meta = text('span', `${providerLabel(candidate.provider)} · ${candidate.type === 'video' ? 'Video' : 'Bild'} · Seite ${candidate.job?.page ?? 1} · Fit ${candidate.technicalFit}/100${candidate.reusedElsewhere ? ' · schon in anderer Szene gefunden' : ''}`);
   const query = text('small', `Query: ${candidate.query}`);
   const selected = text('small', selectionLabel(scene, candidate), 'svf-selection-label');
   const buttons = el('div', 'svf-candidate-actions');
