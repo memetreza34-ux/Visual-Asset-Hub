@@ -14,7 +14,7 @@ Der Nutzer liefert ein fertiges Skript. Visual Asset Hub schreibt, verbessert, e
 fertiges Skript
 → visuelle Einheiten
 → visuelle Absicht
-→ mehrere Suchqueries
+→ mehrere unterschiedliche Suchrichtungen
 → Providerrecherche
 → Kandidaten pro Szene
 → Hauptvisual / Alternativen
@@ -70,8 +70,69 @@ Pro Einheit werden lokal erzeugt:
 - bevorzugter Medientyp
 - 3–5 unterschiedliche Queries
 - Kennzeichnung symbolischer / kontextueller B-Roll
+- falls nötig transparenter Kontext aus der direkt vorherigen Szene
 
 Unterstützte interne Visualrichtungen umfassen unter anderem Person, Produkt, Ort, Event, Technik, Finanzen, Historie, Prozess, Action und abstrakte Konzepte.
+
+## Unterschiedliche Suchrichtungen
+
+Die Query-Engine hängt nicht nur mehrere ähnliche Zusätze an denselben langen Suchbegriff. Sie erzeugt bewusst verschiedene Suchachsen, zum Beispiel:
+
+1. konkrete Person/Firma/Entität + wichtigste Motive
+2. zwei konkrete Entitäten zusammen, wenn die Szene eine Beziehung oder ein Ereignis beschreibt
+3. Motiv/Handlung + passende B-Roll-Richtung
+4. Kontext-/Umgebungsaufnahme
+5. Detail-/Close-up- oder symbolischer Fallback
+
+Häufige deutsche Visualbegriffe werden zusätzlich providerfreundlich übersetzt, zum Beispiel:
+
+- Roboter → `robot`
+- Fabrik → `factory`
+- Alltag → `daily life`
+- Rechenzentrum → `data center`
+- Börse → `stock market`
+- Krankenhaus → `hospital`
+
+Konkrete Namen, Marken, Orte, Events und Jahreszahlen bleiben in den Suchrichtungen erhalten, soweit sie erkannt werden.
+
+Beispiel:
+
+```text
+Conor McGregor besiegte José Aldo 2015 in der Arena.
+```
+
+kann unterschiedliche Suchrichtungen erzeugen, die Person, Gegner, Kampf/Action und Arena-/Kontextmaterial abdecken, statt fünf fast identische Queries zu erzeugen.
+
+## Kontext zwischen aufeinanderfolgenden Szenen
+
+Kurze Folgesätze enthalten häufig keinen vollständigen Namen mehr:
+
+```text
+OpenAI entwickelt humanoide Roboter.
+Sie sollen später in Fabriken arbeiten.
+```
+
+Der zweite Satz darf für die **Visualsuche** Kontext aus der direkt vorherigen Szene übernehmen. Das gilt für eindeutige Rückbezüge am Satzanfang, zum Beispiel:
+
+- er / sie / es
+- diese / dieser / dieses
+- dort
+- dabei / dadurch / damit
+- dann
+- anschließend
+- später
+
+Dadurch kann der zweite Satz weiterhin Queries mit `OpenAI` beziehungsweise dem vorherigen Motiv erzeugen, obwohl der Originalsatz den Namen nicht wiederholt.
+
+Wichtig:
+
+- nur die direkt vorherige Szene dient als Kontextquelle
+- der Originaltext wird nicht verändert
+- übernommener Kontext wird getrennt als `contextInherited`, `contextEntities` und `contextConcepts` gespeichert
+- die Weboberfläche zeigt **Kontext übernommen: ...** sichtbar an
+- ein neuer Satz ohne eindeutigen Rückbezug startet ohne diese Vererbung
+
+So bleibt nachvollziehbar, was tatsächlich im Skript stand und was ausschließlich als Recherchehilfe ergänzt wurde.
 
 ## Provider
 
@@ -162,6 +223,7 @@ Dadurch:
 - fertige Szenen bleiben gespeichert
 - einzelne Providerfehler zerstören kein komplettes Projekt
 - zusätzliche Treffer können gezielt nur für einzelne Szenen nachgeladen werden
+- kontextabhängige Folgesätze behalten ihren direkten Vorgängerbezug für die Recherche
 
 ## Kandidaten
 
@@ -225,7 +287,7 @@ Pro Projekt:
 ...
 ```
 
-`searchRound`, Kandidaten, Auswahl und Importverknüpfungen werden im Projekt persistiert. `vault:build` bewahrt diese Projekte.
+`searchRound`, Kandidaten, Auswahl, Kontextfelder und Importverknüpfungen werden im Projekt persistiert. `vault:build` bewahrt diese Projekte.
 
 ## API-Sicherheit
 
