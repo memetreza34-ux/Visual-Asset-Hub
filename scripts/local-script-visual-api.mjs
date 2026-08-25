@@ -18,6 +18,7 @@ const PROJECT_ID = /^SVP-[A-F0-9]{12}$/;
 const SCENE_ID = /^SCENE-\d{3}$/;
 const PROVIDER_ID = /^[A-Za-z0-9_-]{1,128}$/;
 const PIXABAY_CACHE_MS = 24 * 60 * 60 * 1000;
+const MAX_SEARCH_PAGE = 100;
 const CHANNEL_LABELS = { general: 'Allgemein', finance: 'Finanzen', ai: 'Künstliche Intelligenz', electro: 'Elektrotechnik', 'combat-sports': 'Kampfsport' };
 const CHANNEL_TAGS = { finance: 'channel-finance', ai: 'channel-ai', electro: 'channel-electro', 'combat-sports': 'channel-combat-sports' };
 const DEPTH_TARGETS = {
@@ -93,8 +94,10 @@ export function createLocalScriptVisualApi({ root = process.cwd(), token, search
           if (scene.searchedAt && scene.candidates.length && !force) {
             return sendJson(response, 200, { ok: true, projectId, scene, cachedProjectScene: true, searchedProviders: [], validatedKeyProviders: [] });
           }
+          const previousRound = Number.isInteger(scene.searchRound) && scene.searchRound >= 1 ? scene.searchRound : (scene.searchedAt ? 1 : 0);
+          const searchPage = force ? Math.min(MAX_SEARCH_PAGE, Math.max(2, previousRound + 1)) : 1;
 
-          const outcome = await searchScene({ root, project, scene, keys, enabledProviders, perPage, searchDirectory, searchers });
+          const outcome = await searchScene({ root, project, scene, keys, enabledProviders, perPage, page: searchPage, searchDirectory, searchers });
           Object.assign(scene, outcome.scene);
           project.updatedAt = new Date().toISOString();
           refreshProgress(project);
@@ -104,6 +107,7 @@ export function createLocalScriptVisualApi({ root = process.cwd(), token, search
             ok: true,
             projectId,
             scene,
+            page: scene.searchRound ?? searchPage,
             searchedProviders: outcome.successfulProviders,
             validatedKeyProviders: outcome.validatedKeyProviders,
             tasks: outcome.tasks,
@@ -191,7 +195,7 @@ export function createLocalScriptVisualApi({ root = process.cwd(), token, search
   };
 }
 
-async function searchScene({ root, project, scene, keys, enabledProviders, perPage, searchDirectory, searchers }) {
+async function searchScene({ root, project, scene, keys, enabledProviders, perPage, page = 1, searchDirectory, searchers }) {
   const settings = DEPTH_TARGETS[project.settings.depth] ?? DEPTH_TARGETS.deep;
   const providerOrder = orderProviders(scene.preferredMediaType).filter((provider) => enabledProviders.includes(provider));
   const mixedRequested = project.settings.mediaPreference === 'mixed';
@@ -211,11 +215,11 @@ async function searchScene({ root, project, scene, keys, enabledProviders, perPa
       tasks += 1;
       try {
         const type = searchTypeForProvider(provider, scene.preferredMediaType, mixedRequested);
-        const execution = await executeSearch({ provider, query, type, orientation: project.settings.orientation, perPage, apiKey: keys[provider], searchers, searchDirectory });
+        const execution = await executeSearch({ provider, query, type, orientation: project.settings.orientation, perPage, page, apiKey: keys[provider], searchers, searchDirectory });
         providersUsed.add(provider);
         if (!KEYLESS.has(provider) && !execution.cached) validatedKeyProviders.add(provider);
         const searchId = createSearchId();
-        const job = buildJob(project, scene, query, provider, type, perPage);
+        const job = buildJob(project, scene, query, provider, type, perPage, page);
         const result = execution.result;
         const wrapper = {
           version: 10,
@@ -224,7 +228,7 @@ async function searchScene({ root, project, scene, keys, enabledProviders, perPa
           searchedAt: new Date().toISOString(),
           expiresAt: execution.expiresAt,
           cached: execution.cached,
-          scriptVisual: { projectId: project.projectId, projectTitle: project.title, sceneId: scene.id, sequence: scene.sequence },
+          scriptVisual: { projectId: project.projectId, projectTitle: project.title, sceneId: scene.id, sequence: scene.sequence, page },
           arsenalJob: job,
           result
         };
@@ -266,45 +270,47 @@ async function searchScene({ root, project, scene, keys, enabledProviders, perPa
         const mixedMediaReady = !mixedMediaPossible || hasMixedMediaCandidates(candidates);
         if (candidates.length >= settings.candidates && fresh >= Math.min(3, settings.candidates) && providersUsed.size >= settings.minProviders && mixedMediaReady) break outer;
       } catch (error) {
-        errors.push({ provider, query, error: message(error) });
+        errors.push({ provider, query, page, error: message(error) });
       }
     }
   }
 
   candidates.sort((a, b) => Number(Boolean(a.reusedElsewhere)) - Number(Boolean(b.reusedElsewhere)) || b.technicalFit - a.technicalFit || a.title.localeCompare(b.title, 'de'));
+  const successful = providersUsed.size > 0;
   return {
     tasks,
     successfulProviders: [...providersUsed],
     validatedKeyProviders: [...validatedKeyProviders],
     scene: {
       candidates: retainSceneCandidates(candidates, scene, mixedRequested, 20),
-      searchedAt: new Date().toISOString(),
+      searchedAt: successful ? new Date().toISOString() : (scene.searchedAt ?? null),
+      searchRound: successful ? page : (Number.isInteger(scene.searchRound) ? scene.searchRound : 0),
       searchErrors: errors
     }
   };
 }
 
-async function executeSearch({ provider, query, type, orientation, perPage, apiKey, searchers, searchDirectory }) {
+async function executeSearch({ provider, query, type, orientation, perPage, page = 1, apiKey, searchers, searchDirectory }) {
   if (provider === 'pixabay') {
     const cacheDirectory = path.join(searchDirectory, 'pixabay-cache');
     fs.mkdirSync(cacheDirectory, { recursive: true });
-    const request = { query, type, orientation, perPage, locale: 'de', page: 1 };
+    const request = { query, type, orientation, perPage, locale: 'de', page };
     const cacheKey = createHash('sha256').update(JSON.stringify(request)).digest('hex').slice(0, 32);
     const cacheFile = path.join(cacheDirectory, `${cacheKey}.json`);
     const cached = readFreshPixabayCache(cacheFile);
     if (cached) return { result: structuredClone(cached.result), cached: true, expiresAt: cached.expiresAt };
-    const result = await searchers.pixabay({ apiKey, query, type, orientation, locale: 'de', page: 1, perPage });
+    const result = await searchers.pixabay({ apiKey, query, type, orientation, locale: 'de', page, perPage });
     const expiresAt = new Date(Date.now() + PIXABAY_CACHE_MS).toISOString();
     fs.writeFileSync(cacheFile, `${JSON.stringify({ version: 1, provider: 'pixabay', fetchedAt: new Date().toISOString(), expiresAt, request, result }, null, 2)}\n`, { mode: 0o600 });
     return { result, cached: false, expiresAt };
   }
-  if (provider === 'pexels') return { result: await searchers.pexels({ apiKey, query, type, orientation, locale: 'de-DE', page: 1, perPage }), cached: false, expiresAt: null };
-  if (provider === 'unsplash') return { result: await searchers.unsplash({ apiKey, query, orientation, page: 1, perPage, contentFilter: 'high' }), cached: false, expiresAt: null };
-  if (provider === 'openverse') return { result: await searchers.openverse({ query, orientation, page: 1, perPage }), cached: false, expiresAt: null };
-  return { result: await searchers.wikimedia({ query, orientation, page: 1, perPage }), cached: false, expiresAt: null };
+  if (provider === 'pexels') return { result: await searchers.pexels({ apiKey, query, type, orientation, locale: 'de-DE', page, perPage }), cached: false, expiresAt: null };
+  if (provider === 'unsplash') return { result: await searchers.unsplash({ apiKey, query, orientation, page, perPage, contentFilter: 'high' }), cached: false, expiresAt: null };
+  if (provider === 'openverse') return { result: await searchers.openverse({ query, orientation, page, perPage }), cached: false, expiresAt: null };
+  return { result: await searchers.wikimedia({ query, orientation, page, perPage }), cached: false, expiresAt: null };
 }
 
-function buildJob(project, scene, query, provider, type, perPage) {
+function buildJob(project, scene, query, provider, type, perPage, page = 1) {
   const channelTag = CHANNEL_TAGS[project.channel];
   const collection = `script-${projectSlug(project.title)}-${scene.id.toLowerCase()}`.slice(0, 100).replace(/-+$/g, '');
   return {
@@ -318,6 +324,7 @@ function buildJob(project, scene, query, provider, type, perPage) {
     type,
     orientation: project.settings.orientation,
     perPage,
+    page,
     tags: [...new Set([
       ...(channelTag ? [channelTag] : []),
       'script-visual-project',
@@ -381,19 +388,19 @@ function shotlist(project) {
 function sceneMarkdown(project) {
   const lines = [`# Script Visual Finder – ${project.title}`, '', '> Skript rein → Visuals raus. Der Originaltext wird nicht umgeschrieben.', '', `- Projekt: **${project.projectId}**`, `- Zuordnung: **${CHANNEL_LABELS[project.channel] ?? project.channel}**`, `- Szenen: **${project.scenes.length}**`, `- Recherchiert: **${project.progress.searchedScenes}**`, `- Szenen mit Auswahl: **${project.progress.selectedScenes}**`, `- Importierte Assets: **${project.progress.importedAssets}**`, ''];
   for (const scene of project.scenes) {
-    lines.push(`## ${scene.id} · ${scene.startSeconds}–${scene.endSeconds}s`, '', `**Original:** ${scene.originalText}`, '', `**Visuell:** ${scene.visualIntent}`, '', `**Queries:** ${scene.queries.map((query) => `\`${query}\``).join(' · ')}`, '', `**Kandidaten:** ${scene.candidates.length} · Hauptvisual: ${scene.selectedPrimary || 'noch keines'}`, '');
+    lines.push(`## ${scene.id} · ${scene.startSeconds}–${scene.endSeconds}s`, '', `**Original:** ${scene.originalText}`, '', `**Visuell:** ${scene.visualIntent}`, '', `**Queries:** ${scene.queries.map((query) => `\`${query}\``).join(' · ')}`, '', `**Kandidaten:** ${scene.candidates.length} · Suchseite: ${scene.searchRound || 0} · Hauptvisual: ${scene.selectedPrimary || 'noch keines'}`, '');
   }
   return `${lines.join('\n')}\n`;
 }
 
 function sceneDetailMarkdown(project, scene) {
-  const lines = [`# ${scene.id}`, '', `**Originaltext:** ${scene.originalText}`, '', `- Zeit: ${scene.startSeconds}–${scene.endSeconds}s`, `- Visuelle Absicht: ${scene.visualIntent}`, `- Bevorzugtes Medium: ${scene.preferredMediaType}`, `- Symbolisches Visual: ${scene.symbolic ? 'ja' : 'nein'}`, `- Queries: ${scene.queries.join(' | ')}`, `- Kandidaten: ${scene.candidates.length}`, `- Hauptvisual: ${scene.selectedPrimary || 'noch keines'}`, `- Alternativen: ${scene.selectedAlternatives.join(', ') || 'noch keine'}`, '', '> Kandidaten und Suchtreffer sind keine automatische Nutzungsfreigabe. Jeder Import startet als Review.', ''];
+  const lines = [`# ${scene.id}`, '', `**Originaltext:** ${scene.originalText}`, '', `- Zeit: ${scene.startSeconds}–${scene.endSeconds}s`, `- Visuelle Absicht: ${scene.visualIntent}`, `- Bevorzugtes Medium: ${scene.preferredMediaType}`, `- Suchseite: ${scene.searchRound || 0}`, `- Symbolisches Visual: ${scene.symbolic ? 'ja' : 'nein'}`, `- Queries: ${scene.queries.join(' | ')}`, `- Kandidaten: ${scene.candidates.length}`, `- Hauptvisual: ${scene.selectedPrimary || 'noch keines'}`, `- Alternativen: ${scene.selectedAlternatives.join(', ') || 'noch keine'}`, '', '> Kandidaten und Suchtreffer sind keine automatische Nutzungsfreigabe. Jeder Import startet als Review.', ''];
   return `${lines.join('\n')}\n`;
 }
 
 function candidateMarkdown(scene, candidate) {
   const selected = scene.selectedPrimary === candidate.key ? 'Hauptvisual' : scene.selectedAlternatives.includes(candidate.key) ? 'Alternative' : 'nicht ausgewählt';
-  return `# ${candidate.title}\n\n- Szene: **${scene.id}**\n- Auswahl: **${selected}**\n- Provider: **${providerLabel(candidate.provider)}**\n- Typ: **${candidate.type}**\n- Technischer Fit: **${candidate.technicalFit}/100**\n- Query: \`${candidate.query}\`\n- Creator: ${candidate.creator || 'nicht angegeben'}\n- Quelle: ${candidate.sourceUrl || 'nicht angegeben'}\n- Importierte Asset-IDs: ${(candidate.importedAssetIds ?? []).join(', ') || 'noch nicht importiert'}\n- Bereits in anderer Szene gefunden: ${candidate.reusedElsewhere ? 'ja' : 'nein'}\n\n> Vor Veröffentlichung Quelle, Lizenz, Urheber, sichtbare Personen/Marken und Nutzungskontext prüfen.\n`;
+  return `# ${candidate.title}\n\n- Szene: **${scene.id}**\n- Auswahl: **${selected}**\n- Provider: **${providerLabel(candidate.provider)}**\n- Typ: **${candidate.type}**\n- Suchseite: **${candidate.job?.page ?? 1}**\n- Technischer Fit: **${candidate.technicalFit}/100**\n- Query: \`${candidate.query}\`\n- Creator: ${candidate.creator || 'nicht angegeben'}\n- Quelle: ${candidate.sourceUrl || 'nicht angegeben'}\n- Importierte Asset-IDs: ${(candidate.importedAssetIds ?? []).join(', ') || 'noch nicht importiert'}\n- Bereits in anderer Szene gefunden: ${candidate.reusedElsewhere ? 'ja' : 'nein'}\n\n> Vor Veröffentlichung Quelle, Lizenz, Urheber, sichtbare Personen/Marken und Nutzungskontext prüfen.\n`;
 }
 
 function shotlistCsv(project) {
