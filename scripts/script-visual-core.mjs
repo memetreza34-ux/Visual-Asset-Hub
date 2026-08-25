@@ -185,6 +185,7 @@ function buildScene(originalText, index, timing, options) {
     selectedPrimary: null,
     selectedAlternatives: [],
     searchedAt: null,
+    searchRound: 0,
     searchErrors: []
   };
 }
