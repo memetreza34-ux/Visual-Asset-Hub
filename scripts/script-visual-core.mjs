@@ -72,7 +72,8 @@ export function createScriptVisualPlan(input = {}) {
   if (!pieces.length) throw new Error('Aus dem Skript konnten keine visuellen Einheiten gebildet werden.');
   if (pieces.length > MAX_UNITS) throw new Error(`Das Skript erzeugt ${pieces.length} visuelle Einheiten. Maximal ${MAX_UNITS} sind erlaubt; bitte Absatzmodus verwenden oder das Skript teilen.`);
   const timings = allocateTimings(pieces, input.durationSeconds);
-  const scenes = pieces.map((originalText, index) => buildScene(originalText, index, timings[index], { orientation, mediaPreference, depth, channel }));
+  const sceneOptions = { orientation, mediaPreference, depth, channel };
+  const scenes = buildScenes(pieces, timings, sceneOptions);
   const scriptSha256 = createHash('sha256').update(script, 'utf8').digest('hex');
   return {
     format: 'visual-asset-hub-script-visual-plan',
@@ -87,6 +88,7 @@ export function createScriptVisualPlan(input = {}) {
       sceneCount: scenes.length,
       videoPreferred: scenes.filter((scene) => scene.preferredMediaType === 'video').length,
       photoPreferred: scenes.filter((scene) => scene.preferredMediaType === 'photo').length,
+      contextInherited: scenes.filter((scene) => scene.contextInherited).length,
       queryCount: scenes.reduce((sum, scene) => sum + scene.queries.length, 0)
     },
     scenes
@@ -154,15 +156,9 @@ export function generateVisualQueries(text, analysis = analyzeVisualIntent(text)
   const fallbackBase = cleanQuery(conciseContext || conceptCore || text.slice(0, 90));
   const queries = [];
 
-  if (primaryEntity) {
-    queries.push([primaryEntity, ...translatedConcepts.slice(0, 2)].filter(Boolean).join(' '));
-  }
-  if (primaryEntity && secondaryEntity) {
-    queries.push([primaryEntity, secondaryEntity, translatedConcepts[0]].filter(Boolean).join(' '));
-  }
-  if (conceptCore) {
-    queries.push(`${conceptCore} ${meta.modifiers[0] ?? 'b roll'}`);
-  }
+  if (primaryEntity) queries.push([primaryEntity, ...translatedConcepts.slice(0, 2)].filter(Boolean).join(' '));
+  if (primaryEntity && secondaryEntity) queries.push([primaryEntity, secondaryEntity, translatedConcepts[0]].filter(Boolean).join(' '));
+  if (conceptCore) queries.push(`${conceptCore} ${meta.modifiers[0] ?? 'b roll'}`);
   queries.push(`${fallbackBase} ${meta.modifiers[1] ?? 'documentary footage'}`);
   queries.push(`${primaryEntity || conceptCore || fallbackBase} ${meta.modifiers[2] ?? 'close up'}`);
 
@@ -196,9 +192,33 @@ export function projectSlug(value) {
   return String(value ?? '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 70) || 'script-visual-project';
 }
 
-function buildScene(originalText, index, timing, options) {
+function buildScenes(pieces, timings, options) {
+  const scenes = [];
+  let previousContext = { entities: [], concepts: [] };
+  for (let index = 0; index < pieces.length; index += 1) {
+    const scene = buildScene(pieces[index], index, timings[index], options, previousContext);
+    scenes.push(scene);
+    const nextEntities = scene.entities.length ? scene.entities : (scene.contextInherited ? scene.contextEntities : []);
+    const nextConcepts = scene.concepts.length ? scene.concepts : (scene.contextInherited ? scene.contextConcepts : []);
+    previousContext = {
+      entities: unique(nextEntities).slice(0, 3),
+      concepts: unique(nextConcepts).slice(0, 5)
+    };
+  }
+  return scenes;
+}
+
+function buildScene(originalText, index, timing, options, previousContext = { entities: [], concepts: [] }) {
   const visual = analyzeVisualIntent(originalText, options);
-  const queries = generateVisualQueries(originalText, visual, options.depth);
+  const contextInherited = shouldInheritContext(originalText, visual, previousContext);
+  const contextEntities = contextInherited ? unique(previousContext.entities ?? []).slice(0, 2) : [];
+  const contextConcepts = contextInherited ? unique(previousContext.concepts ?? []).slice(0, 3) : [];
+  const queryAnalysis = {
+    ...visual,
+    entities: unique([...contextEntities, ...visual.entities]).slice(0, 3),
+    concepts: unique([...visual.concepts, ...contextConcepts]).slice(0, 6)
+  };
+  const queries = generateVisualQueries(originalText, queryAnalysis, options.depth);
   return {
     id: `SCENE-${String(index + 1).padStart(3, '0')}`,
     sequence: index + 1,
@@ -209,6 +229,9 @@ function buildScene(originalText, index, timing, options) {
     category: visual.category,
     entities: visual.entities,
     concepts: visual.concepts,
+    contextInherited,
+    contextEntities,
+    contextConcepts,
     symbolic: visual.symbolic,
     queries,
     preferredMediaType: visual.preferredMediaType,
@@ -220,6 +243,14 @@ function buildScene(originalText, index, timing, options) {
     searchRound: 0,
     searchErrors: []
   };
+}
+
+function shouldInheritContext(text, visual, previousContext) {
+  if (!(previousContext?.entities?.length || previousContext?.concepts?.length)) return false;
+  const normalized = normalize(text);
+  const contextLead = /^(?:er|sie|es|ihn|ihm|ihnen|diese|dieser|dieses|diesen|diesem|deren|dessen|dabei|dadurch|damit|dort|dann|so|anschliessend|anschließend|spaeter|später)\b/;
+  if (!contextLead.test(normalized)) return false;
+  return visual.entities.length === 0 || /^(?:er|sie|es|ihn|ihm|ihnen|diese|dieser|dieses|diesen|diesem|deren|dessen)\b/.test(normalized);
 }
 
 function splitScriptLine(line) {
@@ -258,7 +289,7 @@ function extractEntities(text) {
   const years = text.match(/\b(?:18|19|20)\d{2}\b/g) ?? [];
   const named = [...text.matchAll(/\b(?:[A-ZÄÖÜ][\p{L}\d&.-]{1,30})(?:\s+[A-ZÄÖÜ0-9][\p{L}\d&.-]{1,30}){0,3}\b/gu)]
     .map((match) => match[0].trim())
-    .filter((value) => !/^(Der|Die|Das|Ein|Eine|In|Im|Am|Bis|Seit|Heute|Morgen|Wenn|Auch|Durch|Mit|Von|Für|Und)$/u.test(value));
+    .filter((value) => !/^(?:Der|Die|Das|Ein|Eine|In|Im|Am|Bis|Seit|Heute|Morgen|Wenn|Auch|Durch|Mit|Von|Für|Und|Er|Sie|Es|Diese|Dieser|Dieses|Diesen|Diesem|Dort|Dabei|Dadurch|Damit|Dann)(?:\s|$)/u.test(value));
   return unique([...quoted, ...named, ...years]).slice(0, 8);
 }
 
