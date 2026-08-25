@@ -50,6 +50,7 @@ test('visuelle Analyse unterscheidet Technik, Ort, Historie und abstrakte Aussag
   assert.equal(analyzeVisualIntent('Berlin ist eine Stadt mit vielen bekannten Gebäuden.').intent, 'place');
   assert.equal(analyzeVisualIntent('Historische Aufnahmen zeigen die Entwicklung im Jahr 1989.').intent, 'history');
   assert.equal(analyzeVisualIntent('Diese Entwicklung könnte die Zukunft stark verändern.').symbolic, true);
+  assert.equal(analyzeVisualIntent('Conor McGregor besiegte José Aldo 2015.').intent, 'action');
 });
 
 test('jede Szene erhält mehrere konkrete Visual-Queries', () => {
@@ -58,6 +59,48 @@ test('jede Szene erhält mehrere konkrete Visual-Queries', () => {
   assert.ok(queries.length >= 3);
   assert.ok(new Set(queries).size === queries.length);
   assert.ok(queries.some((query) => /robot|factory|b roll|process/i.test(query)));
+});
+
+test('Query-Engine behält konkrete Personen und erzeugt unterschiedliche Suchachsen', () => {
+  const analysis = {
+    intent: 'action',
+    entities: ['Conor McGregor', 'José Aldo', '2015'],
+    concepts: ['kampf', 'arena', 'sieg'],
+    symbolic: false
+  };
+  const queries = generateVisualQueries('Conor McGregor besiegte José Aldo 2015 in der Arena.', analysis, 'max');
+  assert.equal(queries.length, 5);
+  assert.ok(queries.some((query) => query.includes('Conor McGregor')));
+  assert.ok(queries.some((query) => query.includes('José Aldo')));
+  assert.ok(queries.some((query) => /fight|action b roll|dynamic footage/i.test(query)));
+  assert.ok(new Set(queries).size === queries.length);
+});
+
+test('Query-Engine übersetzt häufige allgemeine Motive providerfreundlich', () => {
+  const analysis = {
+    intent: 'technology',
+    entities: [],
+    concepts: ['roboter', 'fabrik', 'alltag'],
+    symbolic: false
+  };
+  const queries = generateVisualQueries('Roboter arbeiten in Fabriken und verändern den Alltag.', analysis, 'max');
+  assert.ok(queries.some((query) => /robot/i.test(query)));
+  assert.ok(queries.some((query) => /factory/i.test(query)));
+  assert.ok(queries.some((query) => /daily life/i.test(query)));
+  assert.ok(queries.some((query) => /technology b roll|device close up|technology in use/i.test(query)));
+});
+
+test('abstrakte Aussagen erhalten einen eigenen symbolischen B-Roll-Fallback', () => {
+  const analysis = {
+    intent: 'abstract',
+    entities: [],
+    concepts: ['zukunft', 'arbeit', 'risiko'],
+    symbolic: true
+  };
+  const queries = generateVisualQueries('Die Zukunft der Arbeit bringt Chancen und Risiken.', analysis, 'max');
+  assert.ok(queries.some((query) => /symbolic b roll/i.test(query)));
+  assert.ok(queries.some((query) => /future/i.test(query)));
+  assert.ok(queries.some((query) => /work/i.test(query)));
 });
 
 test('Projekt unterstützt lange Skripte bis zur vorgesehenen Szenengrenze', () => {
