@@ -81,8 +81,8 @@ export async function searchWikimedia({ query, orientation, page = 1, perPage = 
   url.searchParams.set('generator', 'search');
   url.searchParams.set('gsrsearch', String(query).trim());
   url.searchParams.set('gsrnamespace', '6');
-  url.searchParams.set('gsrlimit', '20');
-  if (page > 1) url.searchParams.set('gsroffset', String((page - 1) * 20));
+  url.searchParams.set('gsrlimit', String(perPage));
+  if (page > 1) url.searchParams.set('gsroffset', String((page - 1) * perPage));
   url.searchParams.set('prop', 'imageinfo');
   url.searchParams.set('iiprop', 'url|size|mime|user|extmetadata');
   url.searchParams.set('iiurlwidth', '640');
