@@ -271,7 +271,12 @@ function candidateCard(project, scene, candidate, keyFields, perPage, status) {
       Object.assign(scene, data.scene);
       Object.assign(currentProject.progress, data.progress);
       renderCandidates(card.parentElement, project, scene, keyFields, perPage, status);
-      showStatus(status, `${data.imported} Asset(s) aus ${scene.id} als Review importiert.`, true);
+      const importMessage = data.imported
+        ? `${data.imported} Asset(s) aus ${scene.id} als Review importiert.`
+        : data.linkedExisting
+          ? `Treffer aus ${scene.id} war bereits im Katalog und wurde mit ${data.linkedExisting} bestehendem Asset verknüpft.`
+          : `Für ${scene.id} wurde kein neues Katalog-Asset angelegt.`;
+      showStatus(status, importMessage, true);
       document.dispatchEvent(new CustomEvent('vah:catalog-updated'));
     } catch (error) { importButton.disabled = false; showStatus(status, error.message, false); }
   });
