@@ -32,7 +32,7 @@ fertiges Skript
 → Review-Import
 ```
 
-Der Hub schreibt oder verbessert dabei kein Skript. Der vollständige Originaltext bleibt unverändert gespeichert.
+Der Hub schreibt oder verbessert kein Skript. Der vollständige Originaltext bleibt unverändert gespeichert.
 
 Jedes Projekt liegt separat unter:
 
@@ -55,7 +55,7 @@ Pro Szene werden unter anderem gespeichert:
 - Zeitbereich
 - visuelle Absicht
 - Suchqueries
-- übernommener Kontext, falls ein Rückbezug vorliegt
+- übernommener Kontext bei Rückbezügen
 - aktuelle Suchseite `searchRound`
 - gefundene Kandidaten
 - Provider und Quelle
@@ -63,20 +63,17 @@ Pro Szene werden unter anderem gespeichert:
 - Hauptvisual / Alternativen
 - Import-/Katalogverknüpfung
 
-Nummerierungen wie `2. Sie ...` bleiben im Originaltext erhalten, können aber für die reine Rückbezugs-Erkennung intern ignoriert werden.
+Nummerierungen wie `2. Sie ...` bleiben im Originaltext erhalten, können für die reine Rückbezugs-Erkennung aber intern ignoriert werden.
 
-Je nach Rechercheumfang kann das Projekt bis zu **12 / 20 / 30 eindeutige Kandidaten pro Szene** aufbewahren. Zusätzliche Seiten erweitern die Auswahl, statt Seite 1 zu wiederholen.
+Je nach Rechercheumfang kann das Projekt bis zu **12 / 20 / 30 eindeutige Kandidaten pro Szene** aufbewahren. Zusätzliche Seiten erweitern die Auswahl statt Seite 1 zu wiederholen.
 
-Bei langen Projekten wird nach der initialen Erstellung nur noch der betroffene Szenenordner plus die Root-Projektdateien aktualisiert. Der gesamte Projektordner wird nicht bei jeder kleinen Änderung neu aufgebaut.
+Bei langen Projekten wird die Sammelrecherche modeabhängig gedrosselt: Schnell bis 20, Tief bis 10 und Maximal bis 6 Szenen pro Batch, mit ungefähr höchstens 80 theoretischen Provider-Suchtasks pro Batch.
 
-Bei externen Kandidaten entstehen je nach Treffer zusätzlich:
+Nach der initialen Projekterstellung wird nur noch der betroffene Szenenordner plus die Root-Projektdateien aktualisiert. Der gesamte Projektordner wird nicht bei jeder kleinen Änderung neu aufgebaut.
 
-- `-INFO.md`
-- `-QUELLE.url`
-- `-MEDIUM.url`
-- `-VORSCHAU.url`
+Bei externen Kandidaten entstehen je nach Treffer zusätzlich `-INFO.md`, `-QUELLE.url`, `-MEDIUM.url` und `-VORSCHAU.url`.
 
-Skriptprojekte bleiben auch beim normalen `vault:build` erhalten.
+Skriptprojekte bleiben beim normalen `vault:build` erhalten.
 
 ## Katalog-Assets
 
@@ -94,39 +91,25 @@ Lokale Medien können als echte Dateikopie gespiegelt werden. Externe Medien erh
 
 ## Universelle Themenrecherchen
 
-Der Bereich **Thema recherchieren** legt jede Recherche separat unter `05-THEMENRECHERCHEN` ab und unterstützt Person, Firma/Marke, Produkt, Event, Ort, Technik, Sport/Kampf, Historie, allgemeine Konzepte und automatische Erkennung.
+**Thema recherchieren** legt jede Recherche separat unter `05-THEMENRECHERCHEN` ab und unterstützt Person, Firma/Marke, Produkt, Event, Ort, Technik, Sport/Kampf, Historie, allgemeine Konzepte und automatische Erkennung.
 
-Rechercheumfang:
-
-- Schnell: bis zu 6 Motivbereiche
-- Tief: bis zu 8 Motivbereiche
-- Maximal: bis zu 12 Motivbereiche / höchstens 60 sequenzielle Provider-Suchen bei fünf Quellen
-
-Ein optionales Reel-Skript kann zusätzliche Namen, Events, Jahreszahlen und zitierte Begriffe ergänzen.
+- Schnell: bis 6 Motivbereiche
+- Tief: bis 8 Motivbereiche
+- Maximal: bis 12 Motivbereiche / höchstens 60 Provider-Suchen bei fünf Quellen
 
 ## Quellen
 
-Script Visual Finder, universelle Recherche und Arsenal Builder verwenden:
-
-- Pexels
-- Pixabay
-- Unsplash
-- Openverse
-- Wikimedia Commons
-
-Openverse und Wikimedia benötigen keinen privaten Key.
+Script Visual Finder, universelle Recherche und Arsenal Builder verwenden Pexels, Pixabay, Unsplash, Openverse und Wikimedia Commons. Openverse und Wikimedia benötigen keinen privaten Key.
 
 Dubletten werden soweit möglich über Provider-ID sowie Quell-, Original- und Medien-URLs reduziert. Im Script Visual Finder werden bereits in anderen Szenen gefundene Medien zusätzlich niedriger priorisiert.
 
 ## Nach dem Import
 
-Jeder **neue externe Import** startet als `review`. Ein Treffer wird niemals nur deshalb freigegeben, weil er in einem Skriptprojekt oder einer Themenrecherche sichtbar ist.
-
-Wenn ein Script-Visual-Treffer bereits im Katalog existiert, wird die bestehende Asset-ID verknüpft statt ein Duplikat anzulegen. Der vorhandene Katalogstatus wird dadurch nicht verändert.
+Jeder **neue externe Import** startet als `review`. Wenn ein Script-Visual-Treffer bereits im Katalog existiert, wird die bestehende Asset-ID verknüpft statt ein Duplikat anzulegen. Der vorhandene Katalogstatus wird dadurch nicht verändert.
 
 ## Externe Suchlinks
 
-Themenrecherchen und Script-Visual-Szenen können zusätzliche manuelle Recherchehilfen enthalten, unter anderem YouTube, Google Bilder/Videos/News und Wikipedia.
+Themenrecherchen und Script-Visual-Szenen können manuelle Recherchehilfen enthalten, unter anderem YouTube, Google Bilder/Videos/News und Wikipedia.
 
 **Diese Links sind nur Recherchehilfen.** Sichtbarkeit im Web ist keine automatische Nutzungs- oder Veröffentlichungserlaubnis.
 
