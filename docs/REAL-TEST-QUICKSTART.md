@@ -12,7 +12,7 @@ Dieser Ablauf wird erst beim späteren vollständigen lokalen Endtest verwendet.
 4. `npm run serve`
 5. `http://127.0.0.1:4173/web/` öffnen
 
-## 1. Skript → Visuals real testen
+## 1. Skript → Visuals
 
 Ein fertiges Skript von ungefähr einer Minute einfügen, z. B. **KI-Roboter bis 2035**.
 
@@ -22,19 +22,19 @@ Prüfen:
 - Originaltext bleibt unverändert
 - sinnvolle visuelle Einheiten
 - 3–5 unterschiedliche Queries pro Szene
-- konkrete Namen/Events/Jahre bleiben in passenden Queries
-- symbolische B-Roll wird bei abstrakten Aussagen gekennzeichnet
+- konkrete Namen/Events/Jahre bleiben erhalten
+- symbolische B-Roll wird gekennzeichnet
 - Medienmodus **Gemischt**
 - mindestens zwei Szenen real recherchieren
 - Bild ansehen und Video direkt abspielen
 - mindestens eine einzelne Szene zeigt **Mix erfüllt** mit Video + Bild
 - Hauptvisual + Alternative wählen
-- **Mehr Treffer** lädt Seite 2, danach Seite 3
+- **Mehr Treffer** lädt Seite 2 und danach Seite 3
 - Auswahl bleibt beim Nachladen und Neuladen erhalten
 - genau einen neuen Kandidaten bewusst als `review` importieren
-- bereits vorhandenen Katalogtreffer nach Möglichkeit auf Verknüpfung statt Duplikat prüfen
+- bestehenden Katalogtreffer nach Möglichkeit auf Verknüpfung statt Duplikat prüfen
 
-### Kontext kurz prüfen
+### Kontext
 
 ```text
 1. OpenAI entwickelt humanoide Roboter.
@@ -42,49 +42,34 @@ Prüfen:
 3. Dort übernehmen sie die Montage.
 ```
 
-Erwartung:
+Erwartung: Szene 2/3 zeigen **Kontext übernommen**, relevante Queries behalten `OpenAI`, Nummerierungen bleiben im Originaltext.
 
-- Szene 2/3 zeigen **Kontext übernommen**
-- relevante Queries behalten `OpenAI`
-- Nummerierungen bleiben im Originaltext
+### Rechercheumfang
 
-### Rechercheumfang kurz prüfen
-
-- **Schnell:** bis 12 Kandidaten behalten, Sammelbatch max. 20 Szenen
-- **Tief:** bis 20 Kandidaten behalten, Sammelbatch max. 10 Szenen
-- **Maximal:** bis 30 Kandidaten behalten, Sammelbatch max. 6 Szenen
-- Sammelbatch bleibt bei ungefähr höchstens 80 theoretischen Provider-Suchtasks
-- Tief versucht nach Möglichkeit 3 Quellen, Maximal alle 5 verfügbaren Quellen
+- **Schnell:** bis 12 Kandidaten, max. 20 Szenen/Sammelbatch
+- **Tief:** bis 20 Kandidaten, max. 10 Szenen/Sammelbatch
+- **Maximal:** bis 30 Kandidaten, max. 6 Szenen/Sammelbatch
+- ungefähr höchstens 80 theoretische Provider-Suchtasks pro Batch
+- Tief versucht 3, Maximal alle 5 verfügbaren Quellen
 
 ### Langes Skript
 
-Ein mehrminütiges Skript testen:
-
 - Auto verdichtet bei Bedarf auf max. 120 visuelle Einheiten
 - vollständiges Originalskript bleibt erhalten
-- Kandidatenansichten werden bei >20 Szenen lazy geladen
+- Kandidatenansichten bei >20 Szenen lazy
 - Stoppen / Fortsetzen
 - fertige Szenen bleiben bei Fehlern erhalten
-- lokale Projektspiegelung aktualisiert nur Root-Dateien + betroffene Szene
+- lokale Spiegelung aktualisiert nur Root-Dateien + betroffene Szene
 
-Danach `ALLES-GEFUNDEN/06-SKRIPT-PROJEKTE/` prüfen:
-
-- `00-SKRIPT.txt`
-- `00-PROJEKT.json`
-- `00-SZENENPLAN.md`
-- `00-SHOTLIST.json`
-- `00-SHOTLIST.csv`
-- Szenenordner
-- `searchRound`, Kontext, Auswahl und Importverknüpfungen
+Danach `ALLES-GEFUNDEN/06-SKRIPT-PROJEKTE/` mit Skript, Projekt, Szenenplan, Shotlist, Szenenordnern, `searchRound`, Kontext, Auswahl und Importverknüpfungen prüfen.
 
 ## 2. Provider-Key-Härtung
 
-- gültigen Key eingeben und Provider erfolgreich suchen
-- Key wird erst dann für die Sitzung gemerkt
-- **Sitzungs-Keys löschen** prüfen
-- ungültigen neuen Key scheitern lassen; er darf nicht gemerkt werden
-- Openverse/Wikimedia dürfen keinen fremden Key bestätigen
-- Pixabay-Cachetreffer validiert keinen neu eingegebenen Key
+- gültiger Key wird erst nach erfolgreicher Provideranfrage gemerkt
+- **Sitzungs-Keys löschen**
+- ungültiger Key darf nicht gemerkt werden
+- Openverse/Wikimedia bestätigen keinen fremden Key
+- Pixabay-Cachetreffer validiert keinen neuen Key
 
 ## 3. Universelle Themenrecherche
 
@@ -105,55 +90,33 @@ scriptSpecificTopicResearch: true
 - Pixabay – Foto + Video + 24h-Cache + getrennte Seiten
 - Unsplash – Foto + Attribution + Seite 2
 - Openverse – keylos + Seite 2
-- Wikimedia Commons – keylos + lückenlose Pagination
+- Wikimedia – keylos + lückenlose Pagination
 
 ## 5. Zwölf Starterassets
 
-- alle zwölf prüfen und entscheiden
-- Personen/Marken/Quelle/Lizenz/Kontext
-- mindestens ein Asset freigeben
-- Wikimedia-Starter inkl. CC BY-SA 4.0 prüfen
+Alle zwölf prüfen/entscheiden, mindestens ein Asset freigeben, Wikimedia-Starter inkl. CC BY-SA 4.0 prüfen.
 
 ## 6. Ausbau 720
 
-- 160 / 160 / 160 / 240
-- Review-first
-- globale nächste Aufgaben
-- Video-/Fotolücken
-- Batch/Fallbacks
+160 / 160 / 160 / 240, Review-first, globale Aufgaben, Video-/Fotolücken, Batch/Fallbacks.
 
 ## 7. ALLES-GEFUNDEN
 
-- Gesamtindex / CSV / Manifest
-- `05-THEMENRECHERCHEN`
-- `06-SKRIPT-PROJEKTE`
-- `90-GEFUNDENE-KANDIDATEN`
-- lokale Kopien / `.url`-Links
-- erneuter `vault:build` erhält Script-Visual-Projekt, Suchseiten und Auswahl
+Gesamtindex, `05-THEMENRECHERCHEN`, `06-SKRIPT-PROJEKTE`, `90-GEFUNDENE-KANDIDATEN`, lokale Kopien und `.url`-Links prüfen. `vault:build` darf Projekte/Auswahl nicht löschen.
 
 ## 8. Eigenes Medium
 
-- Datei importieren
-- Rechte bestätigen
-- Startstatus `review`
+Datei importieren, Rechte bestätigen, Startstatus `review`.
 
-## 9. Bestehenden Skript-Planer prüfen
+## 9. Bestehender Skript-Planer
 
-- echte Shotlist
-- Sammlungen / vorhandene Assets
-- Exporte
+Echte Shotlist, Sammlungen, vorhandene Assets und Exporte prüfen.
 
 ## 10. Medienpaket und echte Nutzung
 
-- nur freigegebene Assets
-- Manifest / SHA-256 / Attribution
-- mindestens ein Asset real verwenden
-- Nutzung dokumentieren
-- Backup erzeugen
+Nur freigegebene Assets; Manifest/SHA-256/Attribution; mindestens ein Asset real verwenden; Nutzung dokumentieren; Backup erzeugen.
 
 ## 11. Abschluss
-
-Erforderlich sind insbesondere:
 
 ```text
 scriptVisualProjectGenerated: true
