@@ -14,81 +14,87 @@ Dieser Ablauf wird erst beim späteren vollständigen lokalen Endtest verwendet.
 
 ## 1. Skript → Visuals real testen
 
-Navigation **Skript → Visuals** öffnen.
-
-Ein fertiges Skript von ungefähr einer Minute einfügen, z. B. über **KI-Roboter bis 2035**.
+Ein fertiges Skript von ungefähr einer Minute einfügen, z. B. **KI-Roboter bis 2035**.
 
 Prüfen:
 
 - nur **Fertiges Skript** ist Pflicht
-- Projekt erstellen
-- sinnvolle Szenen / visuelle Einheiten erscheinen
-- Originaltext wird nicht umgeschrieben
-- Nummerierungen/Aufzählungszeichen bleiben im Szenen-Originaltext erhalten
-- pro Szene mehrere Queries sichtbar
-- abstrakte Aussagen werden bei Bedarf als symbolische Visuals markiert
-- Medienmodus **Gemischt** verwenden
-- **Alle Szenen recherchieren** starten
+- Originaltext bleibt unverändert
+- sinnvolle visuelle Einheiten
+- 3–5 unterschiedliche Queries pro Szene
+- konkrete Namen/Events/Jahre bleiben in passenden Queries
+- symbolische B-Roll wird bei abstrakten Aussagen gekennzeichnet
+- Medienmodus **Gemischt**
 - mindestens zwei Szenen real recherchieren
-- Bilder direkt ansehen
-- mindestens einen Videokandidaten direkt abspielen
-- mindestens eine Szene zeigt **Mix erfüllt** mit Video + Bild
-- Hauptvisual auswählen
-- mindestens eine Alternative auswählen
-- bei einer Szene **Mehr Treffer** drücken und prüfen, dass Seite 2 statt erneut Seite 1 geladen wird
-- noch einmal **Mehr Treffer** und Seite 3 prüfen
-- Hauptvisual/Alternative müssen beim Nachladen erhalten bleiben
-- Projekt neu öffnen und Auswahl sowie Suchseite kontrollieren
-- genau einen passenden neuen Kandidaten bewusst **als Review importieren**
-- wenn möglich zusätzlich einen bereits im Katalog vorhandenen Treffer testen: er muss verknüpft statt dupliziert werden
+- Bild ansehen und Video direkt abspielen
+- mindestens eine einzelne Szene zeigt **Mix erfüllt** mit Video + Bild
+- Hauptvisual + Alternative wählen
+- **Mehr Treffer** lädt Seite 2, danach Seite 3
+- Auswahl bleibt beim Nachladen und Neuladen erhalten
+- genau einen neuen Kandidaten bewusst als `review` importieren
+- bereits vorhandenen Katalogtreffer nach Möglichkeit auf Verknüpfung statt Duplikat prüfen
 
-Danach unter `ALLES-GEFUNDEN/06-SKRIPT-PROJEKTE/` prüfen:
+### Kontext kurz prüfen
+
+Zum Beispiel:
+
+```text
+1. OpenAI entwickelt humanoide Roboter.
+2. Sie sollen später in Fabriken arbeiten.
+3. Dort übernehmen sie die Montage.
+```
+
+Erwartung:
+
+- Szene 2/3 zeigen **Kontext übernommen**
+- relevante Queries behalten `OpenAI`
+- Nummerierungen bleiben im Originaltext
+
+### Rechercheumfang kurz prüfen
+
+- **Schnell:** bis 12 Kandidaten behalten, Sammelbatch max. 20 Szenen
+- **Tief:** bis 20 Kandidaten behalten, Sammelbatch max. 10 Szenen
+- **Maximal:** bis 30 Kandidaten behalten, Sammelbatch max. 6 Szenen
+- Sammelbatch bleibt bei ungefähr höchstens 80 theoretischen Provider-Suchtasks
+- Tief versucht nach Möglichkeit 3 Quellen, Maximal alle 5 verfügbaren Quellen
+
+### Langes Skript
+
+Ein mehrminütiges Skript testen:
+
+- Auto verdichtet bei Bedarf auf max. 120 visuelle Einheiten
+- vollständiges Originalskript bleibt erhalten
+- Kandidatenansichten werden bei >20 Szenen lazy geladen
+- Stoppen / Fortsetzen
+- fertige Szenen bleiben bei Fehlern erhalten
+- lokale Projektspiegelung aktualisiert nur Root-Dateien + betroffene Szene
+
+Danach `ALLES-GEFUNDEN/06-SKRIPT-PROJEKTE/` prüfen:
 
 - `00-SKRIPT.txt`
 - `00-PROJEKT.json`
 - `00-SZENENPLAN.md`
 - `00-SHOTLIST.json`
 - `00-SHOTLIST.csv`
-- Szenenordner mit Kandidaten-INFO und Quelllinks
-- `searchRound` entspricht der zuletzt erfolgreichen Suchseite
+- Szenenordner
+- `searchRound`, Kontext, Auswahl und Importverknüpfungen
 
-Anschließend zusätzlich ein längeres Skript testen:
+## 2. Provider-Key-Härtung
 
-- sequenzielle Suche
-- Fortschrittsanzeige
-- Stoppen
-- Fortsetzen
-- bereits fertige Szenen bleiben erhalten
-- einzelne Szenen können später separat mit weiteren Suchseiten vertieft werden
-
-Rechercheumfang kurz gegenprüfen:
-
-- **Schnell** bleibt sparsam
-- **Tief** versucht nach Möglichkeit drei verfügbare Quellen
-- **Maximal** versucht nach Möglichkeit alle fünf tatsächlich verfügbaren Quellen
-
-## 2. Provider-Key-Härtung kurz prüfen
-
-Für mindestens einen Key-Provider:
-
-- gültigen Key eingeben und erfolgreiche Suche durchführen
-- prüfen, dass der Key für die Sitzung gemerkt wird
+- gültigen Key eingeben und Provider erfolgreich suchen
+- Key wird erst dann für die Sitzung gemerkt
 - **Sitzungs-Keys löschen** prüfen
-- absichtlich ungültigen neuen Key verwenden und Suche scheitern lassen
-- der ungültige Key darf danach nicht als gespeichert gelten
-- ein erfolgreicher Openverse-/Wikimedia-Lauf darf den falschen Key nicht bestätigen
-
-Bei Pixabay zusätzlich: Ein reiner Cachetreffer darf einen neu eingegebenen Key nicht als validiert markieren.
+- ungültigen neuen Key scheitern lassen; er darf nicht gemerkt werden
+- Openverse/Wikimedia dürfen keinen fremden Key bestätigen
+- Pixabay-Cachetreffer validiert keinen neu eingegebenen Key
 
 ## 3. Universelle Themenrecherche
 
-Unter **Thema recherchieren**:
+- `Conor McGregor` als **Sport / Kampf / Athletik**
+- zweite andere Rechercheart, z. B. `RCD` oder `Tesla Model 3`
+- mindestens eine skriptspezifische Recherche
 
-- `Conor McGregor` als **Sport / Kampf / Athletik** prüfen
-- zweite andere Rechercheart prüfen, z. B. `RCD` als Technik oder `Tesla Model 3` als Produkt
-- mindestens eine skriptspezifische Recherche durchführen
-
-Erwartung später:
+Erwartung:
 
 ```text
 multipleResearchTypesVerified: true
@@ -97,72 +103,59 @@ scriptSpecificTopicResearch: true
 
 ## 4. Fünf Quellen
 
-Real prüfen:
-
-- Pexels – Foto + Video + neue Treffer auf Seite 2
-- Pixabay – Foto + Video + 24h-Cache + getrennte Suchseiten
-- Unsplash – Foto + Attribution + neue Treffer auf Seite 2
-- Openverse – keylos + neue Treffer auf Seite 2
-- Wikimedia Commons – keylos + lückenlose Pagination über `gsroffset`
-
-Provider-Keys bleiben nur in der laufenden Browserseite und verschwinden nach Neuladen beziehungsweise **Sitzungs-Keys löschen**.
+- Pexels – Foto + Video + Seite 2
+- Pixabay – Foto + Video + 24h-Cache + getrennte Seiten
+- Unsplash – Foto + Attribution + Seite 2
+- Openverse – keylos + Seite 2
+- Wikimedia Commons – keylos + lückenlose Pagination
 
 ## 5. Zwölf Starterassets
 
-Unter **Prüfen**:
-
-- alle zwölf Starterassets ansehen
-- für jedes eine Entscheidung speichern
-- Personen/Marken/Quelle/Lizenz/Kontext prüfen
-- mindestens ein geeignetes Asset freigeben
-- Wikimedia-Starter einschließlich CC BY-SA 4.0 prüfen
+- alle zwölf prüfen und entscheiden
+- Personen/Marken/Quelle/Lizenz/Kontext
+- mindestens ein Asset freigeben
+- Wikimedia-Starter inkl. CC BY-SA 4.0 prüfen
 
 ## 6. Ausbau 720
 
-- vier Kanalkarten prüfen
 - 160 / 160 / 160 / 240
-- Review-first prüfen
-- globale nächste Aufgaben prüfen
-- Video-/Fotolücken prüfen
-- Batch und Fallbacks prüfen
+- Review-first
+- globale nächste Aufgaben
+- Video-/Fotolücken
+- Batch/Fallbacks
 
 ## 7. ALLES-GEFUNDEN
-
-Kontrollieren:
 
 - Gesamtindex / CSV / Manifest
 - `05-THEMENRECHERCHEN`
 - `06-SKRIPT-PROJEKTE`
 - `90-GEFUNDENE-KANDIDATEN`
-- lokale Dateikopie
-- externe `.url`-Links
-- erneuter `vault:build` löscht Script-Visual-Projekt nicht
-- Suchseite, Auswahl und Importverknüpfungen bleiben erhalten
+- lokale Kopien / `.url`-Links
+- erneuter `vault:build` erhält Script-Visual-Projekt, Suchseiten und Auswahl
 
 ## 8. Eigenes Medium
 
-- eigene Datei importieren
+- Datei importieren
 - Rechte bestätigen
-- Import als `review`
+- Startstatus `review`
 
 ## 9. Bestehenden Skript-Planer prüfen
 
-- **Skript planen** öffnen
-- echte Shotlist erzeugen
-- Sammlungen und vorhandene Assets kontrollieren
-- Exporte prüfen
+- echte Shotlist
+- Sammlungen / vorhandene Assets
+- Exporte
 
 ## 10. Medienpaket und echte Nutzung
 
-- nur freigegebene Assets in Medienpaket
-- Manifest / SHA-256 / Attribution prüfen
+- nur freigegebene Assets
+- Manifest / SHA-256 / Attribution
 - mindestens ein Asset real verwenden
 - Nutzung dokumentieren
 - Backup erzeugen
 
 ## 11. Abschluss
 
-Am Ende müssen insbesondere folgende Kriterien wahr sein:
+Erforderlich sind insbesondere:
 
 ```text
 scriptVisualProjectGenerated: true
