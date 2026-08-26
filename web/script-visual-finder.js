@@ -363,7 +363,7 @@ async function searchOneScene(scene, keyFields, perPage, force) {
   const data = await post('/script-visual-api/search-scene', { projectId: currentProject.projectId, sceneId: scene.id, keys, perPage: Number(perPage.input.value), force });
   const validated = new Set(data.validatedKeyProviders ?? []);
   for (const [provider, value] of Object.entries(typed)) if (value && validated.has(provider)) sessionKeys.set(provider, value);
-  clearVisibleKeys(keyFields);
+  updateVisibleKeys(keyFields);
   const index = currentProject.scenes.findIndex((item) => item.id === scene.id);
   if (index >= 0) currentProject.scenes[index] = data.scene;
   currentProject.updatedAt = new Date().toISOString();
@@ -396,7 +396,20 @@ function candidateSummary(scene, project) {
 function mediaPreferenceLabel(value) { return value === 'mixed' ? 'Videos + Bilder' : value === 'photo' ? 'Bilder bevorzugt' : 'Videos bevorzugt'; }
 function typedKeys(fields) { return Object.fromEntries(Object.entries(fields).map(([provider, item]) => [provider, item.input.value.trim()]).filter(([, value]) => value)); }
 function currentKey(provider, fields) { return fields[provider]?.input.value.trim() || sessionKeys.get(provider) || ''; }
-function clearVisibleKeys(fields) { for (const [provider, item] of Object.entries(fields)) { item.input.value = ''; item.input.placeholder = sessionKeys.has(provider) ? 'Für diese Sitzung gespeichert' : 'Nur für diese Sitzung'; } }
+function updateVisibleKeys(fields) {
+  for (const [provider, item] of Object.entries(fields)) {
+    const visible = item.input.value.trim();
+    const remembered = sessionKeys.get(provider) || '';
+    if (visible && remembered && visible === remembered) {
+      item.input.value = '';
+      item.input.placeholder = 'Für diese Sitzung gespeichert';
+    } else if (visible) {
+      item.input.placeholder = 'Noch nicht bestätigt · bleibt nur in diesem Feld';
+    } else {
+      item.input.placeholder = remembered ? 'Für diese Sitzung gespeichert' : 'Nur für diese Sitzung';
+    }
+  }
+}
 function selectionLabel(scene, candidate) { if (scene.selectedPrimary === candidate.key) return 'Auswahl: Hauptvisual'; if (scene.selectedAlternatives.includes(candidate.key)) return 'Auswahl: Alternative'; return 'Noch nicht ausgewählt'; }
 function playableVideoUrl(files) { if (!Array.isArray(files)) return ''; const choices = files.filter((item) => item?.url && /^https?:\/\//i.test(item.url)).sort((a, b) => area(a) - area(b)); if (!choices.length) return ''; return choices.find((item) => Math.min(Number(item.width) || 0, Number(item.height) || 0) >= 720)?.url ?? choices.at(-1)?.url ?? ''; }
 function area(item) { return (Number(item?.width) || 0) * (Number(item?.height) || 0); }
