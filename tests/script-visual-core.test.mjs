@@ -116,6 +116,17 @@ test('kontextabhängige Folgesätze erben die vorherige Entität nur für die Vi
   assert.equal(plan.summary.contextInherited, 1);
 });
 
+test('nummerierte Rückbezugssätze erben Kontext, ohne die Nummerierung zu entfernen', () => {
+  const script = '1. OpenAI entwickelt humanoide Roboter.\n2. Sie sollen später in Fabriken arbeiten.';
+  const plan = createScriptVisualPlan({ script, segmentation: 'sentence', depth: 'max' });
+  assert.equal(plan.scenes.length, 2);
+  assert.equal(plan.scenes[1].originalText, '2. Sie sollen später in Fabriken arbeiten.');
+  assert.equal(plan.scenes[1].contextInherited, true);
+  assert.ok(plan.scenes[1].contextEntities.some((value) => /OpenAI/i.test(value)));
+  assert.ok(plan.scenes[1].queries.some((query) => /OpenAI/i.test(query)));
+  assert.equal(plan.script, script);
+});
+
 test('neuer expliziter Szenenbezug übernimmt nicht unnötig die vorherige Entität', () => {
   const script = 'OpenAI entwickelt humanoide Roboter. Tesla entwickelt ein eigenes Robotersystem.';
   const plan = createScriptVisualPlan({ script, segmentation: 'sentence', depth: 'max' });
