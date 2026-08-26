@@ -61,7 +61,7 @@ const realTestChecks = {
   scriptPlanGenerated: scriptPlans.length >= 1,
   scriptVisualProjectGenerated: scriptVisualProjects.length >= 1,
   scriptVisualMultipleScenesSearched: scriptVisualProjects.some((entry) => entry.searchedScenes >= 2),
-  scriptVisualMixedMediaFound: scriptVisualProjects.some((entry) => entry.videoCandidates >= 1 && entry.photoCandidates >= 1),
+  scriptVisualMixedMediaFound: scriptVisualProjects.some((entry) => entry.mixedMediaScenes >= 1),
   scriptVisualReviewImported: scriptVisualProjects.some((entry) => entry.importedAssets >= 1),
   topicResearchGenerated: topicResearches.length >= 1,
   multipleResearchTypesVerified: researchTypes.length >= requiredResearchTypeCount,
@@ -82,7 +82,7 @@ if (videos.length < 3 || staticVisuals.length < 3) nextActions.push('Mindestens 
 if (scriptPlans.length < 1) nextActions.push('Ein echtes Kanalskript mit dem CLI-Planer verarbeiten und die erzeugte Shotlist prüfen.');
 if (scriptVisualProjects.length < 1) nextActions.push('Ein echtes Projekt unter „Skript → Visuals“ aus einem fertigen Skript erstellen.');
 if (!scriptVisualProjects.some((entry) => entry.searchedScenes >= 2)) nextActions.push('Im Script Visual Finder mindestens zwei Szenen real über Medienquellen recherchieren.');
-if (!scriptVisualProjects.some((entry) => entry.videoCandidates >= 1 && entry.photoCandidates >= 1)) nextActions.push('Im Script Visual Finder mindestens einen Video- und einen Bildkandidaten real sichten.');
+if (!scriptVisualProjects.some((entry) => entry.mixedMediaScenes >= 1)) nextActions.push('Im Script Visual Finder mindestens eine reale Szene mit Video- und Bildkandidaten im selben Szenenboard sichten.');
 if (!scriptVisualProjects.some((entry) => entry.importedAssets >= 1)) nextActions.push('Mindestens einen Script-Visual-Kandidaten bewusst als Review-Asset importieren.');
 if (topicResearches.length < 1) nextActions.push('Eine echte universelle Themenrecherche durchführen, Treffer visuell prüfen und den Themenordner kontrollieren.');
 if (researchTypes.length < requiredResearchTypeCount) nextActions.push(`${requiredResearchTypeCount - researchTypes.length} weitere unterschiedliche Rechercheart(en) real durchführen und im Themenarchiv nachweisen.`);
@@ -162,7 +162,7 @@ const md = [
   `- Verifizierte Medienpakete: **${mediaPacks.length}**`,
   `- Nutzungen: **${usageCount}**`, '',
   '## Script Visual Finder',
-  ...(scriptVisualProjects.length ? scriptVisualProjects.map((entry) => `- ${entry.projectId} / ${entry.title}: **${entry.searchedScenes}/${entry.sceneCount} Szenen** · ${entry.videoCandidates} Video- und ${entry.photoCandidates} Bildkandidaten · ${entry.importedAssets} importiert`) : ['- Noch kein verifiziertes Script-Visual-Projekt.']), '',
+  ...(scriptVisualProjects.length ? scriptVisualProjects.map((entry) => `- ${entry.projectId} / ${entry.title}: **${entry.searchedScenes}/${entry.sceneCount} Szenen** · ${entry.videoCandidates} Video- und ${entry.photoCandidates} Bildkandidaten · ${entry.mixedMediaScenes} Szene(n) mit Video + Bild · ${entry.importedAssets} importiert`) : ['- Noch kein verifiziertes Script-Visual-Projekt.']), '',
   '## Kanalabdeckung',
   ...requiredChannels.map((tag) => `- ${channelLabel(tag)}: **${channelCounts[tag]} Assets**`), '',
   '## Themenrecherchen',
@@ -196,6 +196,10 @@ function findValidScriptVisualProjects(directory) {
       if (!project.scenes.every((scene, index) => scene.id === `SCENE-${String(index + 1).padStart(3, '0')}` && typeof scene.originalText === 'string' && scene.originalText.length > 0 && Array.isArray(scene.queries))) continue;
       const candidates = project.scenes.flatMap((scene) => Array.isArray(scene.candidates) ? scene.candidates : []);
       const importedAssets = new Set(candidates.flatMap((candidate) => candidate.importedAssetIds ?? []));
+      const mixedMediaScenes = project.scenes.filter((scene) => {
+        const sceneCandidates = Array.isArray(scene.candidates) ? scene.candidates : [];
+        return sceneCandidates.some((candidate) => candidate.type === 'video') && sceneCandidates.some((candidate) => candidate.type !== 'video');
+      }).length;
       found.push({
         projectId: project.projectId,
         title: project.title ?? project.projectId,
@@ -204,6 +208,7 @@ function findValidScriptVisualProjects(directory) {
         selectedScenes: project.scenes.filter((scene) => scene.selectedPrimary || (scene.selectedAlternatives?.length ?? 0) > 0).length,
         videoCandidates: candidates.filter((candidate) => candidate.type === 'video').length,
         photoCandidates: candidates.filter((candidate) => candidate.type !== 'video').length,
+        mixedMediaScenes,
         importedAssets: importedAssets.size
       });
     } catch {
