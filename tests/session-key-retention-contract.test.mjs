@@ -36,6 +36,15 @@ test('Script Visual Finder speichert nur vom Server validierte Provider-Keys', (
   assert.ok(searchIndex >= 0 && rememberIndex > searchIndex, 'Keys müssen erst nach erfolgreichem Such-POST und Provider-Nachweis gespeichert werden.');
 });
 
+test('Script Visual Finder löscht nur bestätigte Keys aus dem sichtbaren Eingabefeld', () => {
+  const source = read('web/script-visual-finder.js');
+  assert.match(source, /function updateVisibleKeys\(fields\)/);
+  assert.match(source, /if \(visible && remembered && visible === remembered\)/);
+  assert.match(source, /item\.input\.value = ''/);
+  assert.match(source, /Noch nicht bestätigt · bleibt nur in diesem Feld/);
+  assert.doesNotMatch(source, /function clearVisibleKeys\(fields\)/);
+});
+
 test('Pixabay-Cache allein gilt in keinem Suchbereich als Prüfung eines neu eingegebenen Keys', () => {
   const arsenal = read('web/arsenal-builder.js');
   const entity = read('web/entity-research.js');
