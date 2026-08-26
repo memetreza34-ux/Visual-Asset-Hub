@@ -43,14 +43,14 @@ Die Beta wird erst nach dem späteren vollständigen lokalen Realtest aus Draft 
 - [x] Pexels, Pixabay, Unsplash, Openverse und Wikimedia werden wiederverwendet
 - [x] Gemischt versucht Video + Bild in derselben Szene zu sammeln
 - [x] Schnell/Tief/Maximal nutzt nach Möglichkeit 1/3/5 Quellen und 4/8/12 maximale Suchtasks pro Szene/Seite
-- [x] pro Szene werden je Modus bis zu 12/20/30 eindeutige Kandidaten behalten
+- [x] Schnell/Tief/Maximal bewahrt bis zu 12/20/30 eindeutige Kandidaten pro Szene
 - [x] echte Folgeseiten über `searchRound`, maximal 100 Seiten
 - [x] Wikimedia-Pagination ohne ausgelassene Treffer
 - [x] projektweite Deduplizierung und Wiederverwendungs-Penalty
 - [x] bestehende Katalogassets werden verknüpft statt dupliziert
 - [x] Langprojekte rendern Kandidaten ab mehr als 20 Szenen lazy
 - [x] Sammelrecherche ist auf ungefähr 80 theoretische Provider-Suchtasks pro Batch gedrosselt
-- [x] daraus resultieren maximal Schnell 20 / Tief 10 / Maximal 6 Szenen pro Batch
+- [x] maximale Batchgrößen Schnell 20 / Tief 10 / Maximal 6 Szenen
 - [x] Stoppen und Fortsetzen sind vorgesehen
 - [x] Projektspiegelung wird nach Erstellung inkrementell aktualisiert
 - [x] manuelle Discovery-Links zu YouTube, Google Bilder/Videos/News und Wikipedia
@@ -76,12 +76,12 @@ Die Beta wird erst nach dem späteren vollständigen lokalen Realtest aus Draft 
 - [ ] mindestens eine konkrete Szene enthält gleichzeitig Video- und Bildkandidaten
 - [ ] mehrere brauchbare Kandidaten pro Szene
 - [ ] Tief/Maximal liefern bei vorhandenen Quellen die erwartete Quellenbreite
-- [ ] **Mehr Treffer** lädt nachweislich Seite 2 und mindestens eine weitere Seite
-- [ ] zusätzliche Suchseiten erhöhen die sinnvolle Auswahl bis zu den jeweiligen 12/20/30-Grenzen
+- [ ] **Mehr Treffer** lädt Seite 2 und mindestens eine weitere Seite
+- [ ] zusätzliche Suchseiten erhöhen die Auswahl bis zu den jeweiligen 12/20/30-Grenzen
 - [ ] Video direkt abspielen, Bild direkt prüfen
 - [ ] Hauptvisual und Alternativen bleiben nach Nachladen und Browser-Neuladen erhalten
 - [ ] längeres Skript bleibt performant; Lazy-Rendering funktioniert
-- [ ] Sammelbutton verwendet die modeabhängigen Batchgrößen Schnell 20 / Tief 10 / Maximal 6
+- [ ] Sammelbutton verwendet Schnell 20 / Tief 10 / Maximal 6 Szenen pro Batch
 - [ ] Stoppen beendet nach laufender Szene und Fortsetzen setzt korrekt weiter
 - [ ] einzelne Providerfehler zerstören fertige Szenen nicht
 - [ ] ein Kandidat wird bewusst als `review` importiert
@@ -115,34 +115,13 @@ Die Beta wird erst nach dem späteren vollständigen lokalen Realtest aus Draft 
 
 ## Fünf Medienquellen
 
-### Pexels
-- [ ] echte Fotosuche erfolgreich
-- [ ] echte Videosuche erfolgreich
-- [ ] Sitzung-Key funktioniert
-
-### Pixabay
-- [ ] echte Fotosuche erfolgreich
-- [ ] echte Videosuche erfolgreich
-- [ ] 24-Stunden-Cache für identische Suche funktioniert
-- [ ] Seitennummer ist Teil des Caches
-
-### Unsplash
-- [ ] echte Fotosuche erfolgreich
-- [ ] Creator/Attribution korrekt
-- [ ] Download-Meldung beim Import korrekt
-
-### Openverse
-- [ ] Suche ohne geheimen Key funktioniert
-- [ ] nur unterstützte offene Lizenztypen werden übernommen
-
-### Wikimedia Commons
-- [ ] Suche ohne geheimen Key funktioniert
-- [ ] Lizenz und Attribution werden angezeigt
-- [ ] Folgeseiten sind lückenlos
-
-### Gemeinsame Regeln
-- [ ] Provider-Keys verschwinden nach Neuladen
-- [ ] keine Provider-Keys in `localStorage` oder `sessionStorage`
+- [ ] Pexels Foto + Video + Sitzung-Key
+- [ ] Pixabay Foto + Video + 24h-Cache + seitenspezifischer Cache
+- [ ] Unsplash Foto + Creator/Attribution + Import-Downloadmeldung
+- [ ] Openverse keylos + unterstützte offene Lizenzen
+- [ ] Wikimedia keylos + Lizenz/Attribution + lückenlose Folgeseiten
+- [ ] Provider-Keys verschwinden nach Reload
+- [ ] keine Keys in `localStorage`/`sessionStorage`
 - [ ] technischer Fit verändert keinen Reviewstatus
 - [ ] nur markierte Treffer werden importiert
 - [ ] jeder neue Import startet auf `review`
@@ -159,8 +138,7 @@ Die Beta wird erst nach dem späteren vollständigen lokalen Realtest aus Draft 
 - [x] erzeugte Inhalte bleiben lokal
 - [ ] `npm run vault:build` läuft lokal fehlerfrei
 - [ ] Gesamtindex enthält nach Starterimport zwölf Starterassets
-- [ ] lokale Dateikopie geprüft
-- [ ] externe `.url`-Verknüpfungen geprüft
+- [ ] lokale Dateikopie / `.url`-Verknüpfungen geprüft
 - [ ] echtes Script-Visual-Projekt bleibt nach erneutem Vault-Build erhalten
 - [ ] kein Vault-Eintrag umgeht Review/Rechteprüfung
 
@@ -193,7 +171,6 @@ Die Beta wird erst nach dem späteren vollständigen lokalen Realtest aus Draft 
 - [ ] alle vier festen Kanäle vertreten
 - [ ] alle zwölf Starterassets entschieden
 - [ ] mindestens ein Asset freigegeben
-- [ ] Freigabe ohne Pflichtprüfungen wird blockiert
 
 ## Eigene Medien
 
