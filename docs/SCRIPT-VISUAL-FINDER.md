@@ -17,6 +17,8 @@ fertiges Skript
 → Kandidaten pro Szene
 → Hauptvisual / Alternativen
 → Review-Import
+→ Freigabe
+→ verifiziertes Schnittpaket
 → Shotlist / Projektablage
 ```
 
@@ -109,6 +111,24 @@ Dubletten werden über Provider-ID sowie kanonisierte Quell-, Original- und Medi
 
 Ein neuer externer Import beginnt immer auf `review`. Existiert dieselbe Quelle bereits im Katalog, wird die bestehende Asset-ID mit der Szene verknüpft statt ein Duplikat anzulegen. Der bestehende Status ändert sich dadurch nicht.
 
+## Schnittpaket aus Auswahl
+
+Der Projektkopf besitzt zusätzlich **Schnittpaket aus Auswahl**.
+
+Die Funktion verwendet ausschließlich die bereits vorhandene, verifizierte `/api/media-pack`-Pipeline:
+
+- berücksichtigt nur Kandidaten, die im Szenenboard als Hauptvisual oder Alternative markiert sind
+- Kandidat muss bereits mit einer Katalog-Asset-ID verknüpft sein
+- nur Katalogstatus `approved` wird in ein Paket übernommen
+- `review`, eingeschränkte, archivierte oder noch nicht importierte Auswahl wird übersprungen und sichtbar gemeldet
+- keine automatische Freigabe und keine Statusänderung
+- maximal 20 Asset-IDs pro bestehendem Media-Pack-Aufruf
+- größere Script-Auswahlen werden automatisch in mehrere nummerierte Pakete geteilt
+- bestehende Media-Pack-Regeln bleiben erhalten: SHA-256, Manifest, Attribution, Download-/Größen- und Sicherheitsprüfungen
+- lokales Verwaltungstoken bleibt nur im Arbeitsspeicher des zusätzlichen Browsermoduls
+
+Damit führt der Workflow von der visuellen Recherche bis zu einem tatsächlich verifizierten Schnittpaket, ohne den Review-Schritt zu umgehen.
+
 ## Lokale Persistenz
 
 Arbeitsdaten: `.local-storage/script-visual-projects/`
@@ -120,6 +140,8 @@ Pro Projekt entstehen Skript, Projekt-JSON, Szenenplan, Shotlist JSON/CSV und ei
 ## API-Sicherheit
 
 `/script-visual-api/` ist Loopback-only, Same-Origin-geschützt, tokenisiert und nutzt die gemeinsame Schreibsperre. Provider-Keys werden nicht persistent gespeichert. Ein neuer Key wird erst nach erfolgreicher Anfrage genau dieses Providers als Sitzung-Key gemerkt; keylose Provider und reine Pixabay-Cachetreffer können keinen neuen fremden Key validieren.
+
+Das Schnittpaket nutzt die bestehende lokale `/api/media-pack`-Route. Auch dafür wird kein Token persistent gespeichert.
 
 ## Rechte
 
@@ -134,4 +156,4 @@ scriptVisualMixedMediaFound: true
 scriptVisualReviewImported: true
 ```
 
-`scriptVisualMixedMediaFound` wird erst wahr, wenn mindestens eine konkrete Szene Video **und** Bild enthält. Die restlichen Kriterien werden erst beim späteren echten lokalen Browser-/API-Test abgenommen.
+`scriptVisualMixedMediaFound` wird erst wahr, wenn mindestens eine konkrete Szene Video **und** Bild enthält. Zusätzlich muss im späteren Realtest geprüft werden, dass **Schnittpaket aus Auswahl** ausschließlich bereits freigegebene Script-Visual-Assets exportiert und Review-/nicht importierte Auswahl korrekt blockiert oder überspringt. Die restlichen Kriterien werden erst beim späteren echten lokalen Browser-/API-Test abgenommen.
