@@ -8,57 +8,64 @@
 - der eingegebene Skripttext wird nicht geschrieben, verbessert oder umformuliert; die Funktion dient ausschließlich der Visualsuche
 - lokale Script-Visual-Projekte mit bis zu 40.000 Zeichen und maximal 120 visuellen Einheiten
 - Szenenmodi **Auto**, **Satzweise** und **Absatzweise**
-- automatische Zerlegung sehr langer Sätze in kleinere visuelle Einheiten; Nummerierungs- und Aufzählungspräfixe werden nicht als eigene Szene behandelt und bleiben im Szenen-Originaltext erhalten
-- pro Szene visuelle Absicht, Entitäten, Konzepte, bevorzugter Medientyp und mehrere dynamische Queries
+- lange Sätze können in kleinere visuelle Einheiten zerlegt werden
+- Auto-Modus verdichtet sehr viele kurze Einheiten kontrolliert auf maximal 120 Szenen, ohne das gespeicherte Originalskript zu verändern
+- Nummerierungen und Aufzählungspräfixe bleiben im Szenen-Originaltext erhalten
+- 3–5 bewusst unterschiedliche Suchrichtungen pro Szene statt mehrfach fast derselben Query
+- häufige deutsche Visualbegriffe werden providerfreundlich übersetzt; konkrete Namen, Events und Jahreszahlen bleiben erhalten
+- visuelle Absicht, Entitäten, Konzepte, Kategorie und bevorzugter Medientyp pro Szene
+- lokale Kontext-Vererbung für eindeutige Rückbezugssätze wie `Sie ...`, `Dort ...`, `Dabei ...`, `Dadurch ...`, `Anschließend ...` und `Später ...`
+- Rückbezugskontext kann über eine eindeutige Szenenkette weitergetragen werden und wird getrennt gespeichert sowie in der UI sichtbar angezeigt
+- nummerierte Rückbezugssätze wie `2. Sie ...` funktionieren, ohne die Nummerierung aus dem Originaltext zu entfernen
 - direkter Zugriff auf Pexels, Pixabay, Unsplash, Openverse und Wikimedia Commons über die vorhandenen Provideradapter
-- intelligente Suchbegrenzung pro Szene statt blind alle Queries gegen alle Provider abzufragen
-- lange Projekte werden sequenziell Szene für Szene recherchiert und können gestoppt beziehungsweise später fortgesetzt werden
-- vorhandene Ergebnisse bleiben erhalten, wenn eine spätere Einzelsuche fehlschlägt
 - visuelles Szenenboard mit Bildern, abspielbaren Videos, technischem Fit, Provider, Query, Suchseite und Quellseite
-- pro Szene **Hauptvisual** und mehrere **Alternativen** auswählbar
-- bereits in anderen Szenen gefundene Medien werden projektweit niedriger priorisiert
-- bewusster Import einzelner Kandidaten über die bestehende Review-Pipeline; kein automatischer Import und keine automatische Freigabe
+- pro Szene Hauptvisual und mehrere Alternativen auswählbar
+- zusätzliche manuelle Discovery-Links pro Szene zu YouTube, Google Bilder, Google Videos, Google News und Wikipedia
 - lokaler Projektbestand unter `.local-storage/script-visual-projects`
-- neue lokale Ablage `ALLES-GEFUNDEN/06-SKRIPT-PROJEKTE`
+- lokale Spiegelung unter `ALLES-GEFUNDEN/06-SKRIPT-PROJEKTE`
 - pro Projekt `00-SKRIPT.txt`, `00-PROJEKT.json`, `00-SZENENPLAN.md`, `00-SHOTLIST.json`, `00-SHOTLIST.csv` und Szenenordner
-- Script-Visual-Projekte bleiben bei `vault:build` erhalten
-- neutraler **Allgemein**-Projektmodus außerhalb der vier festen Ausbau-720-Kanäle
 
 ### Verbessert und gehärtet
 
-- **Gemischt** sucht pro Szene nach Möglichkeit bewusst Video-B-Roll und Bildmaterial statt nur nach einer zufälligen Medienart
+- **Gemischt** sucht pro Szene nach Möglichkeit bewusst Video-B-Roll und Bildmaterial
 - die Oberfläche zeigt Video-/Bildanzahl sowie **Mix erfüllt** oder **Mix noch unvollständig**
-- ausgewählte Hauptvisuals und Alternativen bleiben beim Kandidatenlimit geschützt; im Gemischt-Modus werden zusätzlich Treffer beider Medientypen bewahrt
-- Recherche **Tief** berücksichtigt nach Möglichkeit mindestens drei verfügbare Quellen
-- Recherche **Maximal** berücksichtigt nach Möglichkeit alle fünf tatsächlich verfügbaren Quellen mindestens einmal pro Szene
-- **Mehr Treffer** verwendet echte Folgeseiten statt erneut Seite 1 zu laden; pro Szene wird `searchRound` persistiert
+- Recherche Schnell/Tief/Maximal verlangt nach Möglichkeit 1/3/5 unterschiedliche verfügbare Quellen und maximal 4/8/12 Suchtasks pro Szene und Suchseite
+- zusätzliche Suchseiten können mehr Auswahl aufbauen; pro Szene bleiben je nach Modus bis zu **12 / 20 / 30 eindeutige Kandidaten** erhalten
+- Hauptvisual, Alternativen und im Gemischt-Modus beide Medientypen bleiben beim Kandidatenlimit geschützt
+- **Mehr Treffer** verwendet echte Folgeseiten; `searchRound` wird pro Szene persistiert
 - Pexels, Pixabay, Unsplash, Openverse und Wikimedia erhalten die tatsächliche Seitennummer
-- Wikimedia-Pagination berechnet `gsroffset` anhand der gewählten Seitengröße, damit zwischen Suchseiten keine Ergebnisse übersprungen werden
-- vollständig fehlgeschlagene Suchrunden erhöhen die gespeicherte Suchseite nicht; maximal 100 Seiten pro Szene
-- Kandidatendubletten werden zusätzlich über kanonisierte Quellseite, Original-Medien-URL und direkte Medienreferenz erkannt
-- bereits vorhandene Katalogquellen werden mit dem Script-Visual-Projekt verknüpft statt unnötig ein zweites Katalogasset anzulegen
-- neu eingegebene Pexels-/Pixabay-/Unsplash-Keys werden erst nach einer erfolgreichen Anfrage genau dieses Providers für die Sitzung gemerkt
-- erfolgreiche keylose Provider können keinen fehlerhaften Key eines anderen Providers bestätigen
-- ein reiner Pixabay-Cachetreffer gilt nicht als Validierung eines neu eingegebenen Pixabay-Keys
+- Wikimedia-Pagination verwendet `gsroffset` passend zur Seitengröße und überspringt keine Treffer
+- vollständig fehlgeschlagene Suchrunden erhöhen die gespeicherte Seite nicht; maximal 100 Seiten pro Szene
+- Kandidatendubletten werden über Provider-ID sowie kanonisierte Quell-, Original- und Medien-URLs reduziert
+- bereits in anderen Szenen gefundene Medien werden niedriger priorisiert statt unnötig wiederholt
+- bereits vorhandene Katalogquellen werden mit dem Skriptprojekt verknüpft statt als zweites Asset angelegt
+- Langprojekte rendern Kandidatenkarten ab mehr als 20 Szenen lazy und entfernen schwere DOM-Karten beim Zuklappen wieder
+- Sammelrecherche verwendet ein theoretisches Batchbudget von ungefähr 80 Provider-Suchtasks: Schnell bis 20, Tief bis 10, Maximal bis 6 Szenen pro Batch
+- `ALLES-GEFUNDEN/06-SKRIPT-PROJEKTE` wird nach der Erstellung inkrementell aktualisiert: Root-Dateien plus nur der geänderte Szenenordner
+- neu eingegebene Pexels-/Pixabay-/Unsplash-Keys werden erst nach erfolgreicher Anfrage genau dieses Providers als Sitzung-Key gemerkt
+- erfolgreiche keylose Provider können keinen fehlerhaften fremden Key bestätigen
+- ein reiner Pixabay-Cachetreffer validiert keinen neu eingegebenen Pixabay-Key
+- noch nicht validierte Keys bleiben nur im sichtbaren Passwortfeld der aktuellen Seite erhalten, bis genau der Provider sie erfolgreich geprüft hat
 - Review-Filter **Noch keinem Kanal zugeordnet** begrenzt auch die Sammlungs-Auswahl korrekt auf ungetaggte Assets
 
 ### Abnahme und Tests
 
-- neue Tests für Segmentierung, lange Skripte, visuelle Intents, Query-Erzeugung und Kanal-Autoerkennung
-- Regressionstest stellt sicher, dass nummerierte und Aufzählungs-Zeilen im Szenen-Originaltext erhalten bleiben
-- neue Browser-Vertragstests für Navigation, Bild-/Videoansicht, Medienmix, Hauptvisual/Alternativen, Pagination, Fortschritt und Sitzungs-Keys
-- neue API-Vertragstests für Loopback-/Same-Origin-/Token-Schutz, fünf Provider, Pixabay-Cache, provider-spezifische Keyvalidierung, Katalogverknüpfung, Pagination, Projektpersistenz und Review-Import
+- Tests für Segmentierung, lange Skripte, Auto-Verdichtung, visuelle Intents, Query-Diversität, Übersetzungen und Kanal-Autoerkennung
+- Tests für Kontext-Vererbung, Kontextketten, expliziten Kontextwechsel und nummerierte Rückbezugssätze
+- Browser-Vertragstests für Navigation, Bild-/Videoansicht, Medienmix, Kontextanzeige, externe Discovery-Links, Lazy-Rendering, dynamische Batchdrosselung, Pagination, Fortschritt und Sitzungsschlüssel
+- API-Vertragstests für Loopback-/Same-Origin-/Token-Schutz, fünf Provider, Pixabay-Cache, provider-spezifische Keyvalidierung, Katalogverknüpfung, Kandidaten-Retention, Pagination, Projektpersistenz und Review-Import
 - Open-Media-Test sichert lückenlose Wikimedia-Seiten über `gsroffset`
-- neuer Vault-Vertragstest für dauerhafte `06-SKRIPT-PROJEKTE`
-- `beta:verify` verlangt für die endgültige Abnahme ein echtes Script-Visual-Projekt, mindestens zwei real recherchierte Szenen, mindestens einen Video- und einen Bildkandidaten sowie mindestens einen bewusst als Review importierten Script-Visual-Treffer
+- Vault-Vertragstest schützt dauerhafte `06-SKRIPT-PROJEKTE`
+- `beta:verify` verlangt ein echtes Script-Visual-Projekt, mindestens zwei recherchierte Szenen, mindestens eine einzelne Szene mit Video + Bild und mindestens einen bewusst als Review importierten Script-Visual-Treffer
 
 ### Sicherheit und Rechte
 
-- Pexels-, Pixabay- und Unsplash-Keys bleiben auch im Script Visual Finder nur im Arbeitsspeicher der geöffneten Browserseite
+- Pexels-, Pixabay- und Unsplash-Keys bleiben nur im Arbeitsspeicher der geöffneten Browserseite
 - Skripte und lokale Projektdateien werden durch `.gitignore` nicht in Git veröffentlicht
 - jeder neue externe Import aus einem Skriptprojekt startet auf `review`
-- bereits vorhandene Katalogassets werden nur verknüpft und nicht automatisch in ihrem Freigabestatus verändert
+- bereits vorhandene Katalogassets werden nur verknüpft und nicht automatisch im Status verändert
 - technische Trefferbewertung ist keine Inhalts-, Identitäts- oder Rechtefreigabe
+- manuelle Web-Recherchelinks importieren nichts und sind keine Lizenzfreigabe
 - konkrete Personen, Marken, Events, Broadcastmaterial und symbolische B-Rolls müssen vor Veröffentlichung weiterhin manuell geprüft werden
 - GitHub Actions bleiben optional und werden für die lokale Beta-Abnahme nicht benötigt
 
