@@ -23,3 +23,11 @@ test('Verifier prüft Originalskript-Hash, Szenen und echte Kandidaten', () => {
   assert.match(source, /photoCandidates/);
   assert.match(source, /importedAssetIds/);
 });
+
+test('Gemischt gilt erst als real getestet wenn dieselbe Szene Video und Bild enthält', () => {
+  assert.match(source, /const mixedMediaScenes = project\.scenes\.filter/);
+  assert.match(source, /sceneCandidates\.some\(\(candidate\) => candidate\.type === 'video'\)/);
+  assert.match(source, /sceneCandidates\.some\(\(candidate\) => candidate\.type !== 'video'\)/);
+  assert.match(source, /scriptVisualMixedMediaFound: scriptVisualProjects\.some\(\(entry\) => entry\.mixedMediaScenes >= 1\)/);
+  assert.match(source, /mindestens eine reale Szene mit Video- und Bildkandidaten im selben Szenenboard/);
+});
