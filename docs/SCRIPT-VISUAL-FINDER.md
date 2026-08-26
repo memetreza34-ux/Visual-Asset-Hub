@@ -42,7 +42,7 @@ Optional beziehungsweise vorbelegt:
 ## Grenzen
 
 - maximal 40.000 Skriptzeichen
-- maximal 120 visuelle Einheiten
+- maximal 120 visuelle Einheiten im erzeugten Projekt
 - maximal 100 Suchseiten pro Szene
 - keine automatische Skripterstellung
 - keine automatische Inhaltsfreigabe
@@ -57,6 +57,20 @@ Sie werden lediglich bei der visuellen Segmentierungslogik so behandelt, dass da
 
 Lange Sätze dürfen in mehrere visuelle Einheiten aufgeteilt werden. Jede Einheit verweist weiterhin auf ihren tatsächlichen Originaltext; der Hub erzeugt keinen Ersatztext.
 
+### Lange Skripte bis ungefähr zehn Minuten
+
+Im **Auto-Modus** darf ein langes Skript zunächst mehr als 120 einzelne kurze Satzsegmente erzeugen. Statt das Projekt deshalb sofort abzulehnen, verdichtet der Finder nur in diesem Fall die jeweils kürzesten benachbarten visuellen Einheiten, bis höchstens 120 Szenen übrig bleiben.
+
+Dadurch gilt:
+
+- das vollständige gespeicherte Skript bleibt unverändert
+- die Reihenfolge bleibt erhalten
+- nur die visuelle Gruppierung wird gröber
+- normale kürzere Skripte werden nicht künstlich zusammengelegt
+- Satzweise und Absatzweise bleiben bewusste manuelle Segmentierungsmodi
+
+So können auch längere Sprechertexte mit sehr vielen kurzen Sätzen verarbeitet werden, ohne die Web-App mit hunderten Szenenkarten zu überladen.
+
 ## Visuelle Analyse
 
 Pro Einheit werden lokal erzeugt:
@@ -70,7 +84,7 @@ Pro Einheit werden lokal erzeugt:
 - bevorzugter Medientyp
 - 3–5 unterschiedliche Queries
 - Kennzeichnung symbolischer / kontextueller B-Roll
-- falls nötig transparenter Kontext aus der direkt vorherigen Szene
+- falls nötig transparenter Kontext aus der vorherigen aktiven Szenenkette
 
 Unterstützte interne Visualrichtungen umfassen unter anderem Person, Produkt, Ort, Event, Technik, Finanzen, Historie, Prozess, Action und abstrakte Konzepte.
 
@@ -110,9 +124,12 @@ Kurze Folgesätze enthalten häufig keinen vollständigen Namen mehr:
 ```text
 OpenAI entwickelt humanoide Roboter.
 Sie sollen später in Fabriken arbeiten.
+Dort übernehmen sie die Montage.
 ```
 
-Der zweite Satz darf für die **Visualsuche** Kontext aus der direkt vorherigen Szene übernehmen. Das gilt für eindeutige Rückbezüge am Satzanfang, zum Beispiel:
+Rückbezugssätze dürfen für die **Visualsuche** den aktiven Kontext aus der unmittelbar vorherigen Szene übernehmen. Wenn diese vorherige Szene selbst eindeutig auf ihren Vorgänger verwiesen hat, darf der relevante Hauptkontext entlang dieser Rückbezugskette weitergetragen werden.
+
+Das gilt für eindeutige Rückbezüge am Satzanfang, zum Beispiel:
 
 - er / sie / es
 - diese / dieser / dieses
@@ -122,15 +139,15 @@ Der zweite Satz darf für die **Visualsuche** Kontext aus der direkt vorherigen 
 - anschließend
 - später
 
-Dadurch kann der zweite Satz weiterhin Queries mit `OpenAI` beziehungsweise dem vorherigen Motiv erzeugen, obwohl der Originalsatz den Namen nicht wiederholt.
+Dadurch können auch der zweite und dritte Satz weiterhin Queries mit `OpenAI`, `Roboter` und dem aktuellen Motiv erzeugen, obwohl der konkrete Name nicht in jedem Satz wiederholt wird.
 
 Wichtig:
 
-- nur die direkt vorherige Szene dient als Kontextquelle
+- die Vererbung startet nur bei einem eindeutigen sprachlichen Rückbezug
+- ein neuer expliziter Szenenbezug ohne solchen Rückbezug setzt den aktiven Kontext neu
 - der Originaltext wird nicht verändert
 - übernommener Kontext wird getrennt als `contextInherited`, `contextEntities` und `contextConcepts` gespeichert
 - die Weboberfläche zeigt **Kontext übernommen: ...** sichtbar an
-- ein neuer Satz ohne eindeutigen Rückbezug startet ohne diese Vererbung
 
 So bleibt nachvollziehbar, was tatsächlich im Skript stand und was ausschließlich als Recherchehilfe ergänzt wurde.
 
@@ -210,20 +227,34 @@ Die Provider erhalten die tatsächliche Seitennummer:
 
 Die Weboberfläche zeigt die aktuelle Suchseite und deaktiviert weitere Seiten nach Seite 100.
 
-## Lange Skripte
+## Weitere Web-Recherche
+
+Pro Szene steht zusätzlich **Weitere Web-Recherche** zur Verfügung. Sie erzeugt aus bis zu drei der aktuellen Szene-Queries manuelle Suchlinks zu:
+
+- YouTube
+- Google Bilder
+- Google Videos
+- Google News
+- Wikipedia
+
+Diese Links importieren **nichts** und setzen keinen Rechte- oder Reviewstatus. Sie dienen nur dazu, bei sehr konkreten Personen, Events, historischen Motiven oder seltenem Material weitere Fundstellen zu recherchieren.
+
+Sichtbarkeit auf YouTube, Google, Wikipedia oder einer anderen Website ist keine Nutzungsfreigabe.
+
+## Lange Skripte und Suchablauf
 
 Der Browser recherchiert Szene für Szene sequenziell.
 
 Dadurch:
 
-- keine unkontrollierte Request-Explosion
+- keine unkontrollierte gleichzeitige Request-Explosion
 - Fortschritt sichtbar
 - Recherche stoppbar
 - später fortsetzbar
 - fertige Szenen bleiben gespeichert
 - einzelne Providerfehler zerstören kein komplettes Projekt
 - zusätzliche Treffer können gezielt nur für einzelne Szenen nachgeladen werden
-- kontextabhängige Folgesätze behalten ihren direkten Vorgängerbezug für die Recherche
+- kontextabhängige Folgesätze behalten ihren aktiven Bezug für die Recherche
 
 ## Kandidaten
 
@@ -309,6 +340,10 @@ Provider-Keys werden nicht in Projekten oder Suchmetadaten gespeichert. Ein neu 
 
 Ein reiner Pixabay-Cachetreffer gilt ebenfalls nicht als Prüfung eines neu eingegebenen Pixabay-Keys, weil bei diesem Treffer keine echte Anfrage mit dem neuen Schlüssel stattgefunden hat.
 
+Noch nicht validierte Keys bleiben bis zur Bestätigung sichtbar im jeweiligen Passwortfeld und damit nur im Arbeitsspeicher der laufenden Seite. Dadurch geht ein gültiger Key bei langen Projekten nicht verloren, wenn die erste Szene den Provider noch nicht verwendet oder nur einen Cachetreffer erhält. Erst wenn der Server genau diesen Provider erfolgreich mit dem eingegebenen Key geprüft hat, wird der Wert aus dem sichtbaren Feld entfernt und im flüchtigen Sitzungsspeicher der Seite gehalten.
+
+**Sitzungs-Keys löschen** entfernt sowohl die gemerkten als auch die noch sichtbaren Keywerte.
+
 ## Rechte
 
 Ein Suchtreffer ist keine Veröffentlichungserlaubnis.
@@ -335,5 +370,7 @@ scriptVisualMultipleScenesSearched: true
 scriptVisualMixedMediaFound: true
 scriptVisualReviewImported: true
 ```
+
+Die manuelle Release-Checkliste prüft zusätzlich eine echte Szene mit Video + Bild, Folgeseiten, Auswahlpersistenz und die weiteren Browserabläufe.
 
 Diese Kriterien können erst durch den späteren echten lokalen Browser-/API-Test erfüllt werden.
