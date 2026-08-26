@@ -105,10 +105,17 @@ function approvedAssetIds(ids, catalog) {
 }
 
 function packBaseName(project) {
-  const raw = String(project?.title || project?.projectId || 'script-visual').replace(/[\u0000-\u001F\u007F]/g, ' ').replace(/\s+/g, ' ').trim();
+  const raw = String(project?.title || project?.projectId || 'script-visual')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/ß/g, 'ss')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
   const suffix = '-script-visual';
   const maxBaseLength = Math.max(2, MAX_PACK_NAME_LENGTH - suffix.length - 10);
-  return `${raw.slice(0, maxBaseLength) || 'script-visual'}${suffix}`;
+  const base = raw.slice(0, maxBaseLength).replace(/-+$/g, '') || 'script-project';
+  return `${base}${suffix}`;
 }
 
 async function ensureToken() {
