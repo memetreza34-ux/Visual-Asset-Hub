@@ -1,6 +1,9 @@
 const section = document.querySelector('#script-visual-finder');
 const providerLabels = { pexels: 'Pexels', pixabay: 'Pixabay', unsplash: 'Unsplash', openverse: 'Openverse', wikimedia: 'Wikimedia Commons' };
 const MAX_SEARCH_PAGE = 100;
+const LONG_PROJECT_THRESHOLD = 40;
+const LONG_PROJECT_BATCH_SIZE = 20;
+const DEPTH_TASK_LIMIT = { quick: 4, deep: 8, max: 12 };
 const sessionKeys = new Map();
 let currentProject = null;
 let token = '';
@@ -107,9 +110,17 @@ function renderWorkspace(projects) {
 function renderProject(container, project, keyFields, perPage, status) {
   const head = el('div', 'svf-project-head');
   const info = el('div');
-  info.append(text('span', project.projectId, 'svf-project-id'), text('h3', project.title), text('p', `${project.scenes.length} visuelle Einheiten · ${channelLabel(project.channel)} · ${mediaPreferenceLabel(project.settings?.mediaPreference)} · Originaltext bleibt unverändert`));
+  const taskLimit = DEPTH_TASK_LIMIT[project.settings?.depth] ?? DEPTH_TASK_LIMIT.deep;
+  const maxFirstPassTasks = project.scenes.length * taskLimit;
+  const batchNote = project.scenes.length > LONG_PROJECT_THRESHOLD ? ` · Langprojekt in Batches à ${LONG_PROJECT_BATCH_SIZE} Szenen` : '';
+  info.append(
+    text('span', project.projectId, 'svf-project-id'),
+    text('h3', project.title),
+    text('p', `${project.scenes.length} visuelle Einheiten · ${channelLabel(project.channel)} · ${mediaPreferenceLabel(project.settings?.mediaPreference)} · Originaltext bleibt unverändert`),
+    text('small', `Maximaler Erstlauf: bis zu ${maxFirstPassTasks} Provider-Suchtasks${batchNote}. Die Suche stoppt pro Szene früher, sobald die Zielqualität erreicht ist.`, 'svf-search-budget')
+  );
   const controls = el('div', 'svf-project-controls');
-  const searchAll = button('Alle Szenen recherchieren', 'svf-primary');
+  const searchAll = button(searchBatchLabel(project), 'svf-primary');
   const stop = button('Stoppen');
   stop.disabled = true;
   controls.append(searchAll, stop);
@@ -127,18 +138,27 @@ function renderProject(container, project, keyFields, perPage, status) {
   container.replaceChildren(head, progress, scenes);
   updateProgress(project, progressFill, progressText);
 
-  stop.addEventListener('click', () => { stopRequested = true; stop.disabled = true; searchAll.disabled = false; searchAll.textContent = 'Recherche fortsetzen'; });
+  stop.addEventListener('click', () => {
+    stopRequested = true;
+    stop.disabled = true;
+    searchAll.disabled = false;
+    searchAll.textContent = searchBatchLabel(currentProject);
+  });
   searchAll.addEventListener('click', async () => {
     stopRequested = false;
     searchAll.disabled = true;
     stop.disabled = false;
-    const pending = currentProject.scenes.filter((scene) => !scene.searchedAt);
-    if (!pending.length) {
+    const allPending = currentProject.scenes.filter((scene) => !scene.searchedAt);
+    if (!allPending.length) {
       searchAll.disabled = false;
       stop.disabled = true;
+      searchAll.textContent = 'Alle Szenen recherchiert';
       showStatus(status, 'Alle Szenen wurden bereits recherchiert. Einzelne Szenen können mit „Mehr Treffer“ auf der nächsten Suchseite erweitert werden.', true);
       return;
     }
+    const batchLimit = currentProject.scenes.length > LONG_PROJECT_THRESHOLD ? LONG_PROJECT_BATCH_SIZE : allPending.length;
+    const pending = allPending.slice(0, batchLimit);
+    if (allPending.length > pending.length) showStatus(status, `Langprojekt: ${pending.length} von ${allPending.length} offenen Szenen werden in diesem Batch recherchiert.`, true);
     let completed = 0;
     for (const scene of pending) {
       if (stopRequested) break;
@@ -154,8 +174,9 @@ function renderProject(container, project, keyFields, perPage, status) {
     }
     searchAll.disabled = false;
     stop.disabled = true;
-    searchAll.textContent = currentProject.scenes.every((scene) => scene.searchedAt) ? 'Alle Szenen recherchiert' : 'Recherche fortsetzen';
-    if (!stopRequested) showStatus(status, `${currentProject.progress.searchedScenes}/${currentProject.progress.totalScenes} Szenen recherchiert.`, true);
+    searchAll.textContent = searchBatchLabel(currentProject);
+    const remaining = currentProject.scenes.filter((scene) => !scene.searchedAt).length;
+    if (!stopRequested) showStatus(status, `${currentProject.progress.searchedScenes}/${currentProject.progress.totalScenes} Szenen recherchiert${remaining ? ` · ${remaining} noch offen` : ''}.`, true);
   });
 }
 
@@ -410,6 +431,13 @@ function updateProgress(project, fill, copy) {
   const percent = Math.round(100 * searched / total);
   fill.style.width = `${percent}%`;
   copy.textContent = `${searched}/${total} Szenen recherchiert · ${project.scenes.filter((scene) => scene.selectedPrimary || scene.selectedAlternatives.length).length} mit Auswahl`;
+}
+
+function searchBatchLabel(project) {
+  const remaining = project.scenes.filter((scene) => !scene.searchedAt).length;
+  if (!remaining) return 'Alle Szenen recherchiert';
+  if (project.scenes.length > LONG_PROJECT_THRESHOLD) return `Nächste ${Math.min(LONG_PROJECT_BATCH_SIZE, remaining)} Szenen recherchieren`;
+  return project.scenes.some((scene) => scene.searchedAt) ? 'Recherche fortsetzen' : 'Alle Szenen recherchieren';
 }
 
 function candidateSummary(scene, project) {
