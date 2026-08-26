@@ -42,17 +42,28 @@ function installProjectPackAction() {
       const chunks = chunk(approved, MAX_PACK_ASSETS);
       const baseName = packBaseName(project);
       const directories = [];
+      let exportedAssetCount = 0;
       for (let index = 0; index < chunks.length; index += 1) {
         const suffix = chunks.length > 1 ? `-teil-${index + 1}` : '';
         const name = `${baseName}${suffix}`.slice(0, MAX_PACK_NAME_LENGTH);
-        const result = await postMediaPack(chunks[index], name);
-        const pack = parseMediaPackOutput(result.output);
-        if (pack.directory) directories.push(pack.directory);
+        try {
+          const result = await postMediaPack(chunks[index], name);
+          const pack = parseMediaPackOutput(result.output);
+          if (pack.directory) directories.push(pack.directory);
+          exportedAssetCount += chunks[index].length;
+        } catch (error) {
+          const completed = directories.length
+            ? ` Bereits erstellt: ${directories.join(' | ')}.`
+            : exportedAssetCount
+              ? ` ${exportedAssetCount} Asset(s) wurden in vorherigen Teilpaketen bereits exportiert.`
+              : '';
+          throw new Error(`Teilpaket ${index + 1}/${chunks.length} ist fehlgeschlagen: ${error instanceof Error ? error.message : String(error)}.${completed}`);
+        }
       }
 
       const blockedNote = blockedCount ? ` · ${blockedCount} ausgewählte Verknüpfung(en) noch nicht importiert oder nicht freigegeben` : '';
       const directoryNote = directories.length ? ` · Ordner: ${directories.join(' | ')}` : '';
-      showStatus(status, `${approved.length} freigegebene Asset(s) in ${chunks.length} verifiziertem Schnittpaket(en) erstellt${blockedNote}${directoryNote}.`, true);
+      showStatus(status, `${exportedAssetCount} freigegebene Asset(s) in ${chunks.length} verifiziertem Schnittpaket(en) erstellt${blockedNote}${directoryNote}.`, true);
       document.dispatchEvent(new CustomEvent('vah:script-media-pack-created', { detail: { projectId, assetIds: approved, packCount: chunks.length, directories } }));
     } catch (error) {
       showStatus(status, error instanceof Error ? error.message : String(error), false);
