@@ -251,8 +251,12 @@ function buildScene(originalText, index, timing, options, previousContext = { en
 
 function shouldInheritContext(text, previousContext) {
   if (!(previousContext?.entities?.length || previousContext?.concepts?.length)) return false;
-  const normalized = normalize(text);
+  const normalized = normalize(stripListPrefix(text));
   return /^(?:er|sie|es|ihn|ihm|ihnen|diese|dieser|dieses|diesen|diesem|deren|dessen|dabei|dadurch|damit|dort|dann|so|anschliessend|anschließend|spaeter|später)\b/.test(normalized);
+}
+
+function stripListPrefix(value) {
+  return String(value ?? '').replace(/^\s*(?:[-–—•]\s*|\d{1,4}[.)]\s*)/u, '').trim();
 }
 
 function compactAutoUnits(units, maxUnits) {
