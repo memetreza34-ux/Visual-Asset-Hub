@@ -81,6 +81,24 @@ test('lange Projekte rendern Kandidaten erst beim Öffnen der jeweiligen Szene',
   assert.match(css, /\.svf-candidate-panel/);
 });
 
+test('lange Projekte werden in kontrollierten 20-Szenen-Batches recherchiert', () => {
+  const source = read('web/script-visual-finder.js');
+  assert.match(source, /const LONG_PROJECT_THRESHOLD = 40/);
+  assert.match(source, /const LONG_PROJECT_BATCH_SIZE = 20/);
+  assert.match(source, /const batchLimit = currentProject\.scenes\.length > LONG_PROJECT_THRESHOLD \? LONG_PROJECT_BATCH_SIZE : allPending\.length/);
+  assert.match(source, /const pending = allPending\.slice\(0, batchLimit\)/);
+  assert.match(source, /Nächste \$\{Math\.min\(LONG_PROJECT_BATCH_SIZE, remaining\)\} Szenen recherchieren/);
+  assert.match(source, /Langprojekt: \$\{pending\.length\} von \$\{allPending\.length\} offenen Szenen/);
+});
+
+test('Browser zeigt den maximalen Suchaufwand vor dem Langprojekt-Lauf', () => {
+  const source = read('web/script-visual-finder.js');
+  assert.match(source, /const DEPTH_TASK_LIMIT = \{ quick: 4, deep: 8, max: 12 \}/);
+  assert.match(source, /const maxFirstPassTasks = project\.scenes\.length \* taskLimit/);
+  assert.match(source, /Maximaler Erstlauf: bis zu \$\{maxFirstPassTasks\} Provider-Suchtasks/);
+  assert.match(source, /Die Suche stoppt pro Szene früher, sobald die Zielqualität erreicht ist/);
+});
+
 test('Mehr Treffer zeigt die echte nächste Suchseite und ein festes Maximum', () => {
   const source = read('web/script-visual-finder.js');
   assert.match(source, /const MAX_SEARCH_PAGE = 100/);
