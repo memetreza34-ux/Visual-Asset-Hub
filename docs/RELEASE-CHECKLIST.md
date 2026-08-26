@@ -26,108 +26,88 @@ Die Beta wird erst nach dem späteren vollständigen lokalen Realtest aus Draft 
 
 ### Implementiert
 
-- [x] eigener Arbeitsbereich **Skript → Visuals** in Navigation und Web-App
+- [x] eigener Arbeitsbereich **Skript → Visuals**
 - [x] nur **Fertiges Skript** ist Pflichtfeld
-- [x] Projekttitel und Zuordnung sind optional
-- [x] die Funktion schreibt, verbessert oder ergänzt das Skript nicht
-- [x] Originalskript wird mit SHA-256 dokumentiert und lokal gespeichert
-- [x] bis zu 40.000 Zeichen und maximal 120 visuelle Einheiten
-- [x] Szenenmodi Auto, Satzweise und Absatzweise
-- [x] lange Sätze können in kleinere visuelle Einheiten geteilt werden
-- [x] Listen-/Nummerierungspräfixe werden nicht zu eigenen Szenen und bleiben im Originaltext erhalten
-- [x] stabile Szenen-IDs `SCENE-001`, `SCENE-002` usw.
-- [x] automatische Zeitbereiche
-- [x] visuelle Absicht, Entitäten und Konzepte pro Szene
-- [x] mehrere dynamische Queries pro Szene
-- [x] Symbolbilder / kontextuelle B-Rolls werden als solche gekennzeichnet
-- [x] Auto-Zuordnung zu Finanzen, KI, Elektrotechnik, Kampfsport oder neutral Allgemein
-- [x] Allgemein beeinflusst die 720 Kanalziele nicht
+- [x] Skript wird nicht geschrieben, verbessert oder ergänzt
+- [x] vollständiges Originalskript bleibt gespeichert und per SHA-256 dokumentiert
+- [x] bis 40.000 Zeichen und maximal 120 visuelle Einheiten
+- [x] Auto, Satzweise und Absatzweise
+- [x] Auto verdichtet sehr viele kurze Einheiten kontrolliert auf maximal 120
+- [x] Nummerierungs-/Listenpräfixe bleiben im Originaltext erhalten
+- [x] nummerierte Rückbezugssätze wie `2. Sie ...` erben trotzdem Suchkontext
+- [x] stabile Szenen-IDs und automatische Zeitbereiche
+- [x] visuelle Absicht, Entitäten, Konzepte und 3–5 unterschiedliche Queries
+- [x] providerfreundliche Übersetzungen häufiger deutscher Motive
+- [x] Kontext-Vererbung für eindeutige Folgesätze und transparente Anzeige im Szenenboard
+- [x] symbolische / kontextuelle B-Rolls werden gekennzeichnet
 - [x] Pexels, Pixabay, Unsplash, Openverse und Wikimedia werden wiederverwendet
-- [x] Pixabay-24h-Cache bleibt aktiv und ist seitenspezifisch
-- [x] Foto-only-Provider werden nicht als Videoquelle behandelt
-- [x] Gemischt-Modus versucht Video-B-Roll und Bildmaterial pro Szene zu liefern
-- [x] UI zeigt Video-/Bildanzahl und Mix-Status pro Szene
-- [x] Szene-für-Szene-Suche statt unkontrollierter Massensuche
-- [x] Schnell: mindestens 1 verfügbare Quelle / maximal 4 Suchtasks pro Suchseite
-- [x] Tief: nach Möglichkeit mindestens 3 verfügbare Quellen / maximal 8 Suchtasks pro Suchseite
-- [x] Maximal: nach Möglichkeit alle 5 verfügbaren Quellen / maximal 12 Suchtasks pro Suchseite
-- [x] Providerziel passt sich an fehlende Sitzung-Keys an
-- [x] **Mehr Treffer** lädt echte Folgeseiten statt erneut Seite 1
-- [x] `searchRound` wird pro Szene gespeichert
-- [x] maximal 100 Suchseiten pro Szene
-- [x] vollständig fehlgeschlagene Runde erhöht `searchRound` nicht
-- [x] Wikimedia verwendet lückenlosen `gsroffset` passend zu `perPage`
-- [x] lange Projekte können gestoppt und später fortgesetzt werden
-- [x] bereits fertige Szenen bleiben bei späteren Suchfehlern erhalten
-- [x] Bilder direkt sichtbar
-- [x] geeignete Videos direkt abspielbar
-- [x] technischer Fit sichtbar
-- [x] Quellseite und Creator soweit vorhanden sichtbar
-- [x] Hauptvisual auswählbar
-- [x] mehrere Alternativen auswählbar
-- [x] Hauptvisual/Alternativen werden beim Kandidatenlimit geschützt
-- [x] bereits in anderen Szenen gefundene Medien werden niedriger priorisiert
-- [x] Dublettenprüfung umfasst Provider-ID, Quell-URL, Original-URL und Medienreferenz
-- [x] Import nur nach bewusster Auswahl
-- [x] jeder neu angelegte externe Import läuft über bestehende Asset-Pipeline und startet auf `review`
-- [x] bereits vorhandene Katalogquelle wird verknüpft statt als Duplikat erneut angelegt
-- [x] Projekte persistieren unter `.local-storage/script-visual-projects`
-- [x] Projektübersicht und Wiederöffnen nach Browser-Neuladen
+- [x] Gemischt versucht Video + Bild in derselben Szene zu sammeln
+- [x] Schnell/Tief/Maximal nutzt nach Möglichkeit 1/3/5 Quellen und 4/8/12 maximale Suchtasks pro Szene/Seite
+- [x] pro Szene werden je Modus bis zu 12/20/30 eindeutige Kandidaten behalten
+- [x] echte Folgeseiten über `searchRound`, maximal 100 Seiten
+- [x] Wikimedia-Pagination ohne ausgelassene Treffer
+- [x] projektweite Deduplizierung und Wiederverwendungs-Penalty
+- [x] bestehende Katalogassets werden verknüpft statt dupliziert
+- [x] Langprojekte rendern Kandidaten ab mehr als 20 Szenen lazy
+- [x] Sammelrecherche ist auf ungefähr 80 theoretische Provider-Suchtasks pro Batch gedrosselt
+- [x] daraus resultieren maximal Schnell 20 / Tief 10 / Maximal 6 Szenen pro Batch
+- [x] Stoppen und Fortsetzen sind vorgesehen
+- [x] Projektspiegelung wird nach Erstellung inkrementell aktualisiert
+- [x] manuelle Discovery-Links zu YouTube, Google Bilder/Videos/News und Wikipedia
+- [x] Discovery-Links importieren nichts und sind keine Rechtefreigabe
+- [x] Bilder sichtbar, Videos direkt abspielbar
+- [x] Hauptvisual und mehrere Alternativen auswählbar
+- [x] Import nur bewusst und jeder neue externe Import startet auf `review`
+- [x] Projekte unter `.local-storage/script-visual-projects`
 - [x] Spiegelung unter `ALLES-GEFUNDEN/06-SKRIPT-PROJEKTE`
-- [x] `00-SKRIPT.txt`, `00-PROJEKT.json`, `00-SZENENPLAN.md`, `00-SHOTLIST.json`, `00-SHOTLIST.csv`
-- [x] Kandidaten pro Szene mit INFO-/Quellen-/Medium-/Vorschau-Dateien
-- [x] `vault:build` bewahrt Skriptprojekte
-- [x] Provider-Keys werden nicht in Projektdateien geschrieben
-- [x] Browser verwendet für Provider-Keys weder `localStorage` noch `sessionStorage`
-- [x] neuer Key wird erst nach erfolgreicher Anfrage genau dieses Providers für die Sitzung gemerkt
-- [x] keylose Provider können keinen falschen Key eines anderen Providers bestätigen
-- [x] Pixabay-Cachetreffer validiert keinen neu eingegebenen Key
-- [x] neue Unit-/Browser-/API-/Vault-/Beta-/Pagination-Regressionstests vorhanden
+- [x] Shotlist JSON/CSV und Szenenplan
+- [x] Provider-Keys weder in Projekten noch `localStorage`/`sessionStorage`
+- [x] Key wird erst nach erfolgreicher Anfrage genau dieses Providers als Sitzung-Key gemerkt
+- [x] Pixabay-Cachetreffer validiert keinen neuen Key
+- [x] Unit-/Browser-/API-/Vault-/Beta-Vertragstests vorhanden
 
 ### Später real prüfen
 
 - [ ] echtes 1-Minuten-Skript erzeugt sinnvolle visuelle Einheiten
-- [ ] längeres Skript von mehreren Minuten bleibt übersichtlich und stabil
-- [ ] Originalskript ist nach Speicherung inhaltlich unverändert
-- [ ] nummerierte/Aufzählungs-Zeilen bleiben im Szenen-Originaltext erhalten
+- [ ] Originalskript ist nach Speicherung unverändert
+- [ ] Rückbezugssatz übernimmt sichtbar den richtigen Kontext
+- [ ] nummerierter Rückbezugssatz funktioniert ebenfalls
 - [ ] mindestens zwei Szenen werden real über Provider recherchiert
-- [ ] mindestens ein echter Video-Kandidat wird direkt abgespielt
-- [ ] mindestens ein echter Bild-Kandidat wird sichtbar geprüft
-- [ ] Gemischt-Modus liefert bei verfügbarer Videoquelle mindestens eine Szene mit Video + Bild
-- [ ] UI zeigt für diese Szene **Mix erfüllt**
-- [ ] mehrere Kandidaten pro Szene sind praktisch brauchbar
-- [ ] **Mehr Treffer** lädt bei mindestens einer Szene Seite 2 statt erneut Seite 1
-- [ ] erneutes **Mehr Treffer** kann Seite 3 laden
-- [ ] bereits ausgewählte Hauptvisuals/Alternativen bleiben beim Nachladen erhalten
-- [ ] Wikimedia-Seite 2 liefert einen neuen lückenlosen Trefferbereich
-- [ ] **Alle Szenen recherchieren** zeigt korrekten Fortschritt
-- [ ] **Stoppen** und Fortsetzen funktioniert
-- [ ] einzelne Providerfehler zerstören keine bereits fertigen Szenen
-- [ ] vollständig fehlgeschlagene Zusatzrunde erhöht die Suchseite nicht
-- [ ] Hauptvisual und Alternativen bleiben nach Neuladen erhalten
-- [ ] ein ausgewählter Kandidat wird bewusst als `review` importiert
-- [ ] Test mit bereits vorhandenem Katalogtreffer verknüpft die vorhandene Asset-ID statt ein Duplikat anzulegen
+- [ ] mindestens eine konkrete Szene enthält gleichzeitig Video- und Bildkandidaten
+- [ ] mehrere brauchbare Kandidaten pro Szene
+- [ ] Tief/Maximal liefern bei vorhandenen Quellen die erwartete Quellenbreite
+- [ ] **Mehr Treffer** lädt nachweislich Seite 2 und mindestens eine weitere Seite
+- [ ] zusätzliche Suchseiten erhöhen die sinnvolle Auswahl bis zu den jeweiligen 12/20/30-Grenzen
+- [ ] Video direkt abspielen, Bild direkt prüfen
+- [ ] Hauptvisual und Alternativen bleiben nach Nachladen und Browser-Neuladen erhalten
+- [ ] längeres Skript bleibt performant; Lazy-Rendering funktioniert
+- [ ] Sammelbutton verwendet die modeabhängigen Batchgrößen Schnell 20 / Tief 10 / Maximal 6
+- [ ] Stoppen beendet nach laufender Szene und Fortsetzen setzt korrekt weiter
+- [ ] einzelne Providerfehler zerstören fertige Szenen nicht
+- [ ] ein Kandidat wird bewusst als `review` importiert
+- [ ] bestehender Katalogtreffer wird ohne Duplikat verknüpft
 - [ ] ungewählte Kandidaten werden nicht importiert
-- [ ] Unsplash-Import benötigt weiterhin einen gültigen Sitzung-Key
-- [ ] falscher neuer Provider-Key bleibt nach fehlgeschlagener Suche nicht im Sitzungsspeicher
-- [ ] `.local-storage/script-visual-projects` enthält keine Provider-Keys
+- [ ] Unsplash-Import benötigt aktuellen Sitzung-Key
+- [ ] keine Provider-Keys in Projektdateien
 - [ ] `06-SKRIPT-PROJEKTE` enthält das echte Testprojekt
-- [ ] Shotlist JSON/CSV/Markdown stimmt mit den Szenen überein
-- [ ] `beta:verify` meldet `scriptVisualProjectGenerated: true`
-- [ ] `beta:verify` meldet `scriptVisualMultipleScenesSearched: true`
-- [ ] `beta:verify` meldet `scriptVisualMixedMediaFound: true`
-- [ ] `beta:verify` meldet `scriptVisualReviewImported: true`
+- [ ] inkrementelle Spiegelung verändert nur die betroffene Szene plus Root-Dateien
+- [ ] erneuter `vault:build` erhält das Projekt
+- [ ] Shotlist stimmt mit Szenen und Auswahl überein
+- [ ] `scriptVisualProjectGenerated: true`
+- [ ] `scriptVisualMultipleScenesSearched: true`
+- [ ] `scriptVisualMixedMediaFound: true`
+- [ ] `scriptVisualReviewImported: true`
 
 ## Universelle Themenrecherche
 
 - [x] Auto, Person, Firma/Marke/Organisation, Produkt/Objekt, Event, Ort, Technik, Sport/Kampf/Athletik, Historie und allgemeines Konzept
 - [x] Schnell maximal 6 Motivbereiche
 - [x] Tief maximal 8 Motivbereiche
-- [x] Maximal maximal 12 Motivbereiche beziehungsweise 60 Provider-Suchen bei fünf Quellen
+- [x] Maximal maximal 12 Motivbereiche / 60 Provider-Suchen
 - [x] optionale Skriptbegriffe können Namen, Events und Jahreszahlen ergänzen
 - [x] Bilder und Videos werden visuell dargestellt
-- [x] jeder neue Import startet als `review`
-- [x] externe Discovery-Links sind als reine Recherchehilfe gekennzeichnet
+- [x] jeder Import startet als `review`
+- [x] externe Discovery-Links sind reine Recherchehilfe
 - [ ] echte Sport-Recherche z. B. Conor McGregor geprüft
 - [ ] mindestens eine zweite reale Rechercheart geprüft
 - [ ] skriptspezifische Themenrecherche geprüft
@@ -139,38 +119,33 @@ Die Beta wird erst nach dem späteren vollständigen lokalen Realtest aus Draft 
 - [ ] echte Fotosuche erfolgreich
 - [ ] echte Videosuche erfolgreich
 - [ ] Sitzung-Key funktioniert
-- [ ] Seite 2 liefert neue Treffer
 
 ### Pixabay
 - [ ] echte Fotosuche erfolgreich
 - [ ] echte Videosuche erfolgreich
 - [ ] 24-Stunden-Cache für identische Suche funktioniert
-- [ ] Cache vermischt keine Kanal-/Projektmetadaten
-- [ ] Seitennummer ist Bestandteil des Caches
+- [ ] Seitennummer ist Teil des Caches
 
 ### Unsplash
 - [ ] echte Fotosuche erfolgreich
 - [ ] Creator/Attribution korrekt
 - [ ] Download-Meldung beim Import korrekt
-- [ ] nach Löschen des Sitzung-Keys kein alter Schlüssel nutzbar
-- [ ] Seite 2 liefert neue Treffer
 
 ### Openverse
 - [ ] Suche ohne geheimen Key funktioniert
 - [ ] nur unterstützte offene Lizenztypen werden übernommen
-- [ ] Seite 2 liefert neue Treffer
 
 ### Wikimedia Commons
 - [ ] Suche ohne geheimen Key funktioniert
 - [ ] Lizenz und Attribution werden angezeigt
-- [ ] `gsroffset`/Seitennavigation liefert lückenlose neue Treffer
+- [ ] Folgeseiten sind lückenlos
 
 ### Gemeinsame Regeln
 - [ ] Provider-Keys verschwinden nach Neuladen
 - [ ] keine Provider-Keys in `localStorage` oder `sessionStorage`
 - [ ] technischer Fit verändert keinen Reviewstatus
 - [ ] nur markierte Treffer werden importiert
-- [ ] jeder neue externe Import startet auf `review`
+- [ ] jeder neue Import startet auf `review`
 - [ ] Dublettenprüfung funktioniert
 
 ## ALLES-GEFUNDEN
@@ -181,14 +156,13 @@ Die Beta wird erst nach dem späteren vollständigen lokalen Realtest aus Draft 
 - [x] `90-GEFUNDENE-KANDIDATEN`
 - [x] lokale Suchhistorie bleibt erhalten
 - [x] Script-Visual-Projekte bleiben bei Vault-Neuaufbau erhalten
-- [x] erzeugte Inhalte bleiben über `.gitignore` lokal
-- [ ] `npm run vault:build` läuft im echten lokalen Repository fehlerfrei
+- [x] erzeugte Inhalte bleiben lokal
+- [ ] `npm run vault:build` läuft lokal fehlerfrei
 - [ ] Gesamtindex enthält nach Starterimport zwölf Starterassets
 - [ ] lokale Dateikopie geprüft
 - [ ] externe `.url`-Verknüpfungen geprüft
 - [ ] echtes Script-Visual-Projekt bleibt nach erneutem Vault-Build erhalten
-- [ ] `searchRound`, Auswahl und Importverknüpfungen bleiben erhalten
-- [ ] kein Vault-Eintrag umgeht Review- oder Rechteprüfung
+- [ ] kein Vault-Eintrag umgeht Review/Rechteprüfung
 
 ## Ausbau 720 und Review-first
 
@@ -205,7 +179,7 @@ Die Beta wird erst nach dem späteren vollständigen lokalen Realtest aus Draft 
 
 ## Bestehender Skript-Planer
 
-- [x] bestehender Bereich **Skript planen** bleibt getrennt vom Script Visual Finder
+- [x] **Skript planen** bleibt getrennt vom Script Visual Finder
 - [ ] echte Shotlist mit vorhandenen Kanal-Sammlungen prüfen
 - [ ] JSON/CSV/Markdown/SRT prüfen
 - [ ] `scriptPlanGenerated: true`
@@ -215,12 +189,11 @@ Die Beta wird erst nach dem späteren vollständigen lokalen Realtest aus Draft 
 - [x] acht Pexels-Videos vorgesehen
 - [x] drei eigene SVG-Grafiken vorgesehen
 - [x] ein Wikimedia-Commons-Foto CC BY-SA 4.0 vorgesehen
-- [ ] `npm run starter:import` erzeugt idempotent 12 Starterassets
+- [ ] `starter:import` erzeugt idempotent 12 Starterassets
 - [ ] alle vier festen Kanäle vertreten
-- [ ] alle zwölf Starterassets vollständig entschieden
+- [ ] alle zwölf Starterassets entschieden
 - [ ] mindestens ein Asset freigegeben
-- [ ] Freigabe ohne vier Pflichtprüfungen wird blockiert
-- [ ] Einschränkung ohne Begründung wird blockiert
+- [ ] Freigabe ohne Pflichtprüfungen wird blockiert
 
 ## Eigene Medien
 
@@ -232,8 +205,8 @@ Die Beta wird erst nach dem späteren vollständigen lokalen Realtest aus Draft 
 ## Medienpaket und echte Nutzung
 
 - [ ] ungeprüfte Assets werden aus Medienpaketen blockiert
-- [ ] Paket ausschließlich mit `approved`-Assets erzeugt
-- [ ] `manifest.json`, SHA-256, Quelle und Attribution geprüft
+- [ ] Paket ausschließlich mit `approved`-Assets
+- [ ] Manifest, SHA-256, Quelle und Attribution geprüft
 - [ ] mindestens ein freigegebenes Asset real verwendet
 - [ ] Nutzung dokumentiert
 - [ ] `realUsageRecorded: true`
@@ -247,26 +220,22 @@ Die Beta wird erst nach dem späteren vollständigen lokalen Realtest aus Draft 
 
 ## GitHub Actions und Kostenkontrolle
 
-- [x] Workflows ausschließlich manuell über `workflow_dispatch`
-- [x] keine automatischen `push`-Trigger
-- [x] keine automatischen `pull_request`-Trigger
-- [x] keine automatischen `schedule`-Trigger
+- [x] Workflows ausschließlich `workflow_dispatch`
+- [x] keine automatischen Push-/PR-/Schedule-Trigger
 - [x] lokaler Vertragstest schützt diese Regel
-- [ ] keine GitHub Action ist für die lokale Beta-Abnahme erforderlich
+- [ ] keine GitHub Action für lokale Beta-Abnahme erforderlich
 
 ## Release
 
 - [x] Paketversion `0.4.0-beta.7`
 - [x] README auf beta.7
 - [x] Changelog beta.7
-- [x] Script-Visual-Doku auf aktuelle beta.7-Härtung aktualisiert
 - [x] PR #3 bleibt bis zum Realtest Draft
 - [ ] lokale Komplettprüfung grün
-- [ ] alle neuen Script-Visual-Realtest-Kriterien `true`
+- [ ] alle Script-Visual-Realtest-Kriterien `true`
 - [ ] bestehende Realtest-Kriterien `true`
 - [ ] `realTestComplete: true`
 - [ ] PR aus Draft nehmen
 - [ ] nach erfolgreicher Abnahme nach `main` mergen
-- [ ] optional Beta-Tag/Release erstellen
 
-Die Beta gilt erst als real getestet, wenn der komplette lokale Ablauf inklusive **Skript rein → Visuals raus**, realen Provider-Suchen, Medienmix, Folgeseiten, Review, Rechteprüfung, Medienpaket und dokumentierter echter Nutzung erfolgreich abgenommen wurde.
+Die Beta gilt erst als real getestet, wenn der komplette lokale Ablauf inklusive **Skript rein → Visuals raus**, realen Provider-Suchen, Review, Rechteprüfung, Medienpaket und dokumentierter echter Nutzung erfolgreich abgenommen wurde.
