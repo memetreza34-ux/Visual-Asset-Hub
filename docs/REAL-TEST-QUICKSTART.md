@@ -36,8 +36,6 @@ Prüfen:
 
 ### Kontext kurz prüfen
 
-Zum Beispiel:
-
 ```text
 1. OpenAI entwickelt humanoide Roboter.
 2. Sie sollen später in Fabriken arbeiten.
