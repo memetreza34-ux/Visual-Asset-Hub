@@ -41,17 +41,19 @@ function installProjectPackAction() {
 
       const chunks = chunk(approved, MAX_PACK_ASSETS);
       const baseName = packBaseName(project);
-      const outputs = [];
+      const directories = [];
       for (let index = 0; index < chunks.length; index += 1) {
         const suffix = chunks.length > 1 ? `-teil-${index + 1}` : '';
         const name = `${baseName}${suffix}`.slice(0, MAX_PACK_NAME_LENGTH);
         const result = await postMediaPack(chunks[index], name);
-        outputs.push(result.output || `Teil ${index + 1} erstellt`);
+        const pack = parseMediaPackOutput(result.output);
+        if (pack.directory) directories.push(pack.directory);
       }
 
       const blockedNote = blockedCount ? ` · ${blockedCount} ausgewählte Verknüpfung(en) noch nicht importiert oder nicht freigegeben` : '';
-      showStatus(status, `${approved.length} freigegebene Asset(s) in ${chunks.length} verifiziertem Schnittpaket(en) erstellt${blockedNote}.`, true);
-      document.dispatchEvent(new CustomEvent('vah:script-media-pack-created', { detail: { projectId, assetIds: approved, packCount: chunks.length } }));
+      const directoryNote = directories.length ? ` · Ordner: ${directories.join(' | ')}` : '';
+      showStatus(status, `${approved.length} freigegebene Asset(s) in ${chunks.length} verifiziertem Schnittpaket(en) erstellt${blockedNote}${directoryNote}.`, true);
+      document.dispatchEvent(new CustomEvent('vah:script-media-pack-created', { detail: { projectId, assetIds: approved, packCount: chunks.length, directories } }));
     } catch (error) {
       showStatus(status, error instanceof Error ? error.message : String(error), false);
     } finally {
@@ -116,6 +118,16 @@ function packBaseName(project) {
   const maxBaseLength = Math.max(2, MAX_PACK_NAME_LENGTH - suffix.length - 10);
   const base = raw.slice(0, maxBaseLength).replace(/-+$/g, '') || 'script-project';
   return `${base}${suffix}`;
+}
+
+function parseMediaPackOutput(value) {
+  if (typeof value !== 'string' || !value.trim()) return {};
+  try {
+    const parsed = JSON.parse(value);
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
 }
 
 async function ensureToken() {
