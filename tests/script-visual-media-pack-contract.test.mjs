@@ -55,6 +55,13 @@ test('erzeugte Media-Pack-Pfade werden aus der bestehenden CLI-Antwort sichtbar 
   assert.match(source, /directories \}\s*\}\)/);
 });
 
+test('Fehler in späteren Teilpaketen verschweigen bereits erfolgreiche Exporte nicht', () => {
+  assert.match(source, /let exportedAssetCount = 0/);
+  assert.match(source, /exportedAssetCount \+= chunks\[index\]\.length/);
+  assert.match(source, /Teilpaket \$\{index \+ 1\}\/\$\{chunks\.length\} ist fehlgeschlagen/);
+  assert.match(source, /Bereits erstellt: \$\{directories\.join\(' \| '\)\}/);
+});
+
 test('Schnittpaket-Integration speichert weder Sitzungstoken noch Provider-Keys persistent', () => {
   assert.doesNotMatch(source, /localStorage/);
   assert.doesNotMatch(source, /sessionStorage/);
