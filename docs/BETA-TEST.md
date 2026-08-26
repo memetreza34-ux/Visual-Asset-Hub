@@ -47,8 +47,6 @@ Prüfen:
 
 ### B2 – Szenenkontext
 
-Skript mit Rückbezügen verwenden:
-
 ```text
 1. OpenAI entwickelt humanoide Roboter.
 2. Sie sollen später in Fabriken arbeiten.
@@ -59,56 +57,49 @@ Prüfen:
 
 - Szene 2 und 3 zeigen **Kontext übernommen**
 - `OpenAI` bleibt in relevanten Suchqueries erhalten
-- Nummerierungen `1.`, `2.`, `3.` bleiben im Originaltext
-- ein neuer expliziter Akteur in einer späteren Szene setzt den Kontext neu
+- Nummerierungen bleiben im Originaltext
+- ein neuer expliziter Akteur setzt den Kontext neu
 - Kontextfelder stehen getrennt in der Projektdatei
-- Voice-over-/Originaltext wird niemals umgeschrieben
+- Originaltext wird niemals umgeschrieben
 
 ### B3 – echte Medienrecherche
 
 Mindestens zwei Szenen im Modus **Gemischt** real recherchieren.
 
-Prüfen:
-
-- Openverse/Wikimedia ohne privaten Key
-- mit Sitzung-Keys zusätzlich Pexels/Pixabay/Unsplash
 - Bilder sichtbar, Videos direkt abspielbar
 - technischer Fit, Quelle und Creator sichtbar
 - mindestens eine einzelne Szene erreicht **Mix erfüllt** mit Video + Bild
 - keine automatische Auswahl/Freigabe
-- Dubletten über Provider-/Quell-/Medienreferenzen reduziert
+- Dubletten werden reduziert
 
 Rechercheumfang:
 
-- **Schnell:** nach Möglichkeit mindestens 1 Quelle, max. 4 Suchtasks/Seite, bis 12 Kandidaten behalten
-- **Tief:** nach Möglichkeit mindestens 3 Quellen, max. 8 Suchtasks/Seite, bis 20 Kandidaten behalten
+- **Schnell:** nach Möglichkeit 1 Quelle, max. 4 Suchtasks/Seite, bis 12 Kandidaten behalten
+- **Tief:** nach Möglichkeit 3 Quellen, max. 8 Suchtasks/Seite, bis 20 Kandidaten behalten
 - **Maximal:** nach Möglichkeit alle 5 verfügbaren Quellen, max. 12 Suchtasks/Seite, bis 30 Kandidaten behalten
-- fehlen Keys, passt sich die benötigte Quellenzahl an die tatsächlich verfügbaren Quellen an
+- fehlen Keys, passt sich die Quellenbreite an die verfügbaren Provider an
 
 ### B4 – Mehr Treffer / Suchseiten
 
-Bei einer recherchierten Szene **Mehr Treffer** verwenden.
-
 1. erste Suche = Seite 1
-2. erster Nachladevorgang = Seite 2
+2. **Mehr Treffer** = Seite 2
 3. danach Seite 3 möglich
 4. zusätzliche Treffer werden ergänzt
 5. Hauptvisual/Alternativen bleiben erhalten
 6. `searchRound` bleibt nach Neuladen erhalten
 7. komplett fehlgeschlagene Zusatzrunde erhöht die Seite nicht
 8. Pixabay besitzt seitenspezifischen Cache
-9. Wikimedia-Seiten sind lückenlos über passenden `gsroffset`
+9. Wikimedia-Seiten sind lückenlos
 10. Seite 100 blockiert weiteres Nachladen
-11. zusätzliche Seiten können die Kandidatenmenge bis zur 12/20/30-Grenze des Modus vergrößern
+11. zusätzliche Seiten können die Auswahl bis zur 12/20/30-Grenze des gewählten Modus erhöhen
 
 ### B5 – Auswahl
 
 - Hauptvisual markieren
-- mindestens eine Alternative markieren
+- Alternative markieren
 - Auswahl lösen
 - Projekt neu öffnen
 - Auswahl bleibt erhalten
-- Auswahl bleibt auch nach **Mehr Treffer** erhalten
 
 ### B6 – Review-Import und Katalogverknüpfung
 
@@ -118,61 +109,40 @@ Bei einer recherchierten Szene **Mehr Treffer** verwenden.
 - Projekt speichert Katalog-Asset-ID
 - Unsplash-Import benötigt aktuellen Sitzung-Key
 - keine Provider-Keys in Projektdateien
-
-Zusätzlich vorhandenen Katalogtreffer prüfen:
-
-- kein zweites Asset erzeugen
-- vorhandene Asset-ID verknüpfen
-- Oberfläche zeigt Kandidaten als importiert
-- bestehender Katalogstatus ändert sich nicht automatisch
+- vorhandenen Katalogtreffer ohne Duplikat verknüpfen
+- bestehender Katalogstatus bleibt unverändert
 
 ### B7 – Provider-Key-Härtung
 
-- gültiger neuer Key wird erst nach erfolgreicher Anfrage genau dieses Providers gemerkt
-- falscher Key wird nach fehlgeschlagener Provideranfrage nicht gemerkt
+- gültiger Key wird erst nach erfolgreicher Anfrage genau dieses Providers gemerkt
+- falscher Key wird nicht gemerkt
 - keyloser Erfolg bestätigt keinen fremden Key
-- Pixabay-Cachetreffer validiert keinen neu eingegebenen Pixabay-Key
-- noch nicht bestätigter Key bleibt nur im sichtbaren Passwortfeld der laufenden Seite
-- **Sitzungs-Keys löschen** leert gemerkte und sichtbare Werte
-- Seitenreload entfernt alle Sitzungsschlüssel
+- Pixabay-Cachetreffer validiert keinen neuen Key
+- **Sitzungs-Keys löschen** leert alle sichtbaren/gemerkten Werte
+- Reload entfernt Sitzungsschlüssel
 
 ### B8 – langes Skript / Performance / Kostenkontrolle
 
-Ein mehrminütiges Skript verwenden.
-
-Prüfen:
-
-- Auto-Modus verdichtet bei Bedarf auf höchstens 120 visuelle Einheiten
-- vollständiges Originalskript bleibt unverändert
-- Projekte mit mehr als 20 Szenen rendern Kandidaten lazy erst beim Öffnen
-- beim Zuklappen werden schwere Medienkarten aus dem DOM entfernt
-- Fortschritt bleibt korrekt
-- Stoppen beendet nach laufender Szene
-- Fortsetzen setzt bei offenen Szenen weiter
+- Auto verdichtet bei Bedarf auf höchstens 120 Einheiten
+- Originalskript bleibt vollständig erhalten
+- bei >20 Szenen Lazy-Rendering der Kandidaten
+- Fortschritt, Stoppen und Fortsetzen funktionieren
 - Providerfehler löschen fertige Szenen nicht
-- lokale Spiegelung aktualisiert nach Suche/Auswahl/Import nur Root-Dateien + betroffene Szene
+- Spiegelung aktualisiert nur Root-Dateien + betroffene Szene
 
-Batchgrößen real prüfen:
+Batchgrößen:
 
-| Modus | erwartetes Maximum pro Sammelbatch |
+| Modus | max. Szenen pro Sammelbatch |
 |---|---:|
-| Schnell | 20 Szenen |
-| Tief | 10 Szenen |
-| Maximal | 6 Szenen |
+| Schnell | 20 |
+| Tief | 10 |
+| Maximal | 6 |
 
 Die Oberfläche soll ungefähr **80 theoretische Provider-Suchtasks pro Batch** nicht überschreiten. Tatsächliche Requests dürfen wegen Early-Stop niedriger sein.
 
 ### B9 – manuelle Zusatzrecherche
 
-Unter **Weitere Web-Recherche** prüfen:
-
-- YouTube
-- Google Bilder
-- Google Videos
-- Google News
-- Wikipedia
-
-Alle Links müssen nur neue Tabs öffnen. Kein Klick darf automatisch importieren, einen Reviewstatus ändern oder eine Nutzungsfreigabe behaupten.
+Unter **Weitere Web-Recherche** YouTube, Google Bilder/Videos/News und Wikipedia prüfen. Kein Link darf automatisch importieren oder eine Rechtefreigabe behaupten.
 
 ### B10 – Projektordner
 
@@ -191,7 +161,7 @@ ALLES-GEFUNDEN/
         └── ...
 ```
 
-`00-PROJEKT.json` muss Suchseite, Kandidaten, Kontext, Auswahl und Importverknüpfungen enthalten. Danach `vault:build` erneut ausführen; Projekt muss erhalten bleiben.
+Projektdatei muss Suchseite, Kandidaten, Kontext, Auswahl und Importverknüpfungen enthalten. `vault:build` darf das Projekt nicht löschen.
 
 ## Test C – universelle Themenrecherche
 
@@ -208,42 +178,18 @@ scriptSpecificTopicResearch: true
 
 ## Test D – fünf Quellen
 
-### Pexels
-- Foto + Video
-- Sitzung-Key
-- Seite 2 neue Treffer
+- Pexels: Foto + Video + Seite 2
+- Pixabay: Foto + Video + 24h-Cache + Seite 2
+- Unsplash: Foto + Attribution + Seite 2
+- Openverse: keylos + unterstützte offene Lizenzen + Seite 2
+- Wikimedia: keylos + Lizenz/Attribution + lückenlose Pagination
 
-### Pixabay
-- Foto + Video
-- Sitzung-Key
-- 24h-Cache derselben Seite
-- Seite 2 eigener Cachekontext
-
-### Unsplash
-- Foto
-- Creator/Attribution
-- Import-Downloadmeldung
-- Seite 2
-
-### Openverse
-- keylos
-- nur unterstützte offene Lizenztypen
-- Seite 2
-
-### Wikimedia Commons
-- keylos
-- Lizenz/Attribution
-- lückenlose Pagination
-
-Für alle: nur bewusst ausgewählte Treffer importieren; neue externe Importe starten auf `review`.
+Neue externe Importe starten immer auf `review`.
 
 ## Test E – Provider-Keys über alle Suchbereiche
 
-Für Script Visual Finder, Themenrecherche und Arsenal Builder:
-
-- Key nur in laufender Seite nutzbar
-- **Sitzungs-Keys löschen** entfernt ihn
-- Reload entfernt ihn
+- nur in laufender Seite nutzbar
+- löschen / Reload entfernt Keys
 - keine Keys in `localStorage`, `sessionStorage`, Projekt-, Such- oder Katalogdateien
 - ungültiger neuer Key bleibt nicht gemerkt
 
@@ -254,7 +200,7 @@ Für Script Visual Finder, Themenrecherche und Arsenal Builder:
 - `05-THEMENRECHERCHEN`
 - `06-SKRIPT-PROJEKTE`
 - `90-GEFUNDENE-KANDIDATEN`
-- lokale Kopien und `.url`-Links
+- lokale Kopien / `.url`-Links
 - Historie, Suchseiten und Auswahl bleiben nach erneutem Build erhalten
 
 ## Test G – Ausbau 720 / Review-first
@@ -271,15 +217,13 @@ Für Script Visual Finder, Themenrecherche und Arsenal Builder:
 - echte Shotlist
 - Kanal-Sammlungen
 - vorhandene Assets
-- JSON/CSV/Markdown
-- CLI zusätzlich SRT/Skriptkopie
+- JSON/CSV/Markdown/SRT
 
 ## Test I – eigene Datei
 
 - Inbox-Import
 - Rechte bestätigen
 - Startstatus `review`
-- Katalog und ALLES-GEFUNDEN prüfen
 
 ## Test J – zwölf Starterassets / Review
 
@@ -287,15 +231,14 @@ Alle zwölf Starterassets vollständig entscheiden; mindestens ein Asset freigeb
 
 ## Test K – Medienpaket und reale Nutzung
 
-1. nur freigegebene Assets
-2. verifiziertes Medienpaket
-3. SHA-256, Manifest, Quelle, Lizenz, Attribution
-4. ein Asset real einsetzen
-5. Nutzung dokumentieren
+- nur freigegebene Assets
+- verifiziertes Medienpaket
+- SHA-256, Manifest, Quelle, Lizenz, Attribution
+- reale Nutzung dokumentieren
 
 ## Test L – Backup und Abschluss
 
-Später ausführen:
+Später:
 
 ```bash
 npm run arsenal:expansion
