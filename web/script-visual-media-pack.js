@@ -1,6 +1,7 @@
 const section = document.querySelector('#script-visual-finder');
 const PROJECT_ID = /^SVP-[A-F0-9]{12}$/;
 const MAX_PACK_ASSETS = 20;
+const MAX_PACK_NAME_LENGTH = 80;
 let adminToken = '';
 
 if (section) {
@@ -39,10 +40,11 @@ function installProjectPackAction() {
       }
 
       const chunks = chunk(approved, MAX_PACK_ASSETS);
+      const baseName = packBaseName(project);
       const outputs = [];
       for (let index = 0; index < chunks.length; index += 1) {
         const suffix = chunks.length > 1 ? `-teil-${index + 1}` : '';
-        const name = `${project.title || project.projectId}-script-visual${suffix}`;
+        const name = `${baseName}${suffix}`.slice(0, MAX_PACK_NAME_LENGTH);
         const result = await postMediaPack(chunks[index], name);
         outputs.push(result.output || `Teil ${index + 1} erstellt`);
       }
@@ -100,6 +102,13 @@ function collectSelectedAssets(project) {
 function approvedAssetIds(ids, catalog) {
   const byId = new Map((catalog.assets ?? []).map((asset) => [asset.id, asset]));
   return ids.filter((id) => byId.get(id)?.status === 'approved');
+}
+
+function packBaseName(project) {
+  const raw = String(project?.title || project?.projectId || 'script-visual').replace(/[\u0000-\u001F\u007F]/g, ' ').replace(/\s+/g, ' ').trim();
+  const suffix = '-script-visual';
+  const maxBaseLength = Math.max(2, MAX_PACK_NAME_LENGTH - suffix.length - 10);
+  return `${raw.slice(0, maxBaseLength) || 'script-visual'}${suffix}`;
 }
 
 async function ensureToken() {
