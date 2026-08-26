@@ -115,7 +115,7 @@ export function segmentScript(value, mode = 'auto') {
     else if (words < 5 && units.length && wordCount(units.at(-1)) + words <= 28) units[units.length - 1] = `${units.at(-1)} ${sentence}`;
     else units.push(sentence);
   }
-  return units;
+  return compactAutoUnits(units, MAX_UNITS);
 }
 
 export function inferChannel(value) {
@@ -253,6 +253,23 @@ function shouldInheritContext(text, previousContext) {
   if (!(previousContext?.entities?.length || previousContext?.concepts?.length)) return false;
   const normalized = normalize(text);
   return /^(?:er|sie|es|ihn|ihm|ihnen|diese|dieser|dieses|diesen|diesem|deren|dessen|dabei|dadurch|damit|dort|dann|so|anschliessend|anschließend|spaeter|später)\b/.test(normalized);
+}
+
+function compactAutoUnits(units, maxUnits) {
+  const result = [...units];
+  while (result.length > maxUnits) {
+    let bestIndex = 0;
+    let bestWords = Number.POSITIVE_INFINITY;
+    for (let index = 0; index < result.length - 1; index += 1) {
+      const combinedWords = wordCount(result[index]) + wordCount(result[index + 1]);
+      if (combinedWords < bestWords) {
+        bestWords = combinedWords;
+        bestIndex = index;
+      }
+    }
+    result.splice(bestIndex, 2, `${result[bestIndex]} ${result[bestIndex + 1]}`.trim());
+  }
+  return result;
 }
 
 function splitScriptLine(line) {
