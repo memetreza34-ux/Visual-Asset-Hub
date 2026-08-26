@@ -102,7 +102,7 @@ export function createLocalScriptVisualApi({ root = process.cwd(), token, search
           project.updatedAt = new Date().toISOString();
           refreshProgress(project);
           writeProject(projectDirectory, project);
-          writeProjectMirror(root, project);
+          writeProjectMirror(root, project, scene.id);
           return sendJson(response, 200, {
             ok: true,
             projectId,
@@ -137,7 +137,7 @@ export function createLocalScriptVisualApi({ root = process.cwd(), token, search
           project.updatedAt = new Date().toISOString();
           refreshProgress(project);
           writeProject(projectDirectory, project);
-          writeProjectMirror(root, project);
+          writeProjectMirror(root, project, scene.id);
           return sendJson(response, 200, { ok: true, scene, progress: project.progress });
         }
 
@@ -176,7 +176,7 @@ export function createLocalScriptVisualApi({ root = process.cwd(), token, search
           project.updatedAt = new Date().toISOString();
           refreshProgress(project);
           writeProject(projectDirectory, project);
-          writeProjectMirror(root, project);
+          writeProjectMirror(root, project, scene.id);
           return sendJson(response, 200, {
             ok: true,
             imported: importedIds.length,
@@ -339,9 +339,9 @@ function buildJob(project, scene, query, provider, type, perPage, page = 1) {
   };
 }
 
-function writeProjectMirror(root, project) {
+function writeProjectMirror(root, project, changedSceneId = null) {
   const directory = path.join(root, 'ALLES-GEFUNDEN', '06-SKRIPT-PROJEKTE', `${safeName(project.title, 70)}-${project.projectId.slice(-6)}`);
-  fs.rmSync(directory, { recursive: true, force: true });
+  if (!changedSceneId) fs.rmSync(directory, { recursive: true, force: true });
   fs.mkdirSync(directory, { recursive: true });
   fs.writeFileSync(path.join(directory, '00-SKRIPT.txt'), `${project.script.trim()}\n`);
   fs.writeFileSync(path.join(directory, '00-PROJEKT.json'), `${JSON.stringify(project, null, 2)}\n`);
@@ -349,8 +349,10 @@ function writeProjectMirror(root, project) {
   fs.writeFileSync(path.join(directory, '00-SHOTLIST.csv'), shotlistCsv(project));
   fs.writeFileSync(path.join(directory, '00-SZENENPLAN.md'), sceneMarkdown(project));
 
-  for (const scene of project.scenes) {
+  const scenes = changedSceneId ? project.scenes.filter((scene) => scene.id === changedSceneId) : project.scenes;
+  for (const scene of scenes) {
     const sceneDir = path.join(directory, `${String(scene.sequence).padStart(3, '0')}-${scene.id}`);
+    fs.rmSync(sceneDir, { recursive: true, force: true });
     fs.mkdirSync(sceneDir, { recursive: true });
     fs.writeFileSync(path.join(sceneDir, '00-SZENE.md'), sceneDetailMarkdown(project, scene));
     for (let index = 0; index < scene.candidates.length; index += 1) {
