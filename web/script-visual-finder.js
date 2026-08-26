@@ -1,8 +1,8 @@
 const section = document.querySelector('#script-visual-finder');
 const providerLabels = { pexels: 'Pexels', pixabay: 'Pixabay', unsplash: 'Unsplash', openverse: 'Openverse', wikimedia: 'Wikimedia Commons' };
 const MAX_SEARCH_PAGE = 100;
-const LONG_PROJECT_THRESHOLD = 40;
-const LONG_PROJECT_BATCH_SIZE = 20;
+const MAX_BATCH_PROVIDER_TASKS = 80;
+const MAX_BATCH_SCENES = 20;
 const DEPTH_TASK_LIMIT = { quick: 4, deep: 8, max: 12 };
 const sessionKeys = new Map();
 let currentProject = null;
@@ -112,12 +112,13 @@ function renderProject(container, project, keyFields, perPage, status) {
   const info = el('div');
   const taskLimit = DEPTH_TASK_LIMIT[project.settings?.depth] ?? DEPTH_TASK_LIMIT.deep;
   const maxFirstPassTasks = project.scenes.length * taskLimit;
-  const batchNote = project.scenes.length > LONG_PROJECT_THRESHOLD ? ` · Langprojekt in Batches à ${LONG_PROJECT_BATCH_SIZE} Szenen` : '';
+  const batchSize = searchBatchSize(project);
+  const batchNote = project.scenes.length > batchSize ? ` · kontrollierte Batches à bis zu ${batchSize} Szenen` : '';
   info.append(
     text('span', project.projectId, 'svf-project-id'),
     text('h3', project.title),
     text('p', `${project.scenes.length} visuelle Einheiten · ${channelLabel(project.channel)} · ${mediaPreferenceLabel(project.settings?.mediaPreference)} · Originaltext bleibt unverändert`),
-    text('small', `Maximaler Erstlauf: bis zu ${maxFirstPassTasks} Provider-Suchtasks${batchNote}. Die Suche stoppt pro Szene früher, sobald die Zielqualität erreicht ist.`, 'svf-search-budget')
+    text('small', `Maximaler Erstlauf: bis zu ${maxFirstPassTasks} Provider-Suchtasks${batchNote}. Pro Batch sind höchstens etwa ${MAX_BATCH_PROVIDER_TASKS} theoretische Provider-Suchtasks vorgesehen; jede Szene stoppt früher, sobald die Zielqualität erreicht ist.`, 'svf-search-budget')
   );
   const controls = el('div', 'svf-project-controls');
   const searchAll = button(searchBatchLabel(project), 'svf-primary');
@@ -156,9 +157,9 @@ function renderProject(container, project, keyFields, perPage, status) {
       showStatus(status, 'Alle Szenen wurden bereits recherchiert. Einzelne Szenen können mit „Mehr Treffer“ auf der nächsten Suchseite erweitert werden.', true);
       return;
     }
-    const batchLimit = currentProject.scenes.length > LONG_PROJECT_THRESHOLD ? LONG_PROJECT_BATCH_SIZE : allPending.length;
+    const batchLimit = searchBatchSize(currentProject);
     const pending = allPending.slice(0, batchLimit);
-    if (allPending.length > pending.length) showStatus(status, `Langprojekt: ${pending.length} von ${allPending.length} offenen Szenen werden in diesem Batch recherchiert.`, true);
+    if (allPending.length > pending.length) showStatus(status, `Kontrollierter Recherchebatch: ${pending.length} von ${allPending.length} offenen Szenen werden jetzt recherchiert.`, true);
     let completed = 0;
     for (const scene of pending) {
       if (stopRequested) break;
@@ -433,10 +434,16 @@ function updateProgress(project, fill, copy) {
   copy.textContent = `${searched}/${total} Szenen recherchiert · ${project.scenes.filter((scene) => scene.selectedPrimary || scene.selectedAlternatives.length).length} mit Auswahl`;
 }
 
+function searchBatchSize(project) {
+  const taskLimit = DEPTH_TASK_LIMIT[project.settings?.depth] ?? DEPTH_TASK_LIMIT.deep;
+  return Math.max(1, Math.min(MAX_BATCH_SCENES, Math.floor(MAX_BATCH_PROVIDER_TASKS / taskLimit)));
+}
+
 function searchBatchLabel(project) {
   const remaining = project.scenes.filter((scene) => !scene.searchedAt).length;
   if (!remaining) return 'Alle Szenen recherchiert';
-  if (project.scenes.length > LONG_PROJECT_THRESHOLD) return `Nächste ${Math.min(LONG_PROJECT_BATCH_SIZE, remaining)} Szenen recherchieren`;
+  const batchSize = searchBatchSize(project);
+  if (remaining > batchSize || project.scenes.length > batchSize) return `Nächste ${Math.min(batchSize, remaining)} Szenen recherchieren`;
   return project.scenes.some((scene) => scene.searchedAt) ? 'Recherche fortsetzen' : 'Alle Szenen recherchieren';
 }
 
