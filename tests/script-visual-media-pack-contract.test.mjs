@@ -47,6 +47,14 @@ test('Projekttitel werden vor der bestehenden Media-Pack-API sicher normalisiert
   assert.match(source, /\.slice\(0, MAX_PACK_NAME_LENGTH\)/);
 });
 
+test('erzeugte Media-Pack-Pfade werden aus der bestehenden CLI-Antwort sichtbar gemacht', () => {
+  assert.match(source, /function parseMediaPackOutput\(value\)/);
+  assert.match(source, /JSON\.parse\(value\)/);
+  assert.match(source, /if \(pack\.directory\) directories\.push\(pack\.directory\)/);
+  assert.match(source, /Ordner: \$\{directories\.join\(' \| '\)\}/);
+  assert.match(source, /directories \}\s*\}\)/);
+});
+
 test('Schnittpaket-Integration speichert weder Sitzungstoken noch Provider-Keys persistent', () => {
   assert.doesNotMatch(source, /localStorage/);
   assert.doesNotMatch(source, /sessionStorage/);
