@@ -134,6 +134,18 @@ test('Ortsbezug mit Dort kann Kontext aus der vorherigen Szene für die Suche ü
   assert.equal(plan.scenes[1].originalText, 'Dort entstehen große Serverhallen.');
 });
 
+test('mehrere Rückbezugssätze behalten den relevanten Hauptkontext über die Szenenkette', () => {
+  const script = 'OpenAI entwickelt humanoide Roboter. Sie arbeiten später in großen Fabriken. Dort übernehmen sie die Montage.';
+  const plan = createScriptVisualPlan({ script, segmentation: 'sentence', depth: 'max' });
+  assert.equal(plan.scenes.length, 3);
+  assert.equal(plan.scenes[1].contextInherited, true);
+  assert.equal(plan.scenes[2].contextInherited, true);
+  assert.ok(plan.scenes[1].contextEntities.some((value) => /OpenAI/i.test(value)));
+  assert.ok(plan.scenes[2].contextEntities.some((value) => /OpenAI/i.test(value)));
+  assert.ok(plan.scenes[2].queries.some((query) => /OpenAI/i.test(query)));
+  assert.equal(plan.scenes[2].originalText, 'Dort übernehmen sie die Montage.');
+});
+
 test('Projekt unterstützt lange Skripte bis zur vorgesehenen Szenengrenze', () => {
   const sentence = 'Humanoide Roboter helfen Menschen bei einer klar beschriebenen Aufgabe.';
   const script = Array.from({ length: 80 }, (_, index) => `${index + 1}. ${sentence}`).join('\n');
