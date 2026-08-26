@@ -198,8 +198,7 @@ function sceneCard(project, scene, keyFields, perPage, status) {
   const resultStatus = text('span', scene.searchedAt ? `${candidateSummary(scene, project)} · zuletzt Seite ${currentPage || 1}` : 'Noch nicht recherchiert');
   actions.append(resultStatus);
 
-  const grid = el('div', 'svf-candidate-grid');
-  renderCandidates(grid, project, scene, keyFields, perPage, status);
+  const candidates = candidatePanel(project, scene, keyFields, perPage, status);
 
   search.addEventListener('click', async () => {
     if (Number(scene.searchRound || 0) >= MAX_SEARCH_PAGE) return;
@@ -214,7 +213,7 @@ function sceneCard(project, scene, keyFields, perPage, status) {
     } catch (error) { showStatus(status, error.message, false); search.disabled = false; }
   });
 
-  article.append(top, original, queries, discovery, actions, grid);
+  article.append(top, original, queries, discovery, actions, candidates);
   if (scene.searchErrors?.length) {
     const details = document.createElement('details');
     const summary = document.createElement('summary');
@@ -267,6 +266,34 @@ function externalSearchLinks(query) {
     ['Google News', `https://www.google.com/search?tbm=nws&q=${encoded}`],
     ['Wikipedia', `https://de.wikipedia.org/w/index.php?search=${encoded}`]
   ];
+}
+
+function candidatePanel(project, scene, keyFields, perPage, status) {
+  const details = document.createElement('details');
+  details.className = 'svf-candidate-panel';
+  const summary = document.createElement('summary');
+  summary.textContent = scene.candidates.length ? `${candidateSummary(scene, project)} anzeigen` : 'Kandidaten anzeigen';
+  const grid = el('div', 'svf-candidate-grid');
+  const longProject = (project.scenes?.length ?? 0) > 20;
+  let rendered = false;
+  const render = () => {
+    if (rendered) return;
+    renderCandidates(grid, project, scene, keyFields, perPage, status);
+    rendered = true;
+  };
+  if (!longProject && scene.candidates.length) {
+    details.open = true;
+    render();
+  }
+  details.addEventListener('toggle', () => {
+    if (details.open) render();
+    else if (longProject) {
+      grid.replaceChildren();
+      rendered = false;
+    }
+  });
+  details.append(summary, grid);
+  return details;
 }
 
 function renderCandidates(grid, project, scene, keyFields, perPage, status) {
