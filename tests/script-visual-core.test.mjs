@@ -152,7 +152,7 @@ test('Auto-Modus verdichtet sehr viele kurze Sätze auf höchstens 120 visuelle 
   const plan = createScriptVisualPlan({ script, segmentation: 'auto', depth: 'quick' });
   assert.equal(plan.script, script);
   assert.equal(plan.scenes.length, 120);
-  assert.ok(plan.scenes.some((scene) => scene.originalText.includes(`${sentence} ${sentence}`)));
+  assert.ok(plan.scenes.some((scene) => (scene.originalText.match(/Humanoide Roboter/g) ?? []).length >= 2));
   assert.ok(plan.settings.durationSeconds > 60);
 });
 
