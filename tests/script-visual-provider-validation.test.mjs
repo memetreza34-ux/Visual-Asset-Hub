@@ -39,11 +39,18 @@ test('Gemischt-Modus wartet nach Möglichkeit auf Video und Bild', () => {
 });
 
 test('Rechercheumfang nutzt 1, 3 und 5 Quellen und passt sich an verfügbare Provider an', () => {
-  assert.match(api, /quick: \{ candidates: 4, minProviders: 1, maxTasks: 4 \}/);
-  assert.match(api, /deep: \{ candidates: 6, minProviders: 3, maxTasks: 8 \}/);
-  assert.match(api, /max: \{ candidates: 8, minProviders: 5, maxTasks: 12 \}/);
+  assert.match(api, /quick: \{ candidates: 4, minProviders: 1, maxTasks: 4, retainCandidates: 12 \}/);
+  assert.match(api, /deep: \{ candidates: 6, minProviders: 3, maxTasks: 8, retainCandidates: 20 \}/);
+  assert.match(api, /max: \{ candidates: 8, minProviders: 5, maxTasks: 12, retainCandidates: 30 \}/);
   assert.match(api, /const requiredProviders = Math\.min\(settings\.minProviders, providerOrder\.length\)/);
   assert.match(api, /providersUsed\.size >= requiredProviders/);
+});
+
+test('Rechercheumfang behält je nach Tiefe mehr eindeutige Kandidaten für weitere Auswahl', () => {
+  assert.match(api, /retainCandidates: 12/);
+  assert.match(api, /retainCandidates: 20/);
+  assert.match(api, /retainCandidates: 30/);
+  assert.match(api, /retainSceneCandidates\(candidates, scene, mixedRequested, settings\.retainCandidates\)/);
 });
 
 test('Gemischt-Modus nutzt Videoquellen für B-Roll und Fotoquellen für Standbilder', () => {
