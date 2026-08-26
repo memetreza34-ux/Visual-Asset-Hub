@@ -254,18 +254,7 @@ Diese Links importieren nichts und setzen keinen Rechte- oder Reviewstatus. Sie 
 
 ## Kandidaten
 
-Die Weboberfläche zeigt pro Treffer:
-
-- Bild oder Video-Player
-- Titel
-- Provider
-- Medientyp
-- technischer Fit
-- verwendete Query
-- Suchseite
-- Creator soweit vorhanden
-- Quellseite
-- Wiederverwendungshinweis
+Die Weboberfläche zeigt pro Treffer Bild/Video, Titel, Provider, Medientyp, technischen Fit, Query, Suchseite, Creator, Quelle und Wiederverwendungshinweis.
 
 Der Nutzer kann einen Kandidaten als **Hauptvisual** oder **Alternative** markieren.
 
@@ -273,74 +262,31 @@ Dubletten werden über Provider-ID sowie kanonisierte Quell-, Original- und Medi
 
 ## Import
 
-Ein Kandidat wird nur nach ausdrücklichem Klick importiert. Ein neu angelegtes externes Asset beginnt immer auf:
-
-```text
-review
-```
+Ein Kandidat wird nur nach ausdrücklichem Klick importiert. Ein neu angelegtes externes Asset beginnt immer auf `review`.
 
 Falls dieselbe Quelle beziehungsweise Medienreferenz bereits im Katalog vorhanden ist, legt der Finder kein unnötiges Duplikat an. Stattdessen wird der Skriptkandidat mit der bestehenden Katalog-Asset-ID verknüpft.
 
 ## Lokale Persistenz
 
-Arbeitsdaten:
+Arbeitsdaten: `.local-storage/script-visual-projects/`
 
-```text
-.local-storage/script-visual-projects/
-```
+Menschenlesbare Spiegelung: `ALLES-GEFUNDEN/06-SKRIPT-PROJEKTE/`
 
-Menschenlesbare Spiegelung:
-
-```text
-ALLES-GEFUNDEN/06-SKRIPT-PROJEKTE/
-```
-
-Pro Projekt:
-
-```text
-00-SKRIPT.txt
-00-PROJEKT.json
-00-SZENENPLAN.md
-00-SHOTLIST.json
-00-SHOTLIST.csv
-001-SCENE-001/
-002-SCENE-002/
-...
-```
+Pro Projekt entstehen `00-SKRIPT.txt`, `00-PROJEKT.json`, `00-SZENENPLAN.md`, `00-SHOTLIST.json`, `00-SHOTLIST.csv` und Szenenordner.
 
 `searchRound`, Kandidaten, Auswahl, Kontextfelder und Importverknüpfungen werden persistiert. `vault:build` bewahrt die Projekte.
 
 ## API-Sicherheit
 
-Die API liegt unter `/script-visual-api/` und nutzt dieselbe lokale Schutzarchitektur:
+Die API liegt unter `/script-visual-api/` und nutzt Loopback-only, Same-Origin, `X-VAH-Token`, gemeinsame Schreibsperre und begrenzte Requestgröße.
 
-- Loopback-only
-- Same-Origin für Schreibaktionen
-- `X-VAH-Token`
-- gemeinsame Server-Schreibsperre
-- begrenzte Requestgröße
+Provider-Keys werden nicht in Projekten oder Suchmetadaten gespeichert. Ein neu eingegebener Pexels-, Pixabay- oder Unsplash-Key wird erst nach erfolgreicher Anfrage genau dieses Providers als Sitzung-Key gemerkt. Ein keyloser Provider oder reiner Pixabay-Cachetreffer kann keinen neuen fremden Key validieren.
 
-Provider-Keys werden nicht in Projekten oder Suchmetadaten gespeichert.
-
-Ein neu eingegebener Pexels-, Pixabay- oder Unsplash-Key wird erst dann als Sitzung-Key gemerkt, wenn genau dieser Provider erfolgreich damit angesprochen wurde. Ein keyloser Provider kann keinen fremden Key bestätigen.
-
-Ein reiner Pixabay-Cachetreffer zählt nicht als Keyvalidierung. Noch nicht validierte Keys bleiben sichtbar im Passwortfeld und damit nur im Arbeitsspeicher der aktuellen Seite. Nach erfolgreicher Providerprüfung wird der Key aus dem Feld entfernt und nur flüchtig im RAM gehalten.
-
-**Sitzungs-Keys löschen** entfernt sowohl gemerkte als auch noch sichtbare Keywerte.
+**Sitzungs-Keys löschen** entfernt gemerkte und noch sichtbare Keywerte.
 
 ## Rechte
 
-Ein Suchtreffer ist keine Veröffentlichungserlaubnis.
-
-Vor Freigabe weiterhin prüfen:
-
-- Urheber / Lizenz
-- Attribution
-- Personen
-- Marken / Logos
-- Events / Veranstalter
-- Broadcastmaterial
-- Kontext
+Ein Suchtreffer ist keine Veröffentlichungserlaubnis. Vor Freigabe weiterhin Urheber/Lizenz, Attribution, Personen, Marken/Logos, Events/Veranstalter, Broadcastmaterial und Kontext prüfen.
 
 Symbolische B-Rolls dürfen nicht als Beleg dargestellt werden, dass sie das im Skript genannte konkrete Ereignis zeigen.
 
@@ -357,4 +303,4 @@ scriptVisualReviewImported: true
 
 `scriptVisualMixedMediaFound` wird erst wahr, wenn mindestens **eine konkrete Szene sowohl Video- als auch Bildkandidaten** enthält.
 
-Die manuelle Release-Checkliste prüft zusätzlich Pagination, Auswahlpersistenz, lange Projekte, Review-Import und die übrigen Browserabläufe. Diese Kriterien können erst durch den späteren echten lokalen Browser-/API-Test erfüllt werden.
+Die manuelle Release-Checkliste prüft zusätzlich Pagination, Kandidatenmengen, Kontext-Vererbung, Auswahlpersistenz, lange Projekte, Batchdrosselung und Review-Import. Diese Kriterien können erst durch den späteren echten lokalen Browser-/API-Test erfüllt werden.
