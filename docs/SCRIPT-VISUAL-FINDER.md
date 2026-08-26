@@ -51,15 +51,15 @@ Optional beziehungsweise vorbelegt:
 
 ## Originaltext und Segmentierung
 
-Das vollständige eingegebene Skript bleibt unverändert im Projekt gespeichert. Auch Nummerierungs- und Aufzählungspräfixe wie `1.`, `2.` oder `-` bleiben im jeweiligen Szenen-Originaltext erhalten.
+Das vollständige eingegebene Skript bleibt unverändert im Projekt gespeichert. Nummerierungs- und Aufzählungspräfixe wie `1.`, `2.` oder `-` bleiben auch im jeweiligen Szenen-Originaltext erhalten.
 
-Sie werden lediglich bei der visuellen Segmentierungslogik so behandelt, dass daraus keine leeren oder bedeutungslosen Extra-Szenen entstehen.
+Für Segmentierung und Rückbezugs-Erkennung dürfen diese Präfixe intern ignoriert werden, damit beispielsweise `2. Sie arbeiten später in Fabriken.` den Kontext aus Szene 1 übernehmen kann. Der sichtbare Originalsatz bleibt trotzdem exakt erhalten.
 
 Lange Sätze dürfen in mehrere visuelle Einheiten aufgeteilt werden. Jede Einheit verweist weiterhin auf ihren tatsächlichen Originaltext; der Hub erzeugt keinen Ersatztext.
 
 ### Lange Skripte bis ungefähr zehn Minuten
 
-Im **Auto-Modus** darf ein langes Skript zunächst mehr als 120 einzelne kurze Satzsegmente erzeugen. Statt das Projekt deshalb sofort abzulehnen, verdichtet der Finder nur in diesem Fall benachbarte kurze visuelle Einheiten, bis höchstens 120 Szenen übrig bleiben.
+Im **Auto-Modus** darf ein langes Skript zunächst mehr als 120 einzelne kurze Satzsegmente erzeugen. Statt das Projekt deshalb sofort abzulehnen, verdichtet der Finder benachbarte kurze visuelle Einheiten, bis höchstens 120 Szenen übrig bleiben.
 
 Dadurch gilt:
 
@@ -73,7 +73,7 @@ Dadurch gilt:
 
 Pro Einheit werden lokal erzeugt:
 
-- Originaltext der visuellen Einheit
+- Originaltext
 - geschätzter Zeitbereich
 - visuelle Absicht
 - Entitäten
@@ -88,15 +88,15 @@ Unterstützte interne Visualrichtungen umfassen unter anderem Person, Produkt, O
 
 ## Unterschiedliche Suchrichtungen
 
-Die Query-Engine hängt nicht nur mehrere ähnliche Zusätze an denselben langen Suchbegriff. Sie erzeugt bewusst verschiedene Suchachsen, zum Beispiel:
+Die Query-Engine hängt nicht nur ähnliche Zusätze an denselben langen Suchbegriff. Sie erzeugt verschiedene Suchachsen, zum Beispiel:
 
 1. konkrete Person/Firma/Entität + wichtigste Motive
-2. zwei konkrete Entitäten zusammen, wenn die Szene eine Beziehung oder ein Ereignis beschreibt
+2. zwei konkrete Entitäten zusammen, wenn eine Beziehung oder ein Ereignis beschrieben wird
 3. Motiv/Handlung + passende B-Roll-Richtung
 4. Kontext-/Umgebungsaufnahme
 5. Detail-/Close-up- oder symbolischer Fallback
 
-Häufige deutsche Visualbegriffe werden zusätzlich providerfreundlich übersetzt, beispielsweise `Roboter → robot`, `Fabrik → factory`, `Alltag → daily life`, `Rechenzentrum → data center`, `Börse → stock market` und `Krankenhaus → hospital`.
+Häufige deutsche Visualbegriffe werden providerfreundlich übersetzt, beispielsweise `Roboter → robot`, `Fabrik → factory`, `Alltag → daily life`, `Rechenzentrum → data center`, `Börse → stock market` und `Krankenhaus → hospital`.
 
 Konkrete Namen, Marken, Orte, Events und Jahreszahlen bleiben in den Suchrichtungen erhalten, soweit sie erkannt werden.
 
@@ -110,9 +110,9 @@ Sie sollen später in Fabriken arbeiten.
 Dort übernehmen sie die Montage.
 ```
 
-Rückbezugssätze dürfen für die **Visualsuche** den aktiven Kontext aus der unmittelbar vorherigen Szene übernehmen. Wenn diese Szene selbst eindeutig auf ihren Vorgänger verwiesen hat, darf der relevante Hauptkontext entlang dieser Rückbezugskette weitergetragen werden.
+Rückbezugssätze dürfen für die **Visualsuche** den aktiven Kontext aus der unmittelbar vorherigen Szene übernehmen. Wenn diese Szene selbst eindeutig auf ihren Vorgänger verwiesen hat, kann der relevante Hauptkontext entlang dieser Rückbezugskette weitergetragen werden.
 
-Das gilt für eindeutige Rückbezüge am Satzanfang, zum Beispiel:
+Das gilt zum Beispiel für Satzanfänge wie:
 
 - er / sie / es
 - diese / dieser / dieses
@@ -124,14 +124,13 @@ Das gilt für eindeutige Rückbezüge am Satzanfang, zum Beispiel:
 
 Wichtig:
 
-- ein neuer expliziter Szenenbezug ohne solchen Rückbezug setzt den aktiven Kontext neu
-- der Originaltext wird nicht verändert
+- ein neuer expliziter Szenenbezug ohne Rückbezug setzt den aktiven Kontext neu
+- Nummerierungs-/Listenpräfixe werden nur für die Rückbezugs-Erkennung entfernt
+- der Originaltext wird niemals verändert
 - übernommener Kontext wird getrennt als `contextInherited`, `contextEntities` und `contextConcepts` gespeichert
 - die Weboberfläche zeigt **Kontext übernommen: ...** sichtbar an
 
 ## Provider
-
-Es werden die bestehenden Adapter wiederverwendet:
 
 | Provider | Bilder | Videos | Key |
 |---|---:|---:|---:|
@@ -145,13 +144,13 @@ Pixabay verwendet weiterhin den bestehenden 24-Stunden-Cache.
 
 ## Medienmix
 
-Bei **Gemischt** versucht der Finder pro Szene bewusst sowohl Video-B-Roll als auch Bildmaterial zu sammeln, sofern mindestens eine Videoquelle verfügbar ist.
+Bei **Gemischt** versucht der Finder pro Szene sowohl Video-B-Roll als auch Bildmaterial zu sammeln, sofern mindestens eine Videoquelle verfügbar ist.
 
 - Pexels und Pixabay werden für Video-B-Roll genutzt.
 - Unsplash, Openverse und Wikimedia Commons liefern Bildkandidaten.
-- Die Szene wird nicht nur wegen einer hohen Gesamttrefferzahl beendet, solange der gewünschte Mix technisch noch erreichbar, aber noch nicht vorhanden ist.
-- Die Oberfläche zeigt pro Szene Video- und Bildanzahl sowie **Mix erfüllt** oder **Mix noch unvollständig**.
-- Beim Kandidatenlimit bleiben Hauptvisual, Alternativen und nach Möglichkeit beide Medientypen erhalten.
+- Die Szene endet nicht nur wegen einer hohen Gesamttrefferzahl, solange der gewünschte Mix technisch erreichbar, aber noch nicht vorhanden ist.
+- Die Oberfläche zeigt Video- und Bildanzahl sowie **Mix erfüllt** oder **Mix noch unvollständig**.
+- Hauptvisual, Alternativen und nach Möglichkeit beide Medientypen bleiben beim Kandidatenlimit geschützt.
 
 Wenn keine Videoquelle verfügbar ist, blockiert die fehlende Videoseite die Recherche nicht.
 
@@ -162,12 +161,14 @@ Wenn keine Videoquelle verfügbar ist, blockiert die fehlende Videoseite die Rec
 - Ziel: ungefähr 4 eindeutige Kandidaten
 - mindestens 1 erfolgreiche verfügbare Quelle
 - maximal 4 Suchtasks pro Szene und Suchseite
+- bis zu **12 eindeutige Kandidaten** werden pro Szene für die Auswahl behalten
 
 ### Tief
 
 - Ziel: ungefähr 6 Kandidaten
 - nach Möglichkeit mindestens 3 unterschiedliche verfügbare Quellen
 - maximal 8 Suchtasks pro Szene und Suchseite
+- bis zu **20 eindeutige Kandidaten** werden pro Szene behalten
 
 ### Maximal
 
@@ -175,31 +176,41 @@ Wenn keine Videoquelle verfügbar ist, blockiert die fehlende Videoseite die Rec
 - nach Möglichkeit alle 5 verfügbaren Quellen mindestens einmal berücksichtigen
 - fehlen Provider-Keys, passt sich die notwendige Providerzahl an die tatsächlich verfügbaren Quellen an
 - maximal 12 Suchtasks pro Szene und Suchseite
+- bis zu **30 eindeutige Kandidaten** werden pro Szene behalten
 
-Sobald Kandidatenziel, Providerbreite und gegebenenfalls Medienmix erreicht sind, endet der Suchlauf für diese Szene.
+Das Kandidatenziel bestimmt, wann eine erste Suchrunde frühzeitig beendet werden darf. Die höhere Aufbewahrungsgrenze sorgt dafür, dass zusätzliche Suchseiten tatsächlich mehr Auswahl liefern können.
 
-## Langprojekt-Performance
+## Langprojekt-Performance und Kostenkontrolle
 
-5–10-Minuten-Skripte werden zusätzlich gegen Browser-, Provider- und Datei-I/O-Überlast geschützt.
+5–10-Minuten-Skripte werden gegen Browser-, Provider- und Datei-I/O-Überlast geschützt.
 
 ### Kontrollierte Sammelrecherche
 
-- bis einschließlich 40 Szenen kann der Sammelbutton alle offenen Szenen sequenziell abarbeiten
-- bei mehr als 40 Szenen werden pro Klick höchstens **20 offene Szenen** recherchiert
-- danach zeigt der Button automatisch die nächste offene Batchgröße an
-- Stoppen wirkt weiterhin nach der aktuell laufenden Szene
+Die Sammelrecherche verwendet ein theoretisches Batchbudget von höchstens ungefähr **80 Provider-Suchtasks**. Daraus ergibt sich je Recherchemodus automatisch eine andere maximale Szenenzahl pro Klick:
+
+| Recherche | max. Tasks/Szene | max. Szenen/Batch |
+|---|---:|---:|
+| Schnell | 4 | 20 |
+| Tief | 8 | 10 |
+| Maximal | 12 | 6 |
+
+Zusätzlich gilt:
+
+- pro Batch niemals mehr als 20 Szenen
+- Stoppen wirkt nach der aktuell laufenden Szene
+- danach kann mit dem nächsten offenen Batch fortgesetzt werden
 - bereits fertige Szenen bleiben gespeichert
-- die Oberfläche zeigt vor dem Lauf den theoretischen maximalen Erstlauf in Provider-Suchtasks
-- dieser Wert ist nur ein Maximum; jede Szene stoppt früher, sobald ihre Suchziele erfüllt sind
+- die Oberfläche zeigt den theoretischen maximalen Erstlauf sowie das Batchbudget an
+- tatsächliche Requests können deutlich niedriger sein, weil jede Szene früher stoppt, sobald Kandidatenziel, Providerbreite und Medienmix erreicht sind
+
+Damit führt ein langes Skript im Maximal-Modus nicht versehentlich hunderte API-Anfragen in einem einzigen Klick aus.
 
 ### Lazy-Kandidatenansicht
 
 - Projekte bis 20 Szenen zeigen vorhandene Kandidaten direkt geöffnet
 - bei mehr als 20 Szenen werden Bild-/Video-Karten erst erzeugt, wenn der Nutzer die Kandidatenansicht der jeweiligen Szene öffnet
 - beim Zuklappen werden die schweren DOM-Karten wieder entfernt
-- Kandidatendaten, Auswahl und Importstatus bleiben selbstverständlich im Projekt gespeichert
-
-Dadurch müssen bei langen Projekten nicht tausende Bild- und Videoelemente gleichzeitig im Browser existieren.
+- Kandidatendaten, Auswahl und Importstatus bleiben im Projekt gespeichert
 
 ### Inkrementelle lokale Projektspiegelung
 
@@ -208,13 +219,13 @@ Dadurch müssen bei langen Projekten nicht tausende Bild- und Videoelemente glei
 Bei Suche, Auswahl oder Import werden aktualisiert:
 
 - die Projekt-/Shotlist-Dateien im Projektroot
-- **nur der tatsächlich geänderte Szenenordner**
+- nur der tatsächlich geänderte Szenenordner
 
-Der komplette Projektordner wird nur beim erstmaligen Erstellen vollständig aufgebaut. Das reduziert Datei-I/O bei langen Projekten erheblich.
+Der komplette Projektordner wird nur beim erstmaligen Erstellen vollständig aufgebaut.
 
 ## Mehr Treffer / Pagination
 
-**Mehr Treffer** wiederholt nicht einfach Seite 1.
+**Mehr Treffer** wiederholt nicht Seite 1.
 
 ```text
 Erste Suche  → Seite 1
@@ -225,13 +236,13 @@ Mehr Treffer → Seite 3
 
 Die Seitenzahl wird nur nach mindestens einer erfolgreichen Providerabfrage fortgeschrieben. Schlägt eine komplette Runde fehl, bleibt die vorherige Suchseite erhalten.
 
-Die Provider erhalten die tatsächliche Seitennummer. Wikimedia Commons berechnet `gsroffset` passend zu `perPage`, damit zwischen den Seiten keine Treffer übersprungen werden.
+Alle fünf Provider erhalten die tatsächliche Seitennummer. Wikimedia Commons berechnet `gsroffset` passend zu `perPage`, damit zwischen den Seiten keine Treffer übersprungen werden.
 
-Nach Seite 100 wird weiteres Nachladen in der Weboberfläche blockiert.
+Nach Seite 100 wird weiteres Nachladen blockiert.
 
 ## Weitere Web-Recherche
 
-Pro Szene steht zusätzlich **Weitere Web-Recherche** zur Verfügung. Aus bis zu drei aktuellen Szene-Queries werden manuelle Suchlinks zu folgenden Diensten erzeugt:
+Pro Szene steht zusätzlich **Weitere Web-Recherche** zur Verfügung. Aus bis zu drei aktuellen Szene-Queries werden manuelle Suchlinks erzeugt zu:
 
 - YouTube
 - Google Bilder
@@ -239,7 +250,7 @@ Pro Szene steht zusätzlich **Weitere Web-Recherche** zur Verfügung. Aus bis zu
 - Google News
 - Wikipedia
 
-Diese Links importieren **nichts** und setzen keinen Rechte- oder Reviewstatus. Sie sind ausschließlich Discovery-Hilfen für sehr konkrete Personen, Events, historische Motive oder seltenes Material.
+Diese Links importieren nichts und setzen keinen Rechte- oder Reviewstatus. Sie sind ausschließlich Discovery-Hilfen für konkrete Personen, Events, historische Motive oder seltenes Material.
 
 ## Kandidaten
 
@@ -313,7 +324,7 @@ Provider-Keys werden nicht in Projekten oder Suchmetadaten gespeichert.
 
 Ein neu eingegebener Pexels-, Pixabay- oder Unsplash-Key wird erst dann als Sitzung-Key gemerkt, wenn genau dieser Provider erfolgreich damit angesprochen wurde. Ein keyloser Provider kann keinen fremden Key bestätigen.
 
-Ein reiner Pixabay-Cachetreffer zählt ebenfalls nicht als Keyvalidierung. Noch nicht validierte Keys bleiben sichtbar im Passwortfeld und damit nur im Arbeitsspeicher der aktuellen Seite, damit sie bei langen Projekten nicht verloren gehen. Nach erfolgreicher Providerprüfung wird der Key aus dem Feld entfernt und nur flüchtig im RAM gehalten.
+Ein reiner Pixabay-Cachetreffer zählt nicht als Keyvalidierung. Noch nicht validierte Keys bleiben sichtbar im Passwortfeld und damit nur im Arbeitsspeicher der aktuellen Seite. Nach erfolgreicher Providerprüfung wird der Key aus dem Feld entfernt und nur flüchtig im RAM gehalten.
 
 **Sitzungs-Keys löschen** entfernt sowohl gemerkte als auch noch sichtbare Keywerte.
 
@@ -344,8 +355,6 @@ scriptVisualMixedMediaFound: true
 scriptVisualReviewImported: true
 ```
 
-`scriptVisualMixedMediaFound` wird erst wahr, wenn **mindestens eine konkrete Szene sowohl Video- als auch Bildkandidaten** enthält.
+`scriptVisualMixedMediaFound` wird erst wahr, wenn mindestens **eine konkrete Szene sowohl Video- als auch Bildkandidaten** enthält.
 
-Die manuelle Release-Checkliste prüft zusätzlich Pagination, Auswahlpersistenz, lange Projekte, Review-Import und die übrigen Browserabläufe.
-
-Diese Kriterien können erst durch den späteren echten lokalen Browser-/API-Test erfüllt werden.
+Die manuelle Release-Checkliste prüft zusätzlich Pagination, Auswahlpersistenz, lange Projekte, Review-Import und die übrigen Browserabläufe. Diese Kriterien können erst durch den späteren echten lokalen Browser-/API-Test erfüllt werden.
