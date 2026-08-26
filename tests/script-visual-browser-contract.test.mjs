@@ -69,6 +69,18 @@ test('manuelle Web-Recherche bleibt klar von Import und Rechtefreigabe getrennt'
   assert.match(source, /link\.rel = 'noopener noreferrer'/);
 });
 
+test('lange Projekte rendern Kandidaten erst beim Öffnen der jeweiligen Szene', () => {
+  const source = read('web/script-visual-finder.js');
+  const css = read('web/script-visual-finder.css');
+  assert.match(source, /function candidatePanel\(project, scene, keyFields, perPage, status\)/);
+  assert.match(source, /const longProject = \(project\.scenes\?\.length \?\? 0\) > 20/);
+  assert.match(source, /if \(!longProject && scene\.candidates\.length\)/);
+  assert.match(source, /details\.addEventListener\('toggle'/);
+  assert.match(source, /if \(details\.open\) render\(\)/);
+  assert.match(source, /else if \(longProject\)[\s\S]*grid\.replaceChildren\(\)[\s\S]*rendered = false/);
+  assert.match(css, /\.svf-candidate-panel/);
+});
+
 test('Mehr Treffer zeigt die echte nächste Suchseite und ein festes Maximum', () => {
   const source = read('web/script-visual-finder.js');
   assert.match(source, /const MAX_SEARCH_PAGE = 100/);
