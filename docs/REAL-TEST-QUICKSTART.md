@@ -114,7 +114,17 @@ Echte Shotlist, Sammlungen, vorhandene Assets und Exporte prüfen.
 
 ## 10. Medienpaket und echte Nutzung
 
-Nur freigegebene Assets; Manifest/SHA-256/Attribution; mindestens ein Asset real verwenden; Nutzung dokumentieren; Backup erzeugen.
+Allgemein: nur freigegebene Assets; Manifest/SHA-256/Attribution; mindestens ein Asset real verwenden; Nutzung dokumentieren; Backup erzeugen.
+
+Im Script Visual Finder zusätzlich **Schnittpaket aus Auswahl** prüfen:
+
+- ausgewählter, aber noch nicht importierter Kandidat wird nicht exportiert
+- ausgewähltes `review`-Asset wird nicht exportiert
+- ausgewähltes `approved`-Asset wird über die bestehende verifizierte Media-Pack-Pipeline exportiert
+- der Button verändert keinen Assetstatus und gibt nichts automatisch frei
+- Manifest, SHA-256 und Attribution stimmen
+- bei mehr als 20 freigegebenen ausgewählten Asset-IDs entstehen mehrere nummerierte Pakete
+- sehr langer Projekttitel blockiert den Paketexport nicht
 
 ## 11. Abschluss
 
