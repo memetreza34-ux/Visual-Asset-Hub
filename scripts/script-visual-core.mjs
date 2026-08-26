@@ -198,11 +198,15 @@ function buildScenes(pieces, timings, options) {
   for (let index = 0; index < pieces.length; index += 1) {
     const scene = buildScene(pieces[index], index, timings[index], options, previousContext);
     scenes.push(scene);
-    const nextEntities = scene.entities.length ? scene.entities : (scene.contextInherited ? scene.contextEntities : []);
-    const nextConcepts = scene.concepts.length ? scene.concepts : (scene.contextInherited ? scene.contextConcepts : []);
+    const nextEntities = scene.contextInherited
+      ? unique([...scene.contextEntities, ...scene.entities])
+      : unique(scene.entities);
+    const nextConcepts = scene.contextInherited
+      ? unique([...scene.contextConcepts, ...scene.concepts])
+      : unique(scene.concepts);
     previousContext = {
-      entities: unique(nextEntities).slice(0, 3),
-      concepts: unique(nextConcepts).slice(0, 5)
+      entities: nextEntities.slice(0, 3),
+      concepts: nextConcepts.slice(0, 5)
     };
   }
   return scenes;
