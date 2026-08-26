@@ -37,6 +37,13 @@ test('lange Projektauswahl wird in Pakete zu höchstens 20 Assets geteilt', () =
   assert.match(source, /for \(let index = 0; index < chunks\.length; index \+= 1\)/);
 });
 
+test('lange Projekttitel werden vor der bestehenden Media-Pack-API sicher begrenzt', () => {
+  assert.match(source, /const MAX_PACK_NAME_LENGTH = 80/);
+  assert.match(source, /function packBaseName\(project\)/);
+  assert.match(source, /MAX_PACK_NAME_LENGTH - suffix\.length - 10/);
+  assert.match(source, /\.slice\(0, MAX_PACK_NAME_LENGTH\)/);
+});
+
 test('Schnittpaket-Integration speichert weder Sitzungstoken noch Provider-Keys persistent', () => {
   assert.doesNotMatch(source, /localStorage/);
   assert.doesNotMatch(source, /sessionStorage/);
