@@ -39,9 +39,19 @@ test('Medienpaket zählt nur mit Manifest, Datei und SHA-256', () => {
   assert.match(script, /\^\[a-f0-9\]\{64\}\$/);
 });
 
-test('Webstatus zeigt alle Realtest-Kriterien verständlich an', () => {
-  assert.match(status, /Skript- und Shotlist-Test erstellt/);
-  assert.match(status, /alle 4 Kanäle mit Assets/);
-  assert.match(status, /eigenes Medium importiert/);
-  assert.match(status, /Schnittpaket erzeugt/);
+test('Webstatus zeigt alle zentralen beta7 Realtest-Kriterien verständlich an', () => {
+  for (const label of [
+    'Skript- und Shotlist-Test erstellt',
+    'Skript → Visuals Projekt erstellt',
+    'mindestens 2 Script-Visual-Szenen recherchiert',
+    'eine Szene mit Video + Bild gefunden',
+    'Script-Visual-Treffer als Review importiert',
+    'mindestens 2 Recherchearten geprüft',
+    'alle 12 Starterassets entschieden',
+    'alle 4 Kanäle mit Assets',
+    'eigenes Medium importiert',
+    'Schnittpaket erzeugt'
+  ]) assert.match(status, new RegExp(label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  assert.match(status, /requiredReviewedAssets \?\? 12/);
+  assert.match(status, /validScriptVisualProjects/);
 });
