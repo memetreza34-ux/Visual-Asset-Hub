@@ -146,6 +146,16 @@ test('mehrere Rückbezugssätze behalten den relevanten Hauptkontext über die S
   assert.equal(plan.scenes[2].originalText, 'Dort übernehmen sie die Montage.');
 });
 
+test('Auto-Modus verdichtet sehr viele kurze Sätze auf höchstens 120 visuelle Einheiten', () => {
+  const sentence = 'Humanoide Roboter helfen später im Alltag.';
+  const script = Array.from({ length: 150 }, (_, index) => `${index + 1}. ${sentence}`).join('\n');
+  const plan = createScriptVisualPlan({ script, segmentation: 'auto', depth: 'quick' });
+  assert.equal(plan.script, script);
+  assert.equal(plan.scenes.length, 120);
+  assert.ok(plan.scenes.some((scene) => scene.originalText.includes(`${sentence} ${sentence}`)));
+  assert.ok(plan.settings.durationSeconds > 60);
+});
+
 test('Projekt unterstützt lange Skripte bis zur vorgesehenen Szenengrenze', () => {
   const sentence = 'Humanoide Roboter helfen Menschen bei einer klar beschriebenen Aufgabe.';
   const script = Array.from({ length: 80 }, (_, index) => `${index + 1}. ${sentence}`).join('\n');
