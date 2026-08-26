@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 
 const MAX_SCRIPT_CHARS = 40000;
 const MAX_UNITS = 120;
+const SENTENCE_DOT = '\uE000';
 const STOPWORDS = new Set('aber alle auch beim eine einem einen einer eines fuer für gegen hat haben hier ihm ihn ihre immer ist mit nach nicht noch oder sein seine seinen seiner sich sind ueber über und von war waren wird wurde wurden der die das den dem des ein zu zum zur im in am an auf aus bei bis durch ohne um als wie so dass this that with from into about after before the and for are was were will can could would should'.split(/\s+/));
 
 const CHANNEL_RULES = [
@@ -280,9 +281,28 @@ function splitScriptLine(line) {
   const match = line.match(/^(\s*(?:[-–—•]\s*|\d{1,4}[.)]\s*))(.+)$/u);
   const prefix = match?.[1] ?? '';
   const body = (match?.[2] ?? line).trim();
-  const parts = body.split(/(?<=[.!?])\s+(?=[A-ZÄÖÜ0-9„“"'])/u).map((part) => part.trim()).filter(Boolean);
+  const protectedBody = protectSentenceDots(body);
+  const parts = protectedBody
+    .split(/(?<=[.!?])\s+(?=[A-ZÄÖÜ0-9„“"'])/u)
+    .map((part) => restoreSentenceDots(part).trim())
+    .filter(Boolean);
   if (prefix && parts.length) parts[0] = `${prefix}${parts[0]}`.trim();
   return parts;
+}
+
+function protectSentenceDots(value) {
+  const protect = (match) => match.replace(/\./g, SENTENCE_DOT);
+  let text = String(value ?? '');
+  text = text.replace(/\b(?:z\.\s*B\.|d\.\s*h\.|u\.\s*a\.|u\.\s*U\.)/giu, protect);
+  text = text.replace(/\b(?:Dr|Prof|Dipl|Ing|Nr|Abb|ca|bzw|usw|etc|vgl|inkl|zzgl|evtl)\./giu, protect);
+  text = text.replace(/\b(?:[A-ZÄÖÜ]\.[ \t]*){2,}(?=[A-ZÄÖÜ])/gu, protect);
+  text = text.replace(/\b\d{1,2}\.\s+(?=(?:Januar|Februar|März|Maerz|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember)\b)/giu, protect);
+  text = text.replace(/(^|[.!?]\s+)(\d{1,3})\.(\s+)(?=[A-ZÄÖÜ])/gu, (match, lead, number, spacing) => `${lead}${number}${SENTENCE_DOT}${spacing}`);
+  return text;
+}
+
+function restoreSentenceDots(value) {
+  return String(value ?? '').replaceAll(SENTENCE_DOT, '.');
 }
 
 function splitOversized(text, targetWords) {
