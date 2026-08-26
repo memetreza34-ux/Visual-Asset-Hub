@@ -22,9 +22,9 @@ const MAX_SEARCH_PAGE = 100;
 const CHANNEL_LABELS = { general: 'Allgemein', finance: 'Finanzen', ai: 'Künstliche Intelligenz', electro: 'Elektrotechnik', 'combat-sports': 'Kampfsport' };
 const CHANNEL_TAGS = { finance: 'channel-finance', ai: 'channel-ai', electro: 'channel-electro', 'combat-sports': 'channel-combat-sports' };
 const DEPTH_TARGETS = {
-  quick: { candidates: 4, minProviders: 1, maxTasks: 4 },
-  deep: { candidates: 6, minProviders: 3, maxTasks: 8 },
-  max: { candidates: 8, minProviders: 5, maxTasks: 12 }
+  quick: { candidates: 4, minProviders: 1, maxTasks: 4, retainCandidates: 12 },
+  deep: { candidates: 6, minProviders: 3, maxTasks: 8, retainCandidates: 20 },
+  max: { candidates: 8, minProviders: 5, maxTasks: 12, retainCandidates: 30 }
 };
 
 export function createLocalScriptVisualApi({ root = process.cwd(), token, searchers = defaultSearchers() } = {}) {
@@ -283,7 +283,7 @@ async function searchScene({ root, project, scene, keys, enabledProviders, perPa
     successfulProviders: [...providersUsed],
     validatedKeyProviders: [...validatedKeyProviders],
     scene: {
-      candidates: retainSceneCandidates(candidates, scene, mixedRequested, 20),
+      candidates: retainSceneCandidates(candidates, scene, mixedRequested, settings.retainCandidates),
       searchedAt: successful ? new Date().toISOString() : (scene.searchedAt ?? null),
       searchRound: successful ? page : (Number.isInteger(scene.searchRound) ? scene.searchRound : 0),
       searchErrors: errors
