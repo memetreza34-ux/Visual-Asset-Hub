@@ -59,7 +59,7 @@ Lange Sätze dürfen in mehrere visuelle Einheiten aufgeteilt werden. Jede Einhe
 
 ### Lange Skripte bis ungefähr zehn Minuten
 
-Im **Auto-Modus** darf ein langes Skript zunächst mehr als 120 einzelne kurze Satzsegmente erzeugen. Statt das Projekt deshalb sofort abzulehnen, verdichtet der Finder nur in diesem Fall die jeweils kürzesten benachbarten visuellen Einheiten, bis höchstens 120 Szenen übrig bleiben.
+Im **Auto-Modus** darf ein langes Skript zunächst mehr als 120 einzelne kurze Satzsegmente erzeugen. Statt das Projekt deshalb sofort abzulehnen, verdichtet der Finder nur in diesem Fall benachbarte kurze visuelle Einheiten, bis höchstens 120 Szenen übrig bleiben.
 
 Dadurch gilt:
 
@@ -68,8 +68,6 @@ Dadurch gilt:
 - nur die visuelle Gruppierung wird gröber
 - normale kürzere Skripte werden nicht künstlich zusammengelegt
 - Satzweise und Absatzweise bleiben bewusste manuelle Segmentierungsmodi
-
-So können auch längere Sprechertexte mit sehr vielen kurzen Sätzen verarbeitet werden, ohne die Web-App mit hunderten Szenenkarten zu überladen.
 
 ## Visuelle Analyse
 
@@ -98,24 +96,9 @@ Die Query-Engine hängt nicht nur mehrere ähnliche Zusätze an denselben langen
 4. Kontext-/Umgebungsaufnahme
 5. Detail-/Close-up- oder symbolischer Fallback
 
-Häufige deutsche Visualbegriffe werden zusätzlich providerfreundlich übersetzt, zum Beispiel:
-
-- Roboter → `robot`
-- Fabrik → `factory`
-- Alltag → `daily life`
-- Rechenzentrum → `data center`
-- Börse → `stock market`
-- Krankenhaus → `hospital`
+Häufige deutsche Visualbegriffe werden zusätzlich providerfreundlich übersetzt, beispielsweise `Roboter → robot`, `Fabrik → factory`, `Alltag → daily life`, `Rechenzentrum → data center`, `Börse → stock market` und `Krankenhaus → hospital`.
 
 Konkrete Namen, Marken, Orte, Events und Jahreszahlen bleiben in den Suchrichtungen erhalten, soweit sie erkannt werden.
-
-Beispiel:
-
-```text
-Conor McGregor besiegte José Aldo 2015 in der Arena.
-```
-
-kann unterschiedliche Suchrichtungen erzeugen, die Person, Gegner, Kampf/Action und Arena-/Kontextmaterial abdecken, statt fünf fast identische Queries zu erzeugen.
 
 ## Kontext zwischen aufeinanderfolgenden Szenen
 
@@ -127,7 +110,7 @@ Sie sollen später in Fabriken arbeiten.
 Dort übernehmen sie die Montage.
 ```
 
-Rückbezugssätze dürfen für die **Visualsuche** den aktiven Kontext aus der unmittelbar vorherigen Szene übernehmen. Wenn diese vorherige Szene selbst eindeutig auf ihren Vorgänger verwiesen hat, darf der relevante Hauptkontext entlang dieser Rückbezugskette weitergetragen werden.
+Rückbezugssätze dürfen für die **Visualsuche** den aktiven Kontext aus der unmittelbar vorherigen Szene übernehmen. Wenn diese Szene selbst eindeutig auf ihren Vorgänger verwiesen hat, darf der relevante Hauptkontext entlang dieser Rückbezugskette weitergetragen werden.
 
 Das gilt für eindeutige Rückbezüge am Satzanfang, zum Beispiel:
 
@@ -139,17 +122,12 @@ Das gilt für eindeutige Rückbezüge am Satzanfang, zum Beispiel:
 - anschließend
 - später
 
-Dadurch können auch der zweite und dritte Satz weiterhin Queries mit `OpenAI`, `Roboter` und dem aktuellen Motiv erzeugen, obwohl der konkrete Name nicht in jedem Satz wiederholt wird.
-
 Wichtig:
 
-- die Vererbung startet nur bei einem eindeutigen sprachlichen Rückbezug
 - ein neuer expliziter Szenenbezug ohne solchen Rückbezug setzt den aktiven Kontext neu
 - der Originaltext wird nicht verändert
 - übernommener Kontext wird getrennt als `contextInherited`, `contextEntities` und `contextConcepts` gespeichert
 - die Weboberfläche zeigt **Kontext übernommen: ...** sichtbar an
-
-So bleibt nachvollziehbar, was tatsächlich im Skript stand und was ausschließlich als Recherchehilfe ergänzt wurde.
 
 ## Provider
 
@@ -169,17 +147,15 @@ Pixabay verwendet weiterhin den bestehenden 24-Stunden-Cache.
 
 Bei **Gemischt** versucht der Finder pro Szene bewusst sowohl Video-B-Roll als auch Bildmaterial zu sammeln, sofern mindestens eine Videoquelle verfügbar ist.
 
-- Pexels und Pixabay werden im Gemischt-Modus für Video-B-Roll genutzt.
+- Pexels und Pixabay werden für Video-B-Roll genutzt.
 - Unsplash, Openverse und Wikimedia Commons liefern Bildkandidaten.
 - Die Szene wird nicht nur wegen einer hohen Gesamttrefferzahl beendet, solange der gewünschte Mix technisch noch erreichbar, aber noch nicht vorhanden ist.
-- Die Oberfläche zeigt pro Szene sichtbar an, wie viele Videos und Bilder vorhanden sind und ob der Mix erfüllt ist.
-- Beim Kandidatenlimit bleiben ausgewählte Hauptvisuals und Alternativen geschützt; bei Gemischt werden außerdem Kandidaten beider Medientypen bewahrt.
+- Die Oberfläche zeigt pro Szene Video- und Bildanzahl sowie **Mix erfüllt** oder **Mix noch unvollständig**.
+- Beim Kandidatenlimit bleiben Hauptvisual, Alternativen und nach Möglichkeit beide Medientypen erhalten.
 
 Wenn keine Videoquelle verfügbar ist, blockiert die fehlende Videoseite die Recherche nicht.
 
 ## Recherche pro Szene
-
-Die Suche feuert nicht blind jede Query gegen jede Quelle ab.
 
 ### Schnell
 
@@ -197,16 +173,48 @@ Die Suche feuert nicht blind jede Query gegen jede Quelle ab.
 
 - Ziel: ungefähr 8 Kandidaten
 - nach Möglichkeit alle 5 verfügbaren Quellen mindestens einmal berücksichtigen
-- fehlen Provider-Keys, passt sich die notwendige Providerzahl automatisch an die tatsächlich verfügbaren Quellen an
+- fehlen Provider-Keys, passt sich die notwendige Providerzahl an die tatsächlich verfügbaren Quellen an
 - maximal 12 Suchtasks pro Szene und Suchseite
 
 Sobald Kandidatenziel, Providerbreite und gegebenenfalls Medienmix erreicht sind, endet der Suchlauf für diese Szene.
 
+## Langprojekt-Performance
+
+5–10-Minuten-Skripte werden zusätzlich gegen Browser-, Provider- und Datei-I/O-Überlast geschützt.
+
+### Kontrollierte Sammelrecherche
+
+- bis einschließlich 40 Szenen kann der Sammelbutton alle offenen Szenen sequenziell abarbeiten
+- bei mehr als 40 Szenen werden pro Klick höchstens **20 offene Szenen** recherchiert
+- danach zeigt der Button automatisch die nächste offene Batchgröße an
+- Stoppen wirkt weiterhin nach der aktuell laufenden Szene
+- bereits fertige Szenen bleiben gespeichert
+- die Oberfläche zeigt vor dem Lauf den theoretischen maximalen Erstlauf in Provider-Suchtasks
+- dieser Wert ist nur ein Maximum; jede Szene stoppt früher, sobald ihre Suchziele erfüllt sind
+
+### Lazy-Kandidatenansicht
+
+- Projekte bis 20 Szenen zeigen vorhandene Kandidaten direkt geöffnet
+- bei mehr als 20 Szenen werden Bild-/Video-Karten erst erzeugt, wenn der Nutzer die Kandidatenansicht der jeweiligen Szene öffnet
+- beim Zuklappen werden die schweren DOM-Karten wieder entfernt
+- Kandidatendaten, Auswahl und Importstatus bleiben selbstverständlich im Projekt gespeichert
+
+Dadurch müssen bei langen Projekten nicht tausende Bild- und Videoelemente gleichzeitig im Browser existieren.
+
+### Inkrementelle lokale Projektspiegelung
+
+`ALLES-GEFUNDEN/06-SKRIPT-PROJEKTE` wird nach der Projekterstellung nicht bei jeder Szenenänderung komplett neu aufgebaut.
+
+Bei Suche, Auswahl oder Import werden aktualisiert:
+
+- die Projekt-/Shotlist-Dateien im Projektroot
+- **nur der tatsächlich geänderte Szenenordner**
+
+Der komplette Projektordner wird nur beim erstmaligen Erstellen vollständig aufgebaut. Das reduziert Datei-I/O bei langen Projekten erheblich.
+
 ## Mehr Treffer / Pagination
 
 **Mehr Treffer** wiederholt nicht einfach Seite 1.
-
-Eine Szene führt einen eigenen `searchRound`:
 
 ```text
 Erste Suche  → Seite 1
@@ -215,21 +223,15 @@ Mehr Treffer → Seite 3
 ...
 ```
 
-Die Seitenzahl wird nur nach mindestens einer erfolgreichen Providerabfrage fortgeschrieben. Schlägt eine komplette Runde fehl, bleibt die vorherige Suchseite erhalten und kann sauber erneut versucht werden.
+Die Seitenzahl wird nur nach mindestens einer erfolgreichen Providerabfrage fortgeschrieben. Schlägt eine komplette Runde fehl, bleibt die vorherige Suchseite erhalten.
 
-Die Provider erhalten die tatsächliche Seitennummer:
+Die Provider erhalten die tatsächliche Seitennummer. Wikimedia Commons berechnet `gsroffset` passend zu `perPage`, damit zwischen den Seiten keine Treffer übersprungen werden.
 
-- Pexels: echte API-Seite
-- Pixabay: echte API-Seite und seitenspezifischer 24h-Cache
-- Unsplash: echte API-Seite
-- Openverse: echte API-Seite
-- Wikimedia Commons: `gsroffset` wird passend zu `perPage` berechnet, damit zwischen den Seiten keine Treffer übersprungen werden
-
-Die Weboberfläche zeigt die aktuelle Suchseite und deaktiviert weitere Seiten nach Seite 100.
+Nach Seite 100 wird weiteres Nachladen in der Weboberfläche blockiert.
 
 ## Weitere Web-Recherche
 
-Pro Szene steht zusätzlich **Weitere Web-Recherche** zur Verfügung. Sie erzeugt aus bis zu drei der aktuellen Szene-Queries manuelle Suchlinks zu:
+Pro Szene steht zusätzlich **Weitere Web-Recherche** zur Verfügung. Aus bis zu drei aktuellen Szene-Queries werden manuelle Suchlinks zu folgenden Diensten erzeugt:
 
 - YouTube
 - Google Bilder
@@ -237,24 +239,7 @@ Pro Szene steht zusätzlich **Weitere Web-Recherche** zur Verfügung. Sie erzeug
 - Google News
 - Wikipedia
 
-Diese Links importieren **nichts** und setzen keinen Rechte- oder Reviewstatus. Sie dienen nur dazu, bei sehr konkreten Personen, Events, historischen Motiven oder seltenem Material weitere Fundstellen zu recherchieren.
-
-Sichtbarkeit auf YouTube, Google, Wikipedia oder einer anderen Website ist keine Nutzungsfreigabe.
-
-## Lange Skripte und Suchablauf
-
-Der Browser recherchiert Szene für Szene sequenziell.
-
-Dadurch:
-
-- keine unkontrollierte gleichzeitige Request-Explosion
-- Fortschritt sichtbar
-- Recherche stoppbar
-- später fortsetzbar
-- fertige Szenen bleiben gespeichert
-- einzelne Providerfehler zerstören kein komplettes Projekt
-- zusätzliche Treffer können gezielt nur für einzelne Szenen nachgeladen werden
-- kontextabhängige Folgesätze behalten ihren aktiven Bezug für die Recherche
+Diese Links importieren **nichts** und setzen keinen Rechte- oder Reviewstatus. Sie sind ausschließlich Discovery-Hilfen für sehr konkrete Personen, Events, historische Motive oder seltenes Material.
 
 ## Kandidaten
 
@@ -273,23 +258,17 @@ Die Weboberfläche zeigt pro Treffer:
 
 Der Nutzer kann einen Kandidaten als **Hauptvisual** oder **Alternative** markieren.
 
-Dubletten werden nicht nur über die Provider-ID erkannt. Der Finder berücksichtigt zusätzlich kanonisierte Quellseiten, Original-Medien-URLs und direkte Medienreferenzen. Dadurch können gleiche Aufnahmen auch dann erkannt werden, wenn sie über unterschiedliche Suchläufe erneut auftauchen.
-
-Bereits in anderen Szenen vorkommende Kandidaten werden niedriger priorisiert, aber nicht vollständig verboten.
+Dubletten werden über Provider-ID sowie kanonisierte Quell-, Original- und Medien-URLs reduziert. Bereits in anderen Szenen vorkommende Kandidaten werden niedriger priorisiert, aber nicht grundsätzlich verboten.
 
 ## Import
 
-Ein Kandidat wird nur nach ausdrücklichem Klick importiert.
-
-Der Import verwendet die vorhandene Arsenal-Importpipeline und setzt ein neu angelegtes Asset auf:
+Ein Kandidat wird nur nach ausdrücklichem Klick importiert. Ein neu angelegtes externes Asset beginnt immer auf:
 
 ```text
 review
 ```
 
-Importierte Katalog-Asset-IDs werden im Script-Visual-Projekt am Kandidaten gespeichert.
-
-Falls dieselbe Quelle beziehungsweise Medienreferenz bereits im Katalog vorhanden ist, legt der Finder kein unnötiges Duplikat an. Stattdessen wird der Skriptkandidat mit der bestehenden Katalog-Asset-ID verknüpft und in der Oberfläche als bereits importiert behandelt.
+Falls dieselbe Quelle beziehungsweise Medienreferenz bereits im Katalog vorhanden ist, legt der Finder kein unnötiges Duplikat an. Stattdessen wird der Skriptkandidat mit der bestehenden Katalog-Asset-ID verknüpft.
 
 ## Lokale Persistenz
 
@@ -318,17 +297,11 @@ Pro Projekt:
 ...
 ```
 
-`searchRound`, Kandidaten, Auswahl, Kontextfelder und Importverknüpfungen werden im Projekt persistiert. `vault:build` bewahrt diese Projekte.
+`searchRound`, Kandidaten, Auswahl, Kontextfelder und Importverknüpfungen werden persistiert. `vault:build` bewahrt die Projekte.
 
 ## API-Sicherheit
 
-Die API liegt unter:
-
-```text
-/script-visual-api/
-```
-
-Sie ist Teil derselben lokalen Schutzarchitektur:
+Die API liegt unter `/script-visual-api/` und nutzt dieselbe lokale Schutzarchitektur:
 
 - Loopback-only
 - Same-Origin für Schreibaktionen
@@ -336,13 +309,13 @@ Sie ist Teil derselben lokalen Schutzarchitektur:
 - gemeinsame Server-Schreibsperre
 - begrenzte Requestgröße
 
-Provider-Keys werden nicht in Projekten oder Suchmetadaten gespeichert. Ein neu eingegebener Pexels-, Pixabay- oder Unsplash-Key wird im Browser erst für die laufende Sitzung gemerkt, wenn genau dieser Provider erfolgreich angesprochen wurde. Ein erfolgreicher keyloser Provider kann dadurch keinen fehlerhaften Key eines anderen Providers versehentlich bestätigen.
+Provider-Keys werden nicht in Projekten oder Suchmetadaten gespeichert.
 
-Ein reiner Pixabay-Cachetreffer gilt ebenfalls nicht als Prüfung eines neu eingegebenen Pixabay-Keys, weil bei diesem Treffer keine echte Anfrage mit dem neuen Schlüssel stattgefunden hat.
+Ein neu eingegebener Pexels-, Pixabay- oder Unsplash-Key wird erst dann als Sitzung-Key gemerkt, wenn genau dieser Provider erfolgreich damit angesprochen wurde. Ein keyloser Provider kann keinen fremden Key bestätigen.
 
-Noch nicht validierte Keys bleiben bis zur Bestätigung sichtbar im jeweiligen Passwortfeld und damit nur im Arbeitsspeicher der laufenden Seite. Dadurch geht ein gültiger Key bei langen Projekten nicht verloren, wenn die erste Szene den Provider noch nicht verwendet oder nur einen Cachetreffer erhält. Erst wenn der Server genau diesen Provider erfolgreich mit dem eingegebenen Key geprüft hat, wird der Wert aus dem sichtbaren Feld entfernt und im flüchtigen Sitzungsspeicher der Seite gehalten.
+Ein reiner Pixabay-Cachetreffer zählt ebenfalls nicht als Keyvalidierung. Noch nicht validierte Keys bleiben sichtbar im Passwortfeld und damit nur im Arbeitsspeicher der aktuellen Seite, damit sie bei langen Projekten nicht verloren gehen. Nach erfolgreicher Providerprüfung wird der Key aus dem Feld entfernt und nur flüchtig im RAM gehalten.
 
-**Sitzungs-Keys löschen** entfernt sowohl die gemerkten als auch die noch sichtbaren Keywerte.
+**Sitzungs-Keys löschen** entfernt sowohl gemerkte als auch noch sichtbare Keywerte.
 
 ## Rechte
 
@@ -358,7 +331,7 @@ Vor Freigabe weiterhin prüfen:
 - Broadcastmaterial
 - Kontext
 
-Symbolische B-Rolls dürfen nicht als Beleg dafür dargestellt werden, dass sie das im Skript genannte konkrete Ereignis zeigen.
+Symbolische B-Rolls dürfen nicht als Beleg dargestellt werden, dass sie das im Skript genannte konkrete Ereignis zeigen.
 
 ## Beta-Abnahme
 
@@ -371,6 +344,8 @@ scriptVisualMixedMediaFound: true
 scriptVisualReviewImported: true
 ```
 
-Die manuelle Release-Checkliste prüft zusätzlich eine echte Szene mit Video + Bild, Folgeseiten, Auswahlpersistenz und die weiteren Browserabläufe.
+`scriptVisualMixedMediaFound` wird erst wahr, wenn **mindestens eine konkrete Szene sowohl Video- als auch Bildkandidaten** enthält.
+
+Die manuelle Release-Checkliste prüft zusätzlich Pagination, Auswahlpersistenz, lange Projekte, Review-Import und die übrigen Browserabläufe.
 
 Diese Kriterien können erst durch den späteren echten lokalen Browser-/API-Test erfüllt werden.
