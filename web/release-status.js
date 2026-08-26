@@ -28,11 +28,12 @@ function render(report) {
   title.textContent = `${percentage} % fertig`;
   const description = document.createElement('p');
   const reviewed = report.counts?.reviewedAssets ?? 0;
-  const required = report.counts?.requiredReviewedAssets ?? 11;
+  const required = report.counts?.requiredReviewedAssets ?? 12;
   const packs = report.counts?.validMediaPacks ?? 0;
   const plans = report.counts?.validScriptPlans ?? 0;
+  const scriptVisualProjects = report.counts?.validScriptVisualProjects ?? 0;
   const inbox = report.counts?.inboxAssets ?? 0;
-  description.textContent = `Technik ${technical} % · Realtest ${realTest} % · Skriptpläne ${plans} · geprüft ${reviewed}/${required} · eigene Medien ${inbox} · Pakete ${packs}`;
+  description.textContent = `Technik ${technical} % · Realtest ${realTest} % · Script-Visual-Projekte ${scriptVisualProjects} · Skriptpläne ${plans} · geprüft ${reviewed}/${required} · eigene Medien ${inbox} · Pakete ${packs}`;
   text.append(eyebrow, title, description);
 
   const links = document.createElement('div');
@@ -88,7 +89,14 @@ function checkLabel(key) {
   return ({
     starterMediaPresent: 'Startermedien vorhanden',
     scriptPlanGenerated: 'Skript- und Shotlist-Test erstellt',
-    starterAssetsReviewed: 'alle Starterassets entschieden',
+    scriptVisualProjectGenerated: 'Skript → Visuals Projekt erstellt',
+    scriptVisualMultipleScenesSearched: 'mindestens 2 Script-Visual-Szenen recherchiert',
+    scriptVisualMixedMediaFound: 'eine Szene mit Video + Bild gefunden',
+    scriptVisualReviewImported: 'Script-Visual-Treffer als Review importiert',
+    topicResearchGenerated: 'universelle Themenrecherche durchgeführt',
+    multipleResearchTypesVerified: 'mindestens 2 Recherchearten geprüft',
+    scriptSpecificTopicResearch: 'skriptspezifische Themenrecherche geprüft',
+    starterAssetsReviewed: 'alle 12 Starterassets entschieden',
     fourChannelsRepresented: 'alle 4 Kanäle mit Assets',
     ownedInboxAssetImported: 'eigenes Medium importiert',
     approvedAsset: 'Asset freigegeben',
