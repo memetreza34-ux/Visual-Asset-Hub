@@ -8,7 +8,7 @@ Dieser Workflow ist der verbindliche Produktionsweg fuer den geplanten YouTube-D
 
 ```text
 PHASE 1 - ChatGPT / Visual Asset Hub
-Skript + semantische Szenen + Online-Recherche + lokale Hauptvisuals + Quellen + Projektordner
+Thema selbst waehlen + Skript + semantische Szenen + Online-Recherche + lokale Hauptvisuals + Quellen + Projektordner
 
 PHASE 2 - Nutzer
 finales Skript kopieren -> KI-Voice erzeugen -> voiceover.mp3 ablegen
@@ -19,12 +19,25 @@ finale Audio -> echte Wort-Timings -> striktes Skript-Alignment -> reale Szenenz
 
 Wichtig: In Phase 1 werden keine exakten Sekunden fuer die Szenen geraten. Die semantischen Szenengrenzen werden am Skript festgelegt. Exakte Zeitpunkte entstehen erst in Phase 3 aus der finalen Audiodatei.
 
-## Verbindliche Projektstruktur
+## Verbindliche Videostruktur
 
-Jedes neue Dokumentationsvideo bekommt einen eigenen, leicht lesbaren Projektordner:
+Alle normalen Doku-Projekte liegen sichtbar im Repo-Root unter `videos/`.
 
 ```text
-<projektname>/
+videos/
+├── umweltgeschichte/
+├── geschichte/
+├── technik/
+├── wissenschaft/
+├── wirtschaft/
+├── geopolitik/
+└── sonstiges/
+```
+
+Innerhalb der passenden Kategorie bekommt jedes Thema einen fortlaufend nummerierten Projektordner:
+
+```text
+videos/<kategorie>/<nnn-thema>/
 ├── 01-SCRIPT/
 │   └── script.txt
 ├── 02-AUDIO/
@@ -32,7 +45,6 @@ Jedes neue Dokumentationsvideo bekommt einen eigenen, leicht lesbaren Projektord
 ├── 03-VISUALS/
 │   ├── scene-001/
 │   ├── scene-002/
-│   ├── scene-003/
 │   └── ...
 ├── 04-SOURCES/
 │   ├── sources.txt
@@ -47,12 +59,12 @@ Jedes neue Dokumentationsvideo bekommt einen eigenen, leicht lesbaren Projektord
 │   ├── antigravity-handoff.json
 │   ├── phase3-state.json
 │   ├── phase3-validation.json
-│   ├── publish.json                  optional, kuratiert
+│   ├── publish.json
 │   ├── publish-state.json
 │   ├── render-props.json
 │   ├── render-plan.json
-│   ├── render-result.json            nach erfolgreichem Render
-│   └── remotion-public/              temporaerer Render-Stagingbereich
+│   ├── render-result.json
+│   └── remotion-public/
 └── 06-EXPORT/
     ├── final-v1.mp4
     ├── youtube-title.txt
@@ -61,7 +73,13 @@ Jedes neue Dokumentationsvideo bekommt einen eigenen, leicht lesbaren Projektord
     └── thumbnail-text.txt
 ```
 
-`word-timings-input.json` wird automatisch angelegt, wenn Phase 3 die Wortzeiten selbst aus dem Voiceover erzeugt. Technische Dateien bleiben komplett in `05-PROJECT`.
+Beispiel fuer das erste Video:
+
+```text
+videos/umweltgeschichte/001-wie-der-aralsee-fast-verschwand-und-warum-ein-teil-zuruckkam/
+```
+
+Das zentrale Anti-Wiederholungsregister liegt getrennt unter `documentary-registry/`.
 
 ## 01-SCRIPT
 
@@ -69,27 +87,40 @@ Jedes neue Dokumentationsvideo bekommt einen eigenen, leicht lesbaren Projektord
 
 Keine Regieanweisungen, keine JSON-Struktur, keine Szenenlabels. Der Nutzer soll die Datei oeffnen, `Strg+A`, `Strg+C` druecken und den Text direkt in das Voice-Tool kopieren koennen.
 
-## Phase 1 - Skript und Visuals
+## Phase 1 - autonom
 
-ChatGPT / Visual Asset Hub erstellt:
+Standard:
 
-- finales Doku-Skript
-- semantische Szenen nach echten Sinn- und Visualwechseln
-- pro Szene die visuelle Aufgabe
-- passende Bilder und B-Rolls aus den angeschlossenen Quellen
-- Quellen- und Lizenzdaten
-- Hauptvisual und Alternativen
-- lokale Hauptvisual-Datei je Szene, soweit der Provider einen sicheren Download erlaubt
-- die Projektordnerstruktur
-- optional ein kuratiertes `05-PROJECT/publish.json` fuer Titel, Beschreibung, Tags und Thumbnail-Text
+```bash
+npm run documentary:phase1
+```
 
-Szenen werden nicht nach einer festen Sekunden- oder Bildzahl erzeugt. Neue Szenen entstehen nur bei einem echten visuellen Wechsel, zum Beispiel neue Person, neuer Ort, neue Zeit, neues Ereignis, neue Handlung oder Ursache/Folge.
+Phase 1 erledigt selbst:
+
+- Themenregister pruefen
+- neues, nicht wiederholtes Thema waehlen
+- Kategorie bestimmen
+- laufende Themennummer verwenden
+- Fakten recherchieren
+- finales ca. 2,5-Minuten-Doku-Skript schreiben
+- semantische Szenen bilden
+- Bilder und B-Rolls recherchieren
+- Hauptvisual + Alternativen bestimmen
+- sichere Hauptvisuals lokal materialisieren
+- Quellen und Lizenzdaten speichern
+- YouTube-Titel, Beschreibung, exakt 5 Hashtags, Tags und Thumbnail-Text vorbereiten
 
 Ein heruntergeladenes Visual ist nicht automatisch fuer die Veroeffentlichung freigegeben. Rechte-/Review-Status bleibt erhalten.
 
 ## Phase 2 - Voice
 
-Der Nutzer kopiert `01-SCRIPT/script.txt` in sein KI-Voice-Tool und legt die fertige Audiodatei unter folgendem Namen ab:
+Der Nutzer oeffnet im jeweiligen Videoordner:
+
+```text
+01-SCRIPT/script.txt
+```
+
+und legt die fertige Audiodatei ab als:
 
 ```text
 02-AUDIO/voiceover.mp3
@@ -97,14 +128,12 @@ Der Nutzer kopiert `01-SCRIPT/script.txt` in sein KI-Voice-Tool und legt die fer
 
 Das Skript darf danach nicht stillschweigend veraendert werden.
 
-Das ist die einzige normale manuelle Aufgabe zwischen Phase 1 und Phase 3.
-
 ## Phase 3 - echte Timings und Antigravity-Handoff
 
 Standard:
 
 ```bash
-npm run documentary:phase3 -- --project "ALLES-GEFUNDEN/07-DOKU-PROJEKTE/<projekt>"
+npm run documentary:phase3 -- --project "videos/<kategorie>/<nnn-thema>"
 ```
 
 Ablauf:
@@ -148,14 +177,6 @@ Abbruch statt Raten bei:
 - Luecken zwischen den Phase-1-Szenen
 - Timing-Datei, deren gespeicherter Audio-Hash zu einer anderen `voiceover.mp3` gehoert
 
-Gross-/Kleinschreibung und reine Satzzeichenunterschiede duerfen normalisiert werden.
-
-### Audio-/Skript-Invalidierung
-
-`word-timings.json` und `phase3-state.json` speichern SHA-256-Hashes fuer Skript und Audio.
-
-Wird `voiceover.mp3` nach einer automatischen Transkription ausgetauscht, wird die alte Timing-Eingabe verworfen und neu erzeugt. Wird das Skript nach Phase 1 veraendert, wird Phase 3 blockiert und Phase 1 muss fuer dieses finale Skript neu erzeugt werden.
-
 ### Render-Gate
 
 Antigravity ist nur renderbereit, wenn:
@@ -166,19 +187,14 @@ Antigravity ist nur renderbereit, wenn:
 
 Ein Pfad in JSON alleine reicht nicht.
 
-Fehlende Visuals werden in `missingLocalVisuals` aufgelistet.
-
-### Schnittregeln
+## Schnittregeln
 
 - Szenenzeiten duerfen vom Editor nicht verschoben werden.
 - Bilder koennen dezent gezoomt oder gepannt werden.
 - Videos duerfen innerhalb des Quellclips passend getrimmt werden.
-- `sourceInSeconds` / `sourceOutSeconds` werden vom Visual Asset Hub nicht erfunden, solange der konkrete Quellclip nicht inhaltlich zeitcodiert analysiert wurde.
-- Antigravity darf optional kurze `overlayText`-Begriffe, `loopVideo`, `motion` und `transitionIn` setzen.
+- `sourceInSeconds` / `sourceOutSeconds` werden nicht erfunden.
 - Standarduebergang ist ein sauberer Cut, sofern kein konkreter Effekt vorgesehen ist.
 - Rechtepruefung bleibt vor Veroeffentlichung erforderlich.
-
-Mehr Details: `docs/DOCUMENTARY-PHASE3-HANDOFF.md`.
 
 ## Finaler Render mit Remotion
 
@@ -191,16 +207,14 @@ npm install
 Render nur vorbereiten und pruefen:
 
 ```bash
-npm run documentary:render -- --project "ALLES-GEFUNDEN/07-DOKU-PROJEKTE/<projekt>" --dry-run
+npm run documentary:render -- --project "videos/<kategorie>/<nnn-thema>" --dry-run
 ```
 
 Final rendern:
 
 ```bash
-npm run documentary:render -- --project "ALLES-GEFUNDEN/07-DOKU-PROJEKTE/<projekt>"
+npm run documentary:render -- --project "videos/<kategorie>/<nnn-thema>"
 ```
-
-Vor jedem Render laeuft der Phase-3-Preflight erneut. Erst danach wird ein projektinterner Remotion-Stagingbereich erzeugt und das Video gebaut.
 
 Render-Standard:
 
@@ -214,124 +228,35 @@ Render-Standard:
 - gelockte Szenengrenzen aus `timeline.json`
 - vorhandene `final-vN.mp4` niemals ueberschreiben
 
-Mehr Details: `docs/DOCUMENTARY-RENDER.md`.
+## 06-EXPORT
 
-## 06-EXPORT - maximal einfach
-
-Der Exportordner ist fuer den Nutzer gedacht. Technische JSON-Dateien gehoeren nicht hier hinein.
-
-### `final-v1.mp4`
-
-Das fertige YouTube-Video.
-
-Bestehende finale Videos niemals ueberschreiben. Neue Fassungen werden fortlaufend gespeichert:
+Der Exportordner ist maximal einfach und nur fuer den Upload gedacht:
 
 ```text
-final-v1.mp4
-final-v2.mp4
-final-v3.mp4
+06-EXPORT/
+├── final-vN.mp4
+├── youtube-title.txt
+├── youtube-description.txt
+├── youtube-tags.txt
+└── thumbnail-text.txt
 ```
 
-Phase 3 waehlt bereits vor dem Rendern das naechste freie Ziel.
+`youtube-title.txt` enthaelt nur den Titel.
 
-### `youtube-title.txt`
+`youtube-description.txt` enthaelt nur die fertige Beschreibung und insgesamt exakt 5 Hashtags.
 
-Enthaelt ausschliesslich den finalen YouTube-Titel.
+`youtube-tags.txt` enthaelt nur direkt kopierbare, kommagetrennte Tags.
 
-Kein Praefix wie `Titel:` und keine Erklaerung.
-
-Beispielinhalt:
-
-```text
-Warum Tschernobyl bis heute Folgen hat
-```
-
-Der Nutzer kann die Datei oeffnen, `Strg+A`, `Strg+C` und direkt in YouTube einfuegen.
-
-### `youtube-description.txt`
-
-Enthaelt ausschliesslich die komplette fertige YouTube-Beschreibung.
-
-Die Beschreibung soll sofort veroeffentlichbar sein und insgesamt exakt 5 passende Hashtags enthalten. Alte oder versehentlich bereits eingetragene Hashtag-Tokens werden vor dem finalen Export entfernt; die fuenf vorgesehenen Hashtags werden am Ende neu angehaengt.
-
-Kein Praefix wie `Beschreibung:`. Keine Platzhalter. Keine Hinweise fuer den Nutzer.
-
-Format:
-
-```text
-<Fertige natuerliche Videobeschreibung in mehreren kurzen Absaetzen.>
-
-<Optional sinnvolle Quellen-/Hinweise, wenn fuer das Video vorgesehen.>
-
-#Hashtag1 #Hashtag2 #Hashtag3 #Hashtag4 #Hashtag5
-```
-
-### `youtube-tags.txt`
-
-Enthaelt ausschliesslich passende YouTube-Tags als direkt kopierbare, kommagetrennte Zeile.
-
-Beispiel:
-
-```text
-Tschernobyl, Chernobyl, Dokumentation, Geschichte, Atomkraft, Sowjetunion, Reaktorunfall
-```
-
-Kein Praefix wie `Tags:`.
-
-### `thumbnail-text.txt`
-
-Enthaelt nur den kurzen Text, der fuer das Thumbnail empfohlen wird. Idealerweise 2 bis 5 Woerter.
-
-Kein Praefix wie `Thumbnail:`.
-
-Wenn fuer ein Video bewusst kein Thumbnail-Text vorgesehen ist, darf die Datei entfallen.
-
-## YouTube-Metadaten
-
-Bevorzugt erstellt Phase 1 / ChatGPT ein kuratiertes:
-
-```text
-05-PROJECT/publish.json
-```
-
-Fehlt diese Datei, erzeugt das Repo einen lokalen kostenlosen Fallback aus Projekttitel und Skript, damit keine Platzhalter im Export landen.
-
-Manuell neu erzeugen:
-
-```bash
-npm run documentary:publish -- --project "ALLES-GEFUNDEN/07-DOKU-PROJEKTE/<projekt>"
-```
-
-## Copy-Paste-Regel
-
-Alle nutzerorientierten `.txt`-Dateien muessen so geschrieben sein, dass ihr kompletter Inhalt direkt kopiert und am vorgesehenen Ort eingefuegt werden kann.
-
-Nicht erlaubt:
-
-```text
-Titel: ...
-Hier ist deine Beschreibung: ...
-Hashtags: ...
-Kopiere folgenden Text: ...
-```
-
-Richtig:
-
-```text
-youtube-title.txt       -> nur der Titel
-youtube-description.txt -> nur Beschreibung + exakt 5 Hashtags
-youtube-tags.txt        -> nur kommagetrennte Tags
-thumbnail-text.txt      -> nur Thumbnail-Wortlaut
-```
+`thumbnail-text.txt` enthaelt nur den kurzen Thumbnail-Wortlaut.
 
 ## Endzustand
 
-Der Nutzer soll am Ende nur noch folgendes tun muessen:
+Der Nutzer muss fuer ein fertiges Video nur noch:
 
-1. `06-EXPORT/final-vN.mp4` bei YouTube hochladen.
-2. `youtube-title.txt` komplett kopieren.
-3. `youtube-description.txt` komplett kopieren.
-4. `youtube-tags.txt` komplett kopieren.
+1. `final-vN.mp4` hochladen.
+2. `youtube-title.txt` kopieren.
+3. `youtube-description.txt` kopieren.
+4. `youtube-tags.txt` kopieren.
 5. optional `thumbnail-text.txt` fuer das Thumbnail verwenden.
 
 Keine technischen Projektdateien muessen fuer den Upload geoeffnet werden.
