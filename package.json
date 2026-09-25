@@ -16,6 +16,7 @@
     "documentary:new": "node scripts/documentary-project.mjs",
     "documentary:phase1": "node scripts/documentary-phase1.mjs",
     "documentary:research": "node scripts/documentary-research.mjs",
+    "documentary:materialize": "node scripts/documentary-materialize.mjs",
     "documentary:from-script-visual": "node scripts/documentary-from-script-visual.mjs",
     "script:plan": "node scripts/plan-script.mjs",
     "script:benchmark": "node scripts/benchmark-script-planner.mjs",
