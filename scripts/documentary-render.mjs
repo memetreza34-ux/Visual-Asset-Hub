@@ -153,7 +153,8 @@ export function prepareDocumentaryRender({projectDirectory} = {}) {
     sceneCount: renderProps.scenes.length,
     preflight: validation,
     command: {
-      binary: 'node_modules/.bin/remotion',
+      binary: 'node',
+      cliPackage: '@remotion/cli',
       args: commandArgs.map((arg) => makePortable(root, repoRoot, arg))
     }
   };
@@ -165,13 +166,9 @@ export async function renderDocumentary({projectDirectory, dryRun = false} = {})
   const prepared = prepareDocumentaryRender({projectDirectory});
   if (dryRun) return {...prepared, rendered: false};
 
-  const binary = path.join(prepared.repoRoot, 'node_modules', '.bin', process.platform === 'win32' ? 'remotion.cmd' : 'remotion');
-  if (!fs.existsSync(binary)) {
-    throw new Error('Remotion ist nicht installiert. Im Repo einmal `npm install` ausführen und den Render erneut starten.');
-  }
-
+  const remotionCli = resolveRemotionCli(prepared.repoRoot);
   const startedAt = new Date().toISOString();
-  await spawnAndWait(binary, prepared.commandArgs, prepared.repoRoot);
+  await spawnAndWait(process.execPath, [remotionCli, ...prepared.commandArgs], prepared.repoRoot);
   if (!isNonEmptyFile(prepared.outputFile)) throw new Error(`Remotion meldete Erfolg, aber ${prepared.outputRelative} fehlt oder ist leer.`);
 
   const outputStat = fs.statSync(prepared.outputFile);
@@ -212,9 +209,22 @@ export async function renderDocumentary({projectDirectory, dryRun = false} = {})
   return {...prepared, rendered: true, result, publish};
 }
 
+function resolveRemotionCli(repoRoot) {
+  const packageFile = path.join(repoRoot, 'node_modules', '@remotion', 'cli', 'package.json');
+  if (!fs.existsSync(packageFile)) {
+    throw new Error('Remotion ist nicht installiert. Im Repo einmal `npm install` ausführen und den Render erneut starten.');
+  }
+  const packageJson = readJson(packageFile);
+  const bin = typeof packageJson.bin === 'string' ? packageJson.bin : packageJson.bin?.remotion;
+  if (!bin) throw new Error('@remotion/cli enthält keinen ausführbaren `remotion`-Eintrag.');
+  const cli = path.resolve(path.dirname(packageFile), bin);
+  if (!isNonEmptyFile(cli)) throw new Error(`Remotion-CLI wurde nicht gefunden: ${cli}`);
+  return cli;
+}
+
 function spawnAndWait(binary, args, cwd) {
   return new Promise((resolve, reject) => {
-    const child = spawn(binary, args, {cwd, stdio: 'inherit', windowsHide: true});
+    const child = spawn(binary, args, {cwd, stdio: 'inherit', windowsHide: true, shell: false});
     child.on('error', reject);
     child.on('exit', (code, signal) => {
       if (code === 0) resolve();
