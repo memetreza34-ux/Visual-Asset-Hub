@@ -112,7 +112,8 @@ export function writeRegistry(registerRoot, registry) {
     ''
   ];
   for (const [index, entry] of (registry.topics ?? []).entries()) {
-    lines.push(`${String(index + 1).padStart(3, '0')} | ${dateOnly(entry.selectedAt)} | ${entry.status} | ${entry.title}`);
+    const category = entry.category || entry.categorySlug || 'Sonstiges';
+    lines.push(`${String(index + 1).padStart(3, '0')} | ${dateOnly(entry.selectedAt)} | ${entry.status} | ${category} | ${entry.title}`);
     if (entry.angle) lines.push(`      Blickwinkel: ${entry.angle}`);
     if (entry.projectDirectory) lines.push(`      Projekt: ${entry.projectDirectory}`);
     lines.push('');
