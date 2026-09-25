@@ -17,6 +17,25 @@ tmp/
 ALLES-GEFUNDEN/*
 !ALLES-GEFUNDEN/README.md
 
+# Doku-Projekte sind sichtbar unter videos/, große Medien bleiben aber lokal.
+videos/**/*.mp3
+videos/**/*.wav
+videos/**/*.m4a
+videos/**/*.aac
+videos/**/*.flac
+videos/**/*.mp4
+videos/**/*.mov
+videos/**/*.mkv
+videos/**/*.webm
+videos/**/*.avi
+videos/**/*.jpg
+videos/**/*.jpeg
+videos/**/*.png
+videos/**/*.webp
+videos/**/*.gif
+videos/**/*.avif
+videos/**/05-PROJECT/remotion-public/
+
 # Betriebssystem- und Editor-Dateien.
 .vscode/
 .idea/
