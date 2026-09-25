@@ -13,6 +13,7 @@
     "usage:add": "node scripts/record-usage.mjs",
     "attribution:export": "node scripts/export-attribution.mjs",
     "media:pack": "node scripts/export-media-pack.mjs",
+    "documentary:new": "node scripts/documentary-project.mjs",
     "script:plan": "node scripts/plan-script.mjs",
     "script:benchmark": "node scripts/benchmark-script-planner.mjs",
     "entity:plan": "node scripts/entity-research-plan.mjs",
