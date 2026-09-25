@@ -28,17 +28,28 @@ export function projectSlug(value) {
   return slug;
 }
 
+export function documentaryProjectDirectory({
+  root = process.cwd(),
+  outputRoot = DEFAULT_DOCUMENTARY_ROOT,
+  title,
+  slug
+} = {}) {
+  const finalSlug = projectSlug(slug || title);
+  return path.resolve(root, outputRoot, finalSlug);
+}
+
 export function createDocumentaryProject({
   root = process.cwd(),
   outputRoot = DEFAULT_DOCUMENTARY_ROOT,
   title,
   script,
+  slug,
   overwrite = false
 } = {}) {
   const cleanTitle = requireText(title, 'title', 1, 160);
   const cleanScript = requireText(script, 'script', 1, 100_000, false);
-  const slug = projectSlug(cleanTitle);
-  const projectDirectory = path.resolve(root, outputRoot, slug);
+  const finalSlug = projectSlug(slug || cleanTitle);
+  const projectDirectory = documentaryProjectDirectory({ root, outputRoot, title: cleanTitle, slug: finalSlug });
 
   if (fs.existsSync(projectDirectory) && !overwrite) {
     throw new Error(`Doku-Projekt existiert bereits: ${projectDirectory}`);
@@ -61,7 +72,7 @@ export function createDocumentaryProject({
     format: 'visual-asset-hub-documentary-project',
     version: DOCUMENTARY_PROJECT_VERSION,
     title: cleanTitle,
-    slug,
+    slug: finalSlug,
     createdAt: new Date().toISOString(),
     workflow: {
       phase1: 'script-scenes-visuals-sources',
@@ -109,6 +120,49 @@ export function createSceneDirectories(projectDirectory, sceneCount) {
     directories.push(directory);
   }
   return directories;
+}
+
+export function syncDocumentaryPhase1(projectDirectory, scriptVisualProject) {
+  if (!scriptVisualProject || !Array.isArray(scriptVisualProject.scenes)) {
+    throw new Error('Script-Visual-Projekt ist ungültig.');
+  }
+  fs.mkdirSync(path.join(projectDirectory, '05-PROJECT'), { recursive: true });
+  fs.mkdirSync(path.join(projectDirectory, '01-SCRIPT'), { recursive: true });
+  fs.writeFileSync(
+    path.join(projectDirectory, '01-SCRIPT', 'script.txt'),
+    `${String(scriptVisualProject.script ?? '').trim()}\n`,
+    'utf8'
+  );
+  createSceneDirectories(projectDirectory, scriptVisualProject.scenes.length);
+
+  const scenePlan = {
+    format: 'visual-asset-hub-documentary-scenes',
+    version: 1,
+    sourceProjectId: scriptVisualProject.projectId ?? null,
+    title: scriptVisualProject.title ?? '',
+    scriptSha256: scriptVisualProject.scriptSha256 ?? null,
+    generatedAt: new Date().toISOString(),
+    timing: 'semantic-only-until-final-voiceover',
+    scenes: scriptVisualProject.scenes.map((scene) => ({
+      sceneId: scene.id,
+      sequence: scene.sequence,
+      originalText: scene.originalText,
+      visualIntent: scene.visualIntent,
+      visualIntentType: scene.visualIntentType,
+      preferredMediaType: scene.preferredMediaType,
+      symbolic: Boolean(scene.symbolic),
+      queries: [...(scene.queries ?? [])],
+      selectedPrimary: scene.selectedPrimary ?? null,
+      selectedAlternatives: [...(scene.selectedAlternatives ?? [])]
+    }))
+  };
+
+  fs.writeFileSync(
+    path.join(projectDirectory, '05-PROJECT', 'scenes.json'),
+    `${JSON.stringify(scenePlan, null, 2)}\n`,
+    'utf8'
+  );
+  return scenePlan;
 }
 
 function requireText(value, field, min, max, trim = true) {
