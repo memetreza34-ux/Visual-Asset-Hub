@@ -36,23 +36,36 @@ export async function buildAutonomousDocumentaryPhase1({
   fs.mkdirSync(absoluteOutputRoot, {recursive: true});
   fs.mkdirSync(absoluteRegistryRoot, {recursive: true});
 
-  const registry = loadTopicRegistry(absoluteRegistryRoot);
-  const brief = await generateAutonomousDocumentaryBrief({
-    registry,
-    targetDurationSeconds,
-    apiKey,
-    model,
-    fetchImpl
-  });
+  let registry = loadTopicRegistry(absoluteRegistryRoot);
+  let reservation = findResumableReservation(registry, root);
+  let brief;
 
-  const slug = projectSlug(brief.title);
-  const reservation = reserveTopic(absoluteRegistryRoot, brief, {
-    status: 'reserved',
-    targetDurationSeconds,
-    projectSlug: slug,
-    projectDirectory: slug,
-    source: 'autonomous-phase1-web-research'
-  });
+  if (reservation) {
+    brief = readJson(path.resolve(root, reservation.entry.briefFile));
+  } else {
+    brief = await generateAutonomousDocumentaryBrief({
+      registry,
+      targetDurationSeconds,
+      apiKey,
+      model,
+      fetchImpl
+    });
+    const slug = projectSlug(brief.title);
+    const reserved = reserveTopic(absoluteRegistryRoot, brief, {
+      status: 'reserved',
+      targetDurationSeconds,
+      projectSlug: slug,
+      projectDirectory: null,
+      source: 'autonomous-phase1-web-research'
+    });
+    const briefFile = path.join(absoluteRegistryRoot, 'briefs', `${reserved.entry.id}.json`);
+    fs.mkdirSync(path.dirname(briefFile), {recursive: true});
+    writeJson(briefFile, brief);
+    const relativeBriefFile = path.relative(root, briefFile).split(path.sep).join('/');
+    const updated = updateTopicEntry(absoluteRegistryRoot, reserved.entry.id, {briefFile: relativeBriefFile});
+    reservation = {entry: updated, resumed: false};
+    registry = loadTopicRegistry(absoluteRegistryRoot);
+  }
 
   try {
     const result = await buildCompleteDocumentaryPhase1({
@@ -78,16 +91,18 @@ export async function buildAutonomousDocumentaryPhase1({
       status: 'phase1-complete',
       completedAt: new Date().toISOString(),
       projectDirectory: relativeProject,
-      actualScriptWords: brief.generation.actualWords,
-      model: brief.generation.model,
+      actualScriptWords: brief.generation?.actualWords ?? brief.scriptWords ?? null,
+      model: brief.generation?.model ?? brief.generatedWith ?? null,
       visualSceneCount: result.phase1.scenes.length,
-      materializedPrimaryFiles: result.materialization?.summary?.primaryFiles ?? 0
+      materializedPrimaryFiles: result.materialization?.summary?.primaryFiles ?? 0,
+      error: null
     });
 
     return {
       ...result,
       autonomous: {
         brief,
+        resumedReservedTopic: Boolean(reservation.resumed),
         topic: updatedTopic,
         registry: registryPaths(absoluteRegistryRoot)
       }
@@ -100,6 +115,17 @@ export async function buildAutonomousDocumentaryPhase1({
     });
     throw error;
   }
+}
+
+function findResumableReservation(registry, root) {
+  const topics = [...(registry?.topics ?? [])].reverse();
+  for (const entry of topics) {
+    if (entry.status !== 'reserved' || !entry.briefFile) continue;
+    const file = path.resolve(root, entry.briefFile);
+    if (!isNonEmptyFile(file)) continue;
+    return {entry, resumed: true};
+  }
+  return null;
 }
 
 function writeAutonomousMetadata(projectDirectory, brief, topicEntry) {
@@ -125,8 +151,8 @@ function writeAutonomousMetadata(projectDirectory, brief, topicEntry) {
     angle: brief.angle,
     category: brief.category,
     targetDurationSeconds: brief.targetDurationSeconds,
-    scriptWords: brief.generation.actualWords,
-    generatedWith: brief.generatedWith,
+    scriptWords: brief.generation?.actualWords ?? brief.scriptWords ?? null,
+    generatedWith: brief.generatedWith ?? brief.generation?.model ?? null,
     researchSummary: brief.researchSummary
   });
   writeJson(path.join(projectDir, 'script-research.json'), {
@@ -137,14 +163,14 @@ function writeAutonomousMetadata(projectDirectory, brief, topicEntry) {
     angle: brief.angle,
     researchSummary: brief.researchSummary,
     sources: brief.sources,
-    generation: brief.generation
+    generation: brief.generation ?? null
   });
 
   const sourceLines = [
     `SCRIPT-RECHERCHE: ${brief.title}`,
     `Blickwinkel: ${brief.angle}`,
     '',
-    ...brief.sources.flatMap((source, index) => [
+    ...(brief.sources ?? []).flatMap((source, index) => [
       `${index + 1}. ${source.title}`,
       `   ${source.publisher}`,
       `   ${source.url}`,
@@ -152,6 +178,19 @@ function writeAutonomousMetadata(projectDirectory, brief, topicEntry) {
     ])
   ];
   fs.writeFileSync(path.join(sourcesDir, 'script-research-sources.txt'), `${sourceLines.join('\n').trim()}\n`, 'utf8');
+}
+
+function isNonEmptyFile(file) {
+  try {
+    const stat = fs.statSync(file);
+    return stat.isFile() && stat.size > 0;
+  } catch {
+    return false;
+  }
+}
+
+function readJson(file) {
+  return JSON.parse(fs.readFileSync(file, 'utf8'));
 }
 
 function writeJson(file, value) {
@@ -199,8 +238,8 @@ async function runCli() {
   const result = await buildAutonomousDocumentaryPhase1(parseArgs(process.argv.slice(2)));
   process.stdout.write(`Autonome Phase 1 fertig: ${result.projectDirectory}\n`);
   process.stdout.write(`Thema: ${result.autonomous.brief.title}\n`);
+  if (result.autonomous.resumedReservedTopic) process.stdout.write('Vorhandenes reserviertes Thema fortgesetzt: ja\n');
   process.stdout.write(`Blickwinkel: ${result.autonomous.brief.angle}\n`);
-  process.stdout.write(`Skript: ${result.autonomous.brief.generation.actualWords} Woerter / Ziel ${result.autonomous.brief.targetDurationSeconds}s\n`);
   process.stdout.write(`Szenen: ${result.phase1.scenes.length}\n`);
   process.stdout.write(`Lokale Hauptvisuals: ${result.materialization?.summary?.primaryFiles ?? 0}\n`);
   process.stdout.write(`Themenregister: ${result.autonomous.registry.text}\n`);
