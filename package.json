@@ -17,6 +17,7 @@
     "documentary:phase1": "node scripts/documentary-phase1.mjs",
     "documentary:phase3": "node scripts/documentary-phase3-auto.mjs",
     "documentary:phase3:core": "node scripts/documentary-phase3.mjs",
+    "documentary:phase3:validate": "node scripts/documentary-phase3-validate.mjs",
     "documentary:research": "node scripts/documentary-research.mjs",
     "documentary:materialize": "node scripts/documentary-materialize.mjs",
     "documentary:from-script-visual": "node scripts/documentary-from-script-visual.mjs",
