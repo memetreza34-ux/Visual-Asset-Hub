@@ -3,7 +3,11 @@ import path from 'node:path';
 import process from 'node:process';
 import {fileURLToPath} from 'node:url';
 import {buildCompleteDocumentaryPhase1} from './documentary-phase1.mjs';
-import {DEFAULT_DOCUMENTARY_ROOT, projectSlug} from './documentary-project.mjs';
+import {
+  DEFAULT_DOCUMENTARY_ROOT,
+  documentaryCategorySlug,
+  projectSlug
+} from './documentary-project.mjs';
 import {generateAutonomousDocumentaryBrief} from './lib/documentary-autonomous-brief.mjs';
 import {
   loadTopicRegistry,
@@ -50,11 +54,10 @@ export async function buildAutonomousDocumentaryPhase1({
       model,
       fetchImpl
     });
-    const slug = projectSlug(brief.title);
     const reserved = reserveTopic(absoluteRegistryRoot, brief, {
       status: 'reserved',
       targetDurationSeconds,
-      projectSlug: slug,
+      projectSlug: null,
       projectDirectory: null,
       source: 'autonomous-phase1-web-research'
     });
@@ -67,10 +70,22 @@ export async function buildAutonomousDocumentaryPhase1({
     registry = loadTopicRegistry(absoluteRegistryRoot);
   }
 
+  const categorySlug = documentaryCategorySlug(brief.category);
+  const numberedProjectSlug = buildNumberedProjectSlug(reservation.entry.id, brief.title);
+  const expectedProjectDirectory = path.join(absoluteOutputRoot, categorySlug, numberedProjectSlug);
+  const relativeExpectedProject = path.relative(root, expectedProjectDirectory).split(path.sep).join('/');
+  reservation.entry = updateTopicEntry(absoluteRegistryRoot, reservation.entry.id, {
+    categorySlug,
+    projectSlug: numberedProjectSlug,
+    projectDirectory: relativeExpectedProject
+  });
+
   try {
     const result = await buildCompleteDocumentaryPhase1({
       root,
       outputRoot: absoluteOutputRoot,
+      category: categorySlug,
+      slug: numberedProjectSlug,
       title: brief.title,
       script: brief.script,
       depth,
@@ -102,6 +117,7 @@ export async function buildAutonomousDocumentaryPhase1({
       ...result,
       autonomous: {
         brief,
+        category: categorySlug,
         resumedReservedTopic: Boolean(reservation.resumed),
         topic: updatedTopic,
         registry: registryPaths(absoluteRegistryRoot)
@@ -115,6 +131,12 @@ export async function buildAutonomousDocumentaryPhase1({
     });
     throw error;
   }
+}
+
+function buildNumberedProjectSlug(topicId, title) {
+  const match = String(topicId ?? '').match(/(\d+)/);
+  const sequence = match ? String(Number(match[1])).padStart(3, '0') : '000';
+  return `${sequence}-${projectSlug(title)}`;
 }
 
 function findResumableReservation(registry, root) {
@@ -150,6 +172,7 @@ function writeAutonomousMetadata(projectDirectory, brief, topicEntry) {
     topicKey: brief.topicKey,
     angle: brief.angle,
     category: brief.category,
+    categorySlug: topicEntry.categorySlug,
     targetDurationSeconds: brief.targetDurationSeconds,
     scriptWords: brief.generation?.actualWords ?? brief.scriptWords ?? null,
     generatedWith: brief.generatedWith ?? brief.generation?.model ?? null,
@@ -237,6 +260,7 @@ function parseArgs(argv) {
 async function runCli() {
   const result = await buildAutonomousDocumentaryPhase1(parseArgs(process.argv.slice(2)));
   process.stdout.write(`Autonome Phase 1 fertig: ${result.projectDirectory}\n`);
+  process.stdout.write(`Kategorie: ${result.autonomous.category}\n`);
   process.stdout.write(`Thema: ${result.autonomous.brief.title}\n`);
   if (result.autonomous.resumedReservedTopic) process.stdout.write('Vorhandenes reserviertes Thema fortgesetzt: ja\n');
   process.stdout.write(`Blickwinkel: ${result.autonomous.brief.angle}\n`);
