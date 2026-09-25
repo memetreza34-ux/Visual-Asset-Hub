@@ -78,3 +78,47 @@ test('blocks render when JSON points to a local visual that is not physically pr
   assert.deepEqual(result.handoff.gates.missingLocalVisuals, ['SCENE-001']);
   assert.equal(result.phase3State.status, 'blocked-missing-local-visuals');
 });
+
+test('regenerates automatic timings when voiceover hash changed', async (t) => {
+  const root = setupProject();
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  fs.writeFileSync(path.join(root, '05-PROJECT', 'word-timings-input.json'), JSON.stringify({
+    source: 'openai-whisper-1-word-timestamps',
+    audioSha256: 'stale-audio-hash',
+    words: [
+      { word: 'Hallo', start: 9, end: 9.3 },
+      { word: 'Welt', start: 9.3, end: 9.8 }
+    ]
+  }));
+
+  const result = await buildAutomaticDocumentaryPhase3({
+    projectDirectory: root,
+    openaiApiKey: 'sk-test-only',
+    fetchImpl: fakeOpenAIFetch()
+  });
+
+  assert.equal(result.automaticTiming.generated, true);
+  assert.equal(result.automaticTiming.regeneratedBecauseAudioChanged, true);
+  assert.equal(result.timeline.scenes[0].startSeconds, 0.1);
+});
+
+test('rejects explicitly supplied timings when their audio hash belongs to another file', async (t) => {
+  const root = setupProject();
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const external = path.join(root, 'external-timings.json');
+  fs.writeFileSync(external, JSON.stringify({
+    source: 'external-tts',
+    audioSha256: 'different-audio-hash',
+    words: [
+      { word: 'Hallo', start: 0.1, end: 0.4 },
+      { word: 'Welt', start: 0.4, end: 0.8 }
+    ]
+  }));
+
+  await assert.rejects(() => buildAutomaticDocumentaryPhase3({
+    projectDirectory: root,
+    wordTimingsFile: external,
+    openaiApiKey: 'sk-test-only',
+    fetchImpl: fakeOpenAIFetch()
+  }), /anderen voiceover\.mp3/);
+});
