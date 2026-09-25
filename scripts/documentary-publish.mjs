@@ -48,7 +48,7 @@ export function buildFallback(project = {}, script = '') {
   const title = clampTitle(String(project.title || firstSentence(script) || 'Dokumentation').trim());
   const keywords = extractKeywords(`${title} ${script}`, 16);
   const hashtags = buildHashtags(keywords);
-  const summary = summarizeLocally(script, title);
+  const summary = removeHashtagTokens(summarizeLocally(script, title));
   const description = `${summary}\n\nQuellen und Bildnachweise wurden für dieses Video recherchiert und dokumentiert.\n\n${hashtags.map((tag) => `#${tag}`).join(' ')}`;
   const tags = unique([
     ...title.split(/\s+/),
@@ -64,7 +64,7 @@ export function buildFallback(project = {}, script = '') {
 function normalizeCurated(curated, project, script) {
   const fallback = buildFallback(project, script);
   const title = clampTitle(String(curated.title || fallback.title).trim());
-  const descriptionBase = stripTrailingHashtags(String(curated.description || fallback.description).trim());
+  const descriptionBase = removeHashtagTokens(String(curated.description || fallback.description).trim());
   const requestedHashtags = Array.isArray(curated.hashtags) ? curated.hashtags : [];
   const hashtags = normalizeHashtags(requestedHashtags.length ? requestedHashtags : fallback.hashtags);
   const description = `${descriptionBase}\n\n${hashtags.map((tag) => `#${tag}`).join(' ')}`.trim();
@@ -139,8 +139,13 @@ function buildThumbnailText(title, keywords) {
   return clampThumbnail(words.join(' '));
 }
 
-function stripTrailingHashtags(value) {
-  return String(value).replace(/(?:\s*#[\p{L}\p{N}_-]+){1,}\s*$/u, '').trim();
+function removeHashtagTokens(value) {
+  return String(value)
+    .replace(/(^|\s)#[\p{L}\p{N}_-]+/gu, '$1')
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/\n[ \t]+/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 }
 
 function clampTitle(value) {
