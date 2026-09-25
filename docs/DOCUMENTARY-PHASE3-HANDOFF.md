@@ -124,6 +124,8 @@ Enthält die exakten Szenenzeiten und das lokale Hauptvisual je Szene.
 
 Technische Schnittanweisung. Bilder erhalten nur eine dezente Doku-Bewegungsempfehlung. Bei Videos werden `sourceInSeconds` und `sourceOutSeconds` **nicht erfunden**; Antigravity soll innerhalb des lokalen Quellclips den stärksten passenden Ausschnitt wählen, ohne die festgelegte Szenendauer zu verändern.
 
+Antigravity darf außerdem optional kurze `overlayText`-Begriffe, `loopVideo`, `motion` und `transitionIn` festlegen. Skript- und Szenenzeiten bleiben gesperrt.
+
 ### `antigravity-handoff.json`
 
 Maschinenlesbarer Übergabepunkt für Antigravity/Codex/Remotion.
@@ -153,6 +155,59 @@ Das nächste freie Ziel wird automatisch gewählt:
 
 Fehlende lokale Visuals werden in `missingLocalVisuals` aufgelistet. Ein bloßer Pfad in JSON reicht nicht.
 
+Unmittelbar vor dem Render:
+
+```bash
+npm run documentary:phase3:validate -- --project "<projekt>"
+```
+
+Dieser Preflight prüft erneut Skript-Hash, Audio-Hash, Visual-Dateien, Timeline und freies Exportziel.
+
+## Implementierter Remotion-Render
+
+Render zuerst ohne Video testen:
+
+```bash
+npm run documentary:render -- --project "<projekt>" --dry-run
+```
+
+Dann final:
+
+```bash
+npm run documentary:render -- --project "<projekt>"
+```
+
+Der Renderer:
+
+- übernimmt die gelockten 30-fps-Szenengrenzen aus `timeline.json`
+- füllt eine kleine Stille vor dem ersten Wort mit dem ersten Visual und eine Reststille am Ende mit dem letzten Visual
+- spielt B-Roll stumm unter dem Voiceover
+- verwendet bei Bildern dezente Doku-Zoom-/Pan-Bewegung
+- rendert H.264 + AAC, 1920×1080, BT.709, `yuv420p`
+- schreibt nie über ein existierendes `final-vN.mp4`
+- speichert `render-props.json`, `render-plan.json` und nach Erfolg `render-result.json`
+
+Details: `docs/DOCUMENTARY-RENDER.md`.
+
+## YouTube-Paket
+
+Nach erfolgreichem Render enthält `06-EXPORT` zusätzlich:
+
+```text
+youtube-title.txt
+youtube-description.txt
+youtube-tags.txt
+thumbnail-text.txt
+```
+
+Ein kuratiertes `05-PROJECT/publish.json` hat Vorrang. Ohne diese Datei wird ein lokaler kostenloser Fallback aus Titel und Skript erzeugt. Die Beschreibung endet immer mit exakt 5 Hashtags.
+
+Manuell neu erzeugen:
+
+```bash
+npm run documentary:publish -- --project "<projekt>"
+```
+
 ## Rechte
 
 Phase 3 verändert den Rechte-/Review-Status nicht.
@@ -181,6 +236,12 @@ voiceover.mp3
 → timeline.json
 → edit-plan.json
 → antigravity-handoff.json
+
+ANTIGRAVITY / REMOTION
+→ optionale B-Roll-Trims / Begriffe / dezente Effekte
+→ Preflight
+→ Remotion-Staging
 → Render
 → 06-EXPORT/final-vN.mp4
+→ direkt kopierbare YouTube-Dateien
 ```
