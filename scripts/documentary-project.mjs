@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import { fileURLToPath } from 'node:url';
 
 export const DOCUMENTARY_PROJECT_VERSION = 1;
 export const DEFAULT_DOCUMENTARY_ROOT = path.join('ALLES-GEFUNDEN', '07-DOKU-PROJEKTE');
@@ -147,7 +148,7 @@ function runCli() {
   process.stdout.write(`Doku-Projekt erstellt: ${result.projectDirectory}\n`);
 }
 
-const invokedDirectly = process.argv[1] && path.resolve(process.argv[1]) === path.resolve(new URL(import.meta.url).pathname);
+const invokedDirectly = process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url));
 if (invokedDirectly) {
   try {
     runCli();
