@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
@@ -14,11 +15,30 @@ export async function buildAutomaticDocumentaryPhase3({
 } = {}) {
   if (!projectDirectory) throw new Error('projectDirectory fehlt.');
   const projectDir = path.resolve(projectDirectory);
+  const audioFile = path.join(projectDir, '02-AUDIO', 'voiceover.mp3');
   const inputFile = wordTimingsFile ? path.resolve(wordTimingsFile) : path.join(projectDir, '05-PROJECT', 'word-timings-input.json');
+  const explicitTimingFile = Boolean(wordTimingsFile);
+  const currentAudioSha256 = fileSha256IfPresent(audioFile);
 
   let generatedTimings = false;
-  if (!fs.existsSync(inputFile)) {
-    const audioFile = path.join(projectDir, '02-AUDIO', 'voiceover.mp3');
+  let regeneratedBecauseAudioChanged = false;
+  let needsAutomaticTiming = !fs.existsSync(inputFile);
+
+  if (!needsAutomaticTiming) {
+    const existing = readJson(inputFile);
+    if (existing.audioSha256 && currentAudioSha256 && existing.audioSha256 !== currentAudioSha256) {
+      if (explicitTimingFile || existing.source !== 'openai-whisper-1-word-timestamps') {
+        throw new Error('Die bereitgestellten Wort-Timings gehören zu einer anderen voiceover.mp3. Neue Timings sind erforderlich.');
+      }
+      needsAutomaticTiming = true;
+      regeneratedBecauseAudioChanged = true;
+    } else if (!explicitTimingFile && existing.source === 'openai-whisper-1-word-timestamps' && !existing.audioSha256) {
+      needsAutomaticTiming = true;
+      regeneratedBecauseAudioChanged = true;
+    }
+  }
+
+  if (needsAutomaticTiming) {
     const result = await transcribeOpenAIWordTimings({
       audioFile,
       apiKey: openaiApiKey,
@@ -50,6 +70,7 @@ export async function buildAutomaticDocumentaryPhase3({
     ...phase3,
     automaticTiming: {
       generated: generatedTimings,
+      regeneratedBecauseAudioChanged,
       inputFile: path.relative(projectDir, inputFile).split(path.sep).join('/'),
       source: phase3.wordTimings.source
     }
@@ -66,6 +87,23 @@ function localVisualExists(projectDirectory, relativePath) {
     return stat.isFile() && stat.size > 0;
   } catch {
     return false;
+  }
+}
+
+function fileSha256IfPresent(file) {
+  try {
+    if (!fs.existsSync(file) || !fs.statSync(file).isFile()) return null;
+    return createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+  } catch {
+    return null;
+  }
+}
+
+function readJson(file) {
+  try {
+    return JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch (error) {
+    throw new Error(`Timing-JSON konnte nicht gelesen werden (${file}): ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
@@ -91,6 +129,7 @@ async function runCli() {
   const result = await buildAutomaticDocumentaryPhase3(args);
   process.stdout.write(`Phase 3 vorbereitet: ${result.projectDirectory}\n`);
   process.stdout.write(`Wort-Timings automatisch erzeugt: ${result.automaticTiming.generated ? 'ja' : 'nein'}\n`);
+  if (result.automaticTiming.regeneratedBecauseAudioChanged) process.stdout.write('Alte Timings verworfen: voiceover.mp3 wurde geändert.\n');
   process.stdout.write(`Timing-Quelle: ${result.automaticTiming.source}\n`);
   process.stdout.write(`Szenen exakt gemappt: ${result.timeline.sceneCount}\n`);
   process.stdout.write(`Antigravity renderbereit: ${result.handoff.gates.canRender ? 'ja' : 'nein'}\n`);
