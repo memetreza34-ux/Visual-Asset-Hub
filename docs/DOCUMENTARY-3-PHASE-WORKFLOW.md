@@ -13,8 +13,8 @@ Skript + semantische Szenen + Online-Recherche + lokale Hauptvisuals + Quellen +
 PHASE 2 - Nutzer
 finales Skript kopieren -> KI-Voice erzeugen -> voiceover.mp3 ablegen
 
-PHASE 3 - Timing / Antigravity / Schnitt
-finale Audio -> echte Wort-Timings -> striktes Skript-Alignment -> reale Szenenzeiten -> Antigravity-Handoff -> Render -> Export
+PHASE 3 - Timing / Antigravity / Remotion
+finale Audio -> echte Wort-Timings -> striktes Skript-Alignment -> reale Szenenzeiten -> Antigravity-Handoff -> Preflight -> Remotion-Render -> Export
 ```
 
 Wichtig: In Phase 1 werden keine exakten Sekunden fuer die Szenen geraten. Die semantischen Szenengrenzen werden am Skript festgelegt. Exakte Zeitpunkte entstehen erst in Phase 3 aus der finalen Audiodatei.
@@ -38,13 +38,21 @@ Jedes neue Dokumentationsvideo bekommt einen eigenen, leicht lesbaren Projektord
 │   ├── sources.txt
 │   └── licenses.csv
 ├── 05-PROJECT/
+│   ├── project.json
 │   ├── scenes.json
 │   ├── word-timings-input.json
 │   ├── word-timings.json
 │   ├── timeline.json
 │   ├── edit-plan.json
 │   ├── antigravity-handoff.json
-│   └── phase3-state.json
+│   ├── phase3-state.json
+│   ├── phase3-validation.json
+│   ├── publish.json                  optional, kuratiert
+│   ├── publish-state.json
+│   ├── render-props.json
+│   ├── render-plan.json
+│   ├── render-result.json            nach erfolgreichem Render
+│   └── remotion-public/              temporaerer Render-Stagingbereich
 └── 06-EXPORT/
     ├── final-v1.mp4
     ├── youtube-title.txt
@@ -73,6 +81,7 @@ ChatGPT / Visual Asset Hub erstellt:
 - Hauptvisual und Alternativen
 - lokale Hauptvisual-Datei je Szene, soweit der Provider einen sicheren Download erlaubt
 - die Projektordnerstruktur
+- optional ein kuratiertes `05-PROJECT/publish.json` fuer Titel, Beschreibung, Tags und Thumbnail-Text
 
 Szenen werden nicht nach einer festen Sekunden- oder Bildzahl erzeugt. Neue Szenen entstehen nur bei einem echten visuellen Wechsel, zum Beispiel neue Person, neuer Ort, neue Zeit, neues Ereignis, neue Handlung oder Ursache/Folge.
 
@@ -111,8 +120,6 @@ voiceover.mp3
 -> timeline.json
 -> edit-plan.json
 -> antigravity-handoff.json
--> Render
--> 06-EXPORT/final-vN.mp4
 ```
 
 ### Automatische Wort-Timestamps
@@ -167,10 +174,47 @@ Fehlende Visuals werden in `missingLocalVisuals` aufgelistet.
 - Bilder koennen dezent gezoomt oder gepannt werden.
 - Videos duerfen innerhalb des Quellclips passend getrimmt werden.
 - `sourceInSeconds` / `sourceOutSeconds` werden vom Visual Asset Hub nicht erfunden, solange der konkrete Quellclip nicht inhaltlich zeitcodiert analysiert wurde.
+- Antigravity darf optional kurze `overlayText`-Begriffe, `loopVideo`, `motion` und `transitionIn` setzen.
 - Standarduebergang ist ein sauberer Cut, sofern kein konkreter Effekt vorgesehen ist.
 - Rechtepruefung bleibt vor Veroeffentlichung erforderlich.
 
 Mehr Details: `docs/DOCUMENTARY-PHASE3-HANDOFF.md`.
+
+## Finaler Render mit Remotion
+
+Einmalig im Repo:
+
+```bash
+npm install
+```
+
+Render nur vorbereiten und pruefen:
+
+```bash
+npm run documentary:render -- --project "ALLES-GEFUNDEN/07-DOKU-PROJEKTE/<projekt>" --dry-run
+```
+
+Final rendern:
+
+```bash
+npm run documentary:render -- --project "ALLES-GEFUNDEN/07-DOKU-PROJEKTE/<projekt>"
+```
+
+Vor jedem Render laeuft der Phase-3-Preflight erneut. Erst danach wird ein projektinterner Remotion-Stagingbereich erzeugt und das Video gebaut.
+
+Render-Standard:
+
+- 1920 × 1080
+- 30 fps
+- H.264 + AAC
+- BT.709 / `yuv420p`
+- Voiceover als Hauptaudio
+- B-Roll-Audio stumm
+- Bilder mit dezenter Doku-Bewegung
+- gelockte Szenengrenzen aus `timeline.json`
+- vorhandene `final-vN.mp4` niemals ueberschreiben
+
+Mehr Details: `docs/DOCUMENTARY-RENDER.md`.
 
 ## 06-EXPORT - maximal einfach
 
@@ -208,7 +252,7 @@ Der Nutzer kann die Datei oeffnen, `Strg+A`, `Strg+C` und direkt in YouTube einf
 
 Enthaelt ausschliesslich die komplette fertige YouTube-Beschreibung.
 
-Die Beschreibung soll sofort veroeffentlichbar sein und am Ende exakt 5 passende Hashtags enthalten.
+Die Beschreibung soll sofort veroeffentlichbar sein und insgesamt exakt 5 passende Hashtags enthalten. Alte oder versehentlich bereits eingetragene Hashtag-Tokens werden vor dem finalen Export entfernt; die fuenf vorgesehenen Hashtags werden am Ende neu angehaengt.
 
 Kein Praefix wie `Beschreibung:`. Keine Platzhalter. Keine Hinweise fuer den Nutzer.
 
@@ -241,6 +285,22 @@ Enthaelt nur den kurzen Text, der fuer das Thumbnail empfohlen wird. Idealerweis
 Kein Praefix wie `Thumbnail:`.
 
 Wenn fuer ein Video bewusst kein Thumbnail-Text vorgesehen ist, darf die Datei entfallen.
+
+## YouTube-Metadaten
+
+Bevorzugt erstellt Phase 1 / ChatGPT ein kuratiertes:
+
+```text
+05-PROJECT/publish.json
+```
+
+Fehlt diese Datei, erzeugt das Repo einen lokalen kostenlosen Fallback aus Projekttitel und Skript, damit keine Platzhalter im Export landen.
+
+Manuell neu erzeugen:
+
+```bash
+npm run documentary:publish -- --project "ALLES-GEFUNDEN/07-DOKU-PROJEKTE/<projekt>"
+```
 
 ## Copy-Paste-Regel
 
