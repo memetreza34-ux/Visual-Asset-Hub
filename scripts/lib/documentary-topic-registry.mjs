@@ -2,27 +2,24 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 export const TOPIC_REGISTER_VERSION = 1;
-export const TOPIC_SYSTEM_DIRECTORY = '_SYSTEM';
 export const TOPIC_REGISTER_JSON = 'topic-register.json';
 export const TOPIC_REGISTER_TEXT = 'THEMEN-REGISTER.txt';
 
 const STOPWORDS = new Set([
-  'aber','alle','als','also','am','an','auf','aus','bei','bis','das','dass','dem','den','der','des','die','ein','eine','einem','einen','einer','eines','für','hat','haben','im','in','ist','mit','nach','nicht','noch','oder','sein','sind','so','über','um','und','unter','vom','von','vor','war','was','wie','wird','zu','zum','zur','warum','wie','wer','was','wann','wo','the','a','an','of','and','to','in','on','why','how'
+  'aber','alle','als','also','am','an','auf','aus','bei','bis','das','dass','dem','den','der','des','die','ein','eine','einem','einen','einer','eines','für','hat','haben','im','in','ist','mit','nach','nicht','noch','oder','sein','sind','so','über','um','und','unter','vom','von','vor','war','was','wie','wird','zu','zum','zur','warum','wer','wann','wo','the','a','of','and','to','on','why','how'
 ]);
 
-export function registryPaths(outputRoot) {
-  const root = path.resolve(outputRoot);
-  const systemDirectory = path.join(root, TOPIC_SYSTEM_DIRECTORY);
+export function registryPaths(registerRoot) {
+  const root = path.resolve(registerRoot);
   return {
     root,
-    systemDirectory,
-    json: path.join(systemDirectory, TOPIC_REGISTER_JSON),
-    text: path.join(systemDirectory, TOPIC_REGISTER_TEXT)
+    json: path.join(root, TOPIC_REGISTER_JSON),
+    text: path.join(root, TOPIC_REGISTER_TEXT)
   };
 }
 
-export function loadTopicRegistry(outputRoot) {
-  const paths = registryPaths(outputRoot);
+export function loadTopicRegistry(registerRoot) {
+  const paths = registryPaths(registerRoot);
   if (!fs.existsSync(paths.json)) {
     return {
       format: 'visual-asset-hub-documentary-topic-register',
@@ -57,8 +54,8 @@ export function isDuplicateTopic(registry, candidate, {threshold = 0.72} = {}) {
   return best ?? {duplicate: false, similarity: 0, exactKey: false, titleExact: false, existing: null};
 }
 
-export function reserveTopic(outputRoot, candidate, metadata = {}) {
-  const registry = loadTopicRegistry(outputRoot);
+export function reserveTopic(registerRoot, candidate, metadata = {}) {
+  const registry = loadTopicRegistry(registerRoot);
   const duplicate = isDuplicateTopic(registry, candidate);
   if (duplicate.duplicate) {
     throw new Error(`Thema ist bereits benutzt oder zu ähnlich: "${candidate.title}" ↔ "${duplicate.existing?.title ?? 'unbekannt'}" (${Math.round(duplicate.similarity * 100)}%).`);
@@ -81,36 +78,37 @@ export function reserveTopic(outputRoot, candidate, metadata = {}) {
   if (!entry.title) throw new Error('Thementitel fehlt.');
   registry.topics = [...(registry.topics ?? []), entry];
   registry.updatedAt = now;
-  writeRegistry(outputRoot, registry);
+  writeRegistry(registerRoot, registry);
   return {registry, entry};
 }
 
-export function updateTopicEntry(outputRoot, id, patch = {}) {
-  const registry = loadTopicRegistry(outputRoot);
+export function updateTopicEntry(registerRoot, id, patch = {}) {
+  const registry = loadTopicRegistry(registerRoot);
   const index = registry.topics.findIndex((entry) => entry.id === id);
   if (index < 0) throw new Error(`Thema im Register nicht gefunden: ${id}`);
   registry.topics[index] = {...registry.topics[index], ...patch, id: registry.topics[index].id};
   registry.updatedAt = new Date().toISOString();
-  writeRegistry(outputRoot, registry);
+  writeRegistry(registerRoot, registry);
   return registry.topics[index];
 }
 
-export function recentTopicsForPrompt(registry, limit = 250) {
+export function recentTopicsForPrompt(registry, limit = 300) {
   return [...(registry?.topics ?? [])]
     .slice(-Math.max(1, limit))
     .map((entry) => ({title: entry.title, angle: entry.angle, topicKey: entry.topicKey, status: entry.status}));
 }
 
-export function writeRegistry(outputRoot, registry) {
-  const paths = registryPaths(outputRoot);
-  fs.mkdirSync(paths.systemDirectory, {recursive: true});
+export function writeRegistry(registerRoot, registry) {
+  const paths = registryPaths(registerRoot);
+  fs.mkdirSync(paths.root, {recursive: true});
   fs.writeFileSync(paths.json, `${JSON.stringify(registry, null, 2)}\n`, 'utf8');
   const lines = [
     'DOKUMENTARY THEMEN-REGISTER',
     '==========================',
     '',
-    'Dieses Register wird vor jeder automatischen Themenwahl geprüft.',
-    'Bereits reservierte oder produzierte Themen werden nicht erneut verwendet.',
+    'Dieses Register ist die zentrale Quelle fuer alle Doku-Themen.',
+    'Vor jeder automatischen Themenwahl wird es geprueft.',
+    'Bereits reservierte, fehlgeschlagene oder produzierte Themen werden nicht erneut verwendet.',
     ''
   ];
   for (const [index, entry] of (registry.topics ?? []).entries()) {
