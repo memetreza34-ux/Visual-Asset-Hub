@@ -4,7 +4,6 @@ const KNOWLEDGE_PROVIDERS = ['wikimedia', 'openverse'];
 const HISTORICAL_RE = /\b(18\d{2}|19\d{2}|200\d|201\d|histor|archive|archiv|war|krieg|revolution|disaster|katastroph|election|wahl|treaty|vertrag|apollo|chernobyl|tschernobyl|berlin wall|berliner mauer)\b/i;
 const PERSON_RE = /\b(person|politician|president|scientist|actor|athlete|personality|politiker|präsident|wissenschaftler|forscher|künstler|sportler)\b/i;
 const PLACE_RE = /\b(place|city|country|building|landmark|ort|stadt|land|gebäude|denkmal|karte|map)\b/i;
-const EVENT_RE = /\b(event|incident|attack|accident|explosion|protest|speech|ceremony|ereignis|anschlag|unfall|explosion|protest|rede|zeremonie)\b/i;
 
 export function documentaryEvidenceLevel(scene = {}) {
   const text = sceneText(scene);
@@ -40,16 +39,19 @@ export function routeDocumentaryProviders(scene = {}) {
 export function documentaryCandidateScore(scene = {}, candidate = {}) {
   const evidenceLevel = documentaryEvidenceLevel(scene);
   const provider = String(candidate.provider ?? '').toLowerCase();
-  const haystack = normalize([
+
+  // Nur echte Treffer-Metadaten bewerten. Der Suchbegriff selbst ist kein Beweis,
+  // dass das zurückgegebene Medium den gesprochenen Inhalt tatsächlich zeigt.
+  const contentHaystack = normalize([
     candidate.title,
-    candidate.query,
     candidate.creator,
     candidate.asset?.title,
     candidate.asset?.description,
     candidate.asset?.tags?.join?.(' ')
   ].filter(Boolean).join(' '));
-  const sceneTerms = meaningfulTerms(sceneText(scene));
-  const matchedTerms = sceneTerms.filter((term) => haystack.includes(term));
+
+  const sceneTerms = meaningfulTerms(sceneEvidenceText(scene));
+  const matchedTerms = sceneTerms.filter((term) => contentHaystack.includes(term));
   const lexical = sceneTerms.length ? matchedTerms.length / sceneTerms.length : 0;
 
   let sourceFit = 0;
@@ -65,11 +67,13 @@ export function documentaryCandidateScore(scene = {}, candidate = {}) {
 
   const technical = Math.max(0, Math.min(100, Number(candidate.technicalFit) || 0)) / 100;
   const reuse = candidate.reusedElsewhere ? 0 : 1;
-  const exactEntityBonus = exactEntityMatch(scene, haystack) ? 1 : 0;
+  const exactEntityBonus = exactEntityMatch(scene, contentHaystack) ? 1 : 0;
+  const yearBonus = exactYearMatch(scene, contentHaystack) ? 1 : 0;
 
   const score = (
-    lexical * 40 +
+    lexical * 30 +
     exactEntityBonus * 20 +
+    yearBonus * 10 +
     sourceFit * 20 +
     technical * 15 +
     reuse * 5
@@ -80,7 +84,9 @@ export function documentaryCandidateScore(scene = {}, candidate = {}) {
     evidenceLevel,
     lexicalMatch: Math.round(lexical * 100),
     sourceFit: Math.round(sourceFit * 100),
-    exactEntityMatch: Boolean(exactEntityBonus)
+    exactEntityMatch: Boolean(exactEntityBonus),
+    exactYearMatch: Boolean(yearBonus),
+    scoringBasis: 'result-metadata-only'
   };
 }
 
@@ -102,6 +108,11 @@ function exactEntityMatch(scene, haystack) {
   return relevant.some((entity) => haystack.includes(entity));
 }
 
+function exactYearMatch(scene, haystack) {
+  const years = sceneText(scene).match(/\b(?:18|19|20)\d{2}\b/g) ?? [];
+  return years.some((year) => haystack.includes(year));
+}
+
 function sceneText(scene) {
   return [
     scene.originalText,
@@ -109,6 +120,15 @@ function sceneText(scene) {
     ...(Array.isArray(scene.entities) ? scene.entities : []),
     ...(Array.isArray(scene.concepts) ? scene.concepts : []),
     ...(Array.isArray(scene.queries) ? scene.queries : [])
+  ].filter(Boolean).join(' ');
+}
+
+function sceneEvidenceText(scene) {
+  return [
+    scene.originalText,
+    scene.visualIntent,
+    ...(Array.isArray(scene.entities) ? scene.entities : []),
+    ...(Array.isArray(scene.concepts) ? scene.concepts : [])
   ].filter(Boolean).join(' ');
 }
 
