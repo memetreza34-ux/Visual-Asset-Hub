@@ -5,7 +5,17 @@ import { fileURLToPath } from 'node:url';
 import { enrichDocumentaryScene } from './lib/documentary-source-router.mjs';
 
 export const DOCUMENTARY_PROJECT_VERSION = 1;
-export const DEFAULT_DOCUMENTARY_ROOT = path.join('ALLES-GEFUNDEN', '07-DOKU-PROJEKTE');
+export const DEFAULT_DOCUMENTARY_ROOT = 'videos';
+
+export const DOCUMENTARY_CATEGORIES = Object.freeze([
+  'umweltgeschichte',
+  'geschichte',
+  'technik',
+  'wissenschaft',
+  'wirtschaft',
+  'geopolitik',
+  'sonstiges'
+]);
 
 const REQUIRED_DIRECTORIES = [
   '01-SCRIPT',
@@ -29,19 +39,33 @@ export function projectSlug(value) {
   return slug;
 }
 
+export function documentaryCategorySlug(value) {
+  const normalized = projectSlug(value || 'sonstiges');
+  if (/(umwelt|klima|oekolog|naturkatastroph|environment)/.test(normalized)) return 'umweltgeschichte';
+  if (/(geopolit|politik|staat|grenze|krieg|diplomat)/.test(normalized)) return 'geopolitik';
+  if (/(wirtschaft|finanz|geld|markt|industrie|econom)/.test(normalized)) return 'wirtschaft';
+  if (/(technik|technolog|maschine|ingenieur|computer|internet|energie)/.test(normalized)) return 'technik';
+  if (/(wissenschaft|science|medizin|physik|chemie|biolog|astronom|weltraum)/.test(normalized)) return 'wissenschaft';
+  if (/(geschichte|histor|archaeolog|antik|mittelalter)/.test(normalized)) return 'geschichte';
+  return DOCUMENTARY_CATEGORIES.includes(normalized) ? normalized : 'sonstiges';
+}
+
 export function documentaryProjectDirectory({
   root = process.cwd(),
   outputRoot = DEFAULT_DOCUMENTARY_ROOT,
+  category,
   title,
   slug
 } = {}) {
   const finalSlug = projectSlug(slug || title);
-  return path.resolve(root, outputRoot, finalSlug);
+  const categorySlug = documentaryCategorySlug(category);
+  return path.resolve(root, outputRoot, categorySlug, finalSlug);
 }
 
 export function createDocumentaryProject({
   root = process.cwd(),
   outputRoot = DEFAULT_DOCUMENTARY_ROOT,
+  category = 'sonstiges',
   title,
   script,
   slug,
@@ -50,9 +74,13 @@ export function createDocumentaryProject({
   const cleanTitle = requireText(title, 'title', 1, 160);
   const cleanScript = requireText(script, 'script', 1, 100_000, false);
   const finalSlug = projectSlug(slug || cleanTitle);
-  const projectDirectory = documentaryProjectDirectory({ root, outputRoot, title: cleanTitle, slug: finalSlug });
+  const categorySlug = documentaryCategorySlug(category);
+  const projectDirectory = documentaryProjectDirectory({ root, outputRoot, category: categorySlug, title: cleanTitle, slug: finalSlug });
+  const existingProjectFile = path.join(projectDirectory, '05-PROJECT', 'project.json');
 
-  if (fs.existsSync(projectDirectory) && !overwrite) {
+  // Ein im Repo sichtbares Ordner-Skelett (.gitkeep/README) darf von Phase 1 befüllt werden.
+  // Ein bereits echtes Projekt wird ohne --overwrite niemals überschrieben.
+  if (fs.existsSync(existingProjectFile) && !overwrite) {
     throw new Error(`Doku-Projekt existiert bereits: ${projectDirectory}`);
   }
 
@@ -74,6 +102,7 @@ export function createDocumentaryProject({
     version: DOCUMENTARY_PROJECT_VERSION,
     title: cleanTitle,
     slug: finalSlug,
+    category: categorySlug,
     createdAt: new Date().toISOString(),
     workflow: {
       phase1: 'script-scenes-visuals-sources',
@@ -109,7 +138,7 @@ export function createDocumentaryProject({
   };
 
   fs.writeFileSync(
-    path.join(projectDirectory, '05-PROJECT', 'project.json'),
+    existingProjectFile,
     `${JSON.stringify(project, null, 2)}\n`,
     'utf8'
   );
@@ -190,10 +219,11 @@ function requireText(value, field, min, max, trim = true) {
 }
 
 function parseArgs(argv) {
-  const args = { title: '', scriptFile: '', outputRoot: DEFAULT_DOCUMENTARY_ROOT, overwrite: false };
+  const args = { title: '', category: 'sonstiges', scriptFile: '', outputRoot: DEFAULT_DOCUMENTARY_ROOT, overwrite: false };
   for (let index = 0; index < argv.length; index += 1) {
     const token = argv[index];
     if (token === '--title') args.title = argv[++index] ?? '';
+    else if (token === '--category') args.category = argv[++index] ?? 'sonstiges';
     else if (token === '--script-file') args.scriptFile = argv[++index] ?? '';
     else if (token === '--output-root') args.outputRoot = argv[++index] ?? '';
     else if (token === '--overwrite') args.overwrite = true;
@@ -211,6 +241,7 @@ function runCli() {
   const script = fs.readFileSync(scriptPath, 'utf8');
   const result = createDocumentaryProject({
     title: args.title,
+    category: args.category,
     script,
     outputRoot: args.outputRoot,
     overwrite: args.overwrite
