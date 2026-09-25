@@ -14,12 +14,51 @@ npm run documentary:phase1
 
 Ohne weitere Argumente soll Phase 1 selbststaendig ein ca. **150 Sekunden / 2,5 Minuten** langes Doku-Projekt vorbereiten.
 
+## Sichtbare Video-Struktur
+
+Alle normalen Videos liegen im Repo-Root unter:
+
+```text
+videos/
+├── umweltgeschichte/
+├── geschichte/
+├── technik/
+├── wissenschaft/
+├── wirtschaft/
+├── geopolitik/
+└── sonstiges/
+```
+
+Jedes Thema bekommt innerhalb seiner Kategorie einen nummerierten Ordner:
+
+```text
+videos/<kategorie>/<nnn-thema>/
+├── 01-SCRIPT/
+├── 02-AUDIO/
+├── 03-VISUALS/
+├── 04-SOURCES/
+├── 05-PROJECT/
+└── 06-EXPORT/
+```
+
+Beispiel:
+
+```text
+videos/umweltgeschichte/001-wie-der-aralsee-fast-verschwand-und-warum-ein-teil-zuruckkam/
+```
+
+Damit sind fertige und laufende Videos im Finder sofort auffindbar. Das Themenregister bleibt getrennt unter `documentary-registry/`.
+
 ## Ablauf
 
 ```text
 THEMEN-REGISTER pruefen
 ↓
 neues Thema selbst auswaehlen
+↓
+Kategorie bestimmen
+↓
+fortlaufende Nummer vergeben
 ↓
 Thema im Register reservieren
 ↓
@@ -47,7 +86,8 @@ Zentrale, mit dem Repo gespeicherte Dateien:
 ```text
 documentary-registry/
 ├── THEMEN-REGISTER.txt
-└── topic-register.json
+├── topic-register.json
+└── briefs/
 ```
 
 `THEMEN-REGISTER.txt` ist fuer Menschen gedacht und schnell lesbar.
@@ -56,7 +96,7 @@ documentary-registry/
 
 Vor **jeder** neuen Themenwahl wird das gesamte Register geprueft.
 
-Ein Thema wird bereits unmittelbar nach erfolgreicher Auswahl als `reserved` eingetragen. Dadurch wird es selbst dann nicht erneut verwendet, wenn spaeter die Visual-Recherche oder ein Download fehlschlaegt.
+Ein Thema wird unmittelbar nach erfolgreicher Auswahl als `reserved` eingetragen. Dadurch wird es selbst dann nicht erneut verwendet, wenn spaeter die Visual-Recherche oder ein Download fehlschlaegt.
 
 Moegliche Statuswerte:
 
@@ -73,37 +113,13 @@ Die Sperre arbeitet zweifach:
 1. Das Modell erhaelt die bisherigen Themen vor seiner Themenwahl.
 2. Danach prueft der lokale Code nochmals unabhaengig.
 
-Geprueft werden unter anderem:
-
-- normalisierter Themen-Key
-- identischer Titel
-- Wortueberschneidung zwischen Titel und Blickwinkel
-- aehnliche Formulierungen desselben Kernthemas
-
-Wird ein Thema als zu aehnlich erkannt, wird es verworfen und Phase 1 fordert automatisch einen anderen Vorschlag an.
+Geprueft werden unter anderem normalisierter Themen-Key, identischer Titel und Wortueberschneidungen zwischen Titel und Blickwinkel. Wird ein Thema als zu aehnlich erkannt, wird es verworfen und ein anderes Thema gesucht.
 
 ## Themenqualitaet
 
-Phase 1 soll vorzugsweise Themen auswaehlen, die:
+Phase 1 soll vorzugsweise Themen auswaehlen, die langfristig interessant, gut visualisierbar und serioes belegbar sind.
 
-- langfristig interessant sind
-- eine klare Geschichte oder Erklaerung besitzen
-- mit Fotos, Archivmaterial, Karten oder B-Roll gut visualisierbar sind
-- fuer ein breites deutschsprachiges YouTube-Publikum funktionieren
-- genuegend serioese Recherchequellen besitzen
-
-Bevorzugte Felder:
-
-- Geschichte
-- Technik
-- Wissenschaft
-- Infrastruktur
-- Natur
-- ungewoehnliche Ereignisse
-- Systeme
-- interessante Alltagsphaenomene
-
-Reines Tagesgeschehen und schwach visualisierbare Themen sollen vermieden werden.
+Bevorzugt werden unter anderem Geschichte, Technik, Wissenschaft, Umweltgeschichte, Wirtschaft, Geopolitik, Infrastruktur, Natur und ungewoehnliche Ereignisse.
 
 ## Skriptstandard
 
@@ -116,32 +132,22 @@ horizontal 16:9
 Deutsch
 ```
 
-Das Skript in:
+Das Skript liegt im jeweiligen Video unter:
 
 ```text
 01-SCRIPT/script.txt
 ```
 
-enthaelt nur den final gesprochenen Text.
-
-Keine Regieanweisungen, Szenennummern oder technischen Hinweise.
-
-Der Nutzer soll `script.txt` oeffnen und den gesamten Inhalt direkt in sein Voice-Tool kopieren koennen.
+und enthaelt nur den final gesprochenen Text.
 
 ## Recherche
 
-Die autonome Themen- und Skriptrecherche nutzt die OpenAI Responses API mit Websuche. Das Thema wird erst nach aktueller Recherche geschrieben.
+Die autonome Themen- und Skriptrecherche nutzt die OpenAI Responses API mit Websuche.
 
 Erforderlich lokal:
 
 ```text
 OPENAI_API_KEY=...
-```
-
-Optional:
-
-```text
-OPENAI_PHASE1_MODEL=gpt-5.5
 ```
 
 Der API-Key wird niemals in einen Doku-Projektordner geschrieben.
@@ -153,8 +159,6 @@ Mindestens drei konkrete Skript-Recherchequellen werden gespeichert unter:
 05-PROJECT/script-research.json
 ```
 
-Die Visual-Quellen bleiben getrennt davon in den bestehenden Source-/License-Dateien.
-
 ## Automatisch vorbereitete YouTube-Daten
 
 Phase 1 erzeugt ausserdem:
@@ -163,27 +167,9 @@ Phase 1 erzeugt ausserdem:
 05-PROJECT/publish.json
 ```
 
-mit:
-
-- YouTube-Titel
-- fertiger Beschreibung
-- genau 5 Hashtags
-- YouTube-Tags
-- Thumbnail-Text mit 2–5 Woertern
+mit YouTube-Titel, fertiger Beschreibung, genau 5 Hashtags, YouTube-Tags und Thumbnail-Text.
 
 Nach dem finalen Render werden diese Daten als einfache Copy-Paste-Dateien nach `06-EXPORT/` geschrieben.
-
-## Projekt-Metadaten
-
-Zusaetzlich entstehen:
-
-```text
-05-PROJECT/topic.json
-05-PROJECT/script-research.json
-05-PROJECT/publish.json
-```
-
-`topic.json` speichert unter anderem die ID aus dem zentralen Themenregister. So kann jedes Video spaeter eindeutig seinem Registereintrag zugeordnet werden.
 
 ## Manuelle Phase 1
 
@@ -197,23 +183,6 @@ Dieser Befehl ist **nicht** der normale Produktionsweg.
 
 ## Gewuenschter Nutzerablauf
 
-Bei einem neuen Video soll der Nutzer nur sagen muessen, dass ein neues Video erstellt werden soll.
-
-Phase 1 entscheidet selbst:
-
-```text
-Welches Thema?
-Welcher Blickwinkel?
-Welche Fakten?
-Welches Skript?
-Welche Szenen?
-Welche Visuals?
-Welche Quellen?
-Welcher YouTube-Titel?
-Welche Beschreibung?
-Welche 5 Hashtags?
-Welche Tags?
-Welcher Thumbnail-Text?
-```
+Bei einem neuen Video soll der Nutzer nur sagen muessen, dass ein neues Video erstellt werden soll. Phase 1 entscheidet selbst Thema, Kategorie, Blickwinkel, Fakten, Skript, Szenen, Visuals, Quellen und YouTube-Metadaten.
 
 Der erste normale manuelle Eingriff kommt erst in Phase 2: `script.txt` kopieren, Voice erzeugen und als `02-AUDIO/voiceover.mp3` ablegen.
