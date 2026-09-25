@@ -51,10 +51,10 @@
     "check": "npm run secrets:scan && npm run syntax && npm run validate && npm run index && npm run script:benchmark && npm run test"
   },
   "devDependencies": {
-    "@remotion/cli": "4.0.528",
-    "@remotion/media": "4.0.528",
+    "@remotion/cli": "4.0.527",
+    "@remotion/media": "4.0.527",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "remotion": "4.0.528"
+    "remotion": "4.0.527"
   }
 }
