@@ -11,6 +11,8 @@ export function buildDocumentaryPhase1({
   root = process.cwd(),
   title,
   script,
+  category = 'sonstiges',
+  slug,
   outputRoot,
   segmentation = 'auto',
   depth = 'deep',
@@ -29,6 +31,8 @@ export function buildDocumentaryPhase1({
   const created = createDocumentaryProject({
     root,
     outputRoot,
+    category,
+    slug,
     title: plan.title,
     script: plan.script,
     overwrite
@@ -68,6 +72,8 @@ export async function buildCompleteDocumentaryPhase1(options = {}) {
 function parseArgs(argv) {
   const args = {
     title: '',
+    category: 'sonstiges',
+    slug: undefined,
     scriptFile: '',
     outputRoot: undefined,
     segmentation: 'auto',
@@ -86,6 +92,8 @@ function parseArgs(argv) {
   for (let index = 0; index < argv.length; index += 1) {
     const token = argv[index];
     if (token === '--title') args.title = argv[++index] ?? '';
+    else if (token === '--category') args.category = argv[++index] ?? 'sonstiges';
+    else if (token === '--slug') args.slug = argv[++index] ?? undefined;
     else if (token === '--script-file') args.scriptFile = argv[++index] ?? '';
     else if (token === '--output-root') args.outputRoot = argv[++index] ?? '';
     else if (token === '--segmentation') args.segmentation = argv[++index] ?? 'auto';
@@ -120,6 +128,8 @@ async function runCli() {
   const script = fs.readFileSync(scriptFile, 'utf8');
   const buildOptions = {
     title: args.title,
+    category: args.category,
+    slug: args.slug,
     script,
     outputRoot: args.outputRoot,
     segmentation: args.segmentation,
