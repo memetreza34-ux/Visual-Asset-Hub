@@ -36,6 +36,16 @@ export async function buildAutomaticDocumentaryPhase3({
     timingSource: timingSource || (generatedTimings ? 'openai-whisper-1-word-timestamps' : 'external-word-timestamps')
   });
 
+  const missingLocalVisuals = phase3.timeline.scenes
+    .filter((scene) => !localVisualExists(projectDir, scene.visualPath))
+    .map((scene) => scene.sceneId);
+  phase3.handoff.gates.missingLocalVisuals = missingLocalVisuals;
+  phase3.handoff.gates.canRender = missingLocalVisuals.length === 0;
+  phase3.phase3State.status = missingLocalVisuals.length === 0 ? 'ready-for-editor' : 'blocked-missing-local-visuals';
+  phase3.phase3State.missingLocalVisuals = missingLocalVisuals;
+  writeJson(path.join(projectDir, '05-PROJECT', 'antigravity-handoff.json'), phase3.handoff);
+  writeJson(path.join(projectDir, '05-PROJECT', 'phase3-state.json'), phase3.phase3State);
+
   return {
     ...phase3,
     automaticTiming: {
@@ -44,6 +54,23 @@ export async function buildAutomaticDocumentaryPhase3({
       source: phase3.wordTimings.source
     }
   };
+}
+
+function localVisualExists(projectDirectory, relativePath) {
+  if (!relativePath || typeof relativePath !== 'string') return false;
+  const resolved = path.resolve(projectDirectory, relativePath);
+  const root = `${path.resolve(projectDirectory)}${path.sep}`;
+  if (!resolved.startsWith(root)) return false;
+  try {
+    const stat = fs.statSync(resolved);
+    return stat.isFile() && stat.size > 0;
+  } catch {
+    return false;
+  }
+}
+
+function writeJson(file, value) {
+  fs.writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`, 'utf8');
 }
 
 function parseArgs(argv) {
@@ -67,6 +94,9 @@ async function runCli() {
   process.stdout.write(`Timing-Quelle: ${result.automaticTiming.source}\n`);
   process.stdout.write(`Szenen exakt gemappt: ${result.timeline.sceneCount}\n`);
   process.stdout.write(`Antigravity renderbereit: ${result.handoff.gates.canRender ? 'ja' : 'nein'}\n`);
+  if (result.handoff.gates.missingLocalVisuals.length) {
+    process.stdout.write(`Fehlende lokale Visuals: ${result.handoff.gates.missingLocalVisuals.join(', ')}\n`);
+  }
   process.stdout.write(`Exportziel: ${result.timeline.exportTarget}\n`);
 }
 
