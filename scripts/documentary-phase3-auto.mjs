@@ -10,7 +10,7 @@ export async function buildAutomaticDocumentaryPhase3({
   projectDirectory,
   wordTimingsFile,
   timingSource,
-  openaiApiKey = process.env.OPENAI_API_KEY,
+  openaiApiKey = process.env.OPENAI_API_KEY || readLocalEnvValue('OPENAI_API_KEY'),
   fetchImpl = globalThis.fetch
 } = {}) {
   if (!projectDirectory) throw new Error('projectDirectory fehlt.');
@@ -97,6 +97,25 @@ function fileSha256IfPresent(file) {
   } catch {
     return null;
   }
+}
+
+function readLocalEnvValue(key, envFile = path.resolve(process.cwd(), '.env')) {
+  try {
+    if (!fs.existsSync(envFile) || !fs.statSync(envFile).isFile()) return '';
+    const lines = fs.readFileSync(envFile, 'utf8').split(/\r?\n/);
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const separator = trimmed.indexOf('=');
+      if (separator < 1) continue;
+      const name = trimmed.slice(0, separator).trim();
+      if (name !== key) continue;
+      let value = trimmed.slice(separator + 1).trim();
+      if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) value = value.slice(1, -1);
+      return value;
+    }
+  } catch {}
+  return '';
 }
 
 function readJson(file) {
