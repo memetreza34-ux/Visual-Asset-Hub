@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
+import { enrichDocumentaryScene } from './lib/documentary-source-router.mjs';
 
 export const DOCUMENTARY_PROJECT_VERSION = 1;
 export const DEFAULT_DOCUMENTARY_ROOT = path.join('ALLES-GEFUNDEN', '07-DOKU-PROJEKTE');
@@ -143,18 +144,24 @@ export function syncDocumentaryPhase1(projectDirectory, scriptVisualProject) {
     scriptSha256: scriptVisualProject.scriptSha256 ?? null,
     generatedAt: new Date().toISOString(),
     timing: 'semantic-only-until-final-voiceover',
-    scenes: scriptVisualProject.scenes.map((scene) => ({
-      sceneId: scene.id,
-      sequence: scene.sequence,
-      originalText: scene.originalText,
-      visualIntent: scene.visualIntent,
-      visualIntentType: scene.visualIntentType,
-      preferredMediaType: scene.preferredMediaType,
-      symbolic: Boolean(scene.symbolic),
-      queries: [...(scene.queries ?? [])],
-      selectedPrimary: scene.selectedPrimary ?? null,
-      selectedAlternatives: [...(scene.selectedAlternatives ?? [])]
-    }))
+    scenes: scriptVisualProject.scenes.map((scene) => {
+      const enriched = enrichDocumentaryScene(scene);
+      return {
+        sceneId: scene.id,
+        sequence: scene.sequence,
+        originalText: scene.originalText,
+        visualIntent: scene.visualIntent,
+        visualIntentType: scene.visualIntentType,
+        preferredMediaType: scene.preferredMediaType,
+        symbolic: Boolean(scene.symbolic),
+        entities: [...(scene.entities ?? [])],
+        concepts: [...(scene.concepts ?? [])],
+        queries: [...(scene.queries ?? [])],
+        documentary: enriched.documentary,
+        selectedPrimary: scene.selectedPrimary ?? null,
+        selectedAlternatives: [...(scene.selectedAlternatives ?? [])]
+      };
+    })
   };
 
   fs.writeFileSync(
