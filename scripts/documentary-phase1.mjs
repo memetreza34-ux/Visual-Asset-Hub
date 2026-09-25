@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { createDocumentaryProject, syncDocumentaryPhase1 } from './documentary-project.mjs';
 import { createDocumentaryVisualPlan } from './documentary-visual-plan.mjs';
 import { researchDocumentaryProject } from './documentary-research.mjs';
+import { materializeDocumentaryVisuals } from './documentary-materialize.mjs';
 
 export function buildDocumentaryPhase1({
   root = process.cwd(),
@@ -53,6 +54,17 @@ export async function buildAndResearchDocumentaryPhase1(options = {}) {
   return { ...built, research };
 }
 
+export async function buildCompleteDocumentaryPhase1(options = {}) {
+  const researched = await buildAndResearchDocumentaryPhase1(options);
+  const materialization = await materializeDocumentaryVisuals({
+    projectDirectory: researched.projectDirectory,
+    includeAlternatives: Boolean(options.materializeAlternatives),
+    overwrite: Boolean(options.overwriteMedia),
+    maxBytes: options.maxMediaBytes
+  });
+  return { ...researched, materialization };
+}
+
 function parseArgs(argv) {
   const args = {
     title: '',
@@ -63,6 +75,10 @@ function parseArgs(argv) {
     mediaPreference: 'mixed',
     overwrite: false,
     research: false,
+    complete: false,
+    materializeAlternatives: false,
+    overwriteMedia: false,
+    maxMediaBytes: undefined,
     perPage: undefined,
     maxTasksPerScene: undefined,
     alternatives: undefined
@@ -77,6 +93,10 @@ function parseArgs(argv) {
     else if (token === '--media') args.mediaPreference = argv[++index] ?? 'mixed';
     else if (token === '--overwrite') args.overwrite = true;
     else if (token === '--research') args.research = true;
+    else if (token === '--complete') { args.complete = true; args.research = true; }
+    else if (token === '--materialize-alternatives') { args.materializeAlternatives = true; args.complete = true; args.research = true; }
+    else if (token === '--overwrite-media') args.overwriteMedia = true;
+    else if (token === '--max-media-mb') args.maxMediaBytes = Number(argv[++index]) * 1024 * 1024;
     else if (token === '--per-page') args.perPage = Number(argv[++index]);
     else if (token === '--max-tasks') args.maxTasksPerScene = Number(argv[++index]);
     else if (token === '--alternatives') args.alternatives = Number(argv[++index]);
@@ -87,6 +107,9 @@ function parseArgs(argv) {
   validateOptionalInteger(args.perPage, 3, 20, '--per-page');
   validateOptionalInteger(args.maxTasksPerScene, 1, 20, '--max-tasks');
   validateOptionalInteger(args.alternatives, 0, 6, '--alternatives');
+  if (args.maxMediaBytes !== undefined && (!Number.isFinite(args.maxMediaBytes) || args.maxMediaBytes < 1024 * 1024 || args.maxMediaBytes > 2 * 1024 * 1024 * 1024)) {
+    throw new Error('--max-media-mb muss zwischen 1 und 2048 liegen.');
+  }
   return args;
 }
 
@@ -105,12 +128,17 @@ async function runCli() {
     overwrite: args.overwrite,
     perPage: args.perPage,
     maxTasksPerScene: args.maxTasksPerScene,
-    alternatives: args.alternatives
+    alternatives: args.alternatives,
+    materializeAlternatives: args.materializeAlternatives,
+    overwriteMedia: args.overwriteMedia,
+    maxMediaBytes: args.maxMediaBytes
   };
 
-  const result = args.research
-    ? await buildAndResearchDocumentaryPhase1(buildOptions)
-    : buildDocumentaryPhase1(buildOptions);
+  const result = args.complete
+    ? await buildCompleteDocumentaryPhase1(buildOptions)
+    : args.research
+      ? await buildAndResearchDocumentaryPhase1(buildOptions)
+      : buildDocumentaryPhase1(buildOptions);
 
   process.stdout.write(`Doku Phase 1 erstellt: ${result.projectDirectory}\n`);
   process.stdout.write(`Szenen: ${result.phase1.scenes.length}\n`);
@@ -118,6 +146,11 @@ async function runCli() {
     process.stdout.write(`Online recherchiert: ${result.research.summary.researchedScenes}/${result.research.summary.sceneCount}\n`);
     process.stdout.write(`Szenen mit Visual-Empfehlung: ${result.research.summary.scenesWithRecommendation}\n`);
     process.stdout.write(`Gefundene Kandidaten: ${result.research.summary.totalCandidates}\n`);
+  }
+  if (result.materialization) {
+    process.stdout.write(`Lokale Hauptvisuals: ${result.materialization.summary.primaryFiles}\n`);
+    process.stdout.write(`Download-Fehler: ${result.materialization.summary.failed}\n`);
+    process.stdout.write('Rechte-Status: review-required-before-publication\n');
   }
 }
 
