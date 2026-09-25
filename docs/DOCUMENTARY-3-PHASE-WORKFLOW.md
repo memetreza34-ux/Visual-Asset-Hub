@@ -8,13 +8,13 @@ Dieser Workflow ist der verbindliche Produktionsweg fuer den geplanten YouTube-D
 
 ```text
 PHASE 1 - ChatGPT / Visual Asset Hub
-Skript + Szenen + passende Bilder/B-Rolls + Quellen + Projektordner
+Skript + semantische Szenen + Online-Recherche + lokale Hauptvisuals + Quellen + Projektordner
 
 PHASE 2 - Nutzer
 finales Skript kopieren -> KI-Voice erzeugen -> voiceover.mp3 ablegen
 
-PHASE 3 - Antigravity / Schnitt
-finale Audio analysieren -> echte Timings -> Visuals synchronisieren -> Video bauen -> Export
+PHASE 3 - Timing / Antigravity / Schnitt
+finale Audio -> echte Wort-Timings -> striktes Skript-Alignment -> reale Szenenzeiten -> Antigravity-Handoff -> Render -> Export
 ```
 
 Wichtig: In Phase 1 werden keine exakten Sekunden fuer die Szenen geraten. Die semantischen Szenengrenzen werden am Skript festgelegt. Exakte Zeitpunkte entstehen erst in Phase 3 aus der finalen Audiodatei.
@@ -39,9 +39,12 @@ Jedes neue Dokumentationsvideo bekommt einen eigenen, leicht lesbaren Projektord
 │   └── licenses.csv
 ├── 05-PROJECT/
 │   ├── scenes.json
+│   ├── word-timings-input.json
 │   ├── word-timings.json
 │   ├── timeline.json
-│   └── edit-plan.json
+│   ├── edit-plan.json
+│   ├── antigravity-handoff.json
+│   └── phase3-state.json
 └── 06-EXPORT/
     ├── final-v1.mp4
     ├── youtube-title.txt
@@ -49,6 +52,8 @@ Jedes neue Dokumentationsvideo bekommt einen eigenen, leicht lesbaren Projektord
     ├── youtube-tags.txt
     └── thumbnail-text.txt
 ```
+
+`word-timings-input.json` wird automatisch angelegt, wenn Phase 3 die Wortzeiten selbst aus dem Voiceover erzeugt. Technische Dateien bleiben komplett in `05-PROJECT`.
 
 ## 01-SCRIPT
 
@@ -63,12 +68,15 @@ ChatGPT / Visual Asset Hub erstellt:
 - finales Doku-Skript
 - semantische Szenen nach echten Sinn- und Visualwechseln
 - pro Szene die visuelle Aufgabe
-- passende Bilder und B-Rolls aus freigegebenen Quellen
+- passende Bilder und B-Rolls aus den angeschlossenen Quellen
 - Quellen- und Lizenzdaten
-- Hauptvisual und bei Bedarf Alternativen
+- Hauptvisual und Alternativen
+- lokale Hauptvisual-Datei je Szene, soweit der Provider einen sicheren Download erlaubt
 - die Projektordnerstruktur
 
 Szenen werden nicht nach einer festen Sekunden- oder Bildzahl erzeugt. Neue Szenen entstehen nur bei einem echten visuellen Wechsel, zum Beispiel neue Person, neuer Ort, neue Zeit, neues Ereignis, neue Handlung oder Ursache/Folge.
+
+Ein heruntergeladenes Visual ist nicht automatisch fuer die Veroeffentlichung freigegeben. Rechte-/Review-Status bleibt erhalten.
 
 ## Phase 2 - Voice
 
@@ -80,26 +88,89 @@ Der Nutzer kopiert `01-SCRIPT/script.txt` in sein KI-Voice-Tool und legt die fer
 
 Das Skript darf danach nicht stillschweigend veraendert werden.
 
-## Phase 3 - Timing und Schnitt
+Das ist die einzige normale manuelle Aufgabe zwischen Phase 1 und Phase 3.
 
-Antigravity arbeitet mit der finalen `voiceover.mp3`.
+## Phase 3 - echte Timings und Antigravity-Handoff
+
+Standard:
+
+```bash
+npm run documentary:phase3 -- --project "ALLES-GEFUNDEN/07-DOKU-PROJEKTE/<projekt>"
+```
 
 Ablauf:
 
 ```text
 voiceover.mp3
 + script.txt
--> Wort-Timings
--> Szenengrenzen auf echte Audiozeiten mappen
+-> echte Wort-Timestamps
+-> Wortfolge streng gegen finales Skript pruefen
+-> semantische Szenen lueckenlos im Skript verankern
+-> Szenengrenzen auf reale Audiozeiten mappen
+-> word-timings.json
 -> timeline.json
--> Visuals einsetzen
--> Bilder zoomen/pannen, Videos trimmen
--> Schnitt und erlaubte Effekte
+-> edit-plan.json
+-> antigravity-handoff.json
 -> Render
--> 06-EXPORT/final-v1.mp4
+-> 06-EXPORT/final-vN.mp4
 ```
 
-Keine manuell erfundenen Sekunden. Wenn die Audiodatei geaendert wird, muessen Wort-Timings und Timeline neu erzeugt werden.
+### Automatische Wort-Timestamps
+
+Wenn keine eigene Timing-Datei vorhanden ist, kann Phase 3 `02-AUDIO/voiceover.mp3` automatisch mit OpenAI `whisper-1` auf Wortebene transkribieren.
+
+Lokal in `.env`:
+
+```text
+OPENAI_API_KEY=...
+```
+
+Der Key wird nicht in das Doku-Projekt geschrieben.
+
+Eigene TTS-Wort-Timestamps koennen stattdessen als `05-PROJECT/word-timings-input.json` bereitgestellt werden.
+
+### Keine geratenen Zeiten
+
+Phase 3 darf nicht versuchen, einen Transkriptionsfehler mit geschaetzten Sekunden zu reparieren.
+
+Abbruch statt Raten bei:
+
+- fehlenden oder zusaetzlichen Woertern
+- geaenderter Wortreihenfolge
+- veraendertem finalen Skript
+- Luecken zwischen den Phase-1-Szenen
+- Timing-Datei, deren gespeicherter Audio-Hash zu einer anderen `voiceover.mp3` gehoert
+
+Gross-/Kleinschreibung und reine Satzzeichenunterschiede duerfen normalisiert werden.
+
+### Audio-/Skript-Invalidierung
+
+`word-timings.json` und `phase3-state.json` speichern SHA-256-Hashes fuer Skript und Audio.
+
+Wird `voiceover.mp3` nach einer automatischen Transkription ausgetauscht, wird die alte Timing-Eingabe verworfen und neu erzeugt. Wird das Skript nach Phase 1 veraendert, wird Phase 3 blockiert und Phase 1 muss fuer dieses finale Skript neu erzeugt werden.
+
+### Render-Gate
+
+Antigravity ist nur renderbereit, wenn:
+
+- das Wort-Alignment exakt ist
+- alle Szenengrenzen feststehen
+- fuer jede Szene das lokale Hauptvisual wirklich als nichtleere Datei existiert
+
+Ein Pfad in JSON alleine reicht nicht.
+
+Fehlende Visuals werden in `missingLocalVisuals` aufgelistet.
+
+### Schnittregeln
+
+- Szenenzeiten duerfen vom Editor nicht verschoben werden.
+- Bilder koennen dezent gezoomt oder gepannt werden.
+- Videos duerfen innerhalb des Quellclips passend getrimmt werden.
+- `sourceInSeconds` / `sourceOutSeconds` werden vom Visual Asset Hub nicht erfunden, solange der konkrete Quellclip nicht inhaltlich zeitcodiert analysiert wurde.
+- Standarduebergang ist ein sauberer Cut, sofern kein konkreter Effekt vorgesehen ist.
+- Rechtepruefung bleibt vor Veroeffentlichung erforderlich.
+
+Mehr Details: `docs/DOCUMENTARY-PHASE3-HANDOFF.md`.
 
 ## 06-EXPORT - maximal einfach
 
@@ -116,6 +187,8 @@ final-v1.mp4
 final-v2.mp4
 final-v3.mp4
 ```
+
+Phase 3 waehlt bereits vor dem Rendern das naechste freie Ziel.
 
 ### `youtube-title.txt`
 
@@ -195,7 +268,7 @@ thumbnail-text.txt      -> nur Thumbnail-Wortlaut
 
 Der Nutzer soll am Ende nur noch folgendes tun muessen:
 
-1. `06-EXPORT/final-v1.mp4` bei YouTube hochladen.
+1. `06-EXPORT/final-vN.mp4` bei YouTube hochladen.
 2. `youtube-title.txt` komplett kopieren.
 3. `youtube-description.txt` komplett kopieren.
 4. `youtube-tags.txt` komplett kopieren.
