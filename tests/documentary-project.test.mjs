@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { createDocumentaryProject, createSceneDirectories, projectSlug } from '../scripts/documentary-project.mjs';
+import { createDocumentaryProject, createSceneDirectories, projectSlug, syncDocumentaryPhase1 } from '../scripts/documentary-project.mjs';
 
 test('Doku-Projekt erzeugt die sechs verbindlichen Hauptordner', () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'vah-doku-'));
@@ -68,6 +68,56 @@ test('Szenenordner werden lückenlos dreistellig erzeugt', () => {
     assert.equal(fs.existsSync(path.join(projectDirectory, '03-VISUALS', 'scene-001')), true);
     assert.equal(fs.existsSync(path.join(projectDirectory, '03-VISUALS', 'scene-002')), true);
     assert.equal(fs.existsSync(path.join(projectDirectory, '03-VISUALS', 'scene-003')), true);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('Script Visual Finder wird in Phase-1-Szenenplan gespiegelt', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'vah-doku-'));
+  try {
+    const script = 'Tschernobyl lag in der Sowjetunion. 1986 explodierte Reaktor vier.';
+    const { projectDirectory } = createDocumentaryProject({ root, title: 'Tschernobyl', script, outputRoot: 'projects' });
+    syncDocumentaryPhase1(projectDirectory, {
+      format: 'visual-asset-hub-script-visual-project',
+      projectId: 'SVP-ABCDEF123456',
+      title: 'Tschernobyl',
+      script,
+      scriptSha256: 'a'.repeat(64),
+      scenes: [
+        {
+          id: 'SCENE-001',
+          sequence: 1,
+          originalText: 'Tschernobyl lag in der Sowjetunion.',
+          visualIntent: 'Historische Aufnahme des Kraftwerks und Ortskontext',
+          visualIntentType: 'history',
+          preferredMediaType: 'photo',
+          symbolic: false,
+          queries: ['Chernobyl nuclear power plant archival photo'],
+          selectedPrimary: null,
+          selectedAlternatives: []
+        },
+        {
+          id: 'SCENE-002',
+          sequence: 2,
+          originalText: '1986 explodierte Reaktor vier.',
+          visualIntent: 'Historisches Material von Reaktor 4',
+          visualIntentType: 'event',
+          preferredMediaType: 'video',
+          symbolic: false,
+          queries: ['Chernobyl reactor 4 1986 archival footage'],
+          selectedPrimary: 'wikimedia:123',
+          selectedAlternatives: []
+        }
+      ]
+    });
+
+    const scenes = JSON.parse(fs.readFileSync(path.join(projectDirectory, '05-PROJECT', 'scenes.json'), 'utf8'));
+    assert.equal(scenes.timing, 'semantic-only-until-final-voiceover');
+    assert.equal(scenes.scenes.length, 2);
+    assert.equal(scenes.scenes[1].selectedPrimary, 'wikimedia:123');
+    assert.equal(fs.existsSync(path.join(projectDirectory, '03-VISUALS', 'scene-001')), true);
+    assert.equal(fs.existsSync(path.join(projectDirectory, '03-VISUALS', 'scene-002')), true);
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }
