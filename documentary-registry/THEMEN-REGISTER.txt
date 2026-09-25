@@ -1,0 +1,8 @@
+DOKUMENTARY THEMEN-REGISTER
+==========================
+
+Dieses Register ist die zentrale Quelle fuer alle Doku-Themen.
+Vor jeder automatischen Themenwahl wird es geprueft.
+Bereits reservierte, fehlgeschlagene oder produzierte Themen werden nicht erneut verwendet.
+
+Noch keine Themen eingetragen.
