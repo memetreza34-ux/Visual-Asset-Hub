@@ -12,9 +12,12 @@ import {
   registryPaths
 } from './lib/documentary-topic-registry.mjs';
 
+export const DEFAULT_TOPIC_REGISTRY_ROOT = 'documentary-registry';
+
 export async function buildAutonomousDocumentaryPhase1({
   root = process.cwd(),
   outputRoot = DEFAULT_DOCUMENTARY_ROOT,
+  registryRoot = DEFAULT_TOPIC_REGISTRY_ROOT,
   targetDurationSeconds = 150,
   depth = 'deep',
   mediaPreference = 'mixed',
@@ -29,8 +32,11 @@ export async function buildAutonomousDocumentaryPhase1({
   fetchImpl = globalThis.fetch
 } = {}) {
   const absoluteOutputRoot = path.resolve(root, outputRoot);
+  const absoluteRegistryRoot = path.resolve(root, registryRoot);
   fs.mkdirSync(absoluteOutputRoot, {recursive: true});
-  const registry = loadTopicRegistry(absoluteOutputRoot);
+  fs.mkdirSync(absoluteRegistryRoot, {recursive: true});
+
+  const registry = loadTopicRegistry(absoluteRegistryRoot);
   const brief = await generateAutonomousDocumentaryBrief({
     registry,
     targetDurationSeconds,
@@ -40,7 +46,7 @@ export async function buildAutonomousDocumentaryPhase1({
   });
 
   const slug = projectSlug(brief.title);
-  const reservation = reserveTopic(absoluteOutputRoot, brief, {
+  const reservation = reserveTopic(absoluteRegistryRoot, brief, {
     status: 'reserved',
     targetDurationSeconds,
     projectSlug: slug,
@@ -67,8 +73,8 @@ export async function buildAutonomousDocumentaryPhase1({
     });
 
     writeAutonomousMetadata(result.projectDirectory, brief, reservation.entry);
-    const relativeProject = path.relative(absoluteOutputRoot, result.projectDirectory).split(path.sep).join('/');
-    const updatedTopic = updateTopicEntry(absoluteOutputRoot, reservation.entry.id, {
+    const relativeProject = path.relative(root, result.projectDirectory).split(path.sep).join('/');
+    const updatedTopic = updateTopicEntry(absoluteRegistryRoot, reservation.entry.id, {
       status: 'phase1-complete',
       completedAt: new Date().toISOString(),
       projectDirectory: relativeProject,
@@ -83,11 +89,11 @@ export async function buildAutonomousDocumentaryPhase1({
       autonomous: {
         brief,
         topic: updatedTopic,
-        registry: registryPaths(absoluteOutputRoot)
+        registry: registryPaths(absoluteRegistryRoot)
       }
     };
   } catch (error) {
-    updateTopicEntry(absoluteOutputRoot, reservation.entry.id, {
+    updateTopicEntry(absoluteRegistryRoot, reservation.entry.id, {
       status: 'phase1-failed',
       failedAt: new Date().toISOString(),
       error: String(error instanceof Error ? error.message : error).slice(0, 1000)
@@ -155,6 +161,7 @@ function writeJson(file, value) {
 function parseArgs(argv) {
   const args = {
     outputRoot: DEFAULT_DOCUMENTARY_ROOT,
+    registryRoot: DEFAULT_TOPIC_REGISTRY_ROOT,
     targetDurationSeconds: 150,
     depth: 'deep',
     mediaPreference: 'mixed',
@@ -169,6 +176,7 @@ function parseArgs(argv) {
   for (let index = 0; index < argv.length; index += 1) {
     const token = argv[index];
     if (token === '--output-root') args.outputRoot = argv[++index] ?? DEFAULT_DOCUMENTARY_ROOT;
+    else if (token === '--registry-root') args.registryRoot = argv[++index] ?? DEFAULT_TOPIC_REGISTRY_ROOT;
     else if (token === '--duration') args.targetDurationSeconds = Number(argv[++index]);
     else if (token === '--depth') args.depth = argv[++index] ?? 'deep';
     else if (token === '--media') args.mediaPreference = argv[++index] ?? 'mixed';
