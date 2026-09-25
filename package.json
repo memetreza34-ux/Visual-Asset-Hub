@@ -18,6 +18,8 @@
     "documentary:phase3": "node scripts/documentary-phase3-auto.mjs",
     "documentary:phase3:core": "node scripts/documentary-phase3.mjs",
     "documentary:phase3:validate": "node scripts/documentary-phase3-validate.mjs",
+    "documentary:render": "node scripts/documentary-render.mjs",
+    "documentary:publish": "node scripts/documentary-publish.mjs",
     "documentary:research": "node scripts/documentary-research.mjs",
     "documentary:materialize": "node scripts/documentary-materialize.mjs",
     "documentary:from-script-visual": "node scripts/documentary-from-script-visual.mjs",
@@ -47,5 +49,12 @@
     "test": "node --test",
     "syntax": "node scripts/check-syntax.mjs",
     "check": "npm run secrets:scan && npm run syntax && npm run validate && npm run index && npm run script:benchmark && npm run test"
+  },
+  "devDependencies": {
+    "@remotion/cli": "4.0.528",
+    "@remotion/media": "4.0.528",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "remotion": "4.0.528"
   }
 }
