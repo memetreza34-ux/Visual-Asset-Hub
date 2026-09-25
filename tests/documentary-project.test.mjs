@@ -3,7 +3,13 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { createDocumentaryProject, createSceneDirectories, projectSlug, syncDocumentaryPhase1 } from '../scripts/documentary-project.mjs';
+import {
+  createDocumentaryProject,
+  createSceneDirectories,
+  documentaryCategorySlug,
+  projectSlug,
+  syncDocumentaryPhase1
+} from '../scripts/documentary-project.mjs';
 
 test('Doku-Projekt erzeugt die sechs verbindlichen Hauptordner', () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'vah-doku-'));
@@ -20,6 +26,45 @@ test('Doku-Projekt erzeugt die sechs verbindlichen Hauptordner', () => {
     }
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('Kategorie liegt zwischen videos-Root und Themenordner', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'vah-doku-'));
+  try {
+    const { projectDirectory, project } = createDocumentaryProject({
+      root,
+      outputRoot: 'videos',
+      category: 'Umweltgeschichte',
+      slug: '001-aralsee',
+      title: 'Der Aralsee',
+      script: 'Ein finales Skript.'
+    });
+    assert.equal(path.relative(root, projectDirectory), path.join('videos', 'umweltgeschichte', '001-aralsee'));
+    assert.equal(project.category, 'umweltgeschichte');
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('sichtbares Git-Skelett darf von Phase 1 befuellt werden', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'vah-doku-'));
+  try {
+    const skeleton = path.join(root, 'videos', 'technik', '001-test');
+    fs.mkdirSync(path.join(skeleton, '01-SCRIPT'), {recursive: true});
+    fs.writeFileSync(path.join(skeleton, '01-SCRIPT', 'README.txt'), 'Skeleton');
+    const {projectDirectory} = createDocumentaryProject({
+      root,
+      outputRoot: 'videos',
+      category: 'Technik',
+      slug: '001-test',
+      title: 'Test',
+      script: 'Finales Skript.'
+    });
+    assert.equal(projectDirectory, skeleton);
+    assert.equal(fs.existsSync(path.join(skeleton, '05-PROJECT', 'project.json')), true);
+  } finally {
+    fs.rmSync(root, {recursive: true, force: true});
   }
 });
 
@@ -123,6 +168,9 @@ test('Script Visual Finder wird in Phase-1-Szenenplan gespiegelt', () => {
   }
 });
 
-test('Projekt-Slug ist stabil und dateisystemsicher', () => {
+test('Projekt-Slug und Kategorien sind stabil und dateisystemsicher', () => {
   assert.equal(projectSlug('Warum Tschernobyl? – Die Folgen'), 'warum-tschernobyl-die-folgen');
+  assert.equal(documentaryCategorySlug('Umweltgeschichte'), 'umweltgeschichte');
+  assert.equal(documentaryCategorySlug('Computertechnik'), 'technik');
+  assert.equal(documentaryCategorySlug('unbekannte Kategorie'), 'sonstiges');
 });
