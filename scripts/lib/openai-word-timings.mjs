@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -26,6 +27,7 @@ export async function transcribeOpenAIWordTimings({
 
   const form = new FormData();
   const data = fs.readFileSync(file);
+  const audioSha256 = createHash('sha256').update(data).digest('hex');
   form.append('file', new Blob([data], { type: mimeFor(file) }), path.basename(file));
   form.append('model', 'whisper-1');
   form.append('response_format', 'verbose_json');
@@ -69,6 +71,8 @@ export async function transcribeOpenAIWordTimings({
     model: 'whisper-1',
     language: payload.language ?? language ?? null,
     generatedAt: new Date().toISOString(),
+    audioSha256,
+    audioBytes: stat.size,
     durationSeconds: Number(payload.duration) || Math.max(...payload.words.map((word) => Number(word.end) || 0)),
     transcript: payload.text ?? '',
     words: payload.words.map((word) => ({
