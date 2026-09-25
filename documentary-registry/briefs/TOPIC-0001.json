@@ -1,0 +1,47 @@
+{
+  "format": "visual-asset-hub-autonomous-documentary-brief",
+  "version": 1,
+  "registerId": "TOPIC-0001",
+  "title": "Wie der Aralsee fast verschwand – und warum ein Teil zurückkam",
+  "topicKey": "aralsee-verschwinden-nord-aralsee-rueckkehr",
+  "angle": "Wie sowjetische Wasserumleitungen einen der groessten Seen der Welt zerstoerten und der Kok-Aral-Damm den noerdlichen Teil teilweise rettete",
+  "category": "Umweltgeschichte",
+  "targetDurationSeconds": 150,
+  "scriptWords": 377,
+  "script": "Noch vor wenigen Jahrzehnten lag mitten in Zentralasien ein riesiges Binnenmeer. Der Aralsee war einst der viertgrößte See der Erde. Heute stehen an vielen seiner früheren Ufer Schiffe auf trockenem Boden. Wie konnte ein Meer in nur wenigen Jahrzehnten fast verschwinden?\n\nDer Aralsee liegt zwischen Kasachstan und Usbekistan. Gespeist wurde er vor allem von zwei großen Flüssen: dem Amudarja und dem Syrdarja. In den 1960er-Jahren begann die Sowjetunion, immer größere Mengen dieses Wassers umzuleiten. In den trockenen Regionen Zentralasiens sollten damit vor allem Baumwolle und andere Nutzpflanzen bewässert werden. Ein Teil der Kanäle verlor zusätzlich viel Wasser durch Versickerung und Verdunstung.\n\nFür die Landwirtschaft brachte das kurzfristig mehr Wasser. Für den Aralsee war es eine Katastrophe. Immer weniger Flusswasser erreichte den See. Seine Fläche schrumpfte, der Salzgehalt stieg und große Teile des Fischbestands verschwanden. Fischereiorte verloren ihre wirtschaftliche Grundlage. Häfen lagen plötzlich kilometerweit vom Wasser entfernt. Aus einem zusammenhängenden See wurden mehrere voneinander getrennte Wasserflächen.\n\nAuf dem freigelegten Seeboden entstand eine neue Wüste: der Aralkum. Wind kann dort Salz, Staub und Rückstände landwirtschaftlicher Chemikalien aufnehmen und über weite Entfernungen transportieren. Das belastet Böden, Landwirtschaft und die Gesundheit der Menschen in der Region. Gleichzeitig verschwand die temperaturausgleichende Wirkung der riesigen Wasserfläche, wodurch das lokale Klima extremer wurde.\n\nNASA-Satellitenbilder zeigen besonders deutlich, wie sich die Wasserfläche seit den 1960er-Jahren zurückzog. Um das Jahr 2000 war der See bereits in einen nördlichen und einen südlichen Teil zerfallen. 2014 trocknete der östliche Teil des südlichen Aralsees erstmals in der modernen Geschichte vollständig aus. Spätere feuchte Jahre ließen dort zeitweise wieder Wasser erscheinen, doch die frühere Größe kehrte nicht zurück.\n\nDoch die Geschichte endet nicht nur mit Zerstörung. Im Norden ließ Kasachstan mit Unterstützung der Weltbank den Kok-Aral-Damm bauen. Er wurde 2005 fertiggestellt und hält Wasser aus dem Syrdarja im nördlichen Aralsee zurück. Dort stieg der Wasserspiegel wieder, der Salzgehalt sank und die Fischerei erholte sich deutlich. Schon wenige Jahre später wurden wieder deutlich größere Fischmengen gefangen.\n\nDer südliche Aralsee dagegen ist bis heute weitgehend verloren. Auf Teilen des trockengefallenen Bodens werden inzwischen Millionen widerstandsfähige Saxaul-Sträucher gepflanzt, um Staub zu binden und die Landschaft zu stabilisieren.\n\nDer Aralsee zeigt deshalb zwei Dinge gleichzeitig: Menschen können ein riesiges Ökosystem innerhalb weniger Jahrzehnte schwer beschädigen. Aber gezielte Maßnahmen können zumindest einen Teil davon zurückbringen.",
+  "researchSummary": "Der Aralsee war vor den grossen sowjetischen Wasserumleitungen einer der groessten Seen der Welt. Seit den 1960er-Jahren wurden Amudarja und Syrdarja stark fuer Bewaesserung abgezweigt. Der See schrumpfte und teilte sich; der oestliche Sued-Aralsee trocknete 2014 erstmals in der modernen Geschichte komplett aus. Der 2005 fertiggestellte Kok-Aral-Damm stabilisierte den Nord-Aralsee, senkte dort die Salinitaet und half der Fischerei bei der Erholung. Auf trockengefallenem Seeboden werden heute unter anderem Saxaul-Bestaende zur Staubminderung aufgebaut.",
+  "sources": [
+    {
+      "title": "World of Change: Shrinking Aral Sea",
+      "publisher": "NASA Earth Observatory",
+      "url": "https://earthobservatory.nasa.gov/world-of-change/AralSea"
+    },
+    {
+      "title": "The Aral Sea Loses Its Eastern Lobe",
+      "publisher": "NASA Earth Observatory",
+      "url": "https://earthobservatory.nasa.gov/images/84437/the-aral-sea-loses-its-eastern-lobe"
+    },
+    {
+      "title": "Miraculous catch in Kazakhstan's northern Aral Sea",
+      "publisher": "World Bank",
+      "url": "https://documents.worldbank.org/en/publication/documents-reports/documentdetail/668681468050713490"
+    },
+    {
+      "title": "In Search of a Desert Oasis: Innovative Projects Imagine a Promising Future for the Aral Sea and Central Asian Drylands",
+      "publisher": "World Bank",
+      "url": "https://www.worldbank.org/en/news/feature/2021/06/17/a-promising-future-for-the-aral-sea-and-central-asian-drylands"
+    },
+    {
+      "title": "Catastrophe of Aral Sea shows 'men can destroy the planet,' warns UN chief Guterres",
+      "publisher": "United Nations",
+      "url": "https://www.un.org/sustainabledevelopment/blog/2017/06/catastrophe-of-aral-sea-shows-men-can-destroy-the-planet-warns-un-chief-guterres/"
+    }
+  ],
+  "publish": {
+    "title": "Wie der Aralsee fast verschwand – und warum ein Teil zurückkam",
+    "description": "Der Aralsee war einst einer der größten Seen der Erde. Innerhalb weniger Jahrzehnte schrumpfte er dramatisch, Häfen lagen plötzlich in der Wüste und eine neue Staublandschaft entstand. Diese Dokumentation zeigt, wie die Umleitung zweier großer Flüsse die Katastrophe auslöste – und warum sich der nördliche Teil des Aralsees heute teilweise erholt hat.",
+    "hashtags": ["Aralsee", "Dokumentation", "Umwelt", "Geschichte", "Zentralasien"],
+    "tags": ["Aralsee", "Aral Sea", "Dokumentation", "Kasachstan", "Usbekistan", "Sowjetunion", "Kok-Aral-Damm", "Umweltkatastrophe", "Wasser", "Baumwolle", "Zentralasien", "NASA", "Weltbank"],
+    "thumbnailText": "Ein Meer verschwand"
+  }
+}
