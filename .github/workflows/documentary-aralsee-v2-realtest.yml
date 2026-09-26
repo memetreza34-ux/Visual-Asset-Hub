@@ -1,10 +1,11 @@
-name: Aralsee V6 Realtest
+name: Aralsee V7 Realtest
 
 on:
   push:
     branches: [agent/beta-release]
     paths:
       - '.github/workflows/documentary-aralsee-v2-realtest.yml'
+      - 'scripts/documentary-research-v7.mjs'
       - 'scripts/documentary-research-v6.mjs'
       - 'scripts/documentary-research-v5.mjs'
       - 'scripts/documentary-phase1.mjs'
@@ -38,8 +39,9 @@ jobs:
         with:
           node-version: '22'
 
-      - name: V6 Syntax vor Realtest pruefen
+      - name: V7 Syntax vor Realtest pruefen
         run: |
+          node --check scripts/documentary-research-v7.mjs
           node --check scripts/documentary-research-v6.mjs
           node --check scripts/documentary-materialize-v2.mjs
           node --check scripts/lib/wikimedia.mjs
@@ -67,7 +69,7 @@ jobs:
           console.log(`${t.id}: ${t.title}; anchors=${brief.visualSearchAnchors.length}`);
           NODE
 
-      - name: Autonome Phase 1 V6 real ausfuehren
+      - name: Autonome Phase 1 V7 real ausfuehren
         run: |
           npm run documentary:phase1 -- \
             --duration 150 \
@@ -77,7 +79,7 @@ jobs:
             --overwrite-media \
             --max-media-mb 120
 
-      - name: Strengen V6 Qualitaetsbericht erzeugen
+      - name: Strengen V7 Qualitaetsbericht erzeugen
         run: |
           node - <<'NODE'
           const fs = require('fs');
@@ -87,23 +89,27 @@ jobs:
           const research = JSON.parse(fs.readFileSync(`${project}/research-summary.json`, 'utf8'));
           const material = JSON.parse(fs.readFileSync(`${project}/materialization-summary.json`, 'utf8'));
           const rescue = fs.existsSync(`${project}/anchor-rescue-report.json`) ? JSON.parse(fs.readFileSync(`${project}/anchor-rescue-report.json`, 'utf8')) : {};
+          const archiveGate = fs.existsSync(`${project}/archive-relevance-v7-report.json`) ? JSON.parse(fs.readFileSync(`${project}/archive-relevance-v7-report.json`, 'utf8')) : {};
           const providers = {};
           const selected = [];
           const blockedScenes = [];
           const weakSelections = [];
           const generatedSelections = [];
           const irrelevantStock = [];
+          const irrelevantArchive = [];
           const uniqueAssets = new Set();
+          const archiveTopicRe = /\baral\b|syr[ -]?darya|amu[ -]?darya|aralkum|muyn|moynaq|kok[ -]?aral|kazakh|uzbek|irrigat|cotton|salin|dust|saxaul|fishing/i;
           let coveredScenes = 0;
           for (const scene of scenes.scenes || []) {
             const shots = scene.recommendedShots || [];
             if (shots.length) coveredScenes += 1;
-            else blockedScenes.push({sceneId: scene.sceneId, text: scene.originalText, status: scene.research?.qualityGate?.status, rescue: scene.research?.v6Rescue?.status});
+            else blockedScenes.push({sceneId: scene.sceneId, text: scene.originalText, status: scene.research?.qualityGate?.status, rescue: scene.research?.v6Rescue?.status, v7: scene.research?.v7ArchiveGate?.status});
             for (const shot of shots) {
               providers[shot.provider] = (providers[shot.provider] || 0) + 1;
               const candidate = (scene.candidates || []).find((x) => x.key === shot.candidateKey) || {};
               const identity = candidate.identity || `${candidate.provider || shot.provider}|${candidate.providerId || candidate.key || shot.candidateKey}`;
               uniqueAssets.add(identity);
+              const candidateText = [candidate.title, candidate.asset?.title, candidate.asset?.description, candidate.query].filter(Boolean).join(' ');
               const row = {
                 sceneId: scene.sceneId,
                 shotId: shot.shotId,
@@ -124,6 +130,7 @@ jobs:
               if (Number(row.qualityGateScore ?? 0) < 35) weakSelections.push(row);
               if (/ai[- ]generated|generated with ai|artificial intelligence generated|midjourney|stable diffusion|sora generated/i.test(row.title)) generatedSelections.push(row);
               if (['pexels','pixabay','unsplash'].includes(row.provider) && Number(row.lexicalMatch ?? 0) < 6) irrelevantStock.push(row);
+              if (['wikimedia','openverse','loc'].includes(row.provider) && !row.anchorQuery && Number(row.lexicalMatch ?? 0) < 6 && !archiveTopicRe.test(candidateText)) irrelevantArchive.push(row);
             }
           }
           const total = selected.length;
@@ -144,6 +151,8 @@ jobs:
             pexelsShare: total ? Number((pexels / total).toFixed(3)) : 0,
             qualityBlockedScenes: blockedScenes.length,
             stockPrunedForIrrelevance: research.stockPrunedForIrrelevance || rescue.stockPrunedForIrrelevance || 0,
+            archivePrunedForIrrelevance: research.archivePrunedForIrrelevance || archiveGate.archivePrunedForIrrelevance || 0,
+            v7ArchiveRemoved: archiveGate.removed || [],
             v6RescueSearches: research.v6RescueSearches || rescue.searches || 0,
             v6CandidatesByProvider: research.v6CandidatesByProvider || rescue.candidatesByProvider || {},
             v6SelectedByProvider: research.v6SelectedByProvider || rescue.selectedByProvider || {},
@@ -156,6 +165,8 @@ jobs:
             networkDownloads: material.networkDownloads || 0,
             locallyReusedFiles: material.reusedFiles || 0,
             downloadRetries: material.retryCount || 0,
+            wikimediaThrottledRequests: material.wikimediaThrottledRequests || 0,
+            wikimediaPreviewDownloads: material.wikimediaPreviewDownloads || 0,
             downloadedVideos: material.videoFiles || 0,
             downloadedImages: material.imageFiles || 0,
             downloadFailures: material.failed || 0,
@@ -163,12 +174,13 @@ jobs:
             weakSelections,
             generatedSelections,
             irrelevantStock,
+            irrelevantArchive,
             blockedScenes,
             selected
           };
-          console.log('=== V6 REALTEST REPORT ===');
+          console.log('=== V7 REALTEST REPORT ===');
           console.log(JSON.stringify(report, null, 2));
-          console.log('=== END V6 REALTEST REPORT ===');
+          console.log('=== END V7 REALTEST REPORT ===');
 
           const failures = [];
           if (coveredScenes < 20) failures.push(`zu wenige verlaesslich abgedeckte Szenen: ${coveredScenes} < 20`);
@@ -178,8 +190,9 @@ jobs:
           if (weakSelections.length) failures.push(`${weakSelections.length} ausgewaehlte Shots unter QualityGateScore 35`);
           if (generatedSelections.length) failures.push(`${generatedSelections.length} AI-generierte Archivtreffer ausgewaehlt`);
           if (irrelevantStock.length) failures.push(`${irrelevantStock.length} generische Stock-Treffer ohne ausreichenden Bezug ausgewaehlt`);
+          if (irrelevantArchive.length) failures.push(`${irrelevantArchive.length} Archiv-Treffer ohne belastbaren Themenbezug ausgewaehlt`);
           if (material.failed > Math.max(6, Math.ceil(total * 0.25))) failures.push(`zu viele Downloadfehler: ${material.failed}`);
-          if (failures.length) throw new Error(`V6 Qualitaetsgate nicht bestanden:\n- ${failures.join('\n- ')}`);
+          if (failures.length) throw new Error(`V7 Qualitaetsgate nicht bestanden:\n- ${failures.join('\n- ')}`);
           NODE
 
       - name: Lokale Realtest-Dateien zusammenfassen
