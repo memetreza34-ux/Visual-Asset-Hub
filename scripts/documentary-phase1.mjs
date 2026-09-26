@@ -4,8 +4,8 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { createDocumentaryProject, syncDocumentaryPhase1 } from './documentary-project.mjs';
 import { createDocumentaryVisualPlan } from './documentary-visual-plan.mjs';
-import { researchDocumentaryProject } from './documentary-research.mjs';
-import { materializeDocumentaryVisuals } from './documentary-materialize.mjs';
+import { researchDocumentaryProjectV2 } from './documentary-research-v2.mjs';
+import { materializeDocumentaryVisualsV2 } from './documentary-materialize-v2.mjs';
 
 export function buildDocumentaryPhase1({
   root = process.cwd(),
@@ -19,76 +19,36 @@ export function buildDocumentaryPhase1({
   mediaPreference = 'mixed',
   overwrite = false
 } = {}) {
-  const plan = createDocumentaryVisualPlan({
-    title,
-    script,
-    segmentation,
-    depth,
-    mediaPreference,
-    orientation: 'horizontal'
-  });
-
-  const created = createDocumentaryProject({
-    root,
-    outputRoot,
-    category,
-    slug,
-    title: plan.title,
-    script: plan.script,
-    overwrite
-  });
-
+  const plan = createDocumentaryVisualPlan({title, script, segmentation, depth, mediaPreference, orientation: 'horizontal'});
+  const created = createDocumentaryProject({root, outputRoot, category, slug, title: plan.title, script: plan.script, overwrite});
   const phase1 = syncDocumentaryPhase1(created.projectDirectory, plan);
-  return {
-    projectDirectory: created.projectDirectory,
-    project: created.project,
-    plan,
-    phase1
-  };
+  return {projectDirectory: created.projectDirectory, project: created.project, plan, phase1};
 }
 
 export async function buildAndResearchDocumentaryPhase1(options = {}) {
   const built = buildDocumentaryPhase1(options);
-  const research = await researchDocumentaryProject({
+  const research = await researchDocumentaryProjectV2({
     projectDirectory: built.projectDirectory,
     perPage: options.perPage,
     maxTasksPerScene: options.maxTasksPerScene,
     alternatives: options.alternatives
   });
-  return { ...built, research };
+  return {...built, research};
 }
 
 export async function buildCompleteDocumentaryPhase1(options = {}) {
   const researched = await buildAndResearchDocumentaryPhase1(options);
-  const materialization = await materializeDocumentaryVisuals({
+  const materialization = await materializeDocumentaryVisualsV2({
     projectDirectory: researched.projectDirectory,
     includeAlternatives: Boolean(options.materializeAlternatives),
     overwrite: Boolean(options.overwriteMedia),
     maxBytes: options.maxMediaBytes
   });
-  return { ...researched, materialization };
+  return {...researched, materialization};
 }
 
 function parseArgs(argv) {
-  const args = {
-    title: '',
-    category: 'sonstiges',
-    slug: undefined,
-    scriptFile: '',
-    outputRoot: undefined,
-    segmentation: 'auto',
-    depth: 'deep',
-    mediaPreference: 'mixed',
-    overwrite: false,
-    research: false,
-    complete: false,
-    materializeAlternatives: false,
-    overwriteMedia: false,
-    maxMediaBytes: undefined,
-    perPage: undefined,
-    maxTasksPerScene: undefined,
-    alternatives: undefined
-  };
+  const args = {title: '', category: 'sonstiges', slug: undefined, scriptFile: '', outputRoot: undefined, segmentation: 'auto', depth: 'deep', mediaPreference: 'mixed', overwrite: false, research: false, complete: false, materializeAlternatives: false, overwriteMedia: false, maxMediaBytes: undefined, perPage: undefined, maxTasksPerScene: undefined, alternatives: undefined};
   for (let index = 0; index < argv.length; index += 1) {
     const token = argv[index];
     if (token === '--title') args.title = argv[++index] ?? '';
@@ -113,11 +73,8 @@ function parseArgs(argv) {
   if (!args.title) throw new Error('Pflichtargument fehlt: --title');
   if (!args.scriptFile) throw new Error('Pflichtargument fehlt: --script-file');
   validateOptionalInteger(args.perPage, 3, 20, '--per-page');
-  validateOptionalInteger(args.maxTasksPerScene, 1, 20, '--max-tasks');
-  validateOptionalInteger(args.alternatives, 0, 6, '--alternatives');
-  if (args.maxMediaBytes !== undefined && (!Number.isFinite(args.maxMediaBytes) || args.maxMediaBytes < 1024 * 1024 || args.maxMediaBytes > 2 * 1024 * 1024 * 1024)) {
-    throw new Error('--max-media-mb muss zwischen 1 und 2048 liegen.');
-  }
+  validateOptionalInteger(args.maxTasksPerScene, 1, 30, '--max-tasks');
+  validateOptionalInteger(args.alternatives, 0, 8, '--alternatives');
   return args;
 }
 
@@ -126,57 +83,29 @@ async function runCli() {
   const scriptFile = path.resolve(args.scriptFile);
   if (!fs.existsSync(scriptFile)) throw new Error(`Skriptdatei nicht gefunden: ${scriptFile}`);
   const script = fs.readFileSync(scriptFile, 'utf8');
-  const buildOptions = {
-    title: args.title,
-    category: args.category,
-    slug: args.slug,
-    script,
-    outputRoot: args.outputRoot,
-    segmentation: args.segmentation,
-    depth: args.depth,
-    mediaPreference: args.mediaPreference,
-    overwrite: args.overwrite,
-    perPage: args.perPage,
-    maxTasksPerScene: args.maxTasksPerScene,
-    alternatives: args.alternatives,
-    materializeAlternatives: args.materializeAlternatives,
-    overwriteMedia: args.overwriteMedia,
-    maxMediaBytes: args.maxMediaBytes
-  };
-
-  const result = args.complete
-    ? await buildCompleteDocumentaryPhase1(buildOptions)
-    : args.research
-      ? await buildAndResearchDocumentaryPhase1(buildOptions)
-      : buildDocumentaryPhase1(buildOptions);
-
+  const buildOptions = {...args, script};
+  const result = args.complete ? await buildCompleteDocumentaryPhase1(buildOptions) : args.research ? await buildAndResearchDocumentaryPhase1(buildOptions) : buildDocumentaryPhase1(buildOptions);
   process.stdout.write(`Doku Phase 1 erstellt: ${result.projectDirectory}\n`);
   process.stdout.write(`Szenen: ${result.phase1.scenes.length}\n`);
   if (result.research) {
-    process.stdout.write(`Online recherchiert: ${result.research.summary.researchedScenes}/${result.research.summary.sceneCount}\n`);
-    process.stdout.write(`Szenen mit Visual-Empfehlung: ${result.research.summary.scenesWithRecommendation}\n`);
-    process.stdout.write(`Gefundene Kandidaten: ${result.research.summary.totalCandidates}\n`);
+    process.stdout.write(`Shots: ${result.research.summary.totalShots ?? 0}\n`);
+    process.stdout.write(`Video-Shots: ${result.research.summary.videoShots ?? 0}\n`);
+    process.stdout.write(`Bild-Shots: ${result.research.summary.imageShots ?? 0}\n`);
   }
   if (result.materialization) {
-    process.stdout.write(`Lokale Hauptvisuals: ${result.materialization.summary.primaryFiles}\n`);
+    process.stdout.write(`Lokale Shots: ${result.materialization.summary.shotFiles ?? 0}\n`);
+    process.stdout.write(`Lokale B-Roll-Videos: ${result.materialization.summary.videoFiles ?? 0}\n`);
     process.stdout.write(`Download-Fehler: ${result.materialization.summary.failed}\n`);
-    process.stdout.write('Rechte-Status: review-required-before-publication\n');
   }
 }
 
 function validateOptionalInteger(value, min, max, label) {
   if (value === undefined) return;
-  if (!Number.isInteger(value) || value < min || value > max) {
-    throw new Error(`${label} muss zwischen ${min} und ${max} liegen.`);
-  }
+  if (!Number.isInteger(value) || value < min || value > max) throw new Error(`${label} muss zwischen ${min} und ${max} liegen.`);
 }
 
 const invokedDirectly = process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url));
 if (invokedDirectly) {
-  try {
-    await runCli();
-  } catch (error) {
-    process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
-    process.exitCode = 1;
-  }
+  try { await runCli(); }
+  catch (error) { process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`); process.exitCode = 1; }
 }
