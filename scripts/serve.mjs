@@ -44,31 +44,36 @@ async function handleApi(request, response, url) {
     return sendJson(response, 200, readManifest());
   }
   if (request.method === 'POST' && url.pathname === '/api/inbox/scan') {
-    requireWriteApi();
+    requireWriteApi(request);
     const scan = runNode('scripts/scan-inbox.mjs');
     if (scan.status !== 0) return sendJson(response, 500, { error: cleanProcessError(scan, 'Inbox-Scan fehlgeschlagen.') });
     return sendJson(response, 200, { message: 'Inbox wurde analysiert.', output: scan.stdout.trim(), manifest: readManifest() });
   }
   if (request.method === 'POST' && url.pathname === '/api/inbox/import') {
-    requireWriteApi();
+    requireWriteApi(request);
     const body = await readJsonBody(request);
     const sourceFile = safeInboxFile(body.file);
     const fields = ['type','category','subject','action','shot','title','description','tags','style','movement','license','source','scopes','quality','status','sourceUrl','licenseUrl','attributionRequired','attributionText','expires','rightsNotes','notes','createdBy'];
     const args = ['scripts/add-asset.mjs', '--file', sourceFile];
     for (const field of fields) {
-      const value = body[field];
+      let value = body[field];
+      if (field === 'status' && (value === undefined || value === null || value === '')) value = 'approved';
       if (value === undefined || value === null || value === '') continue;
       args.push(`--${toKebab(field)}`, Array.isArray(value) ? value.join(',') : String(value));
     }
     const imported = spawnSync(process.execPath, args, { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
     if (imported.status !== 0) return sendJson(response, 400, { error: cleanProcessError(imported, 'Import fehlgeschlagen.') });
 
-    const archivedTo = archiveInboxSource(sourceFile);
+    let archivedTo = null;
+    let warning = null;
+    try { archivedTo = archiveInboxSource(sourceFile); }
+    catch (error) { warning = `Asset ist importiert, aber die Inbox-Quelldatei konnte nicht archiviert werden: ${error instanceof Error ? error.message : String(error)}`; }
     const scan = runNode('scripts/scan-inbox.mjs');
     return sendJson(response, 201, {
-      message: 'Asset wurde importiert und aus der Inbox archiviert.',
+      message: 'Asset wurde erfolgreich in die Bibliothek aufgenommen.',
       output: imported.stdout.trim(),
       archivedTo,
+      warning,
       manifest: scan.status === 0 ? readManifest() : null
     });
   }
@@ -79,19 +84,16 @@ function serveStatic(request, response, url) {
   if (!['GET', 'HEAD'].includes(request.method || 'GET')) return send(response, 405, 'Methode nicht erlaubt.');
   const pathname = url.pathname === '/' ? '/web/index.html' : decodeURIComponent(url.pathname);
   if (pathname.includes('\0') || pathname.split('/').some((part) => part === '..' || part.startsWith('.'))) return send(response, 400, 'Ungültiger Pfad.');
-
   const filePath = path.resolve(root, `.${pathname}`);
   const allowedPrefix = `${path.resolve(root)}${path.sep}`;
   if (!filePath.startsWith(allowedPrefix)) return send(response, 403, 'Zugriff verweigert.');
   if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) return send(response, 404, 'Datei nicht gefunden.');
-
   const stat = fs.statSync(filePath);
   const range = request.headers.range;
   const contentType = mimeTypes[path.extname(filePath).toLowerCase()] || 'application/octet-stream';
   response.setHeader('Content-Type', contentType);
   setSecurityHeaders(response);
   response.setHeader('Cache-Control', pathname.includes('/catalog/') ? 'no-store' : 'public, max-age=300');
-
   if (range && contentType.startsWith('video/')) {
     const match = /^bytes=(\d*)-(\d*)$/.exec(range);
     if (!match) return send(response, 416, 'Ungültiger Range-Header.');
@@ -135,34 +137,25 @@ function archiveInboxSource(sourceFile) {
   return path.relative(root, target).split(path.sep).join('/');
 }
 
-function runNode(script) {
-  return spawnSync(process.execPath, [script], { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
-}
-
-function cleanProcessError(result, fallback) {
-  return (result.stderr || result.stdout || fallback).trim().slice(0, 8000);
-}
-
-function requireWriteApi() {
+function runNode(script) { return spawnSync(process.execPath, [script], { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }); }
+function cleanProcessError(result, fallback) { return (result.stderr || result.stdout || fallback).trim().slice(0, 8000); }
+function requireWriteApi(request) {
   if (!writeApiEnabled) throw new Error('Schreibzugriff ist deaktiviert. Starte Visual Asset Hub lokal auf 127.0.0.1.');
+  const remote = request.socket.remoteAddress || '';
+  const localRemote = remote === '127.0.0.1' || remote === '::1' || remote === '::ffff:127.0.0.1';
+  if (!localRemote) throw new Error('Schreibzugriff ist nur von diesem Computer erlaubt.');
+  const fetchSite = request.headers['sec-fetch-site'];
+  if (fetchSite && !['same-origin', 'none'].includes(fetchSite)) throw new Error('Cross-Site-Schreibzugriff wurde blockiert.');
 }
-
 function readJsonBody(request) {
   return new Promise((resolve, reject) => {
     let body = '';
     request.setEncoding('utf8');
-    request.on('data', (chunk) => {
-      body += chunk;
-      if (body.length > 128 * 1024) { request.destroy(); reject(new Error('Request ist zu groß.')); }
-    });
-    request.on('end', () => {
-      try { resolve(body ? JSON.parse(body) : {}); }
-      catch { reject(new Error('Ungültiges JSON.')); }
-    });
+    request.on('data', (chunk) => { body += chunk; if (body.length > 128 * 1024) { request.destroy(); reject(new Error('Request ist zu groß.')); } });
+    request.on('end', () => { try { resolve(body ? JSON.parse(body) : {}); } catch { reject(new Error('Ungültiges JSON.')); } });
     request.on('error', reject);
   });
 }
-
 function toKebab(value) { return value.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`); }
 function setSecurityHeaders(response) {
   response.setHeader('X-Content-Type-Options', 'nosniff');
@@ -175,10 +168,7 @@ function sendJson(response, status, value) {
   response.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': Buffer.byteLength(text), 'X-Content-Type-Options': 'nosniff' });
   response.end(text);
 }
-function send(response, status, text) {
-  response.writeHead(status, { 'Content-Type': 'text/plain; charset=utf-8', 'X-Content-Type-Options': 'nosniff' });
-  response.end(text);
-}
+function send(response, status, text) { response.writeHead(status, { 'Content-Type': 'text/plain; charset=utf-8', 'X-Content-Type-Options': 'nosniff' }); response.end(text); }
 
 server.listen(port, host, () => {
   console.log(`Visual Asset Hub: http://${host}:${port}`);
