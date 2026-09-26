@@ -1,27 +1,44 @@
 # Documentary 3-Phasen-Workflow
 
-Stand: 2026-09-25
+Stand: 2026-09-26
 
 ## Zweck
 
-Dieser Workflow ist der verbindliche Produktionsweg fuer den geplanten YouTube-Dokumentationskanal.
+Dieser Workflow ist der verbindliche Produktionsweg fuer den deutschsprachigen Faceless-Dokumentationskanal.
 
 ```text
 PHASE 1 - ChatGPT / Visual Asset Hub
-Thema selbst waehlen + Skript + semantische Szenen + Online-Recherche + lokale Hauptvisuals + Quellen + Projektordner
+Thema selbst waehlen
+-> recherchieren
+-> finales Skript
+-> semantische Szenen
+-> mehrere Visual-Shots je Szene
+-> Vision-Check
+-> Bilder + B-Rolls lokal speichern
+-> Quellen + YouTube-Daten
 
 PHASE 2 - Nutzer
-finales Skript kopieren -> KI-Voice erzeugen -> voiceover.mp3 ablegen
+script.txt kopieren
+-> KI-Voice erzeugen
+-> voiceover.mp3 ablegen
 
 PHASE 3 - Timing / Antigravity / Remotion
-finale Audio -> echte Wort-Timings -> striktes Skript-Alignment -> reale Szenenzeiten -> Antigravity-Handoff -> Preflight -> Remotion-Render -> Export
+finale Audio
+-> echte Wort-Timings
+-> semantische Szenenzeiten
+-> mehrere Shots innerhalb jeder gelockten Szene
+-> Preflight
+-> Remotion V2
+-> Export
 ```
 
-Wichtig: In Phase 1 werden keine exakten Sekunden fuer die Szenen geraten. Die semantischen Szenengrenzen werden am Skript festgelegt. Exakte Zeitpunkte entstehen erst in Phase 3 aus der finalen Audiodatei.
+**Grundregel:** Eine semantische Szene ist nicht mehr gleich ein Bild. Eine Szene beschreibt einen Sinnabschnitt im Sprechertext und darf 1-3 unterschiedliche Visual-Shots enthalten. Fuer ein typisches 2,5-Minuten-Video wird grob ein Bereich von etwa 25-35 eigenstaendigen Shots angestrebt, sofern das Material dies sinnvoll hergibt.
+
+Exakte Sprecherzeiten werden weiterhin niemals in Phase 1 geraten. Sie entstehen erst in Phase 3 aus dem finalen Voiceover.
 
 ## Verbindliche Videostruktur
 
-Alle normalen Doku-Projekte liegen sichtbar im Repo-Root unter `videos/`.
+Alle normalen Doku-Projekte liegen sichtbar unter `videos/`:
 
 ```text
 videos/
@@ -34,7 +51,7 @@ videos/
 └── sonstiges/
 ```
 
-Innerhalb der passenden Kategorie bekommt jedes Thema einen fortlaufend nummerierten Projektordner:
+Jedes Thema bekommt einen nummerierten Projektordner:
 
 ```text
 videos/<kategorie>/<nnn-thema>/
@@ -52,6 +69,9 @@ videos/<kategorie>/<nnn-thema>/
 ├── 05-PROJECT/
 │   ├── project.json
 │   ├── scenes.json
+│   ├── visual-ledger.json
+│   ├── research-summary.json
+│   ├── materialization-summary.json
 │   ├── word-timings-input.json
 │   ├── word-timings.json
 │   ├── timeline.json
@@ -60,34 +80,20 @@ videos/<kategorie>/<nnn-thema>/
 │   ├── phase3-state.json
 │   ├── phase3-validation.json
 │   ├── publish.json
-│   ├── publish-state.json
 │   ├── render-props.json
 │   ├── render-plan.json
-│   ├── render-result.json
-│   └── remotion-public/
+│   └── render-result.json
 └── 06-EXPORT/
-    ├── final-v1.mp4
+    ├── final-vN.mp4
     ├── youtube-title.txt
     ├── youtube-description.txt
     ├── youtube-tags.txt
     └── thumbnail-text.txt
 ```
 
-Beispiel fuer das erste Video:
+Das zentrale Themenregister liegt getrennt unter `documentary-registry/`.
 
-```text
-videos/umweltgeschichte/001-wie-der-aralsee-fast-verschwand-und-warum-ein-teil-zuruckkam/
-```
-
-Das zentrale Anti-Wiederholungsregister liegt getrennt unter `documentary-registry/`.
-
-## 01-SCRIPT
-
-`01-SCRIPT/script.txt` enthaelt nur den final gesprochenen Text.
-
-Keine Regieanweisungen, keine JSON-Struktur, keine Szenenlabels. Der Nutzer soll die Datei oeffnen, `Strg+A`, `Strg+C` druecken und den Text direkt in das Voice-Tool kopieren koennen.
-
-## Phase 1 - autonom
+## Phase 1 - autonomer Visual Director
 
 Standard:
 
@@ -98,37 +104,110 @@ npm run documentary:phase1
 Phase 1 erledigt selbst:
 
 - Themenregister pruefen
-- neues, nicht wiederholtes Thema waehlen
-- Kategorie bestimmen
-- laufende Themennummer verwenden
-- Fakten recherchieren
-- finales ca. 2,5-Minuten-Doku-Skript schreiben
+- neues Thema waehlen
+- Kategorie und laufende Nummer bestimmen
+- Fakten mit Websuche recherchieren
+- finales ca. 2,5-Minuten-Skript schreiben
 - semantische Szenen bilden
-- Bilder und B-Rolls recherchieren
-- Hauptvisual + Alternativen bestimmen
-- sichere Hauptvisuals lokal materialisieren
-- Quellen und Lizenzdaten speichern
+- pro Szene mehrere unterschiedliche Suchrichtungen erzeugen
+- passende Archive/Stockquellen dynamisch priorisieren
+- Metadaten-Ranking durchfuehren
+- Top-Previews mit Vision pruefen
+- sichtbare Fehlmatches und Dubletten abwerten
+- pro Szene 1-3 unterschiedliche Shots festlegen
+- B-Roll bei `mixed` aktiv bevorzugen
+- ausgewaehlte Shots lokal speichern
+- Quellen und Lizenzdaten sichern
 - YouTube-Titel, Beschreibung, exakt 5 Hashtags, Tags und Thumbnail-Text vorbereiten
 
-Ein heruntergeladenes Visual ist nicht automatisch fuer die Veroeffentlichung freigegeben. Rechte-/Review-Status bleibt erhalten.
+### Sucharsenal
+
+Der Visual Director kann aktuell nutzen:
+
+| Provider | Bild | Video | Hauptzweck |
+|---|---:|---:|---|
+| Pexels | ja | ja | moderne B-Roll |
+| Pixabay | ja | ja | moderne B-Roll |
+| Unsplash | ja | nein | hochwertige moderne Fotos |
+| Openverse | ja | nein | offene Bildquellen |
+| Wikimedia Commons | ja | ja | Archive, Orte, Personen, historische Medien |
+| NASA Image and Video Library | ja | ja | Raumfahrt, Satellit, Erde, Klima, Wissenschaft |
+| Library of Congress | ja | ja | historische Fotos, Film und Video |
+
+NASA und Library of Congress benoetigen fuer diese Suchintegration keinen lokalen API-Key. Pexels, Pixabay und Unsplash verwenden weiterhin ihre vorhandenen Keys.
+
+Ein Treffer oder Download ist **keine automatische Publikationsfreigabe**. Der konkrete Rechte-/Nutzungskontext bleibt Review-Pflicht.
+
+### Provider-balancierte Recherche
+
+Die alte Recherche konnte ihr Suchbudget schon mit den ersten Query/Provider-Kombinationen verbrauchen. Der neue Director verwendet standardmaessig bis zu 18 gezielte Tasks pro Szene und verteilt sie ueber:
+
+- Video/B-Roll
+- Archivmaterial
+- Fotos
+- Establishing Shots
+- Details
+- Karten/Ortskontext
+- exakte Ereignis-/Personen-/Jahreszahl-Suchen
+
+### Visual Ledger gegen Wiederholungen
+
+`05-PROJECT/visual-ledger.json` merkt sich video-weit:
+
+- bereits ausgewaehlte Asset-IDs/URLs
+- Motiv-/Familien-Schluessel
+- Provider-Haeufigkeit
+- Motiv-Haeufigkeit
+- zuletzt verwendete Visuals
+
+Dadurch werden identische Assets, sehr aehnliche Serien/Motive und zu haeufig verwendete Provider abgestraft.
+
+### Vision-Gate
+
+Nach dem Metadaten-Ranking prueft Phase 1 die Top-Previews nach Moeglichkeit visuell. Gespeichert werden unter anderem:
+
+```text
+visibleRelevance: 0-100
+exactness: exact | contextual | symbolic | mismatch
+duplicateGroup
+reason
+```
+
+Richtwerte:
+
+- 90-100: sehr starker sichtbarer Match
+- 75-89: stark verwendbar
+- 55-74: nur Kontext
+- unter 55: nicht bevorzugen
+- `mismatch`: ablehnen
+
+Das Vision-Gate bewertet ausdruecklich das sichtbare Preview und darf Dateiname/Metadaten nicht als Beweis behandeln. Faellt der Vision-Aufruf technisch aus, bleibt die verbesserte Metadaten-/Diversitaetsauswahl als Fallback erhalten.
+
+Optional in `.env`:
+
+```text
+OPENAI_VISION_MODEL=...
+```
+
+Fehlt diese Einstellung, wird die vorhandene Phase-1-Modellkonfiguration verwendet.
 
 ## Phase 2 - Voice
 
-Der Nutzer oeffnet im jeweiligen Videoordner:
+Der Nutzer oeffnet:
 
 ```text
 01-SCRIPT/script.txt
 ```
 
-und legt die fertige Audiodatei ab als:
+kopiert den kompletten Text in sein Voice-Tool und speichert das Ergebnis als:
 
 ```text
 02-AUDIO/voiceover.mp3
 ```
 
-Das Skript darf danach nicht stillschweigend veraendert werden.
+Danach darf das Skript nicht still veraendert werden.
 
-## Phase 3 - echte Timings und Antigravity-Handoff
+## Phase 3 - echte Sprecherzeiten + mehrere Shots
 
 Standard:
 
@@ -139,98 +218,77 @@ npm run documentary:phase3 -- --project "videos/<kategorie>/<nnn-thema>"
 Ablauf:
 
 ```text
-voiceover.mp3
-+ script.txt
+script.txt + voiceover.mp3
 -> echte Wort-Timestamps
--> Wortfolge streng gegen finales Skript pruefen
--> semantische Szenen lueckenlos im Skript verankern
--> Szenengrenzen auf reale Audiozeiten mappen
--> word-timings.json
+-> striktes Wort-Alignment
+-> semantische Szenengrenzen auf Audio mappen
+-> visualShots[] je Szene uebernehmen
 -> timeline.json
 -> edit-plan.json
 -> antigravity-handoff.json
 ```
 
-### Automatische Wort-Timestamps
+Phase 3 veraendert **nicht** die inhaltlichen Szenengrenzen. Innerhalb einer gelockten Szene duerfen jedoch die bereits ausgewaehlten Visual-Shots editorial verteilt werden.
 
-Wenn keine eigene Timing-Datei vorhanden ist, kann Phase 3 `02-AUDIO/voiceover.mp3` automatisch mit OpenAI `whisper-1` auf Wortebene transkribieren.
-
-Lokal in `.env`:
+`timeline.json` enthaelt deshalb je Szene unter anderem:
 
 ```text
-OPENAI_API_KEY=...
+visualShots[]
+shotCount
 ```
-
-Der Key wird nicht in das Doku-Projekt geschrieben.
-
-Eigene TTS-Wort-Timestamps koennen stattdessen als `05-PROJECT/word-timings-input.json` bereitgestellt werden.
 
 ### Keine geratenen Zeiten
 
-Phase 3 darf nicht versuchen, einen Transkriptionsfehler mit geschaetzten Sekunden zu reparieren.
-
 Abbruch statt Raten bei:
 
-- fehlenden oder zusaetzlichen Woertern
+- fehlenden/zusaetzlichen Woertern
 - geaenderter Wortreihenfolge
-- veraendertem finalen Skript
-- Luecken zwischen den Phase-1-Szenen
-- Timing-Datei, deren gespeicherter Audio-Hash zu einer anderen `voiceover.mp3` gehoert
+- nachtraeglich veraendertem Skript
+- falschem Audio-Hash
+- Luecken in der semantischen Szenenabdeckung
+
+Wenn keine externe Wort-Timing-Datei vorhanden ist, kann Phase 3 das Voiceover mit der bestehenden Whisper-Wort-Timestamp-Pipeline analysieren.
 
 ### Render-Gate
 
-Antigravity ist nur renderbereit, wenn:
+Der V2-Preflight prueft:
 
-- das Wort-Alignment exakt ist
-- alle Szenengrenzen feststehen
-- fuer jede Szene das lokale Hauptvisual wirklich als nichtleere Datei existiert
+- Skript-Hash
+- Audio-Hash
+- exaktes Wort-Alignment
+- gelockte semantische Szenen
+- **jede einzelne lokale Shot-Datei**
+- freies `final-vN.mp4`-Ziel
 
-Ein Pfad in JSON alleine reicht nicht.
+Ein einzelnes vorhandenes Hauptbild reicht nicht mehr, wenn eine Szene mehrere ausgewaehlte Shots erwartet.
 
-## Schnittregeln
+## Finaler Render - Remotion V2
 
-- Szenenzeiten duerfen vom Editor nicht verschoben werden.
-- Bilder koennen dezent gezoomt oder gepannt werden.
-- Videos duerfen innerhalb des Quellclips passend getrimmt werden.
-- `sourceInSeconds` / `sourceOutSeconds` werden nicht erfunden.
-- Standarduebergang ist ein sauberer Cut, sofern kein konkreter Effekt vorgesehen ist.
-- Rechtepruefung bleibt vor Veroeffentlichung erforderlich.
-
-## Finaler Render mit Remotion
-
-Einmalig im Repo:
-
-```bash
-npm install
-```
-
-Render nur vorbereiten und pruefen:
+Dry Run:
 
 ```bash
 npm run documentary:render -- --project "videos/<kategorie>/<nnn-thema>" --dry-run
 ```
 
-Final rendern:
+Final:
 
 ```bash
 npm run documentary:render -- --project "videos/<kategorie>/<nnn-thema>"
 ```
 
-Render-Standard:
+Der Renderer:
 
-- 1920 × 1080
-- 30 fps
-- H.264 + AAC
-- BT.709 / `yuv420p`
-- Voiceover als Hauptaudio
-- B-Roll-Audio stumm
-- Bilder mit dezenter Doku-Bewegung
-- gelockte Szenengrenzen aus `timeline.json`
-- vorhandene `final-vN.mp4` niemals ueberschreiben
+- behaelt die exakten semantischen Szenengrenzen
+- verteilt mehrere Shots innerhalb dieser Grenzen
+- vermeidet nach Moeglichkeit extrem kurze Shots
+- zielt editorial auf etwa 3,5-7 Sekunden je Visual-Shot
+- rendert B-Roll stumm
+- verwendet das Voiceover als Hauptaudio
+- bewegt Standbilder dezent
+- nutzt 1920x1080, 30 fps, H.264 + AAC
+- ueberschreibt vorhandene `final-vN.mp4` niemals
 
 ## 06-EXPORT
-
-Der Exportordner ist maximal einfach und nur fuer den Upload gedacht:
 
 ```text
 06-EXPORT/
@@ -241,22 +299,19 @@ Der Exportordner ist maximal einfach und nur fuer den Upload gedacht:
 └── thumbnail-text.txt
 ```
 
-`youtube-title.txt` enthaelt nur den Titel.
+Die Textdateien enthalten nur direkt kopierbaren Inhalt. `youtube-description.txt` enthaelt insgesamt exakt 5 Hashtags.
 
-`youtube-description.txt` enthaelt nur die fertige Beschreibung und insgesamt exakt 5 Hashtags.
+## Legacy-Fallback
 
-`youtube-tags.txt` enthaelt nur direkt kopierbare, kommagetrennte Tags.
+Der alte Ein-Visual-Workflow bleibt vorerst nur zur Fehlersuche reproduzierbar:
 
-`thumbnail-text.txt` enthaelt nur den kurzen Thumbnail-Wortlaut.
+```bash
+npm run documentary:research:legacy
+npm run documentary:materialize:legacy
+npm run documentary:phase3:legacy
+npm run documentary:render:legacy
+```
 
-## Endzustand
+Der normale Produktionsweg verwendet dagegen Visual Director V2/V3 und Remotion V2.
 
-Der Nutzer muss fuer ein fertiges Video nur noch:
-
-1. `final-vN.mp4` hochladen.
-2. `youtube-title.txt` kopieren.
-3. `youtube-description.txt` kopieren.
-4. `youtube-tags.txt` kopieren.
-5. optional `thumbnail-text.txt` fuer das Thumbnail verwenden.
-
-Keine technischen Projektdateien muessen fuer den Upload geoeffnet werden.
+Weitere technische Details: `docs/DOCUMENTARY-VISUAL-DIRECTOR-V2.md`.
