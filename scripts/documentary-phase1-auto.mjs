@@ -47,13 +47,7 @@ export async function buildAutonomousDocumentaryPhase1({
   if (reservation) {
     brief = readJson(path.resolve(root, reservation.entry.briefFile));
   } else {
-    brief = await generateAutonomousDocumentaryBrief({
-      registry,
-      targetDurationSeconds,
-      apiKey,
-      model,
-      fetchImpl
-    });
+    brief = await generateAutonomousDocumentaryBrief({registry, targetDurationSeconds, apiKey, model, fetchImpl});
     const reserved = reserveTopic(absoluteRegistryRoot, brief, {
       status: 'reserved',
       targetDurationSeconds,
@@ -88,6 +82,7 @@ export async function buildAutonomousDocumentaryPhase1({
       slug: numberedProjectSlug,
       title: brief.title,
       script: brief.script,
+      visualSearchAnchors: brief.visualSearchAnchors ?? [],
       depth,
       mediaPreference,
       segmentation: 'auto',
@@ -97,7 +92,8 @@ export async function buildAutonomousDocumentaryPhase1({
       alternatives,
       materializeAlternatives,
       overwriteMedia,
-      maxMediaBytes
+      maxMediaBytes,
+      openaiApiKey: apiKey
     });
 
     writeAutonomousMetadata(result.projectDirectory, brief, reservation.entry);
@@ -109,6 +105,8 @@ export async function buildAutonomousDocumentaryPhase1({
       actualScriptWords: brief.generation?.actualWords ?? brief.scriptWords ?? null,
       model: brief.generation?.model ?? brief.generatedWith ?? null,
       visualSceneCount: result.phase1.scenes.length,
+      visualSearchAnchorCount: brief.visualSearchAnchors?.length ?? 0,
+      materializedShotFiles: result.materialization?.summary?.shotFiles ?? 0,
       materializedPrimaryFiles: result.materialization?.summary?.primaryFiles ?? 0,
       error: null
     });
@@ -166,7 +164,7 @@ function writeAutonomousMetadata(projectDirectory, brief, topicEntry) {
   writeJson(path.join(projectDir, 'publish.json'), publish);
   writeJson(path.join(projectDir, 'topic.json'), {
     format: 'visual-asset-hub-documentary-topic',
-    version: 1,
+    version: 2,
     registerId: topicEntry.id,
     title: brief.title,
     topicKey: brief.topicKey,
@@ -176,16 +174,18 @@ function writeAutonomousMetadata(projectDirectory, brief, topicEntry) {
     targetDurationSeconds: brief.targetDurationSeconds,
     scriptWords: brief.generation?.actualWords ?? brief.scriptWords ?? null,
     generatedWith: brief.generatedWith ?? brief.generation?.model ?? null,
-    researchSummary: brief.researchSummary
+    researchSummary: brief.researchSummary,
+    visualSearchAnchors: brief.visualSearchAnchors ?? []
   });
   writeJson(path.join(projectDir, 'script-research.json'), {
     format: 'visual-asset-hub-documentary-script-research',
-    version: 1,
+    version: 2,
     generatedAt: new Date().toISOString(),
     title: brief.title,
     angle: brief.angle,
     researchSummary: brief.researchSummary,
     sources: brief.sources,
+    visualSearchAnchors: brief.visualSearchAnchors ?? [],
     generation: brief.generation ?? null
   });
 
@@ -204,21 +204,11 @@ function writeAutonomousMetadata(projectDirectory, brief, topicEntry) {
 }
 
 function isNonEmptyFile(file) {
-  try {
-    const stat = fs.statSync(file);
-    return stat.isFile() && stat.size > 0;
-  } catch {
-    return false;
-  }
+  try { const stat = fs.statSync(file); return stat.isFile() && stat.size > 0; }
+  catch { return false; }
 }
-
-function readJson(file) {
-  return JSON.parse(fs.readFileSync(file, 'utf8'));
-}
-
-function writeJson(file, value) {
-  fs.writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`, 'utf8');
-}
+function readJson(file) { return JSON.parse(fs.readFileSync(file, 'utf8')); }
+function writeJson(file, value) { fs.writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`, 'utf8'); }
 
 function parseArgs(argv) {
   const args = {
@@ -264,18 +254,15 @@ async function runCli() {
   process.stdout.write(`Thema: ${result.autonomous.brief.title}\n`);
   if (result.autonomous.resumedReservedTopic) process.stdout.write('Vorhandenes reserviertes Thema fortgesetzt: ja\n');
   process.stdout.write(`Blickwinkel: ${result.autonomous.brief.angle}\n`);
+  process.stdout.write(`Visual-Suchanker: ${result.autonomous.brief.visualSearchAnchors?.length ?? 0}\n`);
   process.stdout.write(`Szenen: ${result.phase1.scenes.length}\n`);
-  process.stdout.write(`Lokale Hauptvisuals: ${result.materialization?.summary?.primaryFiles ?? 0}\n`);
+  process.stdout.write(`Lokale Shots: ${result.materialization?.summary?.shotFiles ?? result.materialization?.summary?.primaryFiles ?? 0}\n`);
   process.stdout.write(`Themenregister: ${result.autonomous.registry.text}\n`);
   process.stdout.write('Naechster Nutzerschritt: 01-SCRIPT/script.txt kopieren und 02-AUDIO/voiceover.mp3 erstellen.\n');
 }
 
 const invokedDirectly = process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url));
 if (invokedDirectly) {
-  try {
-    await runCli();
-  } catch (error) {
-    process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
-    process.exitCode = 1;
-  }
+  try { await runCli(); }
+  catch (error) { process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`); process.exitCode = 1; }
 }
