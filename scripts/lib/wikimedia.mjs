@@ -2,6 +2,11 @@ const API_BASE = 'https://commons.wikimedia.org/w/api.php';
 const API_USER_AGENT = 'Visual-Asset-Hub/0.4.0-beta.9 (https://github.com/memetreza34-ux/Visual-Asset-Hub; documentary visual research)';
 const SAFE_IMAGE_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/tiff']);
 const SAFE_VIDEO_MIME_TYPES = new Set(['video/webm', 'video/mp4']);
+const MIN_REQUEST_INTERVAL_MS = 350;
+const MAX_REQUEST_ATTEMPTS = 4;
+const RETRYABLE_STATUSES = new Set([429, 500, 502, 503, 504]);
+let requestQueue = Promise.resolve();
+let lastRequestAt = 0;
 
 function inferOrientation(width, height) {
   if (!width || !height) return 'unknown';
@@ -80,6 +85,50 @@ function normalizePage(page, requestedType) {
   };
 }
 
+async function waitForRequestSlot(fetchImpl) {
+  if (fetchImpl !== globalThis.fetch) return;
+  const scheduled = requestQueue.then(async () => {
+    const waitMs = Math.max(0, (lastRequestAt + MIN_REQUEST_INTERVAL_MS) - Date.now());
+    if (waitMs > 0) await sleep(waitMs);
+    lastRequestAt = Date.now();
+  });
+  requestQueue = scheduled.catch(() => {});
+  await scheduled;
+}
+
+function retryDelayMs(response, attempt) {
+  const retryAfter = response?.headers?.get?.('retry-after');
+  if (retryAfter) {
+    const seconds = Number(retryAfter);
+    if (Number.isFinite(seconds) && seconds >= 0) return Math.min(10000, Math.max(500, seconds * 1000));
+    const date = Date.parse(retryAfter);
+    if (Number.isFinite(date)) return Math.min(10000, Math.max(500, date - Date.now()));
+  }
+  return Math.min(8000, 750 * (2 ** attempt));
+}
+
+async function fetchWithRetry(url, options, fetchImpl) {
+  let lastResponse = null;
+  let lastError = null;
+  for (let attempt = 0; attempt < MAX_REQUEST_ATTEMPTS; attempt += 1) {
+    await waitForRequestSlot(fetchImpl);
+    try {
+      const response = await fetchImpl(url, options);
+      lastResponse = response;
+      if (!RETRYABLE_STATUSES.has(response.status) || attempt === MAX_REQUEST_ATTEMPTS - 1) return response;
+      await sleep(retryDelayMs(response, attempt));
+    } catch (error) {
+      lastError = error;
+      if (attempt === MAX_REQUEST_ATTEMPTS - 1) throw error;
+      await sleep(Math.min(8000, 750 * (2 ** attempt)));
+    }
+  }
+  if (lastResponse) return lastResponse;
+  throw lastError ?? new Error('Wikimedia-Anfrage fehlgeschlagen.');
+}
+
+function sleep(ms) { return new Promise((resolve) => setTimeout(resolve, ms)); }
+
 export async function searchWikimedia({ query, type = 'photo', orientation, page = 1, perPage = 15, fetchImpl = globalThis.fetch }) {
   if (!query || !String(query).trim()) throw new Error('Eine Suchanfrage ist erforderlich.');
   if (typeof fetchImpl !== 'function') throw new Error('In dieser Node.js-Version ist fetch nicht verfügbar.');
@@ -104,12 +153,13 @@ export async function searchWikimedia({ query, type = 'photo', orientation, page
   url.searchParams.set('iiextmetadatafilter', 'LicenseShortName|LicenseUrl|UsageTerms|Artist|Credit|ImageDescription');
   url.searchParams.set('origin', '*');
 
-  const response = await fetchImpl(url, {
+  const response = await fetchWithRetry(url, {
     headers: {
       Accept: 'application/json',
+      'User-Agent': API_USER_AGENT,
       'Api-User-Agent': API_USER_AGENT
     }
-  });
+  }, fetchImpl);
   if (!response.ok) {
     const detail = await response.text().catch(() => '');
     throw new Error(`Wikimedia-Anfrage fehlgeschlagen (${response.status}).${detail ? ` ${detail.slice(0, 300)}` : ''}`);
