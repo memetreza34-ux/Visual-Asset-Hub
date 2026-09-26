@@ -14,7 +14,7 @@ Visual Asset Hub ist eine universelle Medienbibliothek für **B-Rolls, Bilder, A
 
 ## Schnellstart
 
-Benötigt wird Node.js 22 oder neuer.
+Benötigt werden **Node.js 22+** und für lokale Medienanalyse **FFmpeg inklusive ffprobe**.
 
 ```bash
 npm run check
@@ -23,13 +23,22 @@ npm run serve
 
 Danach ist die Bibliothek lokal unter `http://127.0.0.1:4173` erreichbar.
 
-Neue Assets werden nicht manuell umbenannt oder in den Katalog geschrieben. Der Importbefehl erzeugt ID, Dateinamen, Sequenz, Hash, Zielordner und Metadaten automatisch:
+## Browser-Workflow für neue Medien
 
-```bash
-npm run asset:add -- --help
-```
+1. Videos oder Bilder lokal unter `inbox/` ablegen.
+2. `npm run serve` starten.
+3. Im Browser auf **Inbox neu scannen** klicken.
+4. Ein Asset mit **Prüfen & aufnehmen** öffnen.
+5. Titel, Kategorie, Tags, Lizenz und Nutzungsbereiche prüfen.
+6. **Approve & in Bibliothek aufnehmen** klicken.
 
-Beispiel:
+Der Hub analysiert lokale Medien automatisch mit FFmpeg/ffprobe. Dabei werden unter anderem Auflösung, Seitenverhältnis, Dauer, FPS, Codec, Audio, Alpha-Kanal und SHA-256 erkannt. Für Videos wird automatisch eine Vorschau erzeugt. Nach erfolgreichem Review wird das Original aus `inbox/` nach `archive/inbox-imported/` verschoben und die katalogisierte Kopie unter `assets/` abgelegt.
+
+Die schreibende Review-API ist absichtlich nur aktiv, wenn der Server lokal auf `127.0.0.1`, `localhost` oder `::1` läuft.
+
+## Kommandozeilen-Import
+
+Neue Assets können alternativ weiterhin direkt über den Importbefehl aufgenommen werden. Technische Angaben und die Ausrichtung werden bei lokalen Dateien automatisch erkannt:
 
 ```bash
 npm run asset:add -- \
@@ -39,7 +48,6 @@ npm run asset:add -- \
   --subject smartphone \
   --action scrolling \
   --shot cu \
-  --orientation vertical \
   --title "Person scrollt am Smartphone" \
   --description "Nahaufnahme einer Hand beim Scrollen durch eine Social-Media-App." \
   --tags smartphone,scrolling,social-media \
@@ -50,7 +58,7 @@ npm run asset:add -- \
   --scopes organic-social,youtube,website
 ```
 
-Mit `--dry-run true` werden ID, Name und Ziel berechnet, ohne Dateien zu verändern.
+Mit `--dry-run true` werden ID, Name und Ziel berechnet, ohne Katalog oder Originaldatei zu verändern.
 
 ## Kostenlose Pexels-Suche
 
@@ -127,6 +135,9 @@ Das genaue Datenmodell steht in [`catalog/schema.json`](catalog/schema.json). Di
 ## Befehle
 
 ```bash
+npm run media:analyze -- --file ./inbox/clip.mp4
+npm run inbox:scan
+npm run inbox:review
 npm run asset:add -- --help
 npm run pexels:search -- --help
 npm run validate
@@ -136,13 +147,16 @@ npm run check
 npm run serve
 ```
 
-- `asset:add`: nimmt eine neue Datei sicher auf und rollt bei Fehlern zurück
+- `media:analyze`: liest technische Mediendaten mit FFmpeg/ffprobe und erzeugt optional eine Vorschau
+- `inbox:scan`: analysiert alle unterstützten Medien im lokalen Inbox-Ordner
+- `inbox:review`: zeigt die analysierte Review-Warteschlange im Terminal
+- `asset:add`: analysiert lokale Medien automatisch, nimmt sie sicher auf und rollt Katalogänderungen bei Fehlern zurück
 - `pexels:search`: sucht kostenlose Pexels-Fotos oder -Videos und speichert Quellenangaben lokal
 - `validate`: prüft IDs, Dateinamen, Kategorien, Pfade, Rechte, Laufzeiten und Dubletten
 - `index`: erzeugt `catalog/search-index.json` für die Websuche
-- `test`: prüft Taxonomie, Katalogvertrag, Pexels-Client und deterministische Indexierung
+- `test`: prüft Taxonomie, Katalogvertrag, Produktionsskripte, Pexels-Client und deterministische Indexierung
 - `check`: führt Validierung, Indexierung und Tests aus
-- `serve`: startet die lokale Suchoberfläche
+- `serve`: startet die lokale Such- und Review-Oberfläche
 
 ## Speicher
 
@@ -155,7 +169,7 @@ Details stehen in [`docs/STORAGE-AND-RIGHTS.md`](docs/STORAGE-AND-RIGHTS.md).
 
 ## Rechte und Sicherheit
 
-Nur Assets speichern, für die eine nachvollziehbare Nutzungserlaubnis besteht. Dateien mit unbekanntem Rechtezustand bleiben in `inbox/` und erhalten nicht den Status `approved`. Quellen, Lizenz und erlaubte Nutzungsbereiche werden pro Asset dokumentiert.
+Nur Assets speichern, für die eine nachvollziehbare Nutzungserlaubnis besteht. Dateien mit unbekanntem Rechtezustand bleiben ungeprüft. Quellen, Lizenz und erlaubte Nutzungsbereiche werden pro Asset dokumentiert.
 
 Die automatische Prüfung blockiert unter anderem:
 
@@ -167,19 +181,25 @@ Die automatische Prüfung blockiert unter anderem:
 - unsichere Pfade
 - URLs mit erkennbaren Token-, Signatur- oder API-Key-Parametern
 
+Die lokale Review-API blockiert Schreibzugriffe von entfernten Clients und Cross-Site-Anfragen.
+
 ## Aktueller Ausbau
 
-Die erste funktionsfähige Stufe enthält:
+Die aktuelle Produktionsstufe enthält:
 
 - universelle Taxonomie
 - verbindlichen Benennungsstandard
 - strukturiertes Metadatenschema
-- sicheren Asset-Import
+- automatisierte lokale Medienanalyse mit FFmpeg/ffprobe
+- automatisches Video-Thumbnailing
+- Inbox-Scanner und Review-Warteschlange
+- Browser-Review mit Approve-&-Import-Workflow
+- sicheren Asset-Import mit Rollback und Dublettenprüfung
 - kostenlose Pexels-Foto- und Videosuche
 - Rechte- und Dublettenprüfung
 - deterministischen Suchindex
-- responsive Websuche mit Filtern und Detailansicht
+- responsive Websuche mit Filtern, Video-Player und Detailansicht
 - Git-LFS-Regeln
 - automatischen GitHub-Workflow
 
-Spätere Ausbaustufen: gezielter Originaldownload, automatische Vorschauerzeugung, Metadatenanalyse über FFmpeg, KI-Tagging, Cloud-Storage-Synchronisierung, Nutzungshistorie und visuelle Ähnlichkeitssuche.
+Nächste Ausbaustufen: direkter Pexels-Download in die Inbox, Bulk-Review, Collections, Nutzungshistorie, Cloud-Storage-Synchronisierung, KI-Tagging und visuelle Ähnlichkeitssuche.
