@@ -15,6 +15,13 @@ function payload(title, topicKey, angle) {
       {title: 'Quelle 2', url: 'https://example.com/2', publisher: 'B'},
       {title: 'Quelle 3', url: 'https://example.com/3', publisher: 'C'}
     ],
+    visualSearchAnchors: [
+      {query: 'Test topic archive', cues: ['Archiv', 'Geschichte'], intent: 'evidence'},
+      {query: 'Test topic satellite', cues: ['Satellit', 'Karte'], intent: 'satellite'},
+      {query: 'Test topic location', cues: ['Ort', 'Stadt'], intent: 'evidence'},
+      {query: 'Test topic process', cues: ['Prozess', 'Ablauf'], intent: 'broll'},
+      {query: 'Test topic map', cues: ['Land', 'Region'], intent: 'map'}
+    ],
     publish: {
       title,
       description: 'Fertige Beschreibung.',
@@ -66,4 +73,6 @@ test('autonomous brief rejects a duplicate and asks for another topic', async ()
   assert.equal(result.title, 'Wie der Eurotunnel gebaut wurde');
   assert.equal(result.publish.hashtags.length, 5);
   assert.equal(result.generation.actualWords, 350);
+  assert.equal(result.visualSearchAnchors.length, 5);
+  assert.equal(result.visualSearchAnchors[0].intent, 'evidence');
 });
