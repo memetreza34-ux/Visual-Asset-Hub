@@ -38,7 +38,7 @@ async function handleApi(request, response, url) {
   response.setHeader('Cache-Control', 'no-store');
 
   if (request.method === 'GET' && url.pathname === '/api/health') {
-    return sendJson(response, 200, { ok: true, writeApiEnabled, host, version: '0.5' });
+    return sendJson(response, 200, { ok: true, writeApiEnabled, host, version: '0.6' });
   }
   if (request.method === 'GET' && url.pathname === '/api/inbox') {
     return sendJson(response, 200, readManifest());
@@ -53,10 +53,12 @@ async function handleApi(request, response, url) {
     requireWriteApi(request);
     const body = await readJsonBody(request);
     const sourceFile = safeInboxFile(body.file);
+    const sourceMetadata = sourceMetadataFor(sourceFile);
+    const effective = applySourceMetadata(body, sourceMetadata);
     const fields = ['type','category','subject','action','shot','title','description','tags','style','movement','license','source','scopes','quality','status','sourceUrl','licenseUrl','attributionRequired','attributionText','expires','rightsNotes','notes','createdBy'];
     const args = ['scripts/add-asset.mjs', '--file', sourceFile];
     for (const field of fields) {
-      let value = body[field];
+      let value = effective[field];
       if (field === 'status' && (value === undefined || value === null || value === '')) value = 'approved';
       if (value === undefined || value === null || value === '') continue;
       args.push(`--${toKebab(field)}`, Array.isArray(value) ? value.join(',') : String(value));
@@ -74,10 +76,32 @@ async function handleApi(request, response, url) {
       output: imported.stdout.trim(),
       archivedTo,
       warning,
+      provider: sourceMetadata?.provider || null,
       manifest: scan.status === 0 ? readManifest() : null
     });
   }
   return sendJson(response, 404, { error: 'API-Endpunkt nicht gefunden.' });
+}
+
+function applySourceMetadata(body, metadata) {
+  const value = { ...body };
+  if (!metadata || metadata.provider !== 'pexels') return value;
+  value.license = metadata.licenseStatus || 'licensed';
+  value.source = metadata.sourceName || 'Pexels';
+  value.sourceUrl = metadata.sourceUrl || value.sourceUrl;
+  value.licenseUrl = metadata.licenseUrl || value.licenseUrl;
+  value.attributionRequired = String(Boolean(metadata.attributionRequired));
+  value.attributionText = metadata.attributionText || value.attributionText;
+  if (!Array.isArray(value.scopes) || !value.scopes.length) value.scopes = metadata.suggestedScopes || ['organic-social', 'youtube'];
+  const provenance = `Imported via Pexels API${metadata.providerId ? `; provider ID ${metadata.providerId}` : ''}.`;
+  value.rightsNotes = [value.rightsNotes, provenance].filter(Boolean).join(' ');
+  return value;
+}
+
+function sourceMetadataFor(sourceFile) {
+  const rel = path.relative(root, sourceFile).split(path.sep).join('/');
+  const asset = (readManifest().ready || []).find((entry) => entry.file === rel);
+  return asset?.sourceMetadata || null;
 }
 
 function serveStatic(request, response, url) {
