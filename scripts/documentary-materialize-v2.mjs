@@ -5,7 +5,10 @@ import {fileURLToPath} from 'node:url';
 import {materializeCandidate} from './documentary-materialize.mjs';
 
 const DEFAULT_MAX_BYTES = 500 * 1024 * 1024;
-const MAX_DOWNLOAD_ATTEMPTS = 3;
+const MAX_DOWNLOAD_ATTEMPTS = 4;
+const WIKIMEDIA_INITIAL_COOLDOWN_MS = 5000;
+const WIKIMEDIA_MEDIA_INTERVAL_MS = 1800;
+let wikimediaNextRequestAt = 0;
 
 export async function materializeDocumentaryVisualsV2({
   projectDirectory,
@@ -20,10 +23,11 @@ export async function materializeDocumentaryVisualsV2({
   const scenePlan = readJson(scenesFile);
   if (!Array.isArray(scenePlan.scenes) || !scenePlan.scenes.length) throw new Error('scenes.json enthält keine Szenen.');
 
+  wikimediaNextRequestAt = Date.now() + WIKIMEDIA_INITIAL_COOLDOWN_MS;
   const summary = {
     format: 'visual-asset-hub-documentary-materialization-summary',
     version: 2,
-    strategy: 'multi-shot-v2-resilient',
+    strategy: 'multi-shot-v2-resilient-throttled',
     materializedAt: new Date().toISOString(),
     sceneCount: scenePlan.scenes.length,
     primaryFiles: 0,
@@ -34,6 +38,8 @@ export async function materializeDocumentaryVisualsV2({
     reusedFiles: 0,
     networkDownloads: 0,
     retryCount: 0,
+    wikimediaThrottledRequests: 0,
+    wikimediaPreviewDownloads: 0,
     skipped: 0,
     failed: 0,
     totalBytes: 0,
@@ -70,16 +76,18 @@ export async function materializeDocumentaryVisualsV2({
           });
           summary.reusedFiles += result.skipped ? 0 : 1;
         } else {
+          const downloadCandidate = preferProviderDownload(candidate);
+          if (downloadCandidate !== candidate) summary.wikimediaPreviewDownloads += 1;
           const attemptResult = await materializeCandidateWithRetry({
             projectDirectory: projectDir,
             scene,
-            candidate,
+            candidate: downloadCandidate,
             role: index === 0 ? 'primary' : `shot-${index + 1}`,
             index,
             overwrite,
             maxBytes,
             fetchImpl
-          });
+          }, summary);
           result = attemptResult.result;
           summary.retryCount += attemptResult.retries;
           if (!result.skipped) summary.networkDownloads += 1;
@@ -110,8 +118,9 @@ export async function materializeDocumentaryVisualsV2({
         else summary.totalBytes += result.bytes;
         summary.files.push({sceneId: scene.sceneId, shotId: target.shotId, ...result});
       } catch (error) {
+        summary.retryCount += Number(error?.downloadRetries ?? 0);
         summary.failed += 1;
-        summary.errors.push({sceneId: scene.sceneId, shotId: target.shotId, provider: candidate.provider, candidateKey: candidate.key, error: errorMessage(error)});
+        summary.errors.push({sceneId: scene.sceneId, shotId: target.shotId, provider: candidate.provider, candidateKey: candidate.key, retries: Number(error?.downloadRetries ?? 0), error: errorMessage(error)});
       }
     }
 
@@ -121,16 +130,18 @@ export async function materializeDocumentaryVisualsV2({
         const candidate = (scene.candidates ?? []).find((item) => item.key === key);
         if (!candidate) continue;
         try {
+          const downloadCandidate = preferProviderDownload(candidate);
+          if (downloadCandidate !== candidate) summary.wikimediaPreviewDownloads += 1;
           const attemptResult = await materializeCandidateWithRetry({
             projectDirectory: projectDir,
             scene,
-            candidate,
+            candidate: downloadCandidate,
             role: `alternative-${index + 1}`,
             index: shotTargets.length + index,
             overwrite,
             maxBytes,
             fetchImpl
-          });
+          }, summary);
           const result = attemptResult.result;
           summary.retryCount += attemptResult.retries;
           if (!result.skipped) summary.networkDownloads += 1;
@@ -138,8 +149,9 @@ export async function materializeDocumentaryVisualsV2({
           if (result.skipped) summary.skipped += 1;
           else summary.totalBytes += result.bytes;
         } catch (error) {
+          summary.retryCount += Number(error?.downloadRetries ?? 0);
           summary.failed += 1;
-          summary.errors.push({sceneId: scene.sceneId, role: `alternative-${index + 1}`, error: errorMessage(error)});
+          summary.errors.push({sceneId: scene.sceneId, role: `alternative-${index + 1}`, provider: candidate.provider, candidateKey: candidate.key, retries: Number(error?.downloadRetries ?? 0), error: errorMessage(error)});
         }
       }
     }
@@ -152,7 +164,7 @@ export async function materializeDocumentaryVisualsV2({
   scenePlan.materialization = {
     status: summary.failed ? 'completed-with-errors' : 'completed',
     version: 2,
-    strategy: 'multi-shot-v2-resilient',
+    strategy: 'multi-shot-v2-resilient-throttled',
     updatedAt: summary.materializedAt,
     primaryFiles: summary.primaryFiles,
     shotFiles: summary.shotFiles,
@@ -161,6 +173,8 @@ export async function materializeDocumentaryVisualsV2({
     reusedFiles: summary.reusedFiles,
     networkDownloads: summary.networkDownloads,
     retryCount: summary.retryCount,
+    wikimediaThrottledRequests: summary.wikimediaThrottledRequests,
+    wikimediaPreviewDownloads: summary.wikimediaPreviewDownloads,
     failed: summary.failed,
     rightsStatus: 'review-required-before-publication'
   };
@@ -169,26 +183,60 @@ export async function materializeDocumentaryVisualsV2({
   return {scenePlan, summary};
 }
 
-async function materializeCandidateWithRetry(options) {
+async function materializeCandidateWithRetry(options, summary) {
   let lastError = null;
   let retries = 0;
+  const provider = options.candidate?.provider;
   for (let attempt = 0; attempt < MAX_DOWNLOAD_ATTEMPTS; attempt += 1) {
+    await waitForProviderDownloadSlot(provider, summary);
     try {
       const result = await materializeCandidate(options);
       return {result, retries};
     } catch (error) {
       lastError = error;
-      if (!isRetryableDownloadError(error) || attempt === MAX_DOWNLOAD_ATTEMPTS - 1) throw error;
+      if (!isRetryableDownloadError(error) || attempt === MAX_DOWNLOAD_ATTEMPTS - 1) {
+        attachRetryCount(error, retries);
+        throw error;
+      }
       retries += 1;
-      await sleep(Math.min(4000, 600 * (2 ** attempt)));
+      if (provider === 'wikimedia' && isRateLimitError(error)) {
+        const cooldown = Math.min(30000, 8000 * retries);
+        wikimediaNextRequestAt = Math.max(wikimediaNextRequestAt, Date.now() + cooldown);
+      } else {
+        await sleep(Math.min(5000, 750 * (2 ** attempt)));
+      }
     }
   }
+  attachRetryCount(lastError, retries);
   throw lastError ?? new Error('Mediendownload fehlgeschlagen.');
+}
+
+async function waitForProviderDownloadSlot(provider, summary) {
+  if (provider !== 'wikimedia') return;
+  const waitMs = Math.max(0, wikimediaNextRequestAt - Date.now());
+  if (waitMs > 0) await sleep(waitMs);
+  wikimediaNextRequestAt = Date.now() + WIKIMEDIA_MEDIA_INTERVAL_MS;
+  summary.wikimediaThrottledRequests += 1;
+}
+
+function preferProviderDownload(candidate) {
+  if (candidate?.provider !== 'wikimedia' || candidate?.type === 'video') return candidate;
+  const preview = candidate?.asset?.files?.medium;
+  if (!preview || typeof preview !== 'string' || !preview.startsWith('https://')) return candidate;
+  return {...candidate, mediaUrl: preview};
+}
+
+function attachRetryCount(error, retries) {
+  if (error && typeof error === 'object') error.downloadRetries = retries;
 }
 
 function isRetryableDownloadError(error) {
   const message = errorMessage(error).toLowerCase();
   return /\b429\b|\b500\b|\b502\b|\b503\b|\b504\b|fetch failed|network|econnreset|etimedout|socket|terminated|temporar/.test(message);
+}
+
+function isRateLimitError(error) {
+  return /\b429\b/.test(errorMessage(error));
 }
 
 function candidateIdentity(candidate) {
@@ -274,6 +322,7 @@ if (invokedDirectly) {
     process.stdout.write(`B-Roll-Videos: ${result.summary.videoFiles}\n`);
     process.stdout.write(`Bilder: ${result.summary.imageFiles}\n`);
     process.stdout.write(`Lokal wiederverwendet: ${result.summary.reusedFiles}\n`);
+    process.stdout.write(`Wikimedia 1920px-Previews: ${result.summary.wikimediaPreviewDownloads}\n`);
     process.stdout.write(`Download-Retries: ${result.summary.retryCount}\n`);
   } catch (error) {
     process.stderr.write(`${errorMessage(error)}\n`);
