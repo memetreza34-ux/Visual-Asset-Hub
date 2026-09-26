@@ -26,10 +26,10 @@ export async function searchNasa({
     const data = item?.data?.[0] ?? {};
     const nasaId = String(data.nasa_id ?? '').trim();
     if (!nasaId) continue;
-    const preview = item?.links?.find((link) => link?.rel === 'preview')?.href || item?.links?.[0]?.href || '';
+    const preview = forceHttps(item?.links?.find((link) => link?.rel === 'preview')?.href || item?.links?.[0]?.href || '');
     let mediaUrl = '';
     try {
-      mediaUrl = await resolveNasaAsset(nasaId, mediaType, fetchImpl);
+      mediaUrl = forceHttps(await resolveNasaAsset(nasaId, mediaType, fetchImpl));
     } catch {}
     if (!mediaUrl && mediaType === 'image') mediaUrl = preview;
     if (!mediaUrl) continue;
@@ -81,4 +81,15 @@ async function resolveNasaAsset(nasaId, mediaType, fetchImpl) {
   return hrefs.find((href) => /~orig\.(?:jpg|jpeg|png|tif|tiff)(?:\?|$)/i.test(href))
     || hrefs.find((href) => /\.(?:jpg|jpeg|png|tif|tiff)(?:\?|$)/i.test(href))
     || '';
+}
+
+function forceHttps(value) {
+  if (!value) return '';
+  try {
+    const url = new URL(String(value));
+    if (url.protocol === 'http:') url.protocol = 'https:';
+    return url.protocol === 'https:' ? url.toString() : '';
+  } catch {
+    return '';
+  }
 }
