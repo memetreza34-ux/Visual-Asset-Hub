@@ -11,55 +11,90 @@ export function createDocumentaryVisualPlan(input = {}) {
 
   const scenes = base.scenes.map((scene) => {
     const enriched = enrichDocumentaryScene(scene);
+    const directions = documentarySearchDirections(scene);
     return {
       ...scene,
-      documentary: enriched.documentary,
-      queries: documentaryQueries(scene)
+      documentary: {
+        ...enriched.documentary,
+        searchDirections: directions
+      },
+      queries: unique(directions.map((item) => item.query))
     };
   });
 
   return {
     ...base,
     format: 'visual-asset-hub-documentary-visual-plan',
-    version: 1,
+    version: 2,
     mode: 'documentary',
     settings: {
       ...base.settings,
       orientation: input.orientation ?? 'horizontal',
       mediaPreference: input.mediaPreference ?? 'mixed',
-      depth: input.depth ?? 'deep'
+      depth: input.depth ?? 'deep',
+      visualDirector: 'multi-shot-v2'
     },
     scenes
   };
 }
 
 export function documentaryQueries(scene = {}) {
+  return documentarySearchDirections(scene).map((item) => item.query);
+}
+
+export function documentarySearchDirections(scene = {}) {
   const original = Array.isArray(scene.queries) ? scene.queries : [];
   const entities = Array.isArray(scene.entities) ? scene.entities : [];
   const concepts = Array.isArray(scene.concepts) ? scene.concepts : [];
   const text = String(scene.originalText ?? '').trim();
-  const evidence = enrichDocumentaryScene(scene).documentary.evidenceLevel;
+  const documentary = enrichDocumentaryScene(scene).documentary;
+  const evidence = documentary.evidenceLevel;
   const years = [...text.matchAll(/\b(?:18|19|20)\d{2}\b/g)].map((match) => match[0]);
   const primaryEntity = entities.find((value) => !/^\d+$/.test(String(value))) ?? '';
+  const coreConcept = concepts[0] ?? '';
   const core = [primaryEntity, ...years, ...concepts.slice(0, 2)].filter(Boolean).join(' ').trim();
-  const extra = [];
+  const directions = [];
+  const add = (kind, query, preferredMediaType = 'mixed') => {
+    const clean = String(query ?? '').replace(/\s+/g, ' ').trim();
+    if (clean.length >= 2) directions.push({kind, query: clean, preferredMediaType});
+  };
 
   if (evidence === 'exact-event-or-era') {
-    if (core) extra.push(`${core} historical archive`);
-    if (primaryEntity) extra.push(`${primaryEntity} archival footage`);
-    if (years.length) extra.push(`${primaryEntity || concepts[0] || ''} ${years[0]} historical photo`.trim());
+    add('exact-archive', `${core || text} historical archive`, 'photo');
+    add('archive-video', `${primaryEntity || coreConcept || text} archival footage ${years[0] || ''}`, 'video');
+    add('exact-photo', `${primaryEntity || coreConcept || text} ${years[0] || ''} historical photo`, 'photo');
+    add('location-context', `${primaryEntity || coreConcept || text} documentary location`, 'mixed');
+    add('action-broll', `${concepts.slice(0, 3).join(' ') || core || text} documentary b roll`, 'video');
   } else if (evidence === 'exact-entity') {
-    if (primaryEntity) extra.push(`${primaryEntity} documentary photo`);
-    if (primaryEntity) extra.push(`${primaryEntity} public appearance archive`);
+    add('entity-photo', `${primaryEntity || text} documentary photo`, 'photo');
+    add('entity-video', `${primaryEntity || text} archive footage`, 'video');
+    add('entity-context', `${primaryEntity || text} location context`, 'mixed');
   } else if (evidence === 'exact-place') {
-    if (core) extra.push(`${core} documentary establishing shot`);
-    if (primaryEntity) extra.push(`${primaryEntity} location footage`);
+    add('establishing', `${core || text} documentary establishing shot`, 'video');
+    add('place-photo', `${primaryEntity || text} documentary photo`, 'photo');
+    add('place-aerial', `${primaryEntity || coreConcept || text} aerial footage`, 'video');
+    add('map', `${primaryEntity || coreConcept || text} map`, 'photo');
   } else if (evidence === 'symbolic') {
-    if (concepts.length) extra.push(`${concepts.slice(0, 3).join(' ')} cinematic b roll`);
-    if (concepts.length) extra.push(`${concepts.slice(0, 2).join(' ')} close up b roll`);
+    add('broll-wide', `${concepts.slice(0, 3).join(' ') || text} cinematic b roll`, 'video');
+    add('broll-detail', `${concepts.slice(0, 2).join(' ') || text} close up b roll`, 'video');
+    add('context-photo', `${concepts.slice(0, 3).join(' ') || text} documentary photo`, 'photo');
+  } else {
+    add('documentary-video', `${core || text} documentary footage`, 'video');
+    add('documentary-photo', `${core || text} documentary photo`, 'photo');
+    add('detail', `${concepts.slice(0, 2).join(' ') || core || text} detail close up`, 'mixed');
+    add('establishing', `${primaryEntity || coreConcept || text} establishing shot`, 'video');
   }
 
-  return unique([...extra, ...original, text]).filter((query) => query.length >= 2).slice(0, 8);
+  for (const query of original.slice(0, 3)) add('planner-original', query, 'mixed');
+  if (text) add('literal-fallback', text, 'mixed');
+
+  const seen = new Set();
+  return directions.filter((item) => {
+    const key = item.query.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).slice(0, 10);
 }
 
 export function rankDocumentaryCandidates(scene = {}, candidates = []) {
