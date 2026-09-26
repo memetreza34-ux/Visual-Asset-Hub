@@ -1,46 +1,102 @@
 # Visual Asset Hub
 
-Visual Asset Hub ist eine universelle Medienbibliothek für **B-Rolls, Bilder, Animationen, Overlays, Screen-Recordings und Grafiken**. Die Assets sind nicht an einen einzelnen Kanal oder Content-Typ gebunden, sondern können für Reels, Shorts, YouTube, Werbung, Webseiten, Apps, Präsentationen und Kundenprojekte wiederverwendet werden.
+Visual Asset Hub ist eine lokale Medienbibliothek für **B-Rolls, Bilder, Animationen, Overlays, Screen-Recordings und Grafiken**. Sie ist für wiederverwendbare Assets in Reels, Shorts, YouTube-Videos, Werbung, Webseiten, Apps und Kundenprojekten gedacht.
 
-**Aktueller Entwicklungsstand: Production Workflow v0.5.0.**
-
-## Ziele
-
-- Assets in Sekunden finden statt Ordner manuell zu durchsuchen
-- einheitliche Namen, Kategorien und Tags verwenden
-- Nutzungsrechte und Quellen nachvollziehbar speichern
-- Dubletten vermeiden
-- Hochformat, Querformat und Quadrat gezielt filtern
-- Assets lokal, über Git LFS oder in externem Object Storage verwalten
-- einen automatisch erzeugten Suchindex für eine Weboberfläche bereitstellen
+**Aktueller Entwicklungsstand: Production Workflow v0.6.0**
 
 ## Schnellstart
 
-Benötigt werden **Node.js 22+** und für lokale Medienanalyse **FFmpeg inklusive ffprobe**.
+Voraussetzungen:
+
+- Node.js 22+
+- FFmpeg inklusive `ffprobe`
 
 ```bash
 npm run check
 npm run serve
 ```
 
-Danach ist die Bibliothek lokal unter `http://127.0.0.1:4173` erreichbar.
+Danach läuft die Oberfläche lokal unter:
 
-## Browser-Workflow für neue Medien
+```text
+http://127.0.0.1:4173
+```
 
-1. Videos oder Bilder lokal unter `inbox/` ablegen.
-2. `npm run serve` starten.
-3. Im Browser auf **Inbox neu scannen** klicken.
-4. Ein Asset mit **Prüfen & aufnehmen** öffnen.
-5. Titel, Kategorie, Tags, Lizenz und Nutzungsbereiche prüfen.
-6. **Approve & in Bibliothek aufnehmen** klicken.
+## Normaler Workflow
 
-Der Hub analysiert lokale Medien automatisch mit FFmpeg/ffprobe. Dabei werden unter anderem Auflösung, Seitenverhältnis, Dauer, FPS, Codec, Audio, Alpha-Kanal und SHA-256 erkannt. Für Videos wird automatisch eine Vorschau erzeugt. Nach erfolgreichem Review wird das Original aus `inbox/` nach `archive/inbox-imported/` verschoben und die katalogisierte Kopie unter `assets/` abgelegt.
+```text
+Datei / Pexels
+      ↓
+    inbox/
+      ↓
+FFmpeg-Analyse
+      ↓
+ Browser Review
+      ↓
+Approve & Import
+      ↓
+    assets/
+      ↓
+Suchbarer Katalog
+```
 
-Die schreibende Review-API ist absichtlich nur aktiv, wenn der Server lokal auf `127.0.0.1`, `localhost` oder `::1` läuft.
+### 1. Eigene Datei aufnehmen
 
-## Kommandozeilen-Import
+Video oder Bild unter `inbox/` ablegen und im Browser **Inbox neu scannen** drücken.
 
-Neue Assets können alternativ weiterhin direkt über den Importbefehl aufgenommen werden. Technische Angaben und die Ausrichtung werden bei lokalen Dateien automatisch erkannt:
+Automatisch erkannt werden unter anderem:
+
+- SHA-256
+- Auflösung
+- Ausrichtung
+- Dauer
+- FPS
+- Codec
+- Audio
+- Alpha-Kanal
+- Video-Vorschau
+
+Danach **Prüfen & aufnehmen** öffnen, Metadaten kontrollieren und **Approve & in Bibliothek aufnehmen** wählen.
+
+Nach erfolgreichem Import liegt die katalogisierte Datei unter `assets/`. Die ursprüngliche Inbox-Datei wird lokal unter `archive/inbox-imported/` archiviert.
+
+### 2. Pexels-Asset in die Inbox laden
+
+`.env.example` nach `.env` kopieren und lokal einen Pexels-Key eintragen:
+
+```env
+PEXELS_API_KEY=DEIN_KEY
+```
+
+Dann beispielsweise:
+
+```bash
+npm run pexels:grab -- "office worker laptop" --orientation vertical
+```
+
+Ein anderes Suchergebnis auswählen:
+
+```bash
+npm run pexels:grab -- "office worker laptop" --orientation vertical --pick 3
+```
+
+Foto laden:
+
+```bash
+npm run pexels:grab -- "Berlin skyline" --type photo --pick 2
+```
+
+`pexels:grab` lädt gezielt **ein** Asset statt die Stock-Bibliothek massenhaft zu kopieren. Für Videos wird standardmäßig eine sinnvolle HD/Full-HD-Datei bis etwa 1920 Pixel längster Kante bevorzugt. Quellen-, Creator- und Lizenzinformationen werden lokal neben dem Inbox-Workflow gespeichert und beim Browser-Import geschützt übernommen.
+
+Die bestehende reine Pexels-Suche bleibt ebenfalls verfügbar:
+
+```bash
+npm run pexels:search -- "Person arbeitet am Laptop" --type video --orientation vertical --per-page 20
+```
+
+## CLI-Import
+
+Alternativ kann direkt importiert werden:
 
 ```bash
 npm run asset:add -- \
@@ -60,88 +116,17 @@ npm run asset:add -- \
   --scopes organic-social,youtube,website
 ```
 
-Mit `--dry-run true` werden ID, Name und Ziel berechnet, ohne Katalog oder Originaldatei zu verändern.
+Technische Werte und Ausrichtung werden bei lokalen Dateien automatisch analysiert. Exakte Dubletten werden über SHA-256 blockiert.
 
-## Kostenlose Pexels-Suche
-
-1. `.env.example` als `.env` kopieren.
-2. Den Schlüssel ausschließlich lokal eintragen:
-
-```env
-PEXELS_API_KEY=DEIN_PEXELS_SCHLUESSEL
-```
-
-3. Nach B-Rolls oder Bildern suchen:
-
-```bash
-npm run pexels:search -- "Person arbeitet am Laptop" --type video --orientation vertical --per-page 20
-npm run pexels:search -- "moderne Fabrik" --type photo --orientation horizontal --per-page 20
-```
-
-Die Ergebnisse werden unter `.local-storage/pexels-search/` gespeichert. Der Schlüssel, die Suchdateien und große Medien werden nicht in GitHub veröffentlicht. Die Suche lädt zunächst nur Metadaten und Vorschaulinks, keine Originaldateien. Weitere Hinweise stehen in [`docs/PEXELS.md`](docs/PEXELS.md).
-
-## Grundstruktur
-
-```text
-assets/
-  video/
-  image/
-  animation/
-  overlay/
-  screen-recording/
-  graphic/
-previews/
-inbox/
-archive/
-catalog/
-docs/
-scripts/
-web/
-```
-
-`inbox/` ist der lokale Eingang für neue Dateien und wird nicht veröffentlicht. Erst nach Benennung, Rechteprüfung und Katalogisierung werden Assets nach `assets/` übernommen.
-
-## Dateinamen
-
-```text
-{type}-{category}-{subject}-{action}-{shot}-{orientation}-{sequence}.{ext}
-```
-
-Beispiele:
-
-```text
-brl-technology-ai-smartphone-scrolling-cu-vertical-0001.mp4
-img-money-finance-cash-growing-not-applicable-square-0001.png
-ovl-social-media-creator-notification-pop-up-transparent-0001.webm
-```
-
-Die vollständigen Regeln stehen in [`docs/NAMING.md`](docs/NAMING.md).
-
-## Katalog
-
-Alle durchsuchbaren Informationen liegen in [`catalog/assets.json`](catalog/assets.json). Jedes Asset besitzt unter anderem:
-
-- stabile Asset-ID
-- Titel und Beschreibung
-- Typ und Hauptkategorie
-- kontrollierte Tags und Such-Aliasse
-- Motiv, Handlung und Kameraeinstellung
-- Ausrichtung, Auflösung und Dauer
-- Speicherpfad oder externe Storage-URL
-- Quelle, Lizenzstatus und erlaubte Einsatzzwecke
-- Erstellungs- und Importdatum
-- optionalen SHA-256-Hash zur Dublettenprüfung
-
-Das genaue Datenmodell steht in [`catalog/schema.json`](catalog/schema.json). Die kontrollierten Werte liegen in [`catalog/taxonomy.json`](catalog/taxonomy.json).
-
-## Befehle
+## Wichtige Befehle
 
 ```bash
 npm run media:analyze -- --file ./inbox/clip.mp4
 npm run inbox:scan
 npm run inbox:review
+npm run pexels:search -- "Suchbegriff"
+npm run pexels:grab -- "Suchbegriff"
 npm run asset:add -- --help
-npm run pexels:search -- --help
 npm run validate
 npm run index
 npm run test
@@ -149,59 +134,59 @@ npm run check
 npm run serve
 ```
 
-- `media:analyze`: liest technische Mediendaten mit FFmpeg/ffprobe und erzeugt optional eine Vorschau
-- `inbox:scan`: analysiert alle unterstützten Medien im lokalen Inbox-Ordner
-- `inbox:review`: zeigt die analysierte Review-Warteschlange im Terminal
-- `asset:add`: analysiert lokale Medien automatisch, nimmt sie sicher auf und rollt Katalogänderungen bei Fehlern zurück
-- `pexels:search`: sucht kostenlose Pexels-Fotos oder -Videos und speichert Quellenangaben lokal
-- `validate`: prüft IDs, Dateinamen, Kategorien, Pfade, Rechte, Laufzeiten und Dubletten
-- `index`: erzeugt `catalog/search-index.json` für die Websuche
-- `test`: prüft Taxonomie, Katalogvertrag, Produktionsskripte, Pexels-Client und deterministische Indexierung
-- `check`: führt Validierung, Indexierung und Tests aus
-- `serve`: startet die lokale Such- und Review-Oberfläche
+## Struktur
 
-## Speicher
+```text
+assets/       katalogisierte Originalmedien
+previews/     generierte Vorschauen
+inbox/        lokale ungeprüfte Medien
+archive/      lokal archivierte Inbox-Originale
+catalog/      Schema, Taxonomie und Suchindex
+docs/         Regeln und Dokumentation
+scripts/      Import-, Analyse- und Provider-Tools
+tests/        automatisierte Tests
+web/          lokale Such- und Review-Oberfläche
+```
 
-- Kleine Textdateien, SVGs und Vorschauen können direkt im Repository liegen.
-- Große Originalbilder und Videos unter `assets/` werden über Git LFS verwaltet.
-- Für eine sehr große Bibliothek ist externer S3-kompatibler Object Storage vorgesehen.
-- Temporäre Signed URLs und private Zugriffstokens dürfen nicht im Katalog gespeichert werden.
+## Sicherheit und Rechte
 
-Details stehen in [`docs/STORAGE-AND-RIGHTS.md`](docs/STORAGE-AND-RIGHTS.md).
+Der Hub speichert pro Asset Quelle, Lizenzstatus und erlaubte Einsatzzwecke. Die Validierung blockiert unter anderem:
 
-## Rechte und Sicherheit
+- doppelte IDs, Dateinamen und SHA-256-Hashes
+- ungültige Kategorien, Dateitypen und Pfade
+- unvollständige Rechteinformationen
+- `approved` bei unbekannter oder eingeschränkter Lizenz
+- abgelaufene Freigaben
+- problematische `editorial-only`-Nutzung
+- URLs mit erkennbaren Secret-/Token-Parametern
 
-Nur Assets speichern, für die eine nachvollziehbare Nutzungserlaubnis besteht. Dateien mit unbekanntem Rechtezustand bleiben ungeprüft. Quellen, Lizenz und erlaubte Nutzungsbereiche werden pro Asset dokumentiert.
+Die schreibende Browser-API läuft absichtlich nur bei lokalem Serverbetrieb auf `127.0.0.1`, `localhost` oder `::1`. Entfernte und Cross-Site-Schreibzugriffe werden blockiert.
 
-Die automatische Prüfung blockiert unter anderem:
+Pexels-Medien behalten beim Import ihre tatsächliche Quelle; sie werden nicht als eigene Produktion umetikettiert.
 
-- doppelte IDs, Dateinamen oder SHA-256-Hashes
-- falsche Kategorien, Typen oder Dateiendungen
-- unvollständige Rechteangaben
-- freigegebene Assets mit unbekannter oder abgelaufener Lizenz
-- editorial-only Assets mit kommerziellen Nutzungsbereichen
-- unsichere Pfade
-- URLs mit erkennbaren Token-, Signatur- oder API-Key-Parametern
+## Speicherstrategie
 
-Die lokale Review-API blockiert Schreibzugriffe von entfernten Clients und Cross-Site-Anfragen.
+- Code, Metadaten und Suchindex: Git
+- größere lokale Medien: Git LFS
+- sehr große Bibliotheken: später S3-kompatibler Object Storage
+- Secrets und lokale Such-/Provider-Metadaten: `.local-storage/` bzw. `.env`, nicht Git
 
-## Aktueller Ausbau
+## Produktionsstand
 
-Die aktuelle Produktionsstufe enthält:
+Bereits vorhanden:
 
-- universelle Taxonomie
-- verbindlichen Benennungsstandard
-- strukturiertes Metadatenschema
-- automatisierte lokale Medienanalyse mit FFmpeg/ffprobe
-- automatisches Video-Thumbnailing
-- Inbox-Scanner und Review-Warteschlange
-- Browser-Review mit Approve-&-Import-Workflow
-- sicheren Asset-Import mit Rollback und Dublettenprüfung
-- kostenlose Pexels-Foto- und Videosuche
-- Rechte- und Dublettenprüfung
-- deterministischen Suchindex
-- responsive Websuche mit Filtern, Video-Player und Detailansicht
-- Git-LFS-Regeln
-- automatischen GitHub-Workflow
+- kontrollierte Taxonomie und JSON-Schema
+- automatischer Asset-Import mit Rollback
+- FFmpeg/ffprobe-Medienanalyse
+- automatisches Thumbnailing
+- Inbox-Scanner
+- Browser-Review und Approve-Import
+- Quellen- und Rechteprüfung
+- SHA-256-Dublettenprüfung
+- Pexels-Suche
+- gezielter Pexels-Download in die Inbox
+- responsiver Asset-Katalog mit Suche, Filtern und Detailansicht
+- Video-Range-Support im lokalen Server
+- automatisierte Tests und GitHub Actions
 
-Nächste Ausbaustufen: direkter Pexels-Download in die Inbox, Bulk-Review, Collections, Nutzungshistorie, Cloud-Storage-Synchronisierung, KI-Tagging und visuelle Ähnlichkeitssuche.
+Nächste sinnvolle Schritte für die erste echte Videoproduktion sind: **echte Assets einfüllen, einen vollständigen Video-Asset-Satz als Collection zusammenstellen und den Export/Übergabe-Workflow für das Schnittprojekt bauen.**
