@@ -144,6 +144,7 @@ jobs:
             v6SelectedByProvider: research.v6SelectedByProvider || rescue.selectedByProvider || {},
             v6RescuedScenes: research.v6RescuedScenes || rescue.rescuedScenes || 0,
             v6ContinuityReusedScenes: research.v6ContinuityReusedScenes || rescue.continuityReusedScenes || 0,
+            v6RescueErrors: rescue.errors || [],
             visionCheckedScenes: research.visionCheckedScenes || 0,
             visionFallbackScenes: research.visionFallbackScenes || 0,
             downloadedShots: material.shotFiles || 0,
