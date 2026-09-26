@@ -1,10 +1,17 @@
-name: Aralsee V5 Realtest
+name: Aralsee V6 Realtest
 
 on:
   push:
     branches: [agent/beta-release]
     paths:
       - '.github/workflows/documentary-aralsee-v2-realtest.yml'
+      - 'scripts/documentary-research-v6.mjs'
+      - 'scripts/documentary-research-v5.mjs'
+      - 'scripts/documentary-phase1.mjs'
+      - 'scripts/lib/wikimedia.mjs'
+      - 'scripts/lib/nasa-media.mjs'
+      - 'documentary-registry/briefs/TOPIC-0001.json'
+      - 'package.json'
 
 permissions:
   contents: read
@@ -29,6 +36,9 @@ jobs:
         with:
           node-version: '22'
 
+      - name: V6 Syntax vor Realtest pruefen
+        run: node --check scripts/documentary-research-v6.mjs
+
       - name: Verfuegbare optionale Qualitaetsdienste anzeigen
         run: |
           node - <<'NODE'
@@ -52,18 +62,17 @@ jobs:
           console.log(`${t.id}: ${t.title}; anchors=${brief.visualSearchAnchors.length}`);
           NODE
 
-      - name: Autonome Phase 1 V5 real ausfuehren
+      - name: Autonome Phase 1 V6 real ausfuehren
         run: |
           npm run documentary:phase1 -- \
             --duration 150 \
             --max-tasks 18 \
             --per-page 8 \
-            --alternatives 4 \
-            --materialize-alternatives \
+            --alternatives 3 \
             --overwrite-media \
             --max-media-mb 120
 
-      - name: Strengen V5 Qualitaetsbericht erzeugen
+      - name: Strengen V6 Qualitaetsbericht erzeugen
         run: |
           node - <<'NODE'
           const fs = require('fs');
@@ -78,12 +87,18 @@ jobs:
           const blockedScenes = [];
           const weakSelections = [];
           const generatedSelections = [];
+          const irrelevantStock = [];
+          const uniqueAssets = new Set();
+          let coveredScenes = 0;
           for (const scene of scenes.scenes || []) {
             const shots = scene.recommendedShots || [];
-            if (!shots.length) blockedScenes.push({sceneId: scene.sceneId, text: scene.originalText, status: scene.research?.qualityGate?.status, rescue: scene.research?.anchorRescue?.status});
+            if (shots.length) coveredScenes += 1;
+            else blockedScenes.push({sceneId: scene.sceneId, text: scene.originalText, status: scene.research?.qualityGate?.status, rescue: scene.research?.v6Rescue?.status});
             for (const shot of shots) {
               providers[shot.provider] = (providers[shot.provider] || 0) + 1;
               const candidate = (scene.candidates || []).find((x) => x.key === shot.candidateKey) || {};
+              const identity = candidate.identity || `${candidate.provider || shot.provider}|${candidate.providerId || candidate.key || shot.candidateKey}`;
+              uniqueAssets.add(identity);
               const row = {
                 sceneId: scene.sceneId,
                 shotId: shot.shotId,
@@ -97,13 +112,13 @@ jobs:
                 anchorMatch: candidate.anchorMatch ?? null,
                 topicMatch: candidate.topicMatch ?? null,
                 lexicalMatch: candidate.scoreBreakdown?.lexicalMatch ?? null,
-                visionScore: candidate.vision?.visibleRelevance ?? null,
-                visionExactness: candidate.vision?.exactness ?? null,
+                continuityReuse: Boolean(shot.continuityReuse || candidate.continuityReuse),
                 sourceUrl: candidate.sourceUrl || ''
               };
               selected.push(row);
               if (Number(row.qualityGateScore ?? 0) < 35) weakSelections.push(row);
               if (/ai[- ]generated|generated with ai|artificial intelligence generated|midjourney|stable diffusion|sora generated/i.test(row.title)) generatedSelections.push(row);
+              if (['pexels','pixabay','unsplash'].includes(row.provider) && Number(row.lexicalMatch ?? 0) < 6) irrelevantStock.push(row);
             }
           }
           const total = selected.length;
@@ -113,20 +128,22 @@ jobs:
           const report = {
             director: research.director,
             sceneCount: scenes.scenes?.length || 0,
+            coveredScenes,
+            coverageShare: scenes.scenes?.length ? Number((coveredScenes / scenes.scenes.length).toFixed(3)) : 0,
             totalShots: total,
+            uniqueAssets: uniqueAssets.size,
             videoShots: videos,
             imageShots: images,
             videoShare: total ? Number((videos / total).toFixed(3)) : 0,
             providerDistribution: providers,
             pexelsShare: total ? Number((pexels / total).toFixed(3)) : 0,
             qualityBlockedScenes: blockedScenes.length,
-            anchorCount: research.anchorCount || 0,
-            anchorRescueSearches: research.anchorRescueSearches || 0,
-            anchorRescueCacheHits: research.anchorRescueCacheHits || 0,
-            anchorRescueCandidates: research.anchorRescueCandidates || 0,
-            anchorRescuedScenes: research.anchorRescuedScenes || 0,
-            generatedMediaRejected: research.generatedMediaRejected || rescue.generatedMediaRejected || 0,
-            topicMismatchRejected: research.topicMismatchRejected || rescue.topicMismatchRejected || 0,
+            stockPrunedForIrrelevance: research.stockPrunedForIrrelevance || rescue.stockPrunedForIrrelevance || 0,
+            v6RescueSearches: research.v6RescueSearches || rescue.searches || 0,
+            v6CandidatesByProvider: research.v6CandidatesByProvider || rescue.candidatesByProvider || {},
+            v6SelectedByProvider: research.v6SelectedByProvider || rescue.selectedByProvider || {},
+            v6RescuedScenes: research.v6RescuedScenes || rescue.rescuedScenes || 0,
+            v6ContinuityReusedScenes: research.v6ContinuityReusedScenes || rescue.continuityReusedScenes || 0,
             visionCheckedScenes: research.visionCheckedScenes || 0,
             visionFallbackScenes: research.visionFallbackScenes || 0,
             downloadedShots: material.shotFiles || 0,
@@ -135,21 +152,24 @@ jobs:
             downloadFailures: material.failed || 0,
             weakSelections,
             generatedSelections,
+            irrelevantStock,
             blockedScenes,
             selected
           };
-          console.log('=== V5 REALTEST REPORT ===');
+          console.log('=== V6 REALTEST REPORT ===');
           console.log(JSON.stringify(report, null, 2));
-          console.log('=== END V5 REALTEST REPORT ===');
+          console.log('=== END V6 REALTEST REPORT ===');
 
           const failures = [];
-          if (total < 20) failures.push(`zu wenige verlaessliche Shots: ${total} < 20`);
+          if (coveredScenes < 20) failures.push(`zu wenige verlaesslich abgedeckte Szenen: ${coveredScenes} < 20`);
+          if (uniqueAssets.size < 12) failures.push(`zu wenige eindeutige hochwertige Assets: ${uniqueAssets.size} < 12`);
           if (report.videoShare > 0.80) failures.push(`Videoquote zu hoch: ${report.videoShare}`);
-          if (report.pexelsShare > 0.75) failures.push(`Pexels-Anteil zu hoch: ${report.pexelsShare}`);
+          if (report.pexelsShare > 0.65) failures.push(`Pexels-Anteil zu hoch: ${report.pexelsShare}`);
           if (weakSelections.length) failures.push(`${weakSelections.length} ausgewaehlte Shots unter QualityGateScore 35`);
           if (generatedSelections.length) failures.push(`${generatedSelections.length} AI-generierte Archivtreffer ausgewaehlt`);
+          if (irrelevantStock.length) failures.push(`${irrelevantStock.length} generische Stock-Treffer ohne ausreichenden Bezug ausgewaehlt`);
           if (material.failed > Math.max(6, Math.ceil(total * 0.25))) failures.push(`zu viele Downloadfehler: ${material.failed}`);
-          if (failures.length) throw new Error(`V5 Qualitaetsgate nicht bestanden:\n- ${failures.join('\n- ')}`);
+          if (failures.length) throw new Error(`V6 Qualitaetsgate nicht bestanden:\n- ${failures.join('\n- ')}`);
           NODE
 
       - name: Lokale Realtest-Dateien zusammenfassen
@@ -159,4 +179,5 @@ jobs:
           echo '=== VISUAL FILE COUNTS ==='
           find "$ROOT/03-VISUALS" -type f 2>/dev/null | wc -l || true
           du -sh "$ROOT/03-VISUALS" 2>/dev/null || true
+          echo 'Nur ausgewaehlte Shots werden materialisiert; Alternativen bleiben Metadaten.'
           echo 'Artifact-Upload absichtlich deaktiviert: Repository-Artifact-Quota ist derzeit voll.'
