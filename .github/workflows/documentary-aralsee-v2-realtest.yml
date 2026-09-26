@@ -8,6 +8,8 @@ on:
       - 'scripts/documentary-research-v6.mjs'
       - 'scripts/documentary-research-v5.mjs'
       - 'scripts/documentary-phase1.mjs'
+      - 'scripts/documentary-materialize-v2.mjs'
+      - 'scripts/documentary-materialize.mjs'
       - 'scripts/lib/wikimedia.mjs'
       - 'scripts/lib/nasa-media.mjs'
       - 'documentary-registry/briefs/TOPIC-0001.json'
@@ -37,7 +39,10 @@ jobs:
           node-version: '22'
 
       - name: V6 Syntax vor Realtest pruefen
-        run: node --check scripts/documentary-research-v6.mjs
+        run: |
+          node --check scripts/documentary-research-v6.mjs
+          node --check scripts/documentary-materialize-v2.mjs
+          node --check scripts/lib/wikimedia.mjs
 
       - name: Verfuegbare optionale Qualitaetsdienste anzeigen
         run: |
@@ -147,10 +152,14 @@ jobs:
             v6RescueErrors: rescue.errors || [],
             visionCheckedScenes: research.visionCheckedScenes || 0,
             visionFallbackScenes: research.visionFallbackScenes || 0,
-            downloadedShots: material.shotFiles || 0,
+            localShotFiles: material.shotFiles || 0,
+            networkDownloads: material.networkDownloads || 0,
+            locallyReusedFiles: material.reusedFiles || 0,
+            downloadRetries: material.retryCount || 0,
             downloadedVideos: material.videoFiles || 0,
             downloadedImages: material.imageFiles || 0,
             downloadFailures: material.failed || 0,
+            downloadErrors: material.errors || [],
             weakSelections,
             generatedSelections,
             irrelevantStock,
