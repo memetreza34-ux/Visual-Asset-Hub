@@ -1,4 +1,4 @@
-name: Aralsee V4 Realtest
+name: Aralsee V5 Realtest
 
 on:
   push:
@@ -47,10 +47,12 @@ jobs:
           const r = JSON.parse(fs.readFileSync('documentary-registry/topic-register.json','utf8'));
           const t = r.topics.find((x) => x.id === 'TOPIC-0001');
           if (!t || t.status !== 'reserved') throw new Error('TOPIC-0001 ist nicht als reserved verfuegbar.');
-          console.log(`${t.id}: ${t.title}`);
+          const brief = JSON.parse(fs.readFileSync('documentary-registry/briefs/TOPIC-0001.json','utf8'));
+          if (!Array.isArray(brief.visualSearchAnchors) || brief.visualSearchAnchors.length < 5) throw new Error('TOPIC-0001 hat keine ausreichenden Visual-Suchanker.');
+          console.log(`${t.id}: ${t.title}; anchors=${brief.visualSearchAnchors.length}`);
           NODE
 
-      - name: Autonome Phase 1 V4 real ausfuehren
+      - name: Autonome Phase 1 V5 real ausfuehren
         run: |
           npm run documentary:phase1 -- \
             --duration 150 \
@@ -61,7 +63,7 @@ jobs:
             --overwrite-media \
             --max-media-mb 120
 
-      - name: Strengen Qualitaetsbericht erzeugen
+      - name: Strengen V5 Qualitaetsbericht erzeugen
         run: |
           node - <<'NODE'
           const fs = require('fs');
@@ -70,13 +72,15 @@ jobs:
           const scenes = JSON.parse(fs.readFileSync(`${project}/scenes.json`, 'utf8'));
           const research = JSON.parse(fs.readFileSync(`${project}/research-summary.json`, 'utf8'));
           const material = JSON.parse(fs.readFileSync(`${project}/materialization-summary.json`, 'utf8'));
+          const rescue = fs.existsSync(`${project}/anchor-rescue-report.json`) ? JSON.parse(fs.readFileSync(`${project}/anchor-rescue-report.json`, 'utf8')) : {};
           const providers = {};
           const selected = [];
           const blockedScenes = [];
           const weakSelections = [];
+          const generatedSelections = [];
           for (const scene of scenes.scenes || []) {
             const shots = scene.recommendedShots || [];
-            if (!shots.length) blockedScenes.push({sceneId: scene.sceneId, text: scene.originalText, status: scene.research?.qualityGate?.status});
+            if (!shots.length) blockedScenes.push({sceneId: scene.sceneId, text: scene.originalText, status: scene.research?.qualityGate?.status, rescue: scene.research?.anchorRescue?.status});
             for (const shot of shots) {
               providers[shot.provider] = (providers[shot.provider] || 0) + 1;
               const candidate = (scene.candidates || []).find((x) => x.key === shot.candidateKey) || {};
@@ -88,16 +92,18 @@ jobs:
                 title: candidate.title || '',
                 documentaryScore: candidate.documentaryScore ?? null,
                 directorScore: candidate.directorScore ?? null,
-                qualityGateScore: candidate.qualityGateScore ?? null,
+                qualityGateScore: candidate.anchorRescueScore ?? candidate.qualityGateScore ?? null,
+                anchorQuery: candidate.anchorQuery ?? null,
+                anchorMatch: candidate.anchorMatch ?? null,
+                topicMatch: candidate.topicMatch ?? null,
                 lexicalMatch: candidate.scoreBreakdown?.lexicalMatch ?? null,
-                exactEntityMatch: candidate.scoreBreakdown?.exactEntityMatch ?? false,
-                exactYearMatch: candidate.scoreBreakdown?.exactYearMatch ?? false,
                 visionScore: candidate.vision?.visibleRelevance ?? null,
                 visionExactness: candidate.vision?.exactness ?? null,
                 sourceUrl: candidate.sourceUrl || ''
               };
               selected.push(row);
               if (Number(row.qualityGateScore ?? 0) < 35) weakSelections.push(row);
+              if (/ai[- ]generated|generated with ai|artificial intelligence generated|midjourney|stable diffusion|sora generated/i.test(row.title)) generatedSelections.push(row);
             }
           }
           const total = selected.length;
@@ -114,29 +120,36 @@ jobs:
             providerDistribution: providers,
             pexelsShare: total ? Number((pexels / total).toFixed(3)) : 0,
             qualityBlockedScenes: blockedScenes.length,
+            anchorCount: research.anchorCount || 0,
+            anchorRescueSearches: research.anchorRescueSearches || 0,
+            anchorRescueCacheHits: research.anchorRescueCacheHits || 0,
+            anchorRescueCandidates: research.anchorRescueCandidates || 0,
+            anchorRescuedScenes: research.anchorRescuedScenes || 0,
+            generatedMediaRejected: research.generatedMediaRejected || rescue.generatedMediaRejected || 0,
+            topicMismatchRejected: research.topicMismatchRejected || rescue.topicMismatchRejected || 0,
             visionCheckedScenes: research.visionCheckedScenes || 0,
             visionFallbackScenes: research.visionFallbackScenes || 0,
-            supplementalArchiveSearches: research.supplementalArchiveSearches || 0,
-            supplementalArchiveCandidates: research.supplementalArchiveCandidates || 0,
             downloadedShots: material.shotFiles || 0,
             downloadedVideos: material.videoFiles || 0,
             downloadedImages: material.imageFiles || 0,
             downloadFailures: material.failed || 0,
             weakSelections,
+            generatedSelections,
             blockedScenes,
             selected
           };
-          console.log('=== V4 REALTEST REPORT ===');
+          console.log('=== V5 REALTEST REPORT ===');
           console.log(JSON.stringify(report, null, 2));
-          console.log('=== END V4 REALTEST REPORT ===');
+          console.log('=== END V5 REALTEST REPORT ===');
 
           const failures = [];
           if (total < 20) failures.push(`zu wenige verlaessliche Shots: ${total} < 20`);
           if (report.videoShare > 0.80) failures.push(`Videoquote zu hoch: ${report.videoShare}`);
           if (report.pexelsShare > 0.75) failures.push(`Pexels-Anteil zu hoch: ${report.pexelsShare}`);
           if (weakSelections.length) failures.push(`${weakSelections.length} ausgewaehlte Shots unter QualityGateScore 35`);
+          if (generatedSelections.length) failures.push(`${generatedSelections.length} AI-generierte Archivtreffer ausgewaehlt`);
           if (material.failed > Math.max(6, Math.ceil(total * 0.25))) failures.push(`zu viele Downloadfehler: ${material.failed}`);
-          if (failures.length) throw new Error(`V4 Qualitaetsgate nicht bestanden:\n- ${failures.join('\n- ')}`);
+          if (failures.length) throw new Error(`V5 Qualitaetsgate nicht bestanden:\n- ${failures.join('\n- ')}`);
           NODE
 
       - name: Lokale Realtest-Dateien zusammenfassen
