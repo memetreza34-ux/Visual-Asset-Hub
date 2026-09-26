@@ -1,0 +1,105 @@
+name: Aralsee V2 Realtest
+
+on:
+  push:
+    branches: [agent/beta-release]
+    paths:
+      - '.github/workflows/documentary-aralsee-v2-realtest.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  phase1-realtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      PEXELS_API_KEY: ${{ secrets.PEXELS_API || secrets.PEXELS_API_KEY }}
+      PIXABAY_API: ${{ secrets.PIXABAY_API || secrets.PIXABAY_API_KEY }}
+      UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_API || secrets.UNSPLASH_ACCESS_KEY }}
+    steps:
+      - name: Repository laden
+        uses: actions/checkout@v4
+        with:
+          lfs: false
+
+      - name: Node.js 22 verwenden
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Reserviertes Aralsee-Thema pruefen
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const r = JSON.parse(fs.readFileSync('documentary-registry/topic-register.json','utf8'));
+          const t = r.topics.find((x) => x.id === 'TOPIC-0001');
+          if (!t || t.status !== 'reserved') throw new Error('TOPIC-0001 ist nicht als reserved verfuegbar.');
+          console.log(`${t.id}: ${t.title}`);
+          NODE
+
+      - name: Autonome Phase 1 V2/V3 real ausfuehren
+        run: |
+          npm run documentary:phase1 -- \
+            --duration 150 \
+            --max-tasks 18 \
+            --per-page 8 \
+            --alternatives 4 \
+            --materialize-alternatives \
+            --overwrite-media \
+            --max-media-mb 120
+
+      - name: Qualitaetsbericht erzeugen
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const path = 'videos/umweltgeschichte/001-wie-der-aralsee-fast-verschwand-und-warum-ein-teil-zuruckkam/05-PROJECT';
+          const scenes = JSON.parse(fs.readFileSync(`${path}/scenes.json`, 'utf8'));
+          const research = JSON.parse(fs.readFileSync(`${path}/research-summary.json`, 'utf8'));
+          const material = JSON.parse(fs.readFileSync(`${path}/materialization-summary.json`, 'utf8'));
+          const providers = {};
+          const motifs = {};
+          const selected = [];
+          for (const scene of scenes.scenes || []) {
+            for (const shot of scene.recommendedShots || []) {
+              providers[shot.provider] = (providers[shot.provider] || 0) + 1;
+              if (shot.motifKey) motifs[shot.motifKey] = (motifs[shot.motifKey] || 0) + 1;
+              selected.push({sceneId: scene.sceneId, ...shot});
+            }
+          }
+          const duplicateMotifs = Object.entries(motifs).filter(([, count]) => count > 1);
+          const report = {
+            generatedAt: new Date().toISOString(),
+            sceneCount: scenes.scenes?.length || 0,
+            totalShots: selected.length,
+            selectedVideoShots: selected.filter((x) => x.mediaType === 'video').length,
+            selectedImageShots: selected.filter((x) => x.mediaType !== 'video').length,
+            providerDistribution: providers,
+            duplicateMotifs,
+            visionCheckedScenes: research.visionCheckedScenes || 0,
+            visionFallbackScenes: research.visionFallbackScenes || 0,
+            visionRejectedCandidates: research.visionRejectedCandidates || 0,
+            downloadedShots: material.shotFiles || 0,
+            downloadedVideos: material.videoFiles || 0,
+            downloadedImages: material.imageFiles || 0,
+            downloadFailures: material.failed || 0,
+            selected
+          };
+          fs.writeFileSync(`${path}/v2-realtest-report.json`, JSON.stringify(report, null, 2) + '\n');
+          console.log(JSON.stringify(report, null, 2));
+          if (report.totalShots < 15) throw new Error(`Zu wenige Shots fuer einen aussagekraeftigen Realtest: ${report.totalShots}`);
+          NODE
+
+      - name: Phase-1-Paket als Artifact sichern
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aralsee-v2-phase1-realtest
+          path: |
+            videos/umweltgeschichte/001-wie-der-aralsee-fast-verschwand-und-warum-ein-teil-zuruckkam/01-SCRIPT/
+            videos/umweltgeschichte/001-wie-der-aralsee-fast-verschwand-und-warum-ein-teil-zuruckkam/03-VISUALS/
+            videos/umweltgeschichte/001-wie-der-aralsee-fast-verschwand-und-warum-ein-teil-zuruckkam/04-SOURCES/
+            videos/umweltgeschichte/001-wie-der-aralsee-fast-verschwand-und-warum-ein-teil-zuruckkam/05-PROJECT/
+            documentary-registry/topic-register.json
+          retention-days: 7
