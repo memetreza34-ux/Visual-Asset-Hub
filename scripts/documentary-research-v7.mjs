@@ -4,22 +4,22 @@ import {researchDocumentaryProjectV6} from './documentary-research-v6.mjs';
 
 const ARCHIVE_PROVIDERS = new Set(['wikimedia', 'openverse', 'loc']);
 const TERM_STOP = new Set([
-  'the','and','for','with','from','into','sea','lake','river','archive','historical','documentary','footage','photo','video','image',
+  'the','and','for','with','from','into','sea','lake','river','archive','historical','historic','documentary','footage','photo','video','image',
+  'satellite','earth','nasa','central','comparison','view','views','map','maps','north','south','east','west',
   'und','der','die','das','ein','eine','einer','eines','mit','von','auf','aus','zum','zur','den','dem','des','see','fluss','bild','bilder','video'
 ]);
+const INTEGRITY_RISK_RE = /pieced together.{0,120}(photoshop|gimp)|using adobe photoshop|created in adobe photoshop|photomontage|photo montage|digitally composited|digital composite|artist.?s impression|artist.?s conception/i;
 
 /**
- * V7 is a conservative post-gate on top of V6.
- * It does not invent replacement visuals. It removes archive selections that
- * slipped through earlier ranking despite having neither V6 anchor evidence,
- * lexical scene evidence nor a real topic-term match. V6 rescue selections
- * already carry anchorQuery/anchorMatch and remain untouched.
+ * V7 is a conservative evidence gate on top of V6.
+ * Archive media must have either explicit rescue-anchor evidence or a direct
+ * lexical link to the spoken scene. Generic compilation videos and explicitly
+ * manipulated/composited archive evidence are not allowed as primary shots.
+ * V7 removes questionable media instead of inventing a replacement.
  */
 export async function researchDocumentaryProjectV7(options = {}) {
   const base = await researchDocumentaryProjectV6(options);
   const scenePlan = base.scenePlan;
-  const anchors = normalizeAnchors(options.visualSearchAnchors ?? []);
-  const topicTerms = buildTopicTerms(anchors);
   const report = {
     format: 'visual-asset-hub-documentary-v7-archive-relevance',
     version: 7,
@@ -34,7 +34,8 @@ export async function researchDocumentaryProjectV7(options = {}) {
     for (const shot of original) {
       const candidate = (scene.candidates ?? []).find((item) => item.key === shot.candidateKey);
       if (!candidate) continue;
-      if (!shouldRejectArchiveCandidate(candidate, topicTerms)) {
+      const reason = archiveRejectionReason(candidate);
+      if (!reason) {
         kept.push(shot);
         continue;
       }
@@ -43,9 +44,13 @@ export async function researchDocumentaryProjectV7(options = {}) {
         sceneId: scene.sceneId,
         candidateKey: candidate.key,
         provider: candidate.provider,
+        mediaType: candidate.type ?? null,
         title: candidate.title ?? '',
+        sourceUrl: candidate.sourceUrl ?? '',
         lexicalMatch: Number(candidate.scoreBreakdown?.lexicalMatch ?? 0),
-        reason: 'archive-without-anchor-lexical-or-topic-evidence'
+        anchorQuery: candidate.anchorQuery ?? null,
+        anchorMatch: candidate.anchorMatch ?? null,
+        reason
       });
     }
 
@@ -54,7 +59,7 @@ export async function researchDocumentaryProjectV7(options = {}) {
     if (!kept.length && original.length) {
       scene.research = {
         ...scene.research,
-        strategy: 'multi-shot-v7-archive-relevance-gate',
+        strategy: 'multi-shot-v7-archive-evidence-gate',
         qualityGate: {
           ...(scene.research?.qualityGate ?? {}),
           status: 'blocked-irrelevant-archive'
@@ -62,6 +67,14 @@ export async function researchDocumentaryProjectV7(options = {}) {
         v7ArchiveGate: {
           status: 'pruned-irrelevant-archive',
           removed: original.length
+        }
+      };
+    } else if (kept.length < original.length) {
+      scene.research = {
+        ...scene.research,
+        v7ArchiveGate: {
+          status: 'pruned-partial',
+          removed: original.length - kept.length
         }
       };
     }
@@ -102,40 +115,42 @@ export async function researchDocumentaryProjectV7(options = {}) {
   return {scenePlan, summary, anchorRescue: base.anchorRescue, archiveRelevance: report};
 }
 
-function shouldRejectArchiveCandidate(candidate, topicTerms) {
-  if (!ARCHIVE_PROVIDERS.has(candidate.provider)) return false;
-  if (candidate.anchorQuery && Number(candidate.anchorMatch ?? 0) >= 20) return false;
-  if (Number(candidate.scoreBreakdown?.lexicalMatch ?? 0) >= 6) return false;
+function archiveRejectionReason(candidate) {
+  if (!ARCHIVE_PROVIDERS.has(candidate.provider)) return null;
 
-  const text = normalize([
+  const rawText = [
     candidate.title,
     candidate.asset?.title,
     candidate.asset?.description,
-    candidate.description,
-    candidate.query
-  ].filter(Boolean).join(' '));
-  const matchedTopicTerms = topicTerms.filter((term) => text.includes(term));
-  return matchedTopicTerms.length === 0;
-}
+    candidate.description
+  ].filter(Boolean).join(' ');
+  if (INTEGRITY_RISK_RE.test(rawText)) return 'archive-manipulated-or-composited-evidence';
 
-function buildTopicTerms(anchors) {
-  const terms = new Set();
-  for (const anchor of anchors) {
-    for (const term of meaningfulTerms(anchor.query)) terms.add(term);
+  const lexicalMatch = Number(candidate.scoreBreakdown?.lexicalMatch ?? 0);
+  const hasAnchorEvidence = Boolean(candidate.anchorQuery) && Number(candidate.anchorMatch ?? 0) >= 20;
+
+  // No archive asset is trusted merely because generic topic words happen to
+  // occur in a long description. It needs an explicit anchor or scene match.
+  if (!hasAnchorEvidence && lexicalMatch < 6) return 'archive-without-anchor-or-lexical-evidence';
+
+  // Wikimedia compilation videos can mention the topic in a very long list
+  // while the actual file contains many unrelated segments. For video, demand
+  // a direct anchor token in the file/source identity unless scene lexical
+  // evidence is strong enough to justify manual use of a segment.
+  if (candidate.provider === 'wikimedia' && candidate.type === 'video' && hasAnchorEvidence) {
+    const anchorTerms = meaningfulTerms(candidate.anchorQuery);
+    const sourceIdentity = normalize(candidate.sourceUrl || candidate.asset?.source_url || candidate.asset?.sourceUrl || '');
+    const sourceMatchesAnchor = anchorTerms.length === 0 || anchorTerms.some((term) => sourceIdentity.includes(term));
+    if (!sourceMatchesAnchor && lexicalMatch < 12) return 'archive-compilation-video-without-direct-anchor';
   }
-  return [...terms];
-}
 
-function normalizeAnchors(values) {
-  return values
-    .map((value) => ({query: String(value?.query ?? '').trim()}))
-    .filter((value) => value.query);
+  return null;
 }
 
 function meaningfulTerms(value) {
   return normalize(value)
     .split(/\s+/)
-    .filter((term) => term.length >= 3 && !TERM_STOP.has(term));
+    .filter((term) => term.length >= 4 && !TERM_STOP.has(term));
 }
 
 function normalize(value) {
