@@ -1,6 +1,6 @@
 {
   "name": "visual-asset-hub",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -8,6 +8,7 @@
   },
   "scripts": {
     "asset:add": "node scripts/add-asset.mjs",
+    "media:analyze": "node scripts/analyze-media.mjs",
     "pexels:search": "node scripts/pexels-search.mjs",
     "validate": "node scripts/validate-catalog.mjs",
     "index": "node scripts/build-index.mjs",
