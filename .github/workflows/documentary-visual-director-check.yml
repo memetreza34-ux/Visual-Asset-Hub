@@ -14,17 +14,21 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Syntax check new documentary modules
+      - name: Syntax check documentary modules
         run: |
+          node --check scripts/documentary-phase1-auto.mjs
+          node --check scripts/documentary-phase1.mjs
           node --check scripts/documentary-research-v2.mjs
           node --check scripts/documentary-research-v3.mjs
           node --check scripts/documentary-research-v4.mjs
+          node --check scripts/documentary-research-v5.mjs
           node --check scripts/documentary-materialize-v2.mjs
           node --check scripts/documentary-phase3-v2.mjs
           node --check scripts/documentary-phase3-validate-v2.mjs
           node --check scripts/documentary-render-v2.mjs
+          node --check scripts/lib/documentary-autonomous-brief.mjs
           node --check scripts/lib/documentary-vision-rerank.mjs
           node --check scripts/lib/nasa-media.mjs
           node --check scripts/lib/loc-media.mjs
-      - name: Run visual director and provider tests
-        run: node --test tests/documentary-visual-director-v2.test.mjs tests/documentary-media-providers-v2.test.mjs
+      - name: Run visual director provider and anchor tests
+        run: node --test tests/documentary-visual-director-v2.test.mjs tests/documentary-media-providers-v2.test.mjs tests/documentary-autonomous-brief.test.mjs
