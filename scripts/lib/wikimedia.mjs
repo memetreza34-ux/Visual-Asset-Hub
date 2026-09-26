@@ -148,7 +148,7 @@ export async function searchWikimedia({ query, type = 'photo', orientation, page
   if (page > 1) url.searchParams.set('gsroffset', String((page - 1) * perPage));
   url.searchParams.set('prop', 'imageinfo');
   url.searchParams.set('iiprop', 'url|size|mime|user|extmetadata');
-  url.searchParams.set('iiurlwidth', '960');
+  url.searchParams.set('iiurlwidth', '1920');
   url.searchParams.set('iiextmetadatalanguage', 'en');
   url.searchParams.set('iiextmetadatafilter', 'LicenseShortName|LicenseUrl|UsageTerms|Artist|Credit|ImageDescription');
   url.searchParams.set('origin', '*');
