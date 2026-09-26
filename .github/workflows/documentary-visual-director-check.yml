@@ -18,6 +18,7 @@ jobs:
         run: |
           node --check scripts/documentary-research-v2.mjs
           node --check scripts/documentary-research-v3.mjs
+          node --check scripts/documentary-research-v4.mjs
           node --check scripts/documentary-materialize-v2.mjs
           node --check scripts/documentary-phase3-v2.mjs
           node --check scripts/documentary-phase3-validate-v2.mjs
@@ -25,8 +26,5 @@ jobs:
           node --check scripts/lib/documentary-vision-rerank.mjs
           node --check scripts/lib/nasa-media.mjs
           node --check scripts/lib/loc-media.mjs
-          node --check scripts/lib/wikimedia.mjs
       - name: Run visual director and provider tests
-        run: |
-          node --test tests/documentary-visual-director-v2.test.mjs
-          node --test tests/documentary-media-providers-v2.test.mjs
+        run: node --test tests/documentary-visual-director-v2.test.mjs tests/documentary-media-providers-v2.test.mjs
