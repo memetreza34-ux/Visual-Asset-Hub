@@ -1,45 +1,13 @@
-name: Pexels API Test
+name: Alter Pexels-Verbindungstest (deaktiviert)
 
 on:
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  pexels-test:
-    if: github.head_ref == 'agent/pexels-smoke-test'
+  information:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    env:
-      PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
-
     steps:
-      - name: Repository laden
-        uses: actions/checkout@v4
-
-      - name: Node.js 22 verwenden
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: API-Key prüfen
-        shell: bash
-        run: |
-          if [ -z "$PEXELS_API_KEY" ]; then
-            echo "PEXELS_API_KEY fehlt"
-            exit 1
-          fi
-
-      - name: Zehn vertikale KI-Technologie-Videos suchen
-        run: npm run pexels:search -- "artificial intelligence technology" --type video --orientation vertical --per-page 10
-
-      - name: Suchergebnisse als Artifact speichern
-        uses: actions/upload-artifact@v4
-        with:
-          name: pexels-ai-technology-vertical-videos
-          path: .local-storage/pexels-search/
-          if-no-files-found: error
-          retention-days: 7
+      - run: echo "Dieser alte Verbindungstest ist deaktiviert. Verwende 'Pexels suchen' oder 'Pexels in Katalog importieren'."

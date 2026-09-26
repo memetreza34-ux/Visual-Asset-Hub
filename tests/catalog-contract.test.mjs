@@ -55,6 +55,9 @@ test('search index is deterministic and complete', () => {
   assert.equal(index.records.length, catalog.assets.length);
   assert.equal(index.catalogVersion, catalog.catalogVersion);
   assert.equal(index.catalogUpdatedAt, catalog.updatedAt);
+  for (const asset of catalog.assets.filter((entry) => entry.storage.previewUrl)) {
+    assert.equal(index.records.find((record) => record.id === asset.id)?.preview, asset.storage.previewUrl);
+  }
 });
 
 test('schema contains core rights and discovery fields', () => {
@@ -63,6 +66,7 @@ test('schema contains core rights and discovery fields', () => {
   for (const key of ['id', 'filename', 'tags', 'searchAliases', 'storage', 'rights', 'sha256']) {
     assert.ok(properties[key], `Schema-Feld fehlt: ${key}`);
   }
+  assert.ok(properties.storage.properties.previewUrl, 'storage.previewUrl fehlt im Schema');
   assert.ok(schema.$defs.asset.required.includes('rights'));
   assert.ok(schema.$defs.asset.required.includes('storage'));
 });

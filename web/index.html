@@ -6,87 +6,112 @@
   <meta name="description" content="Durchsuchbare Bibliothek für B-Rolls, Bilder, Animationen und weitere visuelle Assets." />
   <title>Visual Asset Hub</title>
   <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./selection-tools.css" />
+  <link rel="stylesheet" href="./quick-filters.css" />
+  <link rel="stylesheet" href="./status-indicators.css" />
+  <link rel="stylesheet" href="./local-admin.css" />
+  <link rel="stylesheet" href="./workspace-nav.css" />
+  <link rel="stylesheet" href="./release-status.css" />
+  <link rel="stylesheet" href="./script-visual-finder.css" />
+  <link rel="stylesheet" href="./script-planner.css" />
+  <link rel="stylesheet" href="./inbox-importer.css" />
+  <link rel="stylesheet" href="./inbox-uploader.css" />
+  <link rel="stylesheet" href="./review-queue.css" />
+  <link rel="stylesheet" href="./entity-research.css" />
+  <link rel="stylesheet" href="./arsenal-builder.css" />
+  <link rel="stylesheet" href="./expansion-dashboard.css" />
+  <link rel="stylesheet" href="./channel-arsenal.css" />
   <script type="module" src="./app.js"></script>
+  <script type="module" src="./selection-tools.js"></script>
+  <script type="module" src="./quick-filters.js"></script>
+  <script type="module" src="./status-indicators.js"></script>
+  <script type="module" src="./local-admin.js"></script>
+  <script type="module" src="./workspace-nav.js"></script>
+  <script type="module" src="./release-status.js"></script>
+  <script type="module" src="./script-visual-finder.js"></script>
+  <script type="module" src="./script-visual-media-pack.js"></script>
+  <script type="module" src="./script-planner.js"></script>
+  <script type="module" src="./inbox-importer.js"></script>
+  <script type="module" src="./inbox-uploader.js"></script>
+  <script type="module" src="./review-queue.js"></script>
+  <script type="module" src="./entity-research.js"></script>
+  <script type="module" src="./arsenal-builder.js"></script>
+  <script type="module" src="./expansion-dashboard.js"></script>
+  <script type="module" src="./channel-arsenal.js"></script>
 </head>
 <body>
   <header class="hero">
     <div>
       <span class="eyebrow">Universelle Medienbibliothek</span>
       <h1>Visual Asset Hub</h1>
-      <p>B-Rolls, Bilder, Animationen und Grafiken schnell finden, sicher prüfen und in jedem Content-Projekt wiederverwenden.</p>
+      <p>B-Rolls, Bilder, Animationen und Grafiken schnell finden, Rechte prüfen und in jedem Content-Projekt wiederverwenden.</p>
     </div>
-    <div class="hero-stat">
-      <strong id="asset-count">0</strong>
-      <span>katalogisierte Assets</span>
+    <div class="hero-stats" aria-label="Katalogstatus">
+      <div class="hero-stat"><strong id="asset-count">0</strong><span>Assets</span></div>
+      <div class="hero-stat"><strong id="review-count">0</strong><span>zu prüfen</span></div>
+      <div class="hero-stat"><strong id="approved-count">0</strong><span>freigegeben</span></div>
+      <div class="hero-stat"><strong id="usage-count">0</strong><span>Nutzungen</span></div>
     </div>
   </header>
 
   <main>
     <section class="toolbar" aria-label="Asset-Suche und Filter">
-      <label class="search-field">
-        <span>Suche</span>
-        <input id="search" type="search" placeholder="z. B. Smartphone, Geld, Handwerk, close-up …" autocomplete="off" />
-      </label>
-      <label>
-        <span>Typ</span>
-        <select id="type-filter"><option value="">Alle Typen</option></select>
-      </label>
-      <label>
-        <span>Kategorie</span>
-        <select id="category-filter"><option value="">Alle Kategorien</option></select>
-      </label>
-      <label>
-        <span>Ausrichtung</span>
-        <select id="orientation-filter"><option value="">Alle Ausrichtungen</option></select>
-      </label>
-      <label>
-        <span>Status</span>
-        <select id="status-filter"><option value="">Alle Status</option></select>
-      </label>
-      <label>
-        <span>Lizenz</span>
-        <select id="license-filter"><option value="">Alle Lizenzen</option></select>
-      </label>
-      <label>
-        <span>Sortierung</span>
-        <select id="sort-filter">
-          <option value="quality">Beste Qualität</option>
-          <option value="title">Titel A–Z</option>
-          <option value="category">Kategorie</option>
-        </select>
-      </label>
+      <label class="search-field"><span>Suche</span><input id="search" type="search" placeholder="z. B. Smartphone, Geld, Handwerk, close-up …" autocomplete="off" /></label>
+      <label><span>Typ</span><select id="type-filter"><option value="">Alle Typen</option></select></label>
+      <label><span>Kategorie</span><select id="category-filter"><option value="">Alle Kategorien</option></select></label>
+      <label><span>Ausrichtung</span><select id="orientation-filter"><option value="">Alle Ausrichtungen</option></select></label>
+      <label><span>Stil</span><select id="style-filter"><option value="">Alle Stile</option></select></label>
+      <label><span>Status</span><select id="status-filter"><option value="">Alle Status</option></select></label>
+      <label><span>Lizenz</span><select id="license-filter"><option value="">Alle Lizenzen</option></select></label>
+      <label><span>Nutzung</span><select id="usage-filter"><option value="">Alle Nutzungen</option></select></label>
+      <label><span>Sortierung</span><select id="sort-filter"><option value="quality">Beste Qualität</option><option value="newest">Neu importiert</option><option value="most-used">Am häufigsten genutzt</option><option value="title">Titel A–Z</option><option value="category">Kategorie</option></select></label>
+      <label class="favorite-filter"><input id="favorites-filter" type="checkbox" /><span>Nur Favoriten</span></label>
       <button id="reset" type="button">Filter zurücksetzen</button>
     </section>
 
-    <section class="result-bar" aria-live="polite">
-      <strong id="result-count">0 Assets</strong>
-      <span id="catalog-date"></span>
+    <section id="local-admin-status" class="local-admin-status" hidden>
+      <div><strong>Lokale Verwaltung aktiv</strong><span id="local-admin-status-text"></span></div>
+      <button id="local-backup" type="button">Katalog-Backup erstellen</button>
     </section>
 
-    <section id="asset-grid" class="asset-grid" aria-label="Gefundene Assets"></section>
-    <section id="empty-state" class="empty-state" hidden>
-      <h2>Keine Assets gefunden</h2>
-      <p>Filter ändern oder neue Dateien über den Importbefehl katalogisieren.</p>
-      <code>npm run asset:add -- --help</code>
+    <section id="release-status" class="release-status" hidden aria-label="Beta-Fortschritt"></section>
+    <section id="script-visual-finder" class="script-visual-finder" hidden aria-label="Fertiges Skript in passende Visuals und B-Rolls umwandeln"></section>
+    <section id="script-planner" class="script-planner" hidden aria-label="Reel- und Skript-Planer"></section>
+    <section id="entity-research" class="entity-research" hidden aria-label="Personen- und Themenrecherche für Reels"></section>
+    <section id="inbox-importer" class="inbox-importer" hidden aria-label="Import eigener lokaler Medien"></section>
+    <section id="review-queue" class="review-queue" hidden aria-label="Schnelle Review-Warteschlange"></section>
+    <section id="arsenal-builder" class="arsenal-builder" hidden aria-label="Medienquellen durchsuchen"></section>
+    <section id="expansion-dashboard" class="expansion-dashboard" hidden aria-label="Ausbaufortschritt der vier Kanalbibliotheken"></section>
+    <section id="channel-arsenal" class="channel-arsenal" hidden aria-label="Kanal-Arsenal für Finanzen, KI, Elektrotechnik und Kampfsport"></section>
+    <section id="review-warning" class="review-warning" hidden></section>
+
+    <section class="quick-filter-section" aria-label="Schnellfilter">
+      <span>Schnell finden</span>
+      <div id="quick-filters" class="quick-filters"></div>
     </section>
+
+    <section class="selection-bar" aria-label="Aktuelle Asset-Auswahl">
+      <span><strong id="favorite-selection-count">0</strong> Favoriten in der Auswahl</span>
+      <div>
+        <button id="export-favorites" type="button">Auswahl exportieren</button>
+        <button id="clear-favorites" type="button">Auswahl leeren</button>
+      </div>
+    </section>
+
+    <section class="result-bar" aria-live="polite"><strong id="result-count">0 Assets</strong><span id="catalog-date"></span></section>
+    <section id="asset-grid" class="asset-grid" aria-label="Gefundene Assets"></section>
+    <button id="load-more" class="load-more" type="button" hidden>Mehr anzeigen</button>
+    <section id="empty-state" class="empty-state" hidden><h2>Keine Assets gefunden</h2><p>Filter ändern, „Skript → Visuals“ oder „Thema recherchieren“ nutzen oder über „Medien suchen“ neue Treffer aus Pexels, Pixabay, Unsplash, Openverse oder Wikimedia Commons als Review importieren.</p></section>
   </main>
 
-  <dialog id="asset-dialog">
-    <button class="dialog-close" type="button" aria-label="Detailansicht schließen">×</button>
-    <div id="dialog-content"></div>
-  </dialog>
+  <dialog id="asset-dialog"><button class="dialog-close" type="button" aria-label="Detailansicht schließen">×</button><div id="dialog-content"></div></dialog>
 
   <template id="asset-card-template">
     <article class="asset-card">
+      <button class="favorite-button" type="button" aria-label="Favorit umschalten" title="Favorit umschalten">☆</button>
       <button class="asset-open" type="button">
         <div class="preview"><span class="preview-type"></span></div>
-        <div class="asset-body">
-          <div class="asset-topline"><span class="type-badge"></span><span class="quality"></span></div>
-          <h2></h2>
-          <p class="description"></p>
-          <div class="tags"></div>
-          <div class="asset-meta"><span class="category"></span><span class="orientation"></span><span class="license"></span></div>
-        </div>
+        <div class="asset-body"><div class="asset-topline"><span class="type-badge"></span><span class="quality"></span></div><h2></h2><p class="description"></p><div class="tags"></div><div class="asset-meta"><span class="category"></span><span class="orientation"></span><span class="license"></span></div></div>
       </button>
     </article>
   </template>

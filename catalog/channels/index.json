@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "updatedAt": "2026-08-07T13:55:00.000Z",
+  "files": [
+    "catalog/channels/finance.json",
+    "catalog/channels/ai.json",
+    "catalog/channels/electro.json",
+    "catalog/channels/combat-sports.json"
+  ],
+  "variants": [
+    {"id":"video-vertical","type":"video","orientation":"vertical","perPage":20},
+    {"id":"video-horizontal","type":"video","orientation":"horizontal","perPage":15},
+    {"id":"photo-vertical","type":"photo","orientation":"vertical","perPage":15},
+    {"id":"photo-horizontal","type":"photo","orientation":"horizontal","perPage":15}
+  ],
+  "goals": {
+    "minimumApprovedPerCollection": 4,
+    "recommendedApprovedPerCollection": 8,
+    "minimumVideosPerCollection": 2,
+    "minimumPhotosPerCollection": 2
+  },
+  "rules": [
+    "Jeder externe Medienimport startet im Status review.",
+    "Nur ausgewählte Treffer werden in den Katalog übernommen.",
+    "Pexels und Pixabay liefern Bilder und Videos; Unsplash, Openverse und Wikimedia Commons werden im Builder für Bilder verwendet.",
+    "Openverse und Wikimedia Commons werden auf Public Domain, CC0, CC BY und CC BY-SA vorgefiltert; die Original-Lizenzseite muss vor Freigabe trotzdem geprüft werden.",
+    "UFC- und Eventlogos, TV-Broadcastmaterial und fremde Marken werden nicht automatisch freigegeben.",
+    "Personen, Kennzeichen, medizinische Inhalte und sensible Daten benötigen eine Sichtprüfung.",
+    "Für Reels wird vertikales Material priorisiert; horizontales Material bleibt für YouTube und Webseiten erhalten."
+  ]
+}

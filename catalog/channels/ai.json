@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "id": "ai",
+  "label": "Künstliche Intelligenz",
+  "description": "B-Rolls und Bilder zu KI, Robotik, Coding, Automatisierung und digitaler Zukunft.",
+  "primaryCategory": "artificial-intelligence",
+  "channelTag": "channel-ai",
+  "defaultOrientations": ["vertical", "horizontal"],
+  "collections": [
+    {"id":"ai-general","label":"KI allgemein","queries":["artificial intelligence technology abstract","AI interface futuristic","human using artificial intelligence"],"tags":["ai","artificial-intelligence","future","technology","interface"]},
+    {"id":"humanoid-robots","label":"Humanoide Roboter","queries":["humanoid robot laboratory","robot hand technology close up","human and robot interaction"],"tags":["robot","humanoid","robot-hand","laboratory","future"]},
+    {"id":"machine-learning-data","label":"Machine Learning & Daten","queries":["machine learning data visualization","data scientist computer screens","algorithm data processing"],"tags":["machine-learning","data","algorithm","analytics","computer"]},
+    {"id":"coding-development","label":"Coding & Entwicklung","queries":["software developer coding dark room","programmer typing code laptop","code screen close up"],"tags":["coding","developer","programming","software","softwareentwicklung","software-development","screen"]},
+    {"id":"automation-workflows","label":"Automatisierung & Workflows","queries":["business process automation screen","robotic process automation office","workflow automation technology"],"tags":["automation","workflow","process","robotic","productivity"]},
+    {"id":"generative-ai-art","label":"Generative KI & Bilder","queries":["AI generated art creation","digital artist futuristic screen","generative artificial intelligence animation"],"tags":["generative-ai","ai-art","creation","digital-art","image"]},
+    {"id":"chatbots-assistants","label":"Chatbots & Assistenten","queries":["chatbot conversation smartphone","virtual assistant interface","customer support AI chat"],"tags":["chatbot","assistant","conversation","support","smartphone"]},
+    {"id":"neural-networks","label":"Neuronale Netze","queries":["neural network animation","digital brain connections","artificial intelligence nodes"],"tags":["neural-network","digital-brain","nodes","connections","deep-learning"]},
+    {"id":"data-centers-cloud","label":"Rechenzentren & Cloud","queries":["data center server racks","cloud computing servers","server room blue lights"],"tags":["data-center","cloud","server","rack","computing"]},
+    {"id":"cybersecurity","label":"Cybersecurity","queries":["cybersecurity hacker computer","digital lock data protection","security operations center"],"tags":["cybersecurity","hacker","data-protection","lock","security"]},
+    {"id":"smart-home-iot","label":"Smart Home & IoT","queries":["smart home automation phone","internet of things devices","smart thermostat home"],"tags":["smart-home","iot","devices","automation","home"]},
+    {"id":"autonomous-vehicles","label":"Autonome Fahrzeuge","queries":["self driving car technology","autonomous vehicle sensors","car AI dashboard"],"tags":["autonomous-car","vehicle","sensors","dashboard","ai"],"reviewNotes":"Fahrzeugmarken und Kennzeichen vor Verwendung prüfen."},
+    {"id":"healthcare-ai","label":"KI in Medizin","queries":["medical artificial intelligence doctor screen","AI healthcare scan analysis","robot surgery technology"],"tags":["healthcare-ai","medical","doctor","scan","robotics"],"reviewNotes":"Keine konkrete Diagnose suggerieren und Patientendaten vermeiden."},
+    {"id":"education-ai","label":"KI in Bildung","queries":["student using AI laptop","digital learning technology classroom","online education artificial intelligence"],"tags":["education-ai","student","learning","classroom","laptop"]},
+    {"id":"business-ai","label":"KI im Business","queries":["business team AI presentation","office artificial intelligence analytics","company automation meeting"],"tags":["business-ai","office","analytics","meeting","automation"]},
+    {"id":"ai-ethics-surveillance","label":"Ethik & Überwachung","queries":["facial recognition surveillance camera","AI ethics concept","digital privacy monitoring"],"tags":["ai-ethics","surveillance","privacy","facial-recognition","monitoring"],"reviewNotes":"Gesichter und Datenschutzkontext besonders prüfen."},
+    {"id":"future-city","label":"Zukunftsstadt","queries":["futuristic smart city night","digital city network animation","future urban technology"],"tags":["future-city","smart-city","urban","network","technology"]},
+    {"id":"virtual-reality","label":"VR & AR","queries":["virtual reality headset user","augmented reality interface","metaverse digital world"],"tags":["virtual-reality","augmented-reality","headset","metaverse","digital"]},
+    {"id":"mobile-ai","label":"KI auf Smartphone","queries":["AI smartphone app interface","person using artificial intelligence phone","mobile assistant technology"],"tags":["mobile-ai","smartphone","app","assistant","technology"]},
+    {"id":"content-creation-ai","label":"KI für Content","queries":["content creator using AI tools","video editing artificial intelligence","AI social media creation"],"tags":["content-creation","video-editing","social-media","creator","ai"]}
+  ]
+}

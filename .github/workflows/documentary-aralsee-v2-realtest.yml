@@ -1,0 +1,206 @@
+name: Aralsee V7 Realtest
+
+on:
+  push:
+    branches: [agent/beta-release]
+    paths:
+      - '.github/workflows/documentary-aralsee-v2-realtest.yml'
+      - 'scripts/documentary-research-v7.mjs'
+      - 'scripts/documentary-research-v6.mjs'
+      - 'scripts/documentary-research-v5.mjs'
+      - 'scripts/documentary-phase1.mjs'
+      - 'scripts/documentary-materialize-v2.mjs'
+      - 'scripts/documentary-materialize.mjs'
+      - 'scripts/lib/wikimedia.mjs'
+      - 'scripts/lib/nasa-media.mjs'
+      - 'documentary-registry/briefs/TOPIC-0001.json'
+      - 'package.json'
+
+permissions:
+  contents: read
+
+jobs:
+  phase1-realtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      PEXELS_API_KEY: ${{ secrets.PEXELS_API || secrets.PEXELS_API_KEY }}
+      PIXABAY_API: ${{ secrets.PIXABAY_API || secrets.PIXABAY_API_KEY }}
+      UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_API || secrets.UNSPLASH_ACCESS_KEY }}
+    steps:
+      - name: Repository laden
+        uses: actions/checkout@v4
+        with:
+          lfs: false
+
+      - name: Node.js 22 verwenden
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: V7 Syntax vor Realtest pruefen
+        run: |
+          node --check scripts/documentary-research-v7.mjs
+          node --check scripts/documentary-research-v6.mjs
+          node --check scripts/documentary-materialize-v2.mjs
+          node --check scripts/lib/wikimedia.mjs
+
+      - name: Verfuegbare optionale Qualitaetsdienste anzeigen
+        run: |
+          node - <<'NODE'
+          console.log(JSON.stringify({
+            pexels: Boolean(process.env.PEXELS_API_KEY),
+            pixabay: Boolean(process.env.PIXABAY_API),
+            unsplash: Boolean(process.env.UNSPLASH_ACCESS_KEY),
+            vision: Boolean(process.env.OPENAI_API_KEY)
+          }));
+          NODE
+
+      - name: Reserviertes Aralsee-Thema pruefen
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const r = JSON.parse(fs.readFileSync('documentary-registry/topic-register.json','utf8'));
+          const t = r.topics.find((x) => x.id === 'TOPIC-0001');
+          if (!t || t.status !== 'reserved') throw new Error('TOPIC-0001 ist nicht als reserved verfuegbar.');
+          const brief = JSON.parse(fs.readFileSync('documentary-registry/briefs/TOPIC-0001.json','utf8'));
+          if (!Array.isArray(brief.visualSearchAnchors) || brief.visualSearchAnchors.length < 5) throw new Error('TOPIC-0001 hat keine ausreichenden Visual-Suchanker.');
+          console.log(`${t.id}: ${t.title}; anchors=${brief.visualSearchAnchors.length}`);
+          NODE
+
+      - name: Autonome Phase 1 V7 real ausfuehren
+        run: |
+          npm run documentary:phase1 -- \
+            --duration 150 \
+            --max-tasks 18 \
+            --per-page 8 \
+            --alternatives 3 \
+            --overwrite-media \
+            --max-media-mb 120
+
+      - name: Strengen V7 Qualitaetsbericht erzeugen
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const root = 'videos/umweltgeschichte/001-wie-der-aralsee-fast-verschwand-und-warum-ein-teil-zuruckkam';
+          const project = `${root}/05-PROJECT`;
+          const scenes = JSON.parse(fs.readFileSync(`${project}/scenes.json`, 'utf8'));
+          const research = JSON.parse(fs.readFileSync(`${project}/research-summary.json`, 'utf8'));
+          const material = JSON.parse(fs.readFileSync(`${project}/materialization-summary.json`, 'utf8'));
+          const rescue = fs.existsSync(`${project}/anchor-rescue-report.json`) ? JSON.parse(fs.readFileSync(`${project}/anchor-rescue-report.json`, 'utf8')) : {};
+          const archiveGate = fs.existsSync(`${project}/archive-relevance-v7-report.json`) ? JSON.parse(fs.readFileSync(`${project}/archive-relevance-v7-report.json`, 'utf8')) : {};
+          const providers = {};
+          const selected = [];
+          const blockedScenes = [];
+          const weakSelections = [];
+          const generatedSelections = [];
+          const irrelevantStock = [];
+          const irrelevantArchive = [];
+          const uniqueAssets = new Set();
+          const archiveTopicRe = /\baral\b|syr[ -]?darya|amu[ -]?darya|aralkum|muyn|moynaq|kok[ -]?aral|kazakh|uzbek|irrigat|cotton|salin|dust|saxaul|fishing/i;
+          let coveredScenes = 0;
+          for (const scene of scenes.scenes || []) {
+            const shots = scene.recommendedShots || [];
+            if (shots.length) coveredScenes += 1;
+            else blockedScenes.push({sceneId: scene.sceneId, text: scene.originalText, status: scene.research?.qualityGate?.status, rescue: scene.research?.v6Rescue?.status, v7: scene.research?.v7ArchiveGate?.status});
+            for (const shot of shots) {
+              providers[shot.provider] = (providers[shot.provider] || 0) + 1;
+              const candidate = (scene.candidates || []).find((x) => x.key === shot.candidateKey) || {};
+              const identity = candidate.identity || `${candidate.provider || shot.provider}|${candidate.providerId || candidate.key || shot.candidateKey}`;
+              uniqueAssets.add(identity);
+              const candidateText = [candidate.title, candidate.asset?.title, candidate.asset?.description, candidate.query].filter(Boolean).join(' ');
+              const row = {
+                sceneId: scene.sceneId,
+                shotId: shot.shotId,
+                provider: shot.provider,
+                mediaType: shot.mediaType,
+                title: candidate.title || '',
+                documentaryScore: candidate.documentaryScore ?? null,
+                directorScore: candidate.directorScore ?? null,
+                qualityGateScore: candidate.anchorRescueScore ?? candidate.qualityGateScore ?? null,
+                anchorQuery: candidate.anchorQuery ?? null,
+                anchorMatch: candidate.anchorMatch ?? null,
+                topicMatch: candidate.topicMatch ?? null,
+                lexicalMatch: candidate.scoreBreakdown?.lexicalMatch ?? null,
+                continuityReuse: Boolean(shot.continuityReuse || candidate.continuityReuse),
+                sourceUrl: candidate.sourceUrl || ''
+              };
+              selected.push(row);
+              if (Number(row.qualityGateScore ?? 0) < 35) weakSelections.push(row);
+              if (/ai[- ]generated|generated with ai|artificial intelligence generated|midjourney|stable diffusion|sora generated/i.test(row.title)) generatedSelections.push(row);
+              if (['pexels','pixabay','unsplash'].includes(row.provider) && Number(row.lexicalMatch ?? 0) < 6) irrelevantStock.push(row);
+              if (['wikimedia','openverse','loc'].includes(row.provider) && !row.anchorQuery && Number(row.lexicalMatch ?? 0) < 6 && !archiveTopicRe.test(candidateText)) irrelevantArchive.push(row);
+            }
+          }
+          const total = selected.length;
+          const videos = selected.filter((x) => x.mediaType === 'video').length;
+          const images = total - videos;
+          const pexels = providers.pexels || 0;
+          const report = {
+            director: research.director,
+            sceneCount: scenes.scenes?.length || 0,
+            coveredScenes,
+            coverageShare: scenes.scenes?.length ? Number((coveredScenes / scenes.scenes.length).toFixed(3)) : 0,
+            totalShots: total,
+            uniqueAssets: uniqueAssets.size,
+            videoShots: videos,
+            imageShots: images,
+            videoShare: total ? Number((videos / total).toFixed(3)) : 0,
+            providerDistribution: providers,
+            pexelsShare: total ? Number((pexels / total).toFixed(3)) : 0,
+            qualityBlockedScenes: blockedScenes.length,
+            stockPrunedForIrrelevance: research.stockPrunedForIrrelevance || rescue.stockPrunedForIrrelevance || 0,
+            archivePrunedForIrrelevance: research.archivePrunedForIrrelevance || archiveGate.archivePrunedForIrrelevance || 0,
+            v7ArchiveRemoved: archiveGate.removed || [],
+            v6RescueSearches: research.v6RescueSearches || rescue.searches || 0,
+            v6CandidatesByProvider: research.v6CandidatesByProvider || rescue.candidatesByProvider || {},
+            v6SelectedByProvider: research.v6SelectedByProvider || rescue.selectedByProvider || {},
+            v6RescuedScenes: research.v6RescuedScenes || rescue.rescuedScenes || 0,
+            v6ContinuityReusedScenes: research.v6ContinuityReusedScenes || rescue.continuityReusedScenes || 0,
+            v6RescueErrors: rescue.errors || [],
+            visionCheckedScenes: research.visionCheckedScenes || 0,
+            visionFallbackScenes: research.visionFallbackScenes || 0,
+            localShotFiles: material.shotFiles || 0,
+            networkDownloads: material.networkDownloads || 0,
+            locallyReusedFiles: material.reusedFiles || 0,
+            downloadRetries: material.retryCount || 0,
+            wikimediaThrottledRequests: material.wikimediaThrottledRequests || 0,
+            wikimediaPreviewDownloads: material.wikimediaPreviewDownloads || 0,
+            downloadedVideos: material.videoFiles || 0,
+            downloadedImages: material.imageFiles || 0,
+            downloadFailures: material.failed || 0,
+            downloadErrors: material.errors || [],
+            weakSelections,
+            generatedSelections,
+            irrelevantStock,
+            irrelevantArchive,
+            blockedScenes,
+            selected
+          };
+          console.log('=== V7 REALTEST REPORT ===');
+          console.log(JSON.stringify(report, null, 2));
+          console.log('=== END V7 REALTEST REPORT ===');
+
+          const failures = [];
+          if (coveredScenes < 20) failures.push(`zu wenige verlaesslich abgedeckte Szenen: ${coveredScenes} < 20`);
+          if (uniqueAssets.size < 12) failures.push(`zu wenige eindeutige hochwertige Assets: ${uniqueAssets.size} < 12`);
+          if (report.videoShare > 0.80) failures.push(`Videoquote zu hoch: ${report.videoShare}`);
+          if (report.pexelsShare > 0.65) failures.push(`Pexels-Anteil zu hoch: ${report.pexelsShare}`);
+          if (weakSelections.length) failures.push(`${weakSelections.length} ausgewaehlte Shots unter QualityGateScore 35`);
+          if (generatedSelections.length) failures.push(`${generatedSelections.length} AI-generierte Archivtreffer ausgewaehlt`);
+          if (irrelevantStock.length) failures.push(`${irrelevantStock.length} generische Stock-Treffer ohne ausreichenden Bezug ausgewaehlt`);
+          if (irrelevantArchive.length) failures.push(`${irrelevantArchive.length} Archiv-Treffer ohne belastbaren Themenbezug ausgewaehlt`);
+          if (material.failed > Math.max(6, Math.ceil(total * 0.25))) failures.push(`zu viele Downloadfehler: ${material.failed}`);
+          if (failures.length) throw new Error(`V7 Qualitaetsgate nicht bestanden:\n- ${failures.join('\n- ')}`);
+          NODE
+
+      - name: Lokale Realtest-Dateien zusammenfassen
+        if: always()
+        run: |
+          ROOT='videos/umweltgeschichte/001-wie-der-aralsee-fast-verschwand-und-warum-ein-teil-zuruckkam'
+          echo '=== VISUAL FILE COUNTS ==='
+          find "$ROOT/03-VISUALS" -type f 2>/dev/null | wc -l || true
+          du -sh "$ROOT/03-VISUALS" 2>/dev/null || true
+          echo 'Nur ausgewaehlte Shots werden materialisiert; Alternativen bleiben Metadaten.'
+          echo 'Artifact-Upload absichtlich deaktiviert: Repository-Artifact-Quota ist derzeit voll.'

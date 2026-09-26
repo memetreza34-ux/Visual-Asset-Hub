@@ -2,13 +2,26 @@ import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
 import process from 'node:process';
+import { spawnSync } from 'node:child_process';
+import { createLocalAdminApi } from './local-admin-api.mjs';
+import { createLocalArsenalApi } from './local-arsenal-api.mjs';
+import { createLocalEntityApi } from './local-entity-api.mjs';
+import { createLocalScriptVisualApi } from './local-script-visual-api.mjs';
+import { createLocalInboxApi } from './local-inbox-api.mjs';
+import { createLocalUploadApi } from './local-upload-api.mjs';
 
 const root = process.cwd();
 const host = process.env.HOST || '127.0.0.1';
 const port = Number(process.env.PORT || 4173);
+const allowedHosts = new Set(['127.0.0.1', 'localhost', '::1']);
+const apiPrefixes = ['/api/', '/arsenal-api/', '/entity-api/', '/script-visual-api/', '/inbox-api/', '/upload-api/'];
 
 if (!Number.isInteger(port) || port < 1 || port > 65535) {
   console.error('PORT muss zwischen 1 und 65535 liegen.');
+  process.exit(1);
+}
+if (!allowedHosts.has(host) && process.env.VAH_ALLOW_REMOTE !== 'true') {
+  console.error('Aus Sicherheitsgründen darf der Verwaltungsserver nur lokal laufen. Nutze HOST=127.0.0.1.');
   process.exit(1);
 }
 
@@ -16,22 +29,77 @@ const mimeTypes = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
+  '.mjs': 'text/javascript; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
+  '.webmanifest': 'application/manifest+json',
   '.svg': 'image/svg+xml',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
   '.webp': 'image/webp',
   '.avif': 'image/avif',
+  '.gif': 'image/gif',
+  '.tif': 'image/tiff',
+  '.tiff': 'image/tiff',
   '.mp4': 'video/mp4',
   '.webm': 'video/webm',
-  '.mov': 'video/quicktime'
+  '.mov': 'video/quicktime',
+  '.mkv': 'video/x-matroska'
 };
 
-const server = http.createServer((request, response) => {
+rebuildMediaVault('Start');
+watchCatalogForVaultUpdates();
+
+const adminApi = createLocalAdminApi({ root });
+const arsenalApi = createLocalArsenalApi({ root, token: adminApi.token });
+const entityApi = createLocalEntityApi({ root, token: adminApi.token });
+const scriptVisualApi = createLocalScriptVisualApi({ root, token: adminApi.token });
+const inboxApi = createLocalInboxApi({ root, token: adminApi.token });
+const uploadApi = createLocalUploadApi({ root, token: adminApi.token });
+let activeWriteAction = null;
+
+const server = http.createServer(async (request, response) => {
   try {
     const url = new URL(request.url || '/', `http://${request.headers.host || `${host}:${port}`}`);
-    const pathname = url.pathname === '/' ? '/web/index.html' : decodeURIComponent(url.pathname);
+
+    if (url.pathname === '/') {
+      response.writeHead(302, {
+        Location: '/web/',
+        'Cache-Control': 'no-store'
+      });
+      return response.end();
+    }
+
+    const isApiRequest = apiPrefixes.some((prefix) => url.pathname.startsWith(prefix));
+    const isWriteRequest = isApiRequest && request.method === 'POST';
+
+    if (isWriteRequest && activeWriteAction) {
+      request.resume();
+      return sendJson(response, 409, {
+        error: `Eine andere lokale Schreibaktion läuft bereits: ${activeWriteAction}. Bitte danach erneut versuchen.`
+      });
+    }
+
+    if (isApiRequest) {
+      if (isWriteRequest) activeWriteAction = url.pathname;
+      try {
+        if (await uploadApi.handle(request, response, url)) return;
+        if (await inboxApi.handle(request, response, url)) return;
+        if (await scriptVisualApi.handle(request, response, url)) return;
+        if (await entityApi.handle(request, response, url)) return;
+        if (await arsenalApi.handle(request, response, url)) return;
+        if (await adminApi.handle(request, response, url)) return;
+      } finally {
+        if (isWriteRequest) activeWriteAction = null;
+      }
+    }
+
+    if (!['GET', 'HEAD'].includes(request.method || 'GET')) {
+      response.setHeader('Allow', 'GET, HEAD');
+      return send(response, 405, 'Methode nicht erlaubt.');
+    }
+
+    const pathname = url.pathname === '/web/' ? '/web/index.html' : decodeURIComponent(url.pathname);
     if (pathname.includes('\0') || pathname.split('/').some((part) => part === '..' || part.startsWith('.'))) {
       return send(response, 400, 'Ungültiger Pfad.');
     }
@@ -45,10 +113,14 @@ const server = http.createServer((request, response) => {
     const range = request.headers.range;
     const contentType = mimeTypes[path.extname(filePath).toLowerCase()] || 'application/octet-stream';
 
+    setSecurityHeaders(response, pathname);
     response.setHeader('Content-Type', contentType);
-    response.setHeader('X-Content-Type-Options', 'nosniff');
-    response.setHeader('Referrer-Policy', 'no-referrer');
-    response.setHeader('Cache-Control', pathname.includes('/catalog/') ? 'no-store' : 'public, max-age=300');
+    response.setHeader('Content-Length', stat.size);
+
+    if (request.method === 'HEAD') {
+      response.statusCode = 200;
+      return response.end();
+    }
 
     if (range && contentType.startsWith('video/')) {
       const match = /^bytes=(\d*)-(\d*)$/.exec(range);
@@ -65,7 +137,6 @@ const server = http.createServer((request, response) => {
       return;
     }
 
-    response.setHeader('Content-Length', stat.size);
     fs.createReadStream(filePath).pipe(response);
   } catch (error) {
     send(response, 500, error instanceof Error ? error.message : 'Serverfehler.');
@@ -74,9 +145,64 @@ const server = http.createServer((request, response) => {
 
 server.listen(port, host, () => {
   console.log(`Visual Asset Hub: http://${host}:${port}`);
+  console.log('Lokale Verwaltung aktiv: Script Visual Finder, Themenrecherche, Skriptplanung, Browser-Upload, Review, Freigabe, Nutzung, Medienpakete, Inbox und Arsenal-Suche stehen bereit.');
+  console.log('Alles-gefunden-Ordner aktiv: catalog/assets.json wird automatisch nach ALLES-GEFUNDEN/ gespiegelt.');
 });
 
+function watchCatalogForVaultUpdates() {
+  const catalogPath = path.join(root, 'catalog', 'assets.json');
+  if (!fs.existsSync(catalogPath)) return;
+  let timer = null;
+  try {
+    fs.watch(catalogPath, { persistent: false }, () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => rebuildMediaVault('Katalogänderung'), 300);
+    });
+  } catch (error) {
+    console.warn(`Alles-gefunden-Wächter konnte nicht gestartet werden: ${error instanceof Error ? error.message : error}`);
+  }
+}
+
+function rebuildMediaVault(reason) {
+  const result = spawnSync(process.execPath, ['scripts/build-found-media-vault.mjs'], {
+    cwd: root,
+    encoding: 'utf8',
+    shell: false,
+    maxBuffer: 4 * 1024 * 1024
+  });
+  if (result.status === 0) {
+    const line = String(result.stdout || '').trim().split('\n').filter(Boolean).at(-1);
+    if (line) console.log(`[${reason}] ${line}`);
+    return;
+  }
+  const detail = `${result.stdout || ''}${result.stderr || ''}`.trim();
+  console.warn(`[${reason}] ALLES-GEFUNDEN konnte nicht aktualisiert werden${detail ? `: ${detail.slice(-1200)}` : '.'}`);
+}
+
+function setSecurityHeaders(response, pathname) {
+  response.setHeader('X-Content-Type-Options', 'nosniff');
+  response.setHeader('Referrer-Policy', 'no-referrer');
+  response.setHeader('X-Frame-Options', 'DENY');
+  response.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
+  response.setHeader('Content-Security-Policy', "default-src 'self'; img-src 'self' https: data:; media-src 'self' https:; style-src 'self'; script-src 'self'; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
+  response.setHeader('Cache-Control', pathname.includes('/catalog/') || pathname.includes('/inbox/') ? 'no-store' : 'public, max-age=300');
+}
+
+function sendJson(response, status, value) {
+  response.writeHead(status, {
+    'Content-Type': 'application/json; charset=utf-8',
+    'X-Content-Type-Options': 'nosniff',
+    'Cache-Control': 'no-store',
+    'Referrer-Policy': 'no-referrer'
+  });
+  response.end(`${JSON.stringify(value, null, 2)}\n`);
+}
+
 function send(response, status, text) {
-  response.writeHead(status, { 'Content-Type': 'text/plain; charset=utf-8', 'X-Content-Type-Options': 'nosniff' });
+  response.writeHead(status, {
+    'Content-Type': 'text/plain; charset=utf-8',
+    'X-Content-Type-Options': 'nosniff',
+    'Cache-Control': 'no-store'
+  });
   response.end(text);
 }

@@ -1,0 +1,10 @@
+DOKUMENTARY THEMEN-REGISTER
+==========================
+
+Dieses Register ist die zentrale Quelle fuer alle Doku-Themen.
+Vor jeder automatischen Themenwahl wird es geprueft.
+Bereits reservierte, fehlgeschlagene oder produzierte Themen werden nicht erneut verwendet.
+
+001 | 2026-09-25 | reserved | Umweltgeschichte | Wie der Aralsee fast verschwand – und warum ein Teil zurückkam
+      Blickwinkel: Wie sowjetische Wasserumleitungen einen der groessten Seen der Welt zerstoerten und der Kok-Aral-Damm den noerdlichen Teil teilweise rettete
+      Projekt: videos/umweltgeschichte/001-wie-der-aralsee-fast-verschwand-und-warum-ein-teil-zuruckkam

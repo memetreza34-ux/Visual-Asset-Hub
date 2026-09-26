@@ -1,0 +1,33 @@
+name: Katalog-Testversion bauen
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: visual-asset-hub-preview-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: { lfs: false }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm run report
+      - run: npm run site:build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: visual-asset-hub-testversion
+          path: dist/
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: katalogbericht
+          path: reports/
+          retention-days: 7

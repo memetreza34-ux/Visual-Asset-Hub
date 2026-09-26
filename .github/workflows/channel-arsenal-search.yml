@@ -1,0 +1,83 @@
+name: Kanal-Arsenal durchsuchen
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: Kanal
+        required: true
+        default: finance
+        type: choice
+        options:
+          - finance
+          - ai
+          - electro
+          - combat-sports
+      max_collections:
+        description: Anzahl Sammlungen in diesem Batch
+        required: true
+        default: "5"
+      max_jobs:
+        description: Maximale Pexels-Suchaufträge
+        required: true
+        default: "20"
+      force:
+        description: Vorhandene Suchdateien überschreiben
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  search:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    env:
+      PEXELS_API_KEY: ${{ secrets.PEXELS_API }}
+    steps:
+      - name: Repository laden
+        uses: actions/checkout@v4
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Kanalbibliothek prüfen
+        run: npm run arsenal:validate
+
+      - name: Suchplan erzeugen
+        run: >-
+          npm run arsenal:plan --
+          --channel "${{ inputs.channel }}"
+          --max-collections "${{ inputs.max_collections }}"
+
+      - name: API-Key prüfen
+        shell: bash
+        run: |
+          if [ -z "$PEXELS_API_KEY" ]; then
+            echo "Repository Secret PEXELS_API fehlt."
+            exit 1
+          fi
+
+      - name: Pexels-Suchbatch ausführen
+        run: >-
+          npm run arsenal:search --
+          --execute true
+          --max-jobs "${{ inputs.max_jobs }}"
+          --continue-on-error true
+          --force "${{ inputs.force }}"
+
+      - name: Suchpaket hochladen
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: arsenal-${{ inputs.channel }}-${{ github.run_number }}
+          path: |
+            reports/arsenal-plan.json
+            reports/arsenal-plan.csv
+            .local-storage/arsenal-search/
+          if-no-files-found: warn
+          retention-days: 14

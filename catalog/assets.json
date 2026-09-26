@@ -1,5 +1,261 @@
 {
   "catalogVersion": 1,
-  "updatedAt": "2026-08-02T14:30:00.000Z",
-  "assets": []
+  "updatedAt": "2026-08-04T10:50:00.000Z",
+  "assets": [
+    {
+      "id": "VAH-P6153727",
+      "filename": "brl-technology-ai-robotic-hand-opening-hand-cu-vertical-0001.mp4",
+      "title": "Robotische Hand in Bewegung",
+      "description": "Vertikales Pexels-Video einer technologischen beziehungsweise robotischen Hand in Bewegung. Der vollständige Inhalt muss vor der Freigabe visuell geprüft werden.",
+      "type": "video",
+      "category": "technology-ai",
+      "secondaryCategories": ["science-engineering"],
+      "tags": ["robotic-hand", "technology", "artificial-intelligence", "future", "pexels"],
+      "searchAliases": ["Roboterhand", "künstliche Hand", "robotic hand", "future technology"],
+      "subject": "robotic-hand",
+      "action": "opening-hand",
+      "orientation": "vertical",
+      "shotType": "cu",
+      "cameraMovement": "mixed",
+      "style": "realistic",
+      "status": "review",
+      "qualityRating": 4,
+      "technical": {
+        "width": 720,
+        "height": 1366,
+        "durationSeconds": 11,
+        "fps": 25,
+        "codec": "h264/mp4"
+      },
+      "storage": {
+        "kind": "external",
+        "previewUrl": "https://images.pexels.com/videos/6153727/pexels-photo-6153727.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1200&w=630",
+        "externalUrl": "https://videos.pexels.com/video-files/6153727/6153727-hd_720_1366_25fps.mp4"
+      },
+      "rights": {
+        "licenseStatus": "licensed",
+        "sourceName": "Pexels",
+        "sourceUrl": "https://www.pexels.com/de-de/video/hand-technologie-offen-schau-6153727/",
+        "licenseUrl": "https://www.pexels.com/license/",
+        "usageScopes": ["organic-social", "youtube", "website"],
+        "attributionRequired": false,
+        "attributionText": "Video von cottonbro studio auf Pexels",
+        "notes": "Pexels-Lizenz dokumentiert. Vor Freigabe vollständigen Clip, erkennbare Marken und Nutzungskontext prüfen."
+      },
+      "createdAt": "2026-08-04T09:35:00.000Z",
+      "importedAt": "2026-08-04T09:35:00.000Z",
+      "createdBy": "chatgpt-assisted-review-import",
+      "notes": "Pexels Asset-ID 6153727. Aus dem erfolgreich ausgeführten API-Verbindungstest ausgewählt; Status bleibt review."
+    },
+    {
+      "id": "VAH-P8087308",
+      "filename": "brl-technology-ai-humanoid-robot-holding-ms-vertical-0001.mp4",
+      "title": "Person hält humanoides Technologieobjekt",
+      "description": "Vertikales Pexels-Video mit einer Person und einem humanoiden Technologieobjekt. Eignung, sichtbare Personen und mögliche Marken müssen vor der Freigabe geprüft werden.",
+      "type": "video",
+      "category": "technology-ai",
+      "secondaryCategories": ["science-engineering", "people-lifestyle"],
+      "tags": ["humanoid-robot", "technology", "artificial-intelligence", "person", "pexels"],
+      "searchAliases": ["humanoider Roboter", "AI robot", "Mensch und Roboter", "future technology"],
+      "subject": "humanoid-robot",
+      "action": "holding",
+      "orientation": "vertical",
+      "shotType": "ms",
+      "cameraMovement": "mixed",
+      "style": "realistic",
+      "status": "review",
+      "qualityRating": 4,
+      "technical": {
+        "width": 720,
+        "height": 1280,
+        "durationSeconds": 9,
+        "fps": 25,
+        "codec": "h264/mp4"
+      },
+      "storage": {
+        "kind": "external",
+        "previewUrl": "https://images.pexels.com/videos/8087308/adult-android-art-artificial-intelligence-8087308.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1200&w=630",
+        "externalUrl": "https://videos.pexels.com/video-files/8087308/8087308-hd_720_1280_25fps.mp4"
+      },
+      "rights": {
+        "licenseStatus": "licensed",
+        "sourceName": "Pexels",
+        "sourceUrl": "https://www.pexels.com/de-de/video/mann-person-technologie-festhalten-8087308/",
+        "licenseUrl": "https://www.pexels.com/license/",
+        "usageScopes": ["organic-social", "youtube", "website"],
+        "attributionRequired": false,
+        "attributionText": "Video von Pavel Danilyuk auf Pexels",
+        "notes": "Pexels-Lizenz dokumentiert. Vor Freigabe vollständigen Clip, erkennbare Person, Marken und Nutzungskontext prüfen."
+      },
+      "createdAt": "2026-08-04T09:35:00.000Z",
+      "importedAt": "2026-08-04T09:35:00.000Z",
+      "createdBy": "chatgpt-assisted-review-import",
+      "notes": "Pexels Asset-ID 8087308. Aus dem erfolgreich ausgeführten API-Verbindungstest ausgewählt; Status bleibt review."
+    },
+    {
+      "id": "VAH-P8328141",
+      "filename": "brl-technology-ai-robot-companion-drinking-coffee-ms-vertical-0001.mp4",
+      "title": "Person mit Roboter und Getränk",
+      "description": "Vertikales Pexels-Video einer Person in einer Alltagsszene mit einem robotischen Technologieobjekt und einem Getränk. Der vollständige Inhalt muss vor der Freigabe geprüft werden.",
+      "type": "video",
+      "category": "technology-ai",
+      "secondaryCategories": ["people-lifestyle", "culture-entertainment"],
+      "tags": ["robot-companion", "technology", "artificial-intelligence", "coffee", "pexels"],
+      "searchAliases": ["Roboter im Alltag", "coffee with robot", "robot companion", "future lifestyle"],
+      "subject": "robot-companion",
+      "action": "drinking-coffee",
+      "orientation": "vertical",
+      "shotType": "ms",
+      "cameraMovement": "mixed",
+      "style": "realistic",
+      "status": "review",
+      "qualityRating": 4,
+      "technical": {
+        "width": 720,
+        "height": 1280,
+        "durationSeconds": 36,
+        "fps": 25,
+        "codec": "h264/mp4"
+      },
+      "storage": {
+        "kind": "external",
+        "previewUrl": "https://images.pexels.com/videos/8328141/coffee-with-a-robot-flower-invention-robot-8328141.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1200&w=630",
+        "externalUrl": "https://videos.pexels.com/video-files/8328141/8328141-hd_720_1280_25fps.mp4"
+      },
+      "rights": {
+        "licenseStatus": "licensed",
+        "sourceName": "Pexels",
+        "sourceUrl": "https://www.pexels.com/de-de/video/mann-technologie-trinken-drinnen-8328141/",
+        "licenseUrl": "https://www.pexels.com/license/",
+        "usageScopes": ["organic-social", "youtube", "website"],
+        "attributionRequired": false,
+        "attributionText": "Video von Pavel Danilyuk auf Pexels",
+        "notes": "Pexels-Lizenz dokumentiert. Vor Freigabe vollständigen Clip, erkennbare Person, Marken und Nutzungskontext prüfen."
+      },
+      "createdAt": "2026-08-04T09:35:00.000Z",
+      "importedAt": "2026-08-04T09:35:00.000Z",
+      "createdBy": "chatgpt-assisted-review-import",
+      "notes": "Pexels Asset-ID 8328141. Aus dem erfolgreich ausgeführten API-Verbindungstest ausgewählt; Status bleibt review."
+    },
+    {
+      "id": "VAH-GAINET01",
+      "filename": "gfx-abstract-backgrounds-ai-network-background-not-applicable-horizontal-0001.svg",
+      "title": "Abstraktes KI-Netzwerk",
+      "description": "Originale horizontale Vektorgrafik mit leuchtendem Netzwerk, Knoten und zentralem Mikrochip für KI-, Technologie- und Zukunftsinhalte.",
+      "type": "graphic",
+      "category": "abstract-backgrounds",
+      "secondaryCategories": ["technology-ai", "science-engineering"],
+      "tags": ["ai-network", "microchip", "technology", "future", "background"],
+      "searchAliases": ["KI Netzwerk", "künstliche Intelligenz Hintergrund", "AI network", "technology background"],
+      "subject": "ai-network",
+      "action": "background",
+      "orientation": "horizontal",
+      "shotType": "not-applicable",
+      "cameraMovement": "static",
+      "style": "illustration-2d",
+      "status": "review",
+      "qualityRating": 4,
+      "technical": {
+        "width": 1600,
+        "height": 900,
+        "codec": "svg"
+      },
+      "storage": {
+        "kind": "repository",
+        "path": "assets/graphics/original/gfx-abstract-backgrounds-ai-network-background-not-applicable-horizontal-0001.svg"
+      },
+      "rights": {
+        "licenseStatus": "owned",
+        "sourceName": "Visual Asset Hub Original",
+        "usageScopes": ["organic-social", "paid-ads", "youtube", "website", "app", "presentation", "client-work", "internal-only"],
+        "attributionRequired": false,
+        "attributionText": "Originalgrafik aus Visual Asset Hub",
+        "notes": "Eigenständig für Visual Asset Hub erstellte Vektorgrafik. Vor Freigabe Darstellung und gewünschten Einsatzkontext visuell prüfen."
+      },
+      "createdAt": "2026-08-04T10:45:00.000Z",
+      "importedAt": "2026-08-04T10:50:00.000Z",
+      "createdBy": "visual-asset-hub-original-generator",
+      "notes": "Kostenloses Original-Testasset ohne externe Stock-Abhängigkeit; Status bleibt bis zur Sichtprüfung review."
+    },
+    {
+      "id": "VAH-GBIZGR01",
+      "filename": "gfx-business-work-growth-chart-background-not-applicable-horizontal-0001.svg",
+      "title": "Business-Wachstum und Aufwärtstrend",
+      "description": "Originale horizontale Vektorgrafik mit steigenden Balken, Kurve und Aufwärtspfeil für Business-, Finanz-, Marketing- und Erfolgsthemen.",
+      "type": "graphic",
+      "category": "business-work",
+      "secondaryCategories": ["money-finance", "social-media-creator"],
+      "tags": ["growth-chart", "business", "finance", "success", "background"],
+      "searchAliases": ["Wachstum Grafik", "Umsatz steigt", "business growth", "upward chart"],
+      "subject": "growth-chart",
+      "action": "background",
+      "orientation": "horizontal",
+      "shotType": "not-applicable",
+      "cameraMovement": "static",
+      "style": "illustration-2d",
+      "status": "review",
+      "qualityRating": 4,
+      "technical": {
+        "width": 1600,
+        "height": 900,
+        "codec": "svg"
+      },
+      "storage": {
+        "kind": "repository",
+        "path": "assets/graphics/original/gfx-business-work-growth-chart-background-not-applicable-horizontal-0001.svg"
+      },
+      "rights": {
+        "licenseStatus": "owned",
+        "sourceName": "Visual Asset Hub Original",
+        "usageScopes": ["organic-social", "paid-ads", "youtube", "website", "app", "presentation", "client-work", "internal-only"],
+        "attributionRequired": false,
+        "attributionText": "Originalgrafik aus Visual Asset Hub",
+        "notes": "Eigenständig für Visual Asset Hub erstellte Vektorgrafik. Vor Freigabe Darstellung und gewünschten Einsatzkontext visuell prüfen."
+      },
+      "createdAt": "2026-08-04T10:46:00.000Z",
+      "importedAt": "2026-08-04T10:50:00.000Z",
+      "createdBy": "visual-asset-hub-original-generator",
+      "notes": "Kostenloses Original-Testasset ohne externe Stock-Abhängigkeit; Status bleibt bis zur Sichtprüfung review."
+    },
+    {
+      "id": "VAH-GCIRCU01",
+      "filename": "gfx-industry-trades-circuit-blueprint-background-not-applicable-horizontal-0001.svg",
+      "title": "Technischer Schaltplan-Hintergrund",
+      "description": "Originale horizontale Vektorgrafik im technischen Blueprint-Stil mit Leiterbahnen, Mikrochip und Schaltsymbolen für Industrie und Elektrotechnik.",
+      "type": "graphic",
+      "category": "industry-trades",
+      "secondaryCategories": ["science-engineering", "technology-ai"],
+      "tags": ["circuit-blueprint", "electronics", "industry", "engineering", "background"],
+      "searchAliases": ["Schaltplan Hintergrund", "Elektrotechnik Grafik", "circuit board", "technical blueprint"],
+      "subject": "circuit-blueprint",
+      "action": "background",
+      "orientation": "horizontal",
+      "shotType": "not-applicable",
+      "cameraMovement": "static",
+      "style": "illustration-2d",
+      "status": "review",
+      "qualityRating": 4,
+      "technical": {
+        "width": 1600,
+        "height": 900,
+        "codec": "svg"
+      },
+      "storage": {
+        "kind": "repository",
+        "path": "assets/graphics/original/gfx-industry-trades-circuit-blueprint-background-not-applicable-horizontal-0001.svg"
+      },
+      "rights": {
+        "licenseStatus": "owned",
+        "sourceName": "Visual Asset Hub Original",
+        "usageScopes": ["organic-social", "paid-ads", "youtube", "website", "app", "presentation", "client-work", "internal-only"],
+        "attributionRequired": false,
+        "attributionText": "Originalgrafik aus Visual Asset Hub",
+        "notes": "Eigenständig für Visual Asset Hub erstellte Vektorgrafik. Vor Freigabe Darstellung und gewünschten Einsatzkontext visuell prüfen."
+      },
+      "createdAt": "2026-08-04T10:47:00.000Z",
+      "importedAt": "2026-08-04T10:50:00.000Z",
+      "createdBy": "visual-asset-hub-original-generator",
+      "notes": "Kostenloses Original-Testasset ohne externe Stock-Abhängigkeit; Status bleibt bis zur Sichtprüfung review."
+    }
+  ]
 }

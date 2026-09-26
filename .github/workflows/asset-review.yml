@@ -1,0 +1,85 @@
+name: Asset prüfen und entscheiden
+
+on:
+  workflow_dispatch:
+    inputs:
+      asset_id:
+        description: "Asset-ID, zum Beispiel VAH-P6153727"
+        required: true
+        type: string
+      decision:
+        description: "Entscheidung nach vollständiger Sichtprüfung"
+        required: true
+        default: approve
+        type: choice
+        options: [approve, restrict, send-back, archive]
+      quality:
+        description: "Qualität von 1 bis 5"
+        required: true
+        default: "4"
+        type: choice
+        options: ["1", "2", "3", "4", "5"]
+      reviewer:
+        description: "Name der prüfenden Person"
+        required: true
+        default: "Arman"
+        type: string
+      notes:
+        description: "Prüfnotiz, sichtbare Personen/Marken und Einschränkungen"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      ASSET_ID: ${{ inputs.asset_id }}
+      DECISION: ${{ inputs.decision }}
+      QUALITY: ${{ inputs.quality }}
+      REVIEWER: ${{ inputs.reviewer }}
+      NOTES: ${{ inputs.notes }}
+    steps:
+      - name: Repository laden
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Node.js 22 verwenden
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Entscheidung protokollieren
+        shell: bash
+        run: |
+          npm run asset:review -- \
+            --id "$ASSET_ID" \
+            --decision "$DECISION" \
+            --quality "$QUALITY" \
+            --reviewer "$REVIEWER" \
+            --notes "$NOTES"
+      - name: Gesamtes Projekt prüfen
+        run: npm run check
+      - name: Review-Pull-Request erstellen
+        shell: bash
+        run: |
+          if git diff --quiet -- catalog/assets.json catalog/reviews.json catalog/search-index.json; then
+            echo "Keine Änderungen vorhanden."
+            exit 0
+          fi
+          BRANCH="asset-review/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add catalog/assets.json catalog/reviews.json catalog/search-index.json
+          git commit -m "review: ${ASSET_ID} ${DECISION}"
+          git push origin "$BRANCH"
+          gh pr create \
+            --base main \
+            --head "$BRANCH" \
+            --title "Asset-Review: ${ASSET_ID} – ${DECISION}" \
+            --body "Dokumentierte Asset-Entscheidung. Asset: ${ASSET_ID}. Entscheidung: ${DECISION}. Prüfer: ${REVIEWER}. Vor dem Merge die Änderung und die Prüfnotiz erneut kontrollieren."

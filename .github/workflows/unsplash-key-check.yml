@@ -1,0 +1,52 @@
+name: Unsplash API prüfen
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-key:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_API }}
+
+    steps:
+      - name: Secret vorhanden
+        shell: bash
+        run: |
+          if [ -z "$UNSPLASH_ACCESS_KEY" ]; then
+            echo "UNSPLASH_API fehlt oder ist leer."
+            exit 1
+          fi
+
+      - name: Offizielle Unsplash API testen
+        shell: bash
+        run: |
+          set -euo pipefail
+          status=$(curl --silent --show-error \
+            --output /tmp/unsplash-response.json \
+            --dump-header /tmp/unsplash-headers.txt \
+            --write-out "%{http_code}" \
+            --header "Authorization: Client-ID ${UNSPLASH_ACCESS_KEY}" \
+            --header "Accept-Version: v1" \
+            "https://api.unsplash.com/photos?per_page=1")
+
+          if [ "$status" != "200" ]; then
+            echo "Unsplash API-Test fehlgeschlagen: HTTP $status"
+            exit 1
+          fi
+
+          remaining=$(awk 'BEGIN{IGNORECASE=1} /^x-ratelimit-remaining:/ {gsub("\r", "", $2); print $2}' /tmp/unsplash-headers.txt | tail -n 1)
+          limit=$(awk 'BEGIN{IGNORECASE=1} /^x-ratelimit-limit:/ {gsub("\r", "", $2); print $2}' /tmp/unsplash-headers.txt | tail -n 1)
+          count=$(python3 -c "import json; payload=json.load(open('/tmp/unsplash-response.json', encoding='utf-8')); print(len(payload) if isinstance(payload, list) else 0)")
+
+          if [ "$count" -lt 1 ]; then
+            echo "Unsplash antwortete, aber ohne Fotoergebnis."
+            exit 1
+          fi
+
+          echo "Unsplash API-Key funktioniert."
+          echo "Rate-Limit: ${remaining:-unbekannt}/${limit:-unbekannt} verbleibend."

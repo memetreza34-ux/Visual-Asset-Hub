@@ -1,185 +1,237 @@
 # Visual Asset Hub
 
-Visual Asset Hub ist eine universelle Medienbibliothek für **B-Rolls, Bilder, Animationen, Overlays, Screen-Recordings und Grafiken**. Die Assets sind nicht an einen einzelnen Kanal oder Content-Typ gebunden, sondern können für Reels, Shorts, YouTube, Werbung, Webseiten, Apps, Präsentationen und Kundenprojekte wiederverwendet werden.
+Visual Asset Hub ist eine lokale Medienbibliothek und Rechercheoberfläche für **B-Rolls, Bilder, Animationen, Grafiken, Overlays, Screen-Recordings, Icons und Mockups**. Sie ist für Reels, Shorts, YouTube, Webseiten, Präsentationen und weitere Content-Projekte ausgelegt.
 
-## Ziele
+Aktueller Beta-Stand: **`0.4.0-beta.7`**.
 
-- Assets in Sekunden finden statt Ordner manuell zu durchsuchen
-- einheitliche Namen, Kategorien und Tags verwenden
-- Nutzungsrechte und Quellen nachvollziehbar speichern
-- Dubletten vermeiden
-- Hochformat, Querformat und Quadrat gezielt filtern
-- Assets lokal, über Git LFS oder in externem Object Storage verwalten
-- einen automatisch erzeugten Suchindex für eine Weboberfläche bereitstellen
+## Skript rein → Visuals raus
 
-## Schnellstart
-
-Benötigt wird Node.js 22 oder neuer.
-
-```bash
-npm run check
-npm run serve
-```
-
-Danach ist die Bibliothek lokal unter `http://127.0.0.1:4173` erreichbar.
-
-Neue Assets werden nicht manuell umbenannt oder in den Katalog geschrieben. Der Importbefehl erzeugt ID, Dateinamen, Sequenz, Hash, Zielordner und Metadaten automatisch:
-
-```bash
-npm run asset:add -- --help
-```
-
-Beispiel:
-
-```bash
-npm run asset:add -- \
-  --file ./inbox/smartphone-scroll.mp4 \
-  --type video \
-  --category technology-ai \
-  --subject smartphone \
-  --action scrolling \
-  --shot cu \
-  --orientation vertical \
-  --title "Person scrollt am Smartphone" \
-  --description "Nahaufnahme einer Hand beim Scrollen durch eine Social-Media-App." \
-  --tags smartphone,scrolling,social-media \
-  --style realistic \
-  --movement handheld \
-  --license owned \
-  --source "Eigene Produktion" \
-  --scopes organic-social,youtube,website
-```
-
-Mit `--dry-run true` werden ID, Name und Ziel berechnet, ohne Dateien zu verändern.
-
-## Kostenlose Pexels-Suche
-
-1. `.env.example` als `.env` kopieren.
-2. Den Schlüssel ausschließlich lokal eintragen:
-
-```env
-PEXELS_API_KEY=DEIN_PEXELS_SCHLUESSEL
-```
-
-3. Nach B-Rolls oder Bildern suchen:
-
-```bash
-npm run pexels:search -- "Person arbeitet am Laptop" --type video --orientation vertical --per-page 20
-npm run pexels:search -- "moderne Fabrik" --type photo --orientation horizontal --per-page 20
-```
-
-Die Ergebnisse werden unter `.local-storage/pexels-search/` gespeichert. Der Schlüssel, die Suchdateien und große Medien werden nicht in GitHub veröffentlicht. Die Suche lädt zunächst nur Metadaten und Vorschaulinks, keine Originaldateien. Weitere Hinweise stehen in [`docs/PEXELS.md`](docs/PEXELS.md).
-
-## Grundstruktur
+Der Hauptarbeitsbereich **Skript → Visuals** ist für fertige Sprechertexte gedacht. Die Anwendung schreibt, verbessert oder erweitert das Skript **nicht**. Der Nutzer liefert den fertigen Text; Visual Asset Hub kümmert sich ausschließlich um die visuelle Recherche.
 
 ```text
-assets/
-  video/
-  image/
-  animation/
-  overlay/
-  screen-recording/
-  graphic/
-previews/
-inbox/
-archive/
-catalog/
-docs/
-scripts/
-web/
+fertiges Skript
+→ visuelle Einheiten / Szenen
+→ visuelle Absicht pro Szene
+→ mehrere unterschiedliche Suchrichtungen
+→ Bilder und B-Rolls aus den vorhandenen Quellen
+→ mehrere Kandidaten pro Szene
+→ Hauptvisual / Alternativen auswählen
+→ bewusst als Review importieren
+→ Shotlist und lokales Projektarchiv
 ```
 
-`inbox/` ist der lokale Eingang für neue Dateien und wird nicht veröffentlicht. Erst nach Benennung, Rechteprüfung und Katalogisierung werden Assets nach `assets/` übernommen.
+Unterstützt werden kurze Reels ebenso wie längere Skripte bis **40.000 Zeichen** und maximal **120 visuelle Einheiten**. Auto kann sehr viele kurze Satzsegmente kontrolliert auf höchstens 120 visuelle Einheiten verdichten, ohne das vollständige gespeicherte Originalskript zu verändern.
 
-## Dateinamen
+### Pro Szene
+
+Jede visuelle Einheit enthält unter anderem:
+
+- exakten Originaltext
+- Zeitbereich
+- visuelle Absicht
+- erkannte Entitäten und Konzepte
+- 3–5 unterschiedliche Suchrichtungen
+- bevorzugten Medientyp
+- reale Kandidaten aus den vorhandenen Medienquellen
+- technischen Fit
+- Quellseite und Creator, soweit vorhanden
+- Hauptvisual und Alternativen
+- Importstatus
+
+Bei Rückbezugssätzen wie `Sie ...`, `Dort ...`, `Dabei ...` oder `Später ...` kann der Finder den relevanten Kontext aus der unmittelbar vorherigen aktiven Szenenkette ausschließlich für die Visualsuche übernehmen. Auch bei nummerierten Zeilen wie `2. Sie ...` funktioniert das; die Nummerierung und der Originaltext bleiben sichtbar unverändert.
+
+Direkte Treffer können konkret sein, etwa eine Person, ein Produkt, ein Ort oder ein technisches Gerät. Bei abstrakten Aussagen kann der Hub stattdessen **symbolische / kontextuelle B-Rolls** vorschlagen und kennzeichnet diesen Fall.
+
+### Viele Visuals pro Szene
+
+Die Recherche behält je nach Modus mehr eindeutige Kandidaten für die spätere Auswahl:
+
+- **Schnell:** bis 12 Kandidaten
+- **Tief:** bis 20 Kandidaten
+- **Maximal:** bis 30 Kandidaten
+
+**Mehr Treffer** lädt echte Folgeseiten – Seite 2, Seite 3 usw. – bis maximal Seite 100. Hauptvisual und Alternativen bleiben dabei geschützt.
+
+Bei **Gemischt** versucht der Finder pro Szene bewusst Video-B-Roll **und** Bildmaterial zu sammeln, sofern eine Videoquelle verfügbar ist. `beta:verify` zählt den Mix erst als erfüllt, wenn dieselbe konkrete Szene mindestens ein Video und ein Bild enthält.
+
+### Lange Skripte und Kostenkontrolle
+
+Die Sammelrecherche wird nach Rechercheintensität gedrosselt und bleibt bei ungefähr höchstens **80 theoretischen Provider-Suchtasks pro Batch**:
+
+| Recherche | max. Szenen pro Sammelbatch |
+|---|---:|
+| Schnell | 20 |
+| Tief | 10 |
+| Maximal | 6 |
+
+Tatsächliche Requests können niedriger sein, weil jede Szene früher stoppt, sobald Kandidatenziel, Providerbreite und Medienmix erreicht sind.
+
+Bei Projekten mit mehr als 20 Szenen werden schwere Bild-/Videokarten lazy erst beim Öffnen der jeweiligen Kandidatenansicht erzeugt. Suche, Auswahl und Import aktualisieren in `ALLES-GEFUNDEN/06-SKRIPT-PROJEKTE` nur die Projektroot-Dateien und den tatsächlich geänderten Szenenordner.
+
+### Projektordner
 
 ```text
-{type}-{category}-{subject}-{action}-{shot}-{orientation}-{sequence}.{ext}
+ALLES-GEFUNDEN/
+└── 06-SKRIPT-PROJEKTE/
+    └── <Projektname>-<Projekt-ID>/
+        ├── 00-SKRIPT.txt
+        ├── 00-PROJEKT.json
+        ├── 00-SZENENPLAN.md
+        ├── 00-SHOTLIST.json
+        ├── 00-SHOTLIST.csv
+        ├── 001-SCENE-001/
+        ├── 002-SCENE-002/
+        └── ...
 ```
 
-Beispiele:
+Pro Szene gibt es zusätzlich **Weitere Web-Recherche** mit manuellen Discovery-Links zu YouTube, Google Bilder/Videos/News und Wikipedia. Diese Links importieren nichts und sind keine Rechte- oder Nutzungsfreigabe.
+
+## Vier spezialisierte Kanalbibliotheken
+
+| Kanal | Sammlungen | Suchbegriffe | Ausbauziel |
+|---|---:|---:|---:|
+| Finanzen | 20 | 60 | 160 freigegebene Assets |
+| Künstliche Intelligenz | 20 | 60 | 160 freigegebene Assets |
+| Elektrotechnik | 20 | 60 | 160 freigegebene Assets |
+| Kampfsport | 30 | 90 | 240 freigegebene Assets |
+| **Gesamt** | **90** | **270** | **720 freigegebene Assets** |
+
+Der Script Visual Finder besitzt zusätzlich einen neutralen **Allgemein**-Projektmodus, der nicht in die 720 Ausbauziele eingerechnet wird.
+
+## Fünf Medienquellen
+
+| Quelle | Bilder | Videos | Key |
+|---|---:|---:|---:|
+| Pexels | ja | ja | erforderlich |
+| Pixabay | ja | ja | erforderlich |
+| Unsplash | ja | nein | erforderlich |
+| Openverse | ja | nein | nein |
+| Wikimedia Commons | ja | nein | nein |
+
+Pexels-, Pixabay- und Unsplash-Keys werden nur im Arbeitsspeicher der geöffneten Browserseite gehalten. Ein neu eingegebener Key wird erst nach einer erfolgreichen Anfrage **genau dieses Providers** als Sitzung-Key gemerkt. Ein keyloser Provider oder ein reiner Pixabay-Cachetreffer kann keinen neu eingegebenen fremden Key validieren.
+
+Openverse und Wikimedia werden konservativ auf unterstützte offene Lizenzen begrenzt: Public Domain, CC0, CC BY und CC BY-SA. Attribution und Lizenzinformationen bleiben dokumentiert.
+
+## Universelle Themenrecherche
+
+Der separate Arbeitsbereich **Thema recherchieren** bleibt für Recherche ohne fertigen Szenentext erhalten. Er unterstützt unter anderem Person, Firma/Marke, Produkt, Event, Ort, Technik, Sport/Kampf, Historie und allgemeine Konzepte.
+
+Rechercheumfang:
+
+- **Schnell**: bis zu 6 Motivbereiche
+- **Tief**: bis zu 8 Motivbereiche
+- **Maximal**: bis zu 12 Motivbereiche / höchstens 60 sequenzielle Provider-Suchen bei fünf Quellen
+
+Jeder Import beginnt auf `review`.
+
+## ALLES-GEFUNDEN
 
 ```text
-brl-technology-ai-smartphone-scrolling-cu-vertical-0001.mp4
-img-money-finance-cash-growing-not-applicable-square-0001.png
-ovl-social-media-creator-notification-pop-up-transparent-0001.webm
+ALLES-GEFUNDEN/
+├── 00-GESAMTINDEX.md
+├── 00-GESAMTINDEX.csv
+├── 00-MANIFEST.json
+├── 01-Finanzen/
+├── 02-KI/
+├── 03-Elektrotechnik/
+├── 04-Kampfsport/
+├── 05-THEMENRECHERCHEN/
+├── 06-SKRIPT-PROJEKTE/
+├── 90-GEFUNDENE-KANDIDATEN/
+└── 99-Sonstiges/
 ```
 
-Die vollständigen Regeln stehen in [`docs/NAMING.md`](docs/NAMING.md).
+Katalogassets, normale Suchkandidaten, Themenrecherchen und Script-Visual-Projekte bleiben getrennt. Skriptprojekte und historische Suchfunde werden beim Vault-Neuaufbau erhalten.
 
-## Katalog
+## Ausbau 720
 
-Alle durchsuchbaren Informationen liegen in [`catalog/assets.json`](catalog/assets.json). Jedes Asset besitzt unter anderem:
+**Ausbau 720** zeigt Kandidaten, Reviews, Freigaben, Video-/Fotolücken und priorisierte Aufgaben. Der Hub arbeitet **review-first**: vorhandene Review-Kandidaten werden vor unnötiger neuer API-Suche priorisiert.
 
-- stabile Asset-ID
-- Titel und Beschreibung
-- Typ und Hauptkategorie
-- kontrollierte Tags und Such-Aliasse
-- Motiv, Handlung und Kameraeinstellung
-- Ausrichtung, Auflösung und Dauer
-- Speicherpfad oder externe Storage-URL
-- Quelle, Lizenzstatus und erlaubte Einsatzzwecke
-- Erstellungs- und Importdatum
-- optionalen SHA-256-Hash zur Dublettenprüfung
+Grundsätzliche Fallbacks:
 
-Das genaue Datenmodell steht in [`catalog/schema.json`](catalog/schema.json). Die kontrollierten Werte liegen in [`catalog/taxonomy.json`](catalog/taxonomy.json).
+- Video: Pexels → Pixabay
+- Foto: Unsplash → Openverse → Wikimedia Commons → Pexels → Pixabay
 
-## Befehle
+## Bestehender Skript-Planer
 
-```bash
-npm run asset:add -- --help
-npm run pexels:search -- --help
-npm run validate
-npm run index
-npm run test
-npm run check
-npm run serve
-```
+Der ältere Bereich **Skript planen** bleibt getrennt:
 
-- `asset:add`: nimmt eine neue Datei sicher auf und rollt bei Fehlern zurück
-- `pexels:search`: sucht kostenlose Pexels-Fotos oder -Videos und speichert Quellenangaben lokal
-- `validate`: prüft IDs, Dateinamen, Kategorien, Pfade, Rechte, Laufzeiten und Dubletten
-- `index`: erzeugt `catalog/search-index.json` für die Websuche
-- `test`: prüft Taxonomie, Katalogvertrag, Pexels-Client und deterministische Indexierung
-- `check`: führt Validierung, Indexierung und Tests aus
-- `serve`: startet die lokale Suchoberfläche
+- **Skript planen**: feste Kanal-Sammlungen und vorhandene Bibliotheksassets zuordnen
+- **Skript → Visuals**: dynamische Queries erzeugen und echte Bilder/B-Rolls pro Szene recherchieren
 
-## Speicher
+## Arsenal Builder
 
-- Kleine Textdateien, SVGs und Vorschauen können direkt im Repository liegen.
-- Große Originalbilder und Videos unter `assets/` werden über Git LFS verwaltet.
-- Für eine sehr große Bibliothek ist externer S3-kompatibler Object Storage vorgesehen.
-- Temporäre Signed URLs und private Zugriffstokens dürfen nicht im Katalog gespeichert werden.
+Der normale Arsenal Builder bleibt für den systematischen Ausbau der 90 festen Sammlungen zuständig. Er bietet fünf Medienquellen, Batch-Suche, technischen Fit, Query-Kette, Fallbacks, Sammelimport und Dublettenschutz.
 
-Details stehen in [`docs/STORAGE-AND-RIGHTS.md`](docs/STORAGE-AND-RIGHTS.md).
+Der technische Fit ist nur eine Produktionsvorsortierung und keine Inhalts- oder Rechtefreigabe.
 
-## Rechte und Sicherheit
+## Review und Rechte
 
-Nur Assets speichern, für die eine nachvollziehbare Nutzungserlaubnis besteht. Dateien mit unbekanntem Rechtezustand bleiben in `inbox/` und erhalten nicht den Status `approved`. Quellen, Lizenz und erlaubte Nutzungsbereiche werden pro Asset dokumentiert.
+Jeder **neue externe Import** beginnt auf `review` – auch aus **Skript → Visuals**. Bereits im Katalog vorhandene Treffer werden nur verknüpft; ihr vorhandener Status wird nicht automatisch verändert.
 
-Die automatische Prüfung blockiert unter anderem:
+Vor Freigabe werden weiterhin mindestens geprüft:
 
-- doppelte IDs, Dateinamen oder SHA-256-Hashes
-- falsche Kategorien, Typen oder Dateiendungen
-- unvollständige Rechteangaben
-- freigegebene Assets mit unbekannter oder abgelaufener Lizenz
-- editorial-only Assets mit kommerziellen Nutzungsbereichen
-- unsichere Pfade
-- URLs mit erkennbaren Token-, Signatur- oder API-Key-Parametern
+1. sichtbarer Inhalt
+2. Personen, Logos, Marken und sensible Elemente
+3. Quelle, Lizenz und Nutzung
+4. geplanter Einsatzkontext
 
-## Aktueller Ausbau
+Besonders bei realen Personen, Firmen, Produkten, Events, Sportveranstaltungen und Broadcastmaterial bedeutet ein gefundener Treffer nicht automatisch, dass er verwendet werden darf.
 
-Die erste funktionsfähige Stufe enthält:
+## Eigene Dateien
 
-- universelle Taxonomie
-- verbindlichen Benennungsstandard
-- strukturiertes Metadatenschema
-- sicheren Asset-Import
-- kostenlose Pexels-Foto- und Videosuche
-- Rechte- und Dublettenprüfung
-- deterministischen Suchindex
-- responsive Websuche mit Filtern und Detailansicht
-- Git-LFS-Regeln
-- automatischen GitHub-Workflow
+Eigene Medien können über die lokale Inbox importiert werden. Eine ausdrückliche Rechtebestätigung ist Pflicht. Der Import startet auf `review`.
 
-Spätere Ausbaustufen: gezielter Originaldownload, automatische Vorschauerzeugung, Metadatenanalyse über FFmpeg, KI-Tagging, Cloud-Storage-Synchronisierung, Nutzungshistorie und visuelle Ähnlichkeitssuche.
+## Medienpakete
+
+Nur `approved`-Assets können in verifizierte Schnittpakete unter `exports/media-packs` ausgegeben werden. Enthalten sind Medien, Manifest, SHA-256-Prüfsummen, Quelle/Lizenz, Attribution und README.
+
+## Starterbibliothek
+
+`npm run starter:import` erzeugt idempotent eine Testbibliothek mit **12 Starterassets**: acht Pexels-Videos, drei eigene SVG-Grafiken und ein Wikimedia-Commons-Kampfsportfoto unter CC BY-SA 4.0. Alle beginnen auf `review`.
+
+## Sicherheit und Kostenkontrolle
+
+- lokale Verwaltungs-APIs nur Loopback
+- Schreibaktionen mit Sitzungstoken und Same-Origin
+- keine persistenten Provider-Keys im Browser
+- Script-Visual-Projekte und Skripte bleiben lokal
+- Openverse/Wikimedia benötigen keinen geheimen Key
+- externe und Inbox-Importe starten auf `review`
+- nicht freigegebene Assets werden aus Medienpaketen blockiert
+- GitHub-Actions-Workflows im Beta-Branch nur manuell über `workflow_dispatch`
+- vollständige Beta-Abnahme lokal ohne GitHub-hosted Runner möglich
+
+## Realtest
+
+Die Beta gilt erst als vollständig real getestet, wenn unter anderem:
+
+- `npm run check` lokal grün ist
+- ein echtes **Skript → Visuals**-Projekt erstellt wurde
+- mindestens zwei Szenen real recherchiert wurden
+- mindestens eine einzelne Szene Video + Bild enthält
+- Pagination Seite 2/3 geprüft wurde
+- Kontext-Vererbung und nummerierter Rückbezug geprüft wurden
+- ein Script-Visual-Kandidat bewusst als `review` importiert wurde
+- Langprojekt-Batching/Lazy-Rendering geprüft wurden
+- alle zwölf Starterassets entschieden sind
+- alle fünf Medienquellen technisch getestet wurden
+- universelle Themenrecherche mit mindestens zwei Recherchearten geprüft wurde
+- eigener Inbox-Import funktioniert
+- mindestens ein Asset freigegeben ist
+- ein verifiziertes Medienpaket erstellt wurde
+- eine reale Nutzung dokumentiert wurde
+- `realTestComplete: true` gemeldet wird
+
+PR #3 bleibt bis dahin Draft und wird nicht in `main` gemergt.
+
+## Dokumentation
+
+- [`docs/SCRIPT-VISUAL-FINDER.md`](docs/SCRIPT-VISUAL-FINDER.md)
+- [`ALLES-GEFUNDEN/README.md`](ALLES-GEFUNDEN/README.md)
+- [`docs/REAL-TEST-QUICKSTART.md`](docs/REAL-TEST-QUICKSTART.md)
+- [`docs/CHANNEL-ARSENAL.md`](docs/CHANNEL-ARSENAL.md)
+- [`docs/BETA-TEST.md`](docs/BETA-TEST.md)
+- [`docs/RELEASE-CHECKLIST.md`](docs/RELEASE-CHECKLIST.md)
+- [`SECURITY.md`](SECURITY.md)
+- [`CHANGELOG.md`](CHANGELOG.md)

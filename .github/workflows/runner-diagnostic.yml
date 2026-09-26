@@ -1,0 +1,19 @@
+name: Runner-Diagnose
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnostic:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    steps:
+      - name: Runner gestartet
+        run: echo "GitHub Runner funktioniert auf ${{ matrix.os }}"

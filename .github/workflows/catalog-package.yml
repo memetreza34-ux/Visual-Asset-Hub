@@ -1,0 +1,59 @@
+name: Katalogpaket exportieren
+
+on:
+  workflow_dispatch:
+    inputs:
+      project:
+        description: "Optionaler Projektname für Quellen-/Attributionsdateien"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PROJECT: ${{ inputs.project }}
+    steps:
+      - name: Repository laden
+        uses: actions/checkout@v4
+      - name: Node.js 22 verwenden
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Vollständige Prüfung
+        run: npm run check
+      - name: Beta-Bereitschaft, Bericht und Website erzeugen
+        run: |
+          npm run beta:verify
+          npm run report
+          npm run site:build
+      - name: Optional Attribution für Projekt exportieren
+        shell: bash
+        run: |
+          if [ -n "$PROJECT" ]; then
+            npm run attribution:export -- --project "$PROJECT"
+          else
+            echo "Kein Projekt angegeben; Attributions-Export wird übersprungen."
+          fi
+      - name: Backup erzeugen
+        run: npm run backup
+      - name: Komplettes Paket bereitstellen
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-asset-hub-package-${{ github.run_id }}
+          path: |
+            dist/
+            reports/
+            exports/
+            backups/
+            catalog/
+            CHANGELOG.md
+            SECURITY.md
+            docs/RELEASE-CHECKLIST.md
+          if-no-files-found: warn
+          retention-days: 14

@@ -1,0 +1,23 @@
+{
+  "format": "visual-asset-hub-documentary-topic-register",
+  "version": 1,
+  "createdAt": "2026-09-25T15:43:00.000Z",
+  "updatedAt": "2026-09-25T16:37:00.000Z",
+  "topics": [
+    {
+      "id": "TOPIC-0001",
+      "title": "Wie der Aralsee fast verschwand – und warum ein Teil zurückkam",
+      "topicKey": "aralsee-verschwinden-nord-aralsee-rueckkehr",
+      "angle": "Wie sowjetische Wasserumleitungen einen der groessten Seen der Welt zerstoerten und der Kok-Aral-Damm den noerdlichen Teil teilweise rettete",
+      "category": "Umweltgeschichte",
+      "categorySlug": "umweltgeschichte",
+      "selectedAt": "2026-09-25T15:50:00.000Z",
+      "status": "reserved",
+      "targetDurationSeconds": 150,
+      "projectSlug": "001-wie-der-aralsee-fast-verschwand-und-warum-ein-teil-zuruckkam",
+      "projectDirectory": "videos/umweltgeschichte/001-wie-der-aralsee-fast-verschwand-und-warum-ein-teil-zuruckkam",
+      "briefFile": "documentary-registry/briefs/TOPIC-0001.json",
+      "source": "chatgpt-autonomous-phase1-research"
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import test from 'node:test';
+import { fileURLToPath } from 'node:url';
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const api = fs.readFileSync(path.join(root, 'scripts/local-script-visual-api.mjs'), 'utf8');
+const browser = fs.readFileSync(path.join(root, 'web/script-visual-finder.js'), 'utf8');
+
+test('Script Visual API trennt erfolgreiche Provider von validierten Sitzungsschlüsseln', () => {
+  assert.match(api, /successfulProviders:/);
+  assert.match(api, /validatedKeyProviders:/);
+  assert.match(api, /const validatedKeyProviders = new Set\(\)/);
+  assert.match(api, /!KEYLESS\.has\(provider\) && !execution\.cached/);
+  assert.match(api, /searchedProviders: outcome\.successfulProviders/);
+});
+
+test('Browser übernimmt nur vom Server bestätigte Provider in den Sitzungsspeicher', () => {
+  assert.match(browser, /const validated = new Set\(data\.validatedKeyProviders \?\? \[\]\)/);
+  assert.match(browser, /validated\.has\(provider\)/);
+});
+
+test('Finder dedupliziert über Provider-ID und kanonisierte Medienreferenzen', () => {
+  assert.match(api, /function assetIdentities\(provider, asset\)/);
+  assert.match(api, /canonicalUrl\(asset\?\.source_url\)/);
+  assert.match(api, /canonicalUrl\(asset\?\.original_url\)/);
+  assert.match(api, /canonicalUrl\(bestMediaUrl\(asset\?\.files\)\)/);
+  assert.match(api, /localSeen\.has\(identity\)/);
+  assert.match(api, /projectSeen\.has\(identity\)/);
+});
+
+test('Gemischt-Modus wartet nach Möglichkeit auf Video und Bild', () => {
+  assert.match(api, /const mixedRequested = project\.settings\.mediaPreference === 'mixed'/);
+  assert.match(api, /const mixedMediaPossible = mixedRequested && enabledProviders\.some/);
+  assert.match(api, /searchTypeForProvider\(provider, scene\.preferredMediaType, mixedRequested\)/);
+  assert.match(api, /const mixedMediaReady = !mixedMediaPossible \|\| hasMixedMediaCandidates\(candidates\)/);
+  assert.match(api, /providersUsed\.size >= requiredProviders && mixedMediaReady/);
+});
+
+test('Rechercheumfang nutzt 1, 3 und 5 Quellen und passt sich an verfügbare Provider an', () => {
+  assert.match(api, /quick: \{ candidates: 4, minProviders: 1, maxTasks: 4, retainCandidates: 12 \}/);
+  assert.match(api, /deep: \{ candidates: 6, minProviders: 3, maxTasks: 8, retainCandidates: 20 \}/);
+  assert.match(api, /max: \{ candidates: 8, minProviders: 5, maxTasks: 12, retainCandidates: 30 \}/);
+  assert.match(api, /const requiredProviders = Math\.min\(settings\.minProviders, providerOrder\.length\)/);
+  assert.match(api, /providersUsed\.size >= requiredProviders/);
+});
+
+test('Rechercheumfang behält je nach Tiefe mehr eindeutige Kandidaten für weitere Auswahl', () => {
+  assert.match(api, /retainCandidates: 12/);
+  assert.match(api, /retainCandidates: 20/);
+  assert.match(api, /retainCandidates: 30/);
+  assert.match(api, /retainSceneCandidates\(candidates, scene, mixedRequested, settings\.retainCandidates\)/);
+});
+
+test('Gemischt-Modus nutzt Videoquellen für B-Roll und Fotoquellen für Standbilder', () => {
+  assert.match(api, /function searchTypeForProvider\(provider, preferredType, mixedRequested\)/);
+  assert.match(api, /PHOTO_ONLY\.has\(provider\).*return 'photo'/);
+  assert.match(api, /if \(mixedRequested\) return 'video'/);
+  assert.match(api, /function hasMixedMediaCandidates\(candidates\)/);
+  assert.match(api, /item\.type === 'video'/);
+  assert.match(api, /item\.type !== 'video'/);
+});
+
+test('Kandidatenlimit bewahrt Auswahl und hält im Gemischt-Modus beide Medientypen', () => {
+  assert.match(api, /function retainSceneCandidates\(candidates, scene, mixedRequested, limit = 20\)/);
+  assert.match(api, /scene\.selectedPrimary/);
+  assert.match(api, /scene\.selectedAlternatives/);
+  assert.match(api, /candidate\.type === 'video'/);
+  assert.match(api, /candidate\.type !== 'video'/);
+});
+
+test('bereits vorhandene Katalog-Assets werden mit der Skriptszene verknüpft statt erneut importiert', () => {
+  assert.match(api, /findExistingCatalogAssetIds\(afterAssets, candidate\)/);
+  assert.match(api, /linkedExisting: existingIds\.length/);
+  assert.match(api, /candidate\.importedAssetIds = \[\.\.\.new Set/);
+  assert.match(api, /asset\?\.rights\?\.sourceUrl/);
+  assert.match(api, /asset\?\.storage\?\.externalUrl/);
+  assert.match(browser, /data\.linkedExisting/);
+  assert.match(browser, /war bereits im Katalog und wurde mit/);
+});
+
+test('Mehr Treffer verwendet echte Folgeseiten statt erneut Seite 1', () => {
+  assert.match(api, /const MAX_SEARCH_PAGE = 100/);
+  assert.match(api, /const previousRound = Number\.isInteger\(scene\.searchRound\)/);
+  assert.match(api, /const searchPage = force \? Math\.min\(MAX_SEARCH_PAGE, Math\.max\(2, previousRound \+ 1\)\) : 1/);
+  assert.match(api, /searchScene\(\{ root, project, scene, keys, enabledProviders, perPage, page: searchPage/);
+  assert.match(api, /executeSearch\(\{ provider, query, type, orientation: project\.settings\.orientation, perPage, page/);
+  assert.match(api, /request = \{ query, type, orientation, perPage, locale: 'de', page \}/);
+  assert.match(api, /searchers\.pexels\(\{ apiKey, query, type, orientation, locale: 'de-DE', page, perPage \}\)/);
+  assert.match(api, /searchers\.unsplash\(\{ apiKey, query, orientation, page, perPage/);
+  assert.match(api, /searchers\.openverse\(\{ query, orientation, page, perPage \}\)/);
+  assert.match(api, /searchers\.wikimedia\(\{ query, orientation, page, perPage \}\)/);
+});
+
+test('Suchseite wird nur nach mindestens einem erfolgreichen Providerlauf erhöht', () => {
+  assert.match(api, /const successful = providersUsed\.size > 0/);
+  assert.match(api, /searchRound: successful \? page : \(Number\.isInteger\(scene\.searchRound\) \? scene\.searchRound : 0\)/);
+  assert.match(api, /searchedAt: successful \? new Date\(\)\.toISOString\(\) : \(scene\.searchedAt \?\? null\)/);
+});

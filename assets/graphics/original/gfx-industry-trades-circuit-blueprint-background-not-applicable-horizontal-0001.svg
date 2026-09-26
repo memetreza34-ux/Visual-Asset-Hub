@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-label="Technischer Schaltplan-Hintergrund">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#071823"/>
+      <stop offset="0.6" stop-color="#0d3444"/>
+      <stop offset="1" stop-color="#123a34"/>
+    </linearGradient>
+    <pattern id="minor" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M20 0H0V20" fill="none" stroke="#9de6dc" stroke-opacity="0.05" stroke-width="1"/>
+    </pattern>
+    <pattern id="major" width="100" height="100" patternUnits="userSpaceOnUse">
+      <path d="M100 0H0V100" fill="none" stroke="#baf5ee" stroke-opacity="0.11" stroke-width="2"/>
+    </pattern>
+    <filter id="glow"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <rect width="1600" height="900" fill="url(#minor)"/>
+  <rect width="1600" height="900" fill="url(#major)"/>
+  <g fill="none" stroke="#79d8cc" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.9">
+    <path d="M120 180H350V290H560V170H760"/>
+    <path d="M120 680H330V570H520V710H760"/>
+    <path d="M840 170H1040V290H1270V180H1480"/>
+    <path d="M840 710H1050V560H1280V690H1480"/>
+    <path d="M350 290V450H520M1040 290V450H850M330 570V450H520M1050 560V450H850"/>
+  </g>
+  <g fill="#d9fffa" stroke="#4cbcaf" stroke-width="7" filter="url(#glow)">
+    <circle cx="120" cy="180" r="15"/><circle cx="120" cy="680" r="15"/><circle cx="1480" cy="180" r="15"/><circle cx="1480" cy="690" r="15"/>
+    <circle cx="350" cy="290" r="14"/><circle cx="330" cy="570" r="14"/><circle cx="1040" cy="290" r="14"/><circle cx="1050" cy="560" r="14"/>
+  </g>
+  <g transform="translate(550 220)">
+    <rect x="0" y="0" width="500" height="460" rx="44" fill="#071d27" stroke="#b5f4ec" stroke-width="7"/>
+    <rect x="86" y="74" width="328" height="312" rx="28" fill="#113d48" stroke="#6fd1c6" stroke-width="4"/>
+    <g stroke="#aef2e9" stroke-width="10" stroke-linecap="round">
+      <path d="M-45 80H0M-45 150H0M-45 220H0M-45 290H0M-45 360H0"/>
+      <path d="M500 80H545M500 150H545M500 220H545M500 290H545M500 360H545"/>
+      <path d="M90-45V0M170-45V0M250-45V0M330-45V0M410-45V0"/>
+      <path d="M90 460V505M170 460V505M250 460V505M330 460V505M410 460V505"/>
+    </g>
+    <g fill="none" stroke="#d9fffa" stroke-width="8">
+      <path d="M145 155H220L250 120L285 190L320 155H365"/>
+      <circle cx="250" cy="270" r="58"/>
+      <path d="M250 212V328M192 270H308"/>
+    </g>
+  </g>
+  <g fill="none" stroke="#9de6dc" stroke-width="5" opacity="0.72">
+    <path d="M190 390h90l24-38 38 76 32-38h96"/>
+    <path d="M1130 420h84l24-36 36 72 30-36h105"/>
+    <circle cx="210" cy="520" r="44"/><path d="M166 520h88M210 476v88"/>
+    <rect x="1300" y="320" width="90" height="90" rx="12"/>
+  </g>
+</svg>

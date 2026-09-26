@@ -1,0 +1,87 @@
+name: Asset-Nutzung dokumentieren
+
+on:
+  workflow_dispatch:
+    inputs:
+      asset_id:
+        description: "Freigegebene Asset-ID"
+        required: true
+        type: string
+      project:
+        description: "Kurzer Projektname, zum Beispiel elektro-klar-reel-01"
+        required: true
+        type: string
+      project_title:
+        description: "Lesbarer Projekttitel"
+        required: true
+        type: string
+      platform:
+        description: "Plattform oder Einsatzort"
+        required: true
+        default: tiktok
+        type: choice
+        options: [tiktok, instagram, youtube, facebook, snapchat, website, app, presentation, client-work, other]
+      content_url:
+        description: "Optionale URL zum veröffentlichten Inhalt"
+        required: false
+        default: ""
+        type: string
+      notes:
+        description: "Optionale Notiz"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  usage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      ASSET_ID: ${{ inputs.asset_id }}
+      PROJECT: ${{ inputs.project }}
+      PROJECT_TITLE: ${{ inputs.project_title }}
+      PLATFORM: ${{ inputs.platform }}
+      CONTENT_URL: ${{ inputs.content_url }}
+      NOTES: ${{ inputs.notes }}
+    steps:
+      - name: Repository laden
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Node.js 22 verwenden
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Nutzung erfassen
+        shell: bash
+        run: |
+          ARGS=(--asset "$ASSET_ID" --project "$PROJECT" --title "$PROJECT_TITLE" --platform "$PLATFORM")
+          if [ -n "$CONTENT_URL" ]; then ARGS+=(--url "$CONTENT_URL"); fi
+          if [ -n "$NOTES" ]; then ARGS+=(--notes "$NOTES"); fi
+          npm run usage:add -- "${ARGS[@]}"
+      - name: Gesamtes Projekt prüfen
+        run: npm run check
+      - name: Nutzungs-Pull-Request erstellen
+        shell: bash
+        run: |
+          if git diff --quiet -- catalog/usage.json catalog/search-index.json; then
+            echo "Keine Änderungen vorhanden."
+            exit 0
+          fi
+          BRANCH="asset-usage/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add catalog/usage.json catalog/search-index.json
+          git commit -m "usage: ${ASSET_ID} in ${PROJECT}"
+          git push origin "$BRANCH"
+          gh pr create \
+            --base main \
+            --head "$BRANCH" \
+            --title "Asset-Nutzung: ${ASSET_ID} – ${PROJECT_TITLE}" \
+            --body "Dokumentierte Nutzung eines freigegebenen Assets. Asset: ${ASSET_ID}. Projekt: ${PROJECT_TITLE}. Plattform: ${PLATFORM}."
