@@ -4,7 +4,7 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { createDocumentaryProject, syncDocumentaryPhase1 } from './documentary-project.mjs';
 import { createDocumentaryVisualPlan } from './documentary-visual-plan.mjs';
-import { researchDocumentaryProjectV4 } from './documentary-research-v4.mjs';
+import { researchDocumentaryProjectV5 } from './documentary-research-v5.mjs';
 import { materializeDocumentaryVisualsV2 } from './documentary-materialize-v2.mjs';
 
 export function buildDocumentaryPhase1({
@@ -27,8 +27,9 @@ export function buildDocumentaryPhase1({
 
 export async function buildAndResearchDocumentaryPhase1(options = {}) {
   const built = buildDocumentaryPhase1(options);
-  const research = await researchDocumentaryProjectV4({
+  const research = await researchDocumentaryProjectV5({
     projectDirectory: built.projectDirectory,
+    visualSearchAnchors: options.visualSearchAnchors ?? [],
     perPage: options.perPage,
     maxTasksPerScene: options.maxTasksPerScene,
     alternatives: options.alternatives,
@@ -51,13 +52,14 @@ export async function buildCompleteDocumentaryPhase1(options = {}) {
 }
 
 function parseArgs(argv) {
-  const args = {title: '', category: 'sonstiges', slug: undefined, scriptFile: '', outputRoot: undefined, segmentation: 'auto', depth: 'deep', mediaPreference: 'mixed', overwrite: false, research: false, complete: false, materializeAlternatives: false, overwriteMedia: false, maxMediaBytes: undefined, perPage: undefined, maxTasksPerScene: undefined, alternatives: undefined, visionModel: undefined, visionCandidates: undefined};
+  const args = {title: '', category: 'sonstiges', slug: undefined, scriptFile: '', anchorsFile: '', outputRoot: undefined, segmentation: 'auto', depth: 'deep', mediaPreference: 'mixed', overwrite: false, research: false, complete: false, materializeAlternatives: false, overwriteMedia: false, maxMediaBytes: undefined, perPage: undefined, maxTasksPerScene: undefined, alternatives: undefined, visionModel: undefined, visionCandidates: undefined};
   for (let index = 0; index < argv.length; index += 1) {
     const token = argv[index];
     if (token === '--title') args.title = argv[++index] ?? '';
     else if (token === '--category') args.category = argv[++index] ?? 'sonstiges';
     else if (token === '--slug') args.slug = argv[++index] ?? undefined;
     else if (token === '--script-file') args.scriptFile = argv[++index] ?? '';
+    else if (token === '--anchors-file') args.anchorsFile = argv[++index] ?? '';
     else if (token === '--output-root') args.outputRoot = argv[++index] ?? '';
     else if (token === '--segmentation') args.segmentation = argv[++index] ?? 'auto';
     else if (token === '--depth') args.depth = argv[++index] ?? 'deep';
@@ -89,7 +91,12 @@ async function runCli() {
   const scriptFile = path.resolve(args.scriptFile);
   if (!fs.existsSync(scriptFile)) throw new Error(`Skriptdatei nicht gefunden: ${scriptFile}`);
   const script = fs.readFileSync(scriptFile, 'utf8');
-  const buildOptions = {...args, script};
+  let visualSearchAnchors = [];
+  if (args.anchorsFile) {
+    const anchorData = JSON.parse(fs.readFileSync(path.resolve(args.anchorsFile), 'utf8'));
+    visualSearchAnchors = anchorData.visualSearchAnchors ?? [];
+  }
+  const buildOptions = {...args, script, visualSearchAnchors};
   const result = args.complete ? await buildCompleteDocumentaryPhase1(buildOptions) : args.research ? await buildAndResearchDocumentaryPhase1(buildOptions) : buildDocumentaryPhase1(buildOptions);
   process.stdout.write(`Doku Phase 1 erstellt: ${result.projectDirectory}\n`);
   process.stdout.write(`Szenen: ${result.phase1.scenes.length}\n`);
@@ -97,7 +104,7 @@ async function runCli() {
     process.stdout.write(`Shots: ${result.research.summary.totalShots ?? 0}\n`);
     process.stdout.write(`Video-Shots: ${result.research.summary.videoShots ?? 0}\n`);
     process.stdout.write(`Bild-Shots: ${result.research.summary.imageShots ?? 0}\n`);
-    process.stdout.write(`Vision-geprüfte Szenen: ${result.research.summary.visionCheckedScenes ?? 0}\n`);
+    process.stdout.write(`Anchor-rescued Szenen: ${result.research.summary.anchorRescuedScenes ?? 0}\n`);
     process.stdout.write(`Quality-blocked Szenen: ${result.research.summary.qualityBlockedScenes ?? 0}\n`);
   }
   if (result.materialization) {
