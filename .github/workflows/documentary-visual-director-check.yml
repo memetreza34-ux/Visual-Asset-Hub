@@ -25,5 +25,8 @@ jobs:
           node --check scripts/lib/documentary-vision-rerank.mjs
           node --check scripts/lib/nasa-media.mjs
           node --check scripts/lib/loc-media.mjs
-      - name: Run visual director tests
-        run: node --test tests/documentary-visual-director-v2.test.mjs
+          node --check scripts/lib/wikimedia.mjs
+      - name: Run visual director and provider tests
+        run: |
+          node --test tests/documentary-visual-director-v2.test.mjs
+          node --test tests/documentary-media-providers-v2.test.mjs
