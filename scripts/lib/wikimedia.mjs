@@ -1,4 +1,5 @@
 const API_BASE = 'https://commons.wikimedia.org/w/api.php';
+const API_USER_AGENT = 'Visual-Asset-Hub/0.4.0-beta.9 (https://github.com/memetreza34-ux/Visual-Asset-Hub; documentary visual research)';
 const SAFE_IMAGE_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/tiff']);
 const SAFE_VIDEO_MIME_TYPES = new Set(['video/webm', 'video/mp4']);
 
@@ -103,7 +104,12 @@ export async function searchWikimedia({ query, type = 'photo', orientation, page
   url.searchParams.set('iiextmetadatafilter', 'LicenseShortName|LicenseUrl|UsageTerms|Artist|Credit|ImageDescription');
   url.searchParams.set('origin', '*');
 
-  const response = await fetchImpl(url, { headers: { Accept: 'application/json' } });
+  const response = await fetchImpl(url, {
+    headers: {
+      Accept: 'application/json',
+      'Api-User-Agent': API_USER_AGENT
+    }
+  });
   if (!response.ok) {
     const detail = await response.text().catch(() => '');
     throw new Error(`Wikimedia-Anfrage fehlgeschlagen (${response.status}).${detail ? ` ${detail.slice(0, 300)}` : ''}`);
