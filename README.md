@@ -2,6 +2,8 @@
 
 Visual Asset Hub ist eine universelle Medienbibliothek für **B-Rolls, Bilder, Animationen, Overlays, Screen-Recordings und Grafiken**. Die Assets sind nicht an einen einzelnen Kanal oder Content-Typ gebunden, sondern können für Reels, Shorts, YouTube, Werbung, Webseiten, Apps, Präsentationen und Kundenprojekte wiederverwendet werden.
 
+**Aktueller Entwicklungsstand: Production Workflow v0.5.0.**
+
 ## Ziele
 
 - Assets in Sekunden finden statt Ordner manuell zu durchsuchen
