@@ -4,7 +4,7 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { createDocumentaryProject, syncDocumentaryPhase1 } from './documentary-project.mjs';
 import { createDocumentaryVisualPlan } from './documentary-visual-plan.mjs';
-import { researchDocumentaryProjectV3 } from './documentary-research-v3.mjs';
+import { researchDocumentaryProjectV4 } from './documentary-research-v4.mjs';
 import { materializeDocumentaryVisualsV2 } from './documentary-materialize-v2.mjs';
 
 export function buildDocumentaryPhase1({
@@ -27,7 +27,7 @@ export function buildDocumentaryPhase1({
 
 export async function buildAndResearchDocumentaryPhase1(options = {}) {
   const built = buildDocumentaryPhase1(options);
-  const research = await researchDocumentaryProjectV3({
+  const research = await researchDocumentaryProjectV4({
     projectDirectory: built.projectDirectory,
     perPage: options.perPage,
     maxTasksPerScene: options.maxTasksPerScene,
@@ -98,6 +98,7 @@ async function runCli() {
     process.stdout.write(`Video-Shots: ${result.research.summary.videoShots ?? 0}\n`);
     process.stdout.write(`Bild-Shots: ${result.research.summary.imageShots ?? 0}\n`);
     process.stdout.write(`Vision-geprüfte Szenen: ${result.research.summary.visionCheckedScenes ?? 0}\n`);
+    process.stdout.write(`Quality-blocked Szenen: ${result.research.summary.qualityBlockedScenes ?? 0}\n`);
   }
   if (result.materialization) {
     process.stdout.write(`Lokale Shots: ${result.materialization.summary.shotFiles ?? 0}\n`);
