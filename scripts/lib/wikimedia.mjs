@@ -1,5 +1,6 @@
 const API_BASE = 'https://commons.wikimedia.org/w/api.php';
-const SAFE_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/tiff']);
+const SAFE_IMAGE_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/tiff']);
+const SAFE_VIDEO_MIME_TYPES = new Set(['video/webm', 'video/mp4']);
 
 function inferOrientation(width, height) {
   if (!width || !height) return 'unknown';
@@ -35,9 +36,16 @@ function classifyLicense(shortName, usageTerms, licenseUrl) {
   return null;
 }
 
-function normalizePage(page) {
+function normalizePage(page, requestedType) {
   const info = page.imageinfo?.[0];
-  if (!info || !SAFE_MIME_TYPES.has(String(info.mime || '').toLowerCase())) return null;
+  if (!info) return null;
+  const mime = String(info.mime || '').toLowerCase();
+  const isVideo = SAFE_VIDEO_MIME_TYPES.has(mime);
+  const isImage = SAFE_IMAGE_MIME_TYPES.has(mime);
+  if (!isVideo && !isImage) return null;
+  if (requestedType === 'video' && !isVideo) return null;
+  if (requestedType === 'photo' && !isImage) return null;
+
   const meta = info.extmetadata ?? {};
   const licenseName = text(meta, 'LicenseShortName');
   const usageTerms = text(meta, 'UsageTerms');
@@ -50,13 +58,15 @@ function normalizePage(page) {
   return {
     provider: 'wikimedia',
     provider_id: String(page.pageid),
-    type: 'image',
+    type: isVideo ? 'video' : 'image',
     title: description || page.title.replace(/^File:/, ''),
+    description,
     source_url: sourceUrl,
     creator,
     creator_url: null,
     width: info.width ?? null,
     height: info.height ?? null,
+    duration_seconds: null,
     orientation: inferOrientation(info.width, info.height),
     preview_url: info.thumburl || info.url || null,
     files: { original: info.url || null, medium: info.thumburl || null },
@@ -64,28 +74,31 @@ function normalizePage(page) {
     license_name: licenseName || usageTerms || licenseStatus,
     license_url: licenseUrl || null,
     attribution_text: text(meta, 'Credit') || (creator ? `${creator} / Wikimedia Commons` : 'Wikimedia Commons'),
-    source_name: 'Wikimedia Commons'
+    source_name: 'Wikimedia Commons',
+    mime_type: mime
   };
 }
 
-export async function searchWikimedia({ query, orientation, page = 1, perPage = 15, fetchImpl = globalThis.fetch }) {
+export async function searchWikimedia({ query, type = 'photo', orientation, page = 1, perPage = 15, fetchImpl = globalThis.fetch }) {
   if (!query || !String(query).trim()) throw new Error('Eine Suchanfrage ist erforderlich.');
   if (typeof fetchImpl !== 'function') throw new Error('In dieser Node.js-Version ist fetch nicht verfügbar.');
   assertInteger(page, 'page', 1, 100);
   assertInteger(perPage, 'perPage', 1, 20);
 
+  const requestedType = type === 'video' ? 'video' : 'photo';
   const url = new URL(API_BASE);
   url.searchParams.set('action', 'query');
   url.searchParams.set('format', 'json');
   url.searchParams.set('formatversion', '2');
   url.searchParams.set('generator', 'search');
-  url.searchParams.set('gsrsearch', String(query).trim());
+  const typeFilter = requestedType === 'video' ? ' filetype:video' : ' filetype:bitmap';
+  url.searchParams.set('gsrsearch', `${String(query).trim()}${typeFilter}`);
   url.searchParams.set('gsrnamespace', '6');
   url.searchParams.set('gsrlimit', String(perPage));
   if (page > 1) url.searchParams.set('gsroffset', String((page - 1) * perPage));
   url.searchParams.set('prop', 'imageinfo');
   url.searchParams.set('iiprop', 'url|size|mime|user|extmetadata');
-  url.searchParams.set('iiurlwidth', '640');
+  url.searchParams.set('iiurlwidth', '960');
   url.searchParams.set('iiextmetadatalanguage', 'en');
   url.searchParams.set('iiextmetadatafilter', 'LicenseShortName|LicenseUrl|UsageTerms|Artist|Credit|ImageDescription');
   url.searchParams.set('origin', '*');
@@ -98,16 +111,16 @@ export async function searchWikimedia({ query, orientation, page = 1, perPage = 
 
   const payload = await response.json();
   const normalized = (payload.query?.pages ?? [])
-    .map(normalizePage)
+    .map((pageItem) => normalizePage(pageItem, requestedType))
     .filter(Boolean)
     .filter((item) => item.files.original)
-    .filter((item) => !orientation || orientation === 'any' || item.orientation === orientation)
+    .filter((item) => !orientation || orientation === 'any' || item.orientation === orientation || item.orientation === 'unknown')
     .slice(0, perPage);
 
   return {
     provider: 'wikimedia',
     query: String(query).trim(),
-    type: 'photo',
+    type: requestedType,
     page,
     per_page: perPage,
     total_results: normalized.length,
