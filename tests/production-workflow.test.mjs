@@ -31,6 +31,7 @@ test('production workflow JavaScript parses successfully', () => {
 
 test('package exposes inbox production commands', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+  assert.equal(pkg.version, '0.5.0');
   assert.equal(pkg.scripts['media:analyze'], 'node scripts/analyze-media.mjs');
   assert.equal(pkg.scripts['inbox:scan'], 'node scripts/scan-inbox.mjs');
   assert.equal(pkg.scripts['inbox:review'], 'node scripts/review-inbox.mjs');
@@ -43,4 +44,6 @@ test('local server contains guarded inbox write endpoints', () => {
   assert.match(server, /\/api\/inbox\/scan/);
   assert.match(server, /\/api\/inbox\/import/);
   assert.match(server, /safeInboxFile/);
+  assert.match(server, /Cross-Site-Schreibzugriff wurde blockiert/);
+  assert.match(server, /value = 'approved'/);
 });
