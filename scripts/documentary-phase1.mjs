@@ -4,7 +4,7 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { createDocumentaryProject, syncDocumentaryPhase1 } from './documentary-project.mjs';
 import { createDocumentaryVisualPlan } from './documentary-visual-plan.mjs';
-import { researchDocumentaryProjectV6 } from './documentary-research-v6.mjs';
+import { researchDocumentaryProjectV7 } from './documentary-research-v7.mjs';
 import { materializeDocumentaryVisualsV2 } from './documentary-materialize-v2.mjs';
 
 export function buildDocumentaryPhase1({
@@ -27,7 +27,7 @@ export function buildDocumentaryPhase1({
 
 export async function buildAndResearchDocumentaryPhase1(options = {}) {
   const built = buildDocumentaryPhase1(options);
-  const research = await researchDocumentaryProjectV6({
+  const research = await researchDocumentaryProjectV7({
     projectDirectory: built.projectDirectory,
     visualSearchAnchors: options.visualSearchAnchors ?? [],
     perPage: options.perPage,
@@ -107,6 +107,7 @@ async function runCli() {
     process.stdout.write(`Abgedeckte Szenen: ${result.research.summary.coveredScenes ?? 0}\n`);
     process.stdout.write(`Eindeutige Assets: ${result.research.summary.uniqueSelectedAssets ?? 0}\n`);
     process.stdout.write(`V6-rescued Szenen: ${result.research.summary.v6RescuedScenes ?? 0}\n`);
+    process.stdout.write(`V7 Archiv-Pruning: ${result.research.summary.archivePrunedForIrrelevance ?? 0}\n`);
     process.stdout.write(`Quality-blocked Szenen: ${result.research.summary.qualityBlockedScenes ?? 0}\n`);
   }
   if (result.materialization) {
