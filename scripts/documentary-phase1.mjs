@@ -4,7 +4,7 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { createDocumentaryProject, syncDocumentaryPhase1 } from './documentary-project.mjs';
 import { createDocumentaryVisualPlan } from './documentary-visual-plan.mjs';
-import { researchDocumentaryProjectV2 } from './documentary-research-v2.mjs';
+import { researchDocumentaryProjectV3 } from './documentary-research-v3.mjs';
 import { materializeDocumentaryVisualsV2 } from './documentary-materialize-v2.mjs';
 
 export function buildDocumentaryPhase1({
@@ -27,11 +27,14 @@ export function buildDocumentaryPhase1({
 
 export async function buildAndResearchDocumentaryPhase1(options = {}) {
   const built = buildDocumentaryPhase1(options);
-  const research = await researchDocumentaryProjectV2({
+  const research = await researchDocumentaryProjectV3({
     projectDirectory: built.projectDirectory,
     perPage: options.perPage,
     maxTasksPerScene: options.maxTasksPerScene,
-    alternatives: options.alternatives
+    alternatives: options.alternatives,
+    openaiApiKey: options.openaiApiKey,
+    visionModel: options.visionModel,
+    visionCandidates: options.visionCandidates
   });
   return {...built, research};
 }
@@ -48,7 +51,7 @@ export async function buildCompleteDocumentaryPhase1(options = {}) {
 }
 
 function parseArgs(argv) {
-  const args = {title: '', category: 'sonstiges', slug: undefined, scriptFile: '', outputRoot: undefined, segmentation: 'auto', depth: 'deep', mediaPreference: 'mixed', overwrite: false, research: false, complete: false, materializeAlternatives: false, overwriteMedia: false, maxMediaBytes: undefined, perPage: undefined, maxTasksPerScene: undefined, alternatives: undefined};
+  const args = {title: '', category: 'sonstiges', slug: undefined, scriptFile: '', outputRoot: undefined, segmentation: 'auto', depth: 'deep', mediaPreference: 'mixed', overwrite: false, research: false, complete: false, materializeAlternatives: false, overwriteMedia: false, maxMediaBytes: undefined, perPage: undefined, maxTasksPerScene: undefined, alternatives: undefined, visionModel: undefined, visionCandidates: undefined};
   for (let index = 0; index < argv.length; index += 1) {
     const token = argv[index];
     if (token === '--title') args.title = argv[++index] ?? '';
@@ -68,6 +71,8 @@ function parseArgs(argv) {
     else if (token === '--per-page') args.perPage = Number(argv[++index]);
     else if (token === '--max-tasks') args.maxTasksPerScene = Number(argv[++index]);
     else if (token === '--alternatives') args.alternatives = Number(argv[++index]);
+    else if (token === '--vision-model') args.visionModel = argv[++index] ?? undefined;
+    else if (token === '--vision-candidates') args.visionCandidates = Number(argv[++index]);
     else throw new Error(`Unbekanntes Argument: ${token}`);
   }
   if (!args.title) throw new Error('Pflichtargument fehlt: --title');
@@ -75,6 +80,7 @@ function parseArgs(argv) {
   validateOptionalInteger(args.perPage, 3, 20, '--per-page');
   validateOptionalInteger(args.maxTasksPerScene, 1, 30, '--max-tasks');
   validateOptionalInteger(args.alternatives, 0, 8, '--alternatives');
+  validateOptionalInteger(args.visionCandidates, 2, 10, '--vision-candidates');
   return args;
 }
 
@@ -91,6 +97,7 @@ async function runCli() {
     process.stdout.write(`Shots: ${result.research.summary.totalShots ?? 0}\n`);
     process.stdout.write(`Video-Shots: ${result.research.summary.videoShots ?? 0}\n`);
     process.stdout.write(`Bild-Shots: ${result.research.summary.imageShots ?? 0}\n`);
+    process.stdout.write(`Vision-geprüfte Szenen: ${result.research.summary.visionCheckedScenes ?? 0}\n`);
   }
   if (result.materialization) {
     process.stdout.write(`Lokale Shots: ${result.materialization.summary.shotFiles ?? 0}\n`);
