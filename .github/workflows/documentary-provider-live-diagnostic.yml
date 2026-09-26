@@ -1,0 +1,63 @@
+name: Documentary Provider Live Diagnostic
+
+on:
+  push:
+    branches: [agent/beta-release]
+    paths:
+      - '.github/workflows/documentary-provider-live-diagnostic.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Query NASA Wikimedia and LOC directly
+        run: |
+          node --input-type=module - <<'NODE'
+          import {searchNasa} from './scripts/lib/nasa-media.mjs';
+          import {searchWikimedia} from './scripts/lib/wikimedia.mjs';
+          import {searchLibraryOfCongress} from './scripts/lib/loc-media.mjs';
+
+          const tests = [
+            ['nasa', searchNasa, 'Aral Sea'],
+            ['nasa', searchNasa, 'Aral Sea satellite'],
+            ['wikimedia', searchWikimedia, 'Aral Sea'],
+            ['wikimedia', searchWikimedia, 'Aral Sea satellite'],
+            ['wikimedia', searchWikimedia, 'Moynaq ship cemetery'],
+            ['wikimedia', searchWikimedia, 'Kok Aral Dam'],
+            ['loc', searchLibraryOfCongress, 'Aral Sea'],
+            ['loc', searchLibraryOfCongress, 'Soviet irrigation Central Asia']
+          ];
+
+          for (const [provider, search, query] of tests) {
+            for (const type of ['photo', 'video']) {
+              try {
+                const result = await search({query, type, orientation: 'horizontal', page: 1, perPage: 6});
+                console.log(`\n=== ${provider} | ${type} | ${query} ===`);
+                console.log(`total=${result.total_results} assets=${result.assets?.length || 0}`);
+                for (const asset of (result.assets || []).slice(0, 6)) {
+                  console.log(JSON.stringify({
+                    id: asset.provider_id,
+                    type: asset.type,
+                    title: asset.title,
+                    source: asset.source_url,
+                    media: asset.files?.original || null,
+                    preview: asset.preview_url || null,
+                    license: asset.license || null,
+                    orientation: asset.orientation || null
+                  }));
+                }
+              } catch (error) {
+                console.log(`\n=== ${provider} | ${type} | ${query} | ERROR ===`);
+                console.log(error instanceof Error ? error.stack : String(error));
+              }
+            }
+          }
+          NODE
