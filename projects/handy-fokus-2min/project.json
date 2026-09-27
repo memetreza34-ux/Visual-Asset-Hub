@@ -11,12 +11,12 @@
   "defaultUsageScope": "youtube",
   "targetDurationSeconds": 120,
   "language": "de",
-  "status": "phase1-visual-selection",
+  "status": "phase1-approved-awaiting-voiceover",
   "workflow": {
     "phase1Script": "complete",
     "phase1VisualPlan": "complete-v2",
-    "phase1AssetSelection": "incomplete",
-    "phase2Voiceover": "blocked-until-phase1-approved",
+    "phase1AssetSelection": "complete",
+    "phase2Voiceover": "awaiting-user",
     "phase3TimingAndAssembly": "blocked-until-user-voiceover",
     "phase4Render": "pending"
   },
