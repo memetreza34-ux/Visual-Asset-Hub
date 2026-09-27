@@ -1,6 +1,6 @@
 import {Composition} from 'remotion';
 import {AssetVideo, type RenderManifest} from './AssetVideo';
-import {DemoVideo, DEMO_DURATION_IN_FRAMES} from './DemoVideo';
+import {DemoVideo} from './DemoVideo';
 import {generatedManifest} from './generated-manifest';
 
 const manifest = generatedManifest as unknown as RenderManifest;
@@ -20,7 +20,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="VisualAssetHubDemo2Min"
         component={DemoVideo}
-        durationInFrames={DEMO_DURATION_IN_FRAMES}
+        durationInFrames={1800}
         fps={15}
         width={1920}
         height={1080}
