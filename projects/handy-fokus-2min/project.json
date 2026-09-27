@@ -1,5 +1,7 @@
 {
-  "version": 1,
+  "version": 2,
+  "workflowVersion": 2,
+  "requireUserVoiceover": true,
   "id": "handy-fokus-2min",
   "title": "Warum dein Handy dein Lernen sabotiert – und wie du den Fokus zurückholst",
   "format": "horizontal",
@@ -9,11 +11,13 @@
   "defaultUsageScope": "youtube",
   "targetDurationSeconds": 120,
   "language": "de",
-  "status": "awaiting-voiceover",
+  "status": "phase1-visual-selection",
   "workflow": {
     "phase1Script": "complete",
-    "phase2Voiceover": "pending-user",
-    "phase3VisualSearch": "blocked-until-voiceover",
+    "phase1VisualPlan": "complete-v2",
+    "phase1AssetSelection": "incomplete",
+    "phase2Voiceover": "blocked-until-phase1-approved",
+    "phase3TimingAndAssembly": "blocked-until-user-voiceover",
     "phase4Render": "pending"
   },
   "scenes": []
