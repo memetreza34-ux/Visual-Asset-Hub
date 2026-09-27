@@ -1,0 +1,55 @@
+{
+  "version": 2,
+  "projectId": "air-france-447-2min",
+  "timingSource": "voiceover-pending",
+  "scenes": [
+    {
+      "id": "scene-01",
+      "narration": "In der Nacht zum 1. Juni 2009 verschwand Air-France-Flug 447 auf dem Weg von Rio de Janeiro nach Paris über dem Atlantik. An Bord des Airbus A330 waren 228 Menschen."
+    },
+    {
+      "id": "scene-02",
+      "narration": "Der Flug verlief zunächst normal. Über dem tropischen Atlantik näherte sich die Maschine jedoch einer Zone mit starken Gewittern und Eiskristallen."
+    },
+    {
+      "id": "scene-03",
+      "narration": "Kurz darauf lieferten die Pitot-Sonden, die den Luftstrom messen und daraus die Geschwindigkeit bestimmen, vorübergehend widersprüchliche Werte."
+    },
+    {
+      "id": "scene-04",
+      "narration": "Daraufhin schaltete sich der Autopilot ab. Die Piloten mussten den Airbus plötzlich manuell steuern – nachts, über dem Meer und zeitweise ohne verlässliche Geschwindigkeitsanzeige."
+    },
+    {
+      "id": "scene-05",
+      "narration": "In den folgenden Minuten geriet die Maschine in einen aerodynamischen Strömungsabriss. Das Flugzeug verlor massiv Höhe, obwohl die Nase teilweise nach oben zeigte."
+    },
+    {
+      "id": "scene-06",
+      "narration": "Mehrfach ertönte die Stall-Warnung. Die Besatzung erkannte die tatsächliche Fluglage jedoch nicht rechtzeitig und beendete den Strömungsabriss nicht."
+    },
+    {
+      "id": "scene-07",
+      "narration": "Nur wenige Minuten nach dem ersten Geschwindigkeitsproblem schlug der Airbus nahezu intakt auf der Oberfläche des Atlantiks auf. Niemand an Bord überlebte."
+    },
+    {
+      "id": "scene-08",
+      "narration": "Für die Ermittler begann danach eine außergewöhnlich schwierige Suche. Erste Wrackteile wurden an der Oberfläche entdeckt, doch das Hauptwrack und die Flugschreiber lagen in großer Tiefe auf dem Meeresboden."
+    },
+    {
+      "id": "scene-09",
+      "narration": "Mehrere Suchkampagnen blieben ohne Erfolg. Erst im April 2011 wurde das Hauptwrack in rund 3.900 Metern Tiefe lokalisiert."
+    },
+    {
+      "id": "scene-10",
+      "narration": "Kurz darauf konnten auch die beiden Flugschreiber geborgen und ausgewertet werden. Damit ließ sich der Ablauf der letzten Minuten erstmals genau rekonstruieren."
+    },
+    {
+      "id": "scene-11",
+      "narration": "Der französische BEA-Bericht kam zu dem Ergebnis, dass nicht ein einzelner Defekt den Absturz verursachte. Die vorübergehende Vereisung der Pitot-Sonden, die Reaktionen der Besatzung, Probleme beim Erkennen des Strömungsabrisses und Schwächen bei Training und Verfahren wirkten zusammen."
+    },
+    {
+      "id": "scene-12",
+      "narration": "Air France 447 wurde damit zu einem der bekanntesten Beispiele dafür, wie aus einer begrenzten technischen Störung innerhalb weniger Minuten eine Katastrophe entstehen kann."
+    }
+  ]
+}
