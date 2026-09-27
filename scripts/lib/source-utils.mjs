@@ -50,7 +50,7 @@ export async function downloadAsset({ root, asset, download, provider }) {
   const tmp = `${target}.part`;
   const maxBytes = 700 * 1024 * 1024;
   const response = await fetch(download.url, {
-    headers: { 'User-Agent': 'Visual-Asset-Hub/0.7', Accept: '*/*' },
+    headers: { 'User-Agent': 'Visual-Asset-Hub/0.8', Accept: '*/*' },
     redirect: 'follow'
   });
   if (!response.ok || !response.body) throw new Error(`Download fehlgeschlagen (${response.status}).`);
