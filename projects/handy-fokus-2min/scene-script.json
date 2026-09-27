@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "projectId": "handy-fokus-2min",
+  "timingSource": "voiceover-pending",
+  "scenes": [
+    {
+      "id": "scene-01",
+      "narration": "Warum ist es so schwer, zehn Minuten konzentriert zu lernen, aber so leicht, eine Stunde am Handy zu verlieren?"
+    },
+    {
+      "id": "scene-02",
+      "narration": "Das Problem ist nicht nur fehlende Disziplin. Dein Smartphone ist darauf gebaut, deine Aufmerksamkeit immer wieder zu unterbrechen."
+    },
+    {
+      "id": "scene-03",
+      "narration": "Eine Nachricht, ein neues Video, ein kurzer Blick auf TikTok – jedes Mal wechselst du mit deinem Kopf weg von der Aufgabe."
+    },
+    {
+      "id": "scene-04",
+      "narration": "Und genau dieser Wechsel kostet Zeit. Selbst wenn du das Handy nach fünf Sekunden wieder weglegst, bist du nicht sofort wieder voll im Thema."
+    },
+    {
+      "id": "scene-05",
+      "narration": "Dein Gehirn muss erst zurückfinden. Wenn das ständig passiert, lernst du langsamer und merkst dir weniger."
+    },
+    {
+      "id": "scene-06",
+      "narration": "Das Gefährliche: Viele Unterbrechungen passieren automatisch. Du willst eigentlich nur die Uhrzeit prüfen und plötzlich bist du in einer App."
+    },
+    {
+      "id": "scene-07",
+      "narration": "Deshalb reicht der Gedanke „Ich fasse mein Handy einfach nicht an“ oft nicht aus. Mach es dir stattdessen schwer, abgelenkt zu werden."
+    },
+    {
+      "id": "scene-08",
+      "narration": "Lege das Handy außer Reichweite, am besten in einen anderen Raum. Schalte unnötige Benachrichtigungen aus und öffne beim Lernen nur das, was du wirklich brauchst."
+    },
+    {
+      "id": "scene-09",
+      "narration": "Dann arbeite in klaren Blöcken. Zum Beispiel 25 Minuten konzentriert, danach fünf Minuten Pause."
+    },
+    {
+      "id": "scene-10",
+      "narration": "Während des Lernblocks gibt es nur eine Aufgabe. Kein Chat, kein Scrollen und kein ständiges Wechseln zwischen Tabs."
+    },
+    {
+      "id": "scene-11",
+      "narration": "Nach ein paar Tagen merkst du, dass Fokus nicht bedeutet, besonders motiviert zu sein. Fokus bedeutet vor allem, Ablenkungen vorher zu entfernen."
+    },
+    {
+      "id": "scene-12",
+      "narration": "Wenn dein Handy nicht ständig um deine Aufmerksamkeit kämpft, wird Lernen nicht automatisch leicht – aber deutlich einfacher."
+    }
+  ]
+}
