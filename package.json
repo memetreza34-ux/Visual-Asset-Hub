@@ -1,6 +1,6 @@
 {
   "name": "visual-asset-hub",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "private": true,
   "type": "module",
   "engines": { "node": ">=22" },
@@ -12,6 +12,7 @@
     "source:search": "node scripts/source-search.mjs",
     "source:grab": "node scripts/source-grab.mjs",
     "video:project": "node scripts/video-project.mjs",
+    "youtube:workflow": "node scripts/youtube-workflow.mjs",
     "pexels:search": "node scripts/pexels-search.mjs",
     "pexels:grab": "node scripts/pexels-grab.mjs",
     "validate": "node scripts/validate-catalog.mjs",
