@@ -2,32 +2,20 @@ name: Render 2-Minute Demo Video
 
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - "renderer/src/DemoVideo.tsx"
-      - "renderer/src/Root.tsx"
-      - "renderer/src/index.ts"
-      - "renderer/package.json"
-      - ".github/workflows/render-demo-video.yml"
 
 permissions:
-  contents: write
-
-concurrency:
-  group: render-demo-${{ github.ref }}
-  cancel-in-progress: true
+  contents: read
 
 jobs:
   render:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - name: Checkout production branch
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: production-v1
           lfs: false
-          persist-credentials: true
+          persist-credentials: false
 
       - name: Use Node.js 22
         uses: actions/setup-node@v4
@@ -51,17 +39,6 @@ jobs:
           test -s renderer/out/visual-asset-hub-demo-2min.mp4
           ls -lh renderer/out/visual-asset-hub-demo-2min.mp4
 
-      - name: Save rendered video to branch
-        if: github.event_name == 'pull_request'
-        run: |
-          mkdir -p demo-output
-          cp renderer/out/visual-asset-hub-demo-2min.mp4 demo-output/visual-asset-hub-demo-2min.mp4
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add demo-output/visual-asset-hub-demo-2min.mp4
-          if git diff --cached --quiet; then
-            echo "Rendered video unchanged."
-          else
-            git commit -m "test: add rendered 2-minute demo video"
-            git push origin HEAD:production-v1
-          fi
+# Legacy technical demo only. Real YouTube workflow v2 renders from the user's
+# voiceover and the Phase-1-approved project visuals. Trigger this job manually
+# only when the old renderer demo itself needs regression testing.
