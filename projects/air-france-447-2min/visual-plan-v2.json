@@ -21,213 +21,28 @@
       "visualIntent": "Establish the exact aircraft, route and scale of the disaster immediately.",
       "noGo": ["generic passenger jet", "airport stock not showing F-GZCP", "dramatic fake crash footage"],
       "shots": [
-        {
-          "id": "af01-a",
-          "visualType": "archival-image",
-          "mediaType": "image",
-          "discoveryMode": "curated-external",
-          "description": "Exact aircraft F-GZCP, the Airbus A330-203 involved in AF447, photographed before the accident.",
-          "queries": ["F-GZCP Airbus A330 Air France"],
-          "preferredSources": ["wikimedia-commons"],
-          "priority": "required"
-        },
-        {
-          "id": "af01-b",
-          "visualType": "map-animation",
-          "discoveryMode": "internal",
-          "description": "Dark South Atlantic map with Rio de Janeiro and Paris, a route line crossing the ocean, AF447 marker stopping in the Atlantic, and a restrained 228-person count.",
-          "queries": [],
-          "preferredSources": ["internal-remotion"],
-          "priority": "required"
-        }
+        {"id":"af01-a","visualType":"archival-image","mediaType":"image","discoveryMode":"curated-external","description":"Exact aircraft F-GZCP, the Airbus A330-203 involved in AF447, photographed before the accident.","queries":["F-GZCP Airbus A330 Air France"],"preferredSources":["wikimedia-commons"],"priority":"required"},
+        {"id":"af01-b","visualType":"map-animation","discoveryMode":"internal","description":"Dark South Atlantic map with Rio de Janeiro and Paris, a route line crossing the ocean, AF447 marker stopping in the Atlantic, and a restrained 228-person count.","queries":[],"preferredSources":["internal-remotion"],"priority":"required"}
       ]
     },
-    {
-      "id": "scene-02",
-      "visualIntent": "Show the aircraft entering the Intertropical Convergence Zone and a region of convective weather without pretending unrelated storm footage is from AF447.",
-      "noGo": ["random lightning video labeled as AF447", "hurricane footage", "airport clouds"],
-      "shots": [
-        {
-          "id": "af02-a",
-          "visualType": "weather-map",
-          "discoveryMode": "internal",
-          "description": "Animated Atlantic weather map: route line approaches a band of convective cells; cloud tops and ice-crystal region are shown schematically, clearly labeled as an explanatory reconstruction.",
-          "queries": [],
-          "preferredSources": ["internal-remotion"],
-          "priority": "required"
-        }
-      ]
-    },
-    {
-      "id": "scene-03",
-      "visualIntent": "Explain what the Pitot probes do and how temporary icing can make speed values disagree.",
-      "noGo": ["random engine close-up", "generic ice animation with no sensor context", "fake cockpit error screen"],
-      "shots": [
-        {
-          "id": "af03-a",
-          "visualType": "technical-motion-graphic",
-          "discoveryMode": "internal",
-          "description": "Clean side diagram of an A330 nose with three Pitot probe positions; airflow arrows enter a probe, ice crystals interrupt the flow, then three speed readouts diverge.",
-          "queries": [],
-          "preferredSources": ["internal-remotion"],
-          "priority": "required"
-        }
-      ]
-    },
-    {
-      "id": "scene-04",
-      "visualIntent": "Make the automation loss and unreliable-speed problem understandable without recreating unknown pilot expressions.",
-      "noGo": ["actors in cockpit", "invented pilot reactions", "generic cockpit B-roll presented as AF447"],
-      "shots": [
-        {
-          "id": "af04-a",
-          "visualType": "cockpit-ui-graphic",
-          "discoveryMode": "internal",
-          "description": "Stylized but clearly illustrative primary-flight-display graphic: autopilot indicator disappears, speed tapes disagree, manual-control icon appears, while the background remains a dark night-flight abstraction.",
-          "queries": [],
-          "preferredSources": ["internal-remotion"],
-          "priority": "required"
-        }
-      ]
-    },
-    {
-      "id": "scene-05",
-      "visualIntent": "Explain a high-altitude stall visually: nose attitude can be up while the aircraft still descends rapidly.",
-      "noGo": ["plane spinning like an action movie", "explosion", "unrealistic vertical dive"],
-      "shots": [
-        {
-          "id": "af05-a",
-          "visualType": "technical-motion-graphic",
-          "discoveryMode": "internal",
-          "description": "Side-view aircraft silhouette with airflow separating from the wing; angle-of-attack indicator rises, lift falls, and a vertical-speed arrow grows downward while the nose remains slightly raised.",
-          "queries": [],
-          "preferredSources": ["internal-remotion"],
-          "priority": "required"
-        }
-      ]
-    },
-    {
-      "id": "scene-06",
-      "visualIntent": "Show the confusion of the final minutes through data, not melodrama.",
-      "noGo": ["screaming actors", "fake CVR subtitles", "flashing red horror graphics"],
-      "shots": [
-        {
-          "id": "af06-a",
-          "visualType": "data-visualization",
-          "discoveryMode": "internal",
-          "description": "Minimal time strip of the final minutes: altitude line falls, stall-warning markers appear, pitch remains positive for much of the descent; no invented dialogue is shown.",
-          "queries": [],
-          "preferredSources": ["internal-remotion"],
-          "priority": "required"
-        }
-      ]
-    },
-    {
-      "id": "scene-07",
-      "visualIntent": "Depict the ocean impact soberly and accurately without sensational crash imagery.",
-      "noGo": ["explosion", "fireball", "passenger imagery", "graphic impact recreation"],
-      "shots": [
-        {
-          "id": "af07-a",
-          "visualType": "map-animation",
-          "discoveryMode": "internal",
-          "description": "Dark ocean surface seen from a distant side profile; aircraft path ends at the water with a restrained impact marker, then the screen holds on '228 Menschen an Bord – keine Überlebenden'.",
-          "queries": [],
-          "preferredSources": ["internal-remotion"],
-          "priority": "required"
-        }
-      ]
-    },
+    {"id":"scene-02","visualIntent":"Show the aircraft entering the Intertropical Convergence Zone and a region of convective weather without pretending unrelated storm footage is from AF447.","noGo":["random lightning video labeled as AF447","hurricane footage","airport clouds"],"shots":[{"id":"af02-a","visualType":"weather-map","discoveryMode":"internal","description":"Animated Atlantic weather map: route line approaches a band of convective cells; cloud tops and ice-crystal region are shown schematically, clearly labeled as an explanatory reconstruction.","queries":[],"preferredSources":["internal-remotion"],"priority":"required"}]},
+    {"id":"scene-03","visualIntent":"Explain what the Pitot probes do and how temporary icing can make speed values disagree.","noGo":["random engine close-up","generic ice animation with no sensor context","fake cockpit error screen"],"shots":[{"id":"af03-a","visualType":"technical-motion-graphic","discoveryMode":"internal","description":"Clean side diagram of an A330 nose with three Pitot probe positions; airflow arrows enter a probe, ice crystals interrupt the flow, then three speed readouts diverge.","queries":[],"preferredSources":["internal-remotion"],"priority":"required"}]},
+    {"id":"scene-04","visualIntent":"Make the automation loss and unreliable-speed problem understandable without recreating unknown pilot expressions.","noGo":["actors in cockpit","invented pilot reactions","generic cockpit B-roll presented as AF447"],"shots":[{"id":"af04-a","visualType":"cockpit-ui-graphic","discoveryMode":"internal","description":"Stylized but clearly illustrative primary-flight-display graphic: autopilot indicator disappears, speed tapes disagree, manual-control icon appears, while the background remains a dark night-flight abstraction.","queries":[],"preferredSources":["internal-remotion"],"priority":"required"}]},
+    {"id":"scene-05","visualIntent":"Explain a high-altitude stall visually: nose attitude can be up while the aircraft still descends rapidly.","noGo":["plane spinning like an action movie","explosion","unrealistic vertical dive"],"shots":[{"id":"af05-a","visualType":"technical-motion-graphic","discoveryMode":"internal","description":"Side-view aircraft silhouette with airflow separating from the wing; angle-of-attack indicator rises, lift falls, and a vertical-speed arrow grows downward while the nose remains slightly raised.","queries":[],"preferredSources":["internal-remotion"],"priority":"required"}]},
+    {"id":"scene-06","visualIntent":"Show the confusion of the final minutes through data, not melodrama.","noGo":["screaming actors","fake CVR subtitles","flashing red horror graphics"],"shots":[{"id":"af06-a","visualType":"data-visualization","discoveryMode":"internal","description":"Minimal time strip of the final minutes: altitude line falls, stall-warning markers appear, pitch remains positive for much of the descent; no invented dialogue is shown.","queries":[],"preferredSources":["internal-remotion"],"priority":"required"}]},
+    {"id":"scene-07","visualIntent":"Depict the ocean impact soberly and accurately without sensational crash imagery.","noGo":["explosion","fireball","passenger imagery","graphic impact recreation"],"shots":[{"id":"af07-a","visualType":"map-animation","discoveryMode":"internal","description":"Dark ocean surface seen from a distant side profile; aircraft path ends at the water with a restrained impact marker, then the screen holds on '228 Menschen an Bord – keine Überlebenden'.","queries":[],"preferredSources":["internal-remotion"],"priority":"required"}]},
     {
       "id": "scene-08",
-      "visualIntent": "Move from the accident to the real search using exact archival recovery imagery.",
+      "visualIntent": "Move from the accident to the real investigation using exact wreckage imagery rather than generic rescue footage.",
       "noGo": ["generic rescue helicopter", "unrelated ship footage", "victim recovery imagery"],
       "shots": [
-        {
-          "id": "af08-a",
-          "visualType": "archival-image",
-          "mediaType": "image",
-          "discoveryMode": "curated-external",
-          "description": "Brazilian Navy recovery operation for AF447 wreckage in June 2009; exact-event archival image.",
-          "queries": ["AF447 Brazilian Navy wreckage recovery June 2009"],
-          "preferredSources": ["wikimedia-commons"],
-          "priority": "required"
-        },
-        {
-          "id": "af08-b",
-          "visualType": "depth-graphic",
-          "discoveryMode": "internal",
-          "description": "Ocean cross-section transitions from floating debris at surface to the unseen wreckage far below, establishing why the recorders were so difficult to locate.",
-          "queries": [],
-          "preferredSources": ["internal-remotion"],
-          "priority": "required"
-        }
+        {"id":"af08-a","visualType":"archival-image","mediaType":"image","discoveryMode":"curated-external","description":"Exact AF447 wreckage photograph from US NTSB material, public domain in the United States.","queries":["Wreckage of F-GZCP AF447 NTSB"],"preferredSources":["wikimedia-commons"],"priority":"required"},
+        {"id":"af08-b","visualType":"depth-graphic","discoveryMode":"internal","description":"Ocean cross-section transitions from floating debris at surface to the unseen wreckage far below, establishing why the recorders were so difficult to locate.","queries":[],"preferredSources":["internal-remotion"],"priority":"required"}
       ]
     },
-    {
-      "id": "scene-09",
-      "visualIntent": "Visualize the multi-year deep-ocean search and the roughly 3,900-metre depth.",
-      "noGo": ["submarine action footage", "random scuba diver", "shallow seabed footage"],
-      "shots": [
-        {
-          "id": "af09-a",
-          "visualType": "bathymetry-animation",
-          "discoveryMode": "internal",
-          "description": "Bathymetric-style 3D/2D map of the Mid-Atlantic search area; search zones appear in stages, then a marker locks onto the wreckage at approximately 3,900 m in April 2011.",
-          "queries": [],
-          "preferredSources": ["internal-remotion"],
-          "priority": "required"
-        }
-      ]
-    },
-    {
-      "id": "scene-10",
-      "visualIntent": "Show why finding the flight recorders changed the investigation.",
-      "noGo": ["generic black box with wrong shape", "exploding electronics", "fake data transcript"],
-      "shots": [
-        {
-          "id": "af10-a",
-          "visualType": "technical-motion-graphic",
-          "discoveryMode": "internal",
-          "description": "Two orange flight-recorder units rise from a seabed silhouette into a clean analysis interface; data streams resolve into altitude, speed and pitch traces.",
-          "queries": [],
-          "preferredSources": ["internal-remotion"],
-          "priority": "required"
-        }
-      ]
-    },
-    {
-      "id": "scene-11",
-      "visualIntent": "Present the BEA conclusion as a chain of contributing factors, not a single-cause blame graphic.",
-      "noGo": ["single red arrow blaming pilots", "single failed-sensor explanation", "courtroom imagery"],
-      "shots": [
-        {
-          "id": "af11-a",
-          "visualType": "cause-chain-graphic",
-          "discoveryMode": "internal",
-          "description": "Four connected documentary cards: Pitot icing / unreliable airspeed; manual-control reactions; stall recognition; training/procedures. Cards converge into 'Verlust der Kontrolle'.",
-          "queries": [],
-          "preferredSources": ["internal-remotion"],
-          "priority": "required"
-        }
-      ]
-    },
-    {
-      "id": "scene-12",
-      "visualIntent": "Close with the exact aircraft and a restrained systems-safety message.",
-      "noGo": ["motivational quote", "generic sunset plane", "sensational crash montage"],
-      "shots": [
-        {
-          "id": "af12-a",
-          "visualType": "archival-image",
-          "mediaType": "image",
-          "discoveryMode": "curated-external",
-          "description": "Return to the exact F-GZCP archival photograph, slowly darkening while the four contributing-factor labels remain small in frame.",
-          "queries": ["F-GZCP Airbus A330 Air France"],
-          "preferredSources": ["wikimedia-commons"],
-          "priority": "required"
-        }
-      ]
-    }
+    {"id":"scene-09","visualIntent":"Visualize the multi-year deep-ocean search and the roughly 3,900-metre depth.","noGo":["submarine action footage","random scuba diver","shallow seabed footage"],"shots":[{"id":"af09-a","visualType":"bathymetry-animation","discoveryMode":"internal","description":"Bathymetric-style 3D/2D map of the Mid-Atlantic search area; search zones appear in stages, then a marker locks onto the wreckage at approximately 3,900 m in April 2011.","queries":[],"preferredSources":["internal-remotion"],"priority":"required"}]},
+    {"id":"scene-10","visualIntent":"Show why finding the flight recorders changed the investigation.","noGo":["generic black box with wrong shape","exploding electronics","fake data transcript"],"shots":[{"id":"af10-a","visualType":"technical-motion-graphic","discoveryMode":"internal","description":"Two orange flight-recorder units rise from a seabed silhouette into a clean analysis interface; data streams resolve into altitude, speed and pitch traces.","queries":[],"preferredSources":["internal-remotion"],"priority":"required"}]},
+    {"id":"scene-11","visualIntent":"Present the BEA conclusion as a chain of contributing factors, not a single-cause blame graphic.","noGo":["single red arrow blaming pilots","single failed-sensor explanation","courtroom imagery"],"shots":[{"id":"af11-a","visualType":"cause-chain-graphic","discoveryMode":"internal","description":"Four connected documentary cards: Pitot icing / unreliable airspeed; manual-control reactions; stall recognition; training/procedures. Cards converge into 'Verlust der Kontrolle'.","queries":[],"preferredSources":["internal-remotion"],"priority":"required"}]},
+    {"id":"scene-12","visualIntent":"Close with the exact aircraft and a restrained systems-safety message.","noGo":["motivational quote","generic sunset plane","sensational crash montage"],"shots":[{"id":"af12-a","visualType":"archival-image","mediaType":"image","discoveryMode":"curated-external","description":"Return to the exact F-GZCP archival photograph, slowly darkening while the four contributing-factor labels remain small in frame.","queries":["F-GZCP Airbus A330 Air France"],"preferredSources":["wikimedia-commons"],"priority":"required"}]}
   ]
 }
