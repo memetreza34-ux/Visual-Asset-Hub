@@ -6,7 +6,7 @@ import test from 'node:test';
 const root = process.cwd();
 
 test('youtube workflow help is available', () => {
-  const result = spawnSync(process.execPath, ['scripts/youtube-workflow.mjs', '--help'], { cwd: root, encoding: 'utf8' });
+  const result = spawnSync(process.execPath, ['scripts/youtube-workflow.mjs', 'help'], { cwd: root, encoding: 'utf8' });
   assert.equal(result.status, 0);
   assert.match(result.stdout, /YouTube Workflow v2/);
 });
