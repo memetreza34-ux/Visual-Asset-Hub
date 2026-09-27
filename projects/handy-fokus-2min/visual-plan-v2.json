@@ -159,7 +159,7 @@
           "description": "Hand reflexively reaches for a phone beside study materials, unlocks it, then starts scrolling without a deliberate transition.",
           "queries": ["automatic phone checking habit desk", "reflexively checking smartphone close up", "phone habit scrolling hand desk"],
           "preferredSources": ["pexels", "pixabay"],
-          "priority": "required"
+          "priority": "optional"
         },
         {
           "id": "s06-b",
@@ -201,7 +201,7 @@
           "description": "Phone is deliberately placed into a drawer, bag or outside the immediate desk area.",
           "queries": ["put smartphone in drawer focus", "phone put away study desk", "placing phone in bag studying"],
           "preferredSources": ["pexels", "pixabay"],
-          "priority": "required"
+          "priority": "optional"
         },
         {
           "id": "s08-b",
@@ -304,7 +304,7 @@
           "description": "Calm completed study desk: several finished notes, hand closes notebook, phone remains out of reach or inside a bag.",
           "queries": ["finished studying notes desk phone away", "productive study session completed notes", "close notebook after studying desk"],
           "preferredSources": ["pexels", "pixabay"],
-          "priority": "required"
+          "priority": "optional"
         },
         {
           "id": "s12-b",
