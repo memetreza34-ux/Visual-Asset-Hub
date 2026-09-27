@@ -1,0 +1,56 @@
+{
+  "version": 2,
+  "projectId": "handy-fokus-2min",
+  "phase": 1,
+  "status": "needs-review",
+  "selectionRule": "Every external candidate must score at least 8/10 for semantic relevance before voiceover can be attached.",
+  "scenes": [
+    {"id":"scene-01","shots":[
+      {"id":"s01-a","visualType":"broll","status":"needs-discovery","selectedCandidateId":null,"candidates":[]},
+      {"id":"s01-b","visualType":"motion-graphic","status":"approved","selectedCandidateId":"internal-scene-01-s01-b","candidates":[{"candidateId":"internal-scene-01-s01-b","provider":"internal-remotion","type":"motion-graphic","title":"10 min Lernen vs 60 min Scrollen","relevanceScore":10,"matchReason":"Exakte Visualisierung der Hook-Aussage.","rights":{"licenseStatus":"owned","usageScopes":["youtube"]}}]}
+    ]},
+    {"id":"scene-02","shots":[
+      {"id":"s02-a","visualType":"motion-graphic","status":"approved","selectedCandidateId":"internal-scene-02-s02-a","candidates":[{"candidateId":"internal-scene-02-s02-a","provider":"internal-remotion","type":"motion-graphic","title":"Benachrichtigungen ziehen Aufmerksamkeit","relevanceScore":10,"matchReason":"Direkte Darstellung wiederholter Aufmerksamkeitsreize ohne Marken-UI.","rights":{"licenseStatus":"owned","usageScopes":["youtube"]}}]},
+      {"id":"s02-b","visualType":"broll","status":"needs-discovery","selectedCandidateId":null,"candidates":[]}
+    ]},
+    {"id":"scene-03","shots":[
+      {"id":"s03-a","visualType":"motion-graphic","status":"approved","selectedCandidateId":"internal-scene-03-s03-a","candidates":[{"candidateId":"internal-scene-03-s03-a","provider":"internal-remotion","type":"motion-graphic","title":"Context switching","relevanceScore":10,"matchReason":"Zeigt den Aufgabenwechsel präziser als generisches Stockmaterial.","rights":{"licenseStatus":"owned","usageScopes":["youtube"]}}]},
+      {"id":"s03-b","visualType":"broll","status":"needs-discovery","selectedCandidateId":null,"candidates":[]}
+    ]},
+    {"id":"scene-04","shots":[
+      {"id":"s04-a","visualType":"broll","status":"needs-discovery","selectedCandidateId":null,"candidates":[]},
+      {"id":"s04-b","visualType":"motion-graphic","status":"approved","selectedCandidateId":"internal-scene-04-s04-b","candidates":[{"candidateId":"internal-scene-04-s04-b","provider":"internal-remotion","type":"motion-graphic","title":"Fokus-Meter fällt und erholt sich","relevanceScore":10,"matchReason":"Visualisiert die Erholungszeit direkt.","rights":{"licenseStatus":"owned","usageScopes":["youtube"]}}]}
+    ]},
+    {"id":"scene-05","shots":[
+      {"id":"s05-a","visualType":"motion-graphic","status":"approved","selectedCandidateId":"internal-scene-05-s05-a","candidates":[{"candidateId":"internal-scene-05-s05-a","provider":"internal-remotion","type":"motion-graphic","title":"Lernfortschritt mit und ohne Unterbrechungen","relevanceScore":10,"matchReason":"Vermeidet unpassende Gehirn-Stockbilder und zeigt die Aussage konkret.","rights":{"licenseStatus":"owned","usageScopes":["youtube"]}}]},
+      {"id":"s05-b","visualType":"broll","status":"needs-discovery","selectedCandidateId":null,"candidates":[]}
+    ]},
+    {"id":"scene-06","shots":[
+      {"id":"s06-a","visualType":"broll","status":"needs-discovery","selectedCandidateId":null,"candidates":[]},
+      {"id":"s06-b","visualType":"motion-graphic","status":"approved","selectedCandidateId":"internal-scene-06-s06-b","candidates":[{"candidateId":"internal-scene-06-s06-b","provider":"internal-remotion","type":"motion-graphic","title":"Uhrzeit prüfen wird zu Scrollen","relevanceScore":10,"matchReason":"Exakte Habit-Loop-Darstellung.","rights":{"licenseStatus":"owned","usageScopes":["youtube"]}}]}
+    ]},
+    {"id":"scene-07","shots":[
+      {"id":"s07-a","visualType":"motion-graphic","status":"approved","selectedCandidateId":"internal-scene-07-s07-a","candidates":[{"candidateId":"internal-scene-07-s07-a","provider":"internal-remotion","type":"motion-graphic","title":"Willenskraft vs Umgebung","relevanceScore":10,"matchReason":"Direkte visuelle Übersetzung der Kernaussage.","rights":{"licenseStatus":"owned","usageScopes":["youtube"]}}]}
+    ]},
+    {"id":"scene-08","shots":[
+      {"id":"s08-a","visualType":"broll","status":"needs-discovery","selectedCandidateId":null,"candidates":[]},
+      {"id":"s08-b","visualType":"screen-recording","status":"approved","selectedCandidateId":"internal-scene-08-s08-b","candidates":[{"candidateId":"internal-scene-08-s08-b","provider":"internal-remotion","type":"screen-recording","title":"Benachrichtigungen ausschalten","relevanceScore":10,"matchReason":"Brand-neutrale, exakt steuerbare UI-Demo.","rights":{"licenseStatus":"owned","usageScopes":["youtube"]}}]},
+      {"id":"s08-c","visualType":"screen-recording","status":"approved","selectedCandidateId":"internal-scene-08-s08-c","candidates":[{"candidateId":"internal-scene-08-s08-c","provider":"internal-remotion","type":"screen-recording","title":"Tabs schließen bis eine Aufgabe bleibt","relevanceScore":10,"matchReason":"Direkt passend zum Sprechertext.","rights":{"licenseStatus":"owned","usageScopes":["youtube"]}}]}
+    ]},
+    {"id":"scene-09","shots":[
+      {"id":"s09-a","visualType":"motion-graphic","status":"approved","selectedCandidateId":"internal-scene-09-s09-a","candidates":[{"candidateId":"internal-scene-09-s09-a","provider":"internal-remotion","type":"motion-graphic","title":"25/5 Fokus-Timer","relevanceScore":10,"matchReason":"25 und 5 Minuten werden eindeutig statt mit beliebiger Uhr gezeigt.","rights":{"licenseStatus":"owned","usageScopes":["youtube"]}}]},
+      {"id":"s09-b","visualType":"broll","status":"needs-discovery","selectedCandidateId":null,"candidates":[]}
+    ]},
+    {"id":"scene-10","shots":[
+      {"id":"s10-a","visualType":"broll","status":"needs-discovery","selectedCandidateId":null,"candidates":[]},
+      {"id":"s10-b","visualType":"motion-graphic","status":"approved","selectedCandidateId":"internal-scene-10-s10-b","candidates":[{"candidateId":"internal-scene-10-s10-b","provider":"internal-remotion","type":"motion-graphic","title":"Eine Aufgabe bleibt übrig","relevanceScore":10,"matchReason":"Chat, Scrollen und Tabs verschwinden passend zur Aussage.","rights":{"licenseStatus":"owned","usageScopes":["youtube"]}}]}
+    ]},
+    {"id":"scene-11","shots":[
+      {"id":"s11-a","visualType":"motion-graphic","status":"approved","selectedCandidateId":"internal-scene-11-s11-a","candidates":[{"candidateId":"internal-scene-11-s11-a","provider":"internal-remotion","type":"motion-graphic","title":"Ablenkungsreiche vs fokussierte Umgebung","relevanceScore":10,"matchReason":"Zeigt Umgebung als Ursache statt Motivation.","rights":{"licenseStatus":"owned","usageScopes":["youtube"]}}]}
+    ]},
+    {"id":"scene-12","shots":[
+      {"id":"s12-a","visualType":"broll","status":"needs-discovery","selectedCandidateId":null,"candidates":[]},
+      {"id":"s12-b","visualType":"motion-graphic","status":"approved","selectedCandidateId":"internal-scene-12-s12-b","candidates":[{"candidateId":"internal-scene-12-s12-b","provider":"internal-remotion","type":"motion-graphic","title":"Weniger Ablenkung, mehr nutzbarer Fokus","relevanceScore":10,"matchReason":"Ruhiger, sachlicher Abschluss ohne Motivationsklischee.","rights":{"licenseStatus":"owned","usageScopes":["youtube"]}}]}
+    ]}
+  ]
+}
