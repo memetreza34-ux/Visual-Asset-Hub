@@ -21,7 +21,7 @@ export const RemotionRoot: React.FC = () => {
         id="VisualAssetHubDemo2Min"
         component={DemoVideo}
         durationInFrames={DEMO_DURATION_IN_FRAMES}
-        fps={30}
+        fps={15}
         width={1920}
         height={1080}
       />
