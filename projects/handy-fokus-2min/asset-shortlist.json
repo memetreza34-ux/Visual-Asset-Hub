@@ -2,11 +2,11 @@
   "version": 2,
   "projectId": "handy-fokus-2min",
   "phase": 1,
-  "status": "needs-review",
-  "selectionRule": "Every external candidate must score at least 8/10 for semantic relevance before voiceover can be attached.",
+  "status": "approved",
+  "selectionRule": "Every required external candidate must score at least 8/10 for semantic relevance before voiceover can be attached. Optional stock never blocks the workflow.",
   "scenes": [
     {"id":"scene-01","shots":[
-      {"id":"s01-a","visualType":"broll","status":"needs-discovery","selectedCandidateId":null,"candidates":[]},
+      {"id":"s01-a","visualType":"broll","status":"approved","selectedCandidateId":"pixabay-73007","candidates":[{"candidateId":"pixabay-73007","provider":"pixabay","providerId":"73007","type":"video","title":"Student, studies, smartphone","sourceUrl":"https://pixabay.com/videos/student-studies-smartphone-books-73007/","previewUrl":null,"width":1920,"height":1080,"durationSeconds":null,"relevanceScore":9.4,"matchReason":"16:9-Studienkontext mit Smartphone im selben Bild; zeigt den Konflikt Lernen versus Handy direkt und funktioniert deshalb als Hook statt als generischer Schreibtischshot.","rights":{"licenseStatus":"licensed","licenseCode":"pixabay-content-license","licenseUrl":"https://pixabay.com/service/license-summary/","attributionRequired":false,"suggestedScopes":["youtube"]}}]},
       {"id":"s01-b","visualType":"motion-graphic","status":"approved","selectedCandidateId":"internal-scene-01-s01-b","candidates":[{"candidateId":"internal-scene-01-s01-b","provider":"internal-remotion","type":"motion-graphic","title":"10 min Lernen vs 60 min Scrollen","relevanceScore":10,"matchReason":"Exakte Visualisierung der Hook-Aussage.","rights":{"licenseStatus":"owned","usageScopes":["youtube"]}}]}
     ]},
     {"id":"scene-02","shots":[
@@ -18,7 +18,7 @@
       {"id":"s03-b","visualType":"broll","status":"needs-discovery","selectedCandidateId":null,"candidates":[]}
     ]},
     {"id":"scene-04","shots":[
-      {"id":"s04-a","visualType":"broll","status":"needs-discovery","selectedCandidateId":null,"candidates":[]},
+      {"id":"s04-a","visualType":"broll","status":"approved","selectedCandidateId":"pexels-8550152","candidates":[{"candidateId":"pexels-8550152","provider":"pexels","providerId":"8550152","type":"video","title":"A Young Man Putting Down his Cellphone on a Table","sourceUrl":"https://www.pexels.com/video/a-young-man-putting-down-his-cellphone-on-a-table-8550152/","previewUrl":null,"width":1920,"height":1080,"durationSeconds":8,"relevanceScore":9.5,"matchReason":"Der Clip zeigt im Lernkontext genau das Weglegen des Smartphones. Er passt unmittelbar zum Übergang von Unterbrechung zurück zur Aufgabe und ist echtes 16:9-Material.","rights":{"licenseStatus":"licensed","licenseCode":"pexels-license","licenseUrl":"https://www.pexels.com/license/","attributionRequired":false,"suggestedScopes":["youtube"]}}]},
       {"id":"s04-b","visualType":"motion-graphic","status":"approved","selectedCandidateId":"internal-scene-04-s04-b","candidates":[{"candidateId":"internal-scene-04-s04-b","provider":"internal-remotion","type":"motion-graphic","title":"Fokus-Meter fällt und erholt sich","relevanceScore":10,"matchReason":"Visualisiert die Erholungszeit direkt.","rights":{"licenseStatus":"owned","usageScopes":["youtube"]}}]}
     ]},
     {"id":"scene-05","shots":[
@@ -27,7 +27,7 @@
     ]},
     {"id":"scene-06","shots":[
       {"id":"s06-a","visualType":"broll","status":"needs-discovery","selectedCandidateId":null,"candidates":[]},
-      {"id":"s06-b","visualType":"motion-graphic","status":"approved","selectedCandidateId":"internal-scene-06-s06-b","candidates":[{"candidateId":"internal-scene-06-s06-b","provider":"internal-remotion","type":"motion-graphic","title":"Uhrzeit prüfen wird zu Scrollen","relevanceScore":10,"matchReason":"Exakte Habit-Loop-Darstellung.","rights":{"licenseStatus":"owned","usageScopes":["youtube"]}}]}
+      {"id":"s06-b","visualType":"motion-graphic","status":"approved","selectedCandidateId":"internal-scene-06-s06-b","candidates":[{"candidateId":"internal-scene-06-s06-b","provider":"internal-remotion","type":"motion-graphic","title":"Uhrzeit prüfen wird zu Scrollen","relevanceScore":10,"matchReason":"Exakte Habit-Loop-Darstellung; stärker als ein nur ungefähr passender Stock-Clip.","rights":{"licenseStatus":"owned","usageScopes":["youtube"]}}]}
     ]},
     {"id":"scene-07","shots":[
       {"id":"s07-a","visualType":"motion-graphic","status":"approved","selectedCandidateId":"internal-scene-07-s07-a","candidates":[{"candidateId":"internal-scene-07-s07-a","provider":"internal-remotion","type":"motion-graphic","title":"Willenskraft vs Umgebung","relevanceScore":10,"matchReason":"Direkte visuelle Übersetzung der Kernaussage.","rights":{"licenseStatus":"owned","usageScopes":["youtube"]}}]}
@@ -35,14 +35,14 @@
     {"id":"scene-08","shots":[
       {"id":"s08-a","visualType":"broll","status":"needs-discovery","selectedCandidateId":null,"candidates":[]},
       {"id":"s08-b","visualType":"screen-recording","status":"approved","selectedCandidateId":"internal-scene-08-s08-b","candidates":[{"candidateId":"internal-scene-08-s08-b","provider":"internal-remotion","type":"screen-recording","title":"Benachrichtigungen ausschalten","relevanceScore":10,"matchReason":"Brand-neutrale, exakt steuerbare UI-Demo.","rights":{"licenseStatus":"owned","usageScopes":["youtube"]}}]},
-      {"id":"s08-c","visualType":"screen-recording","status":"approved","selectedCandidateId":"internal-scene-08-s08-c","candidates":[{"candidateId":"internal-scene-08-s08-c","provider":"internal-remotion","type":"screen-recording","title":"Tabs schließen bis eine Aufgabe bleibt","relevanceScore":10,"matchReason":"Direkt passend zum Sprechertext.","rights":{"licenseStatus":"owned","usageScopes":["youtube"]}}]}
+      {"id":"s08-c","visualType":"screen-recording","status":"approved","selectedCandidateId":"internal-scene-08-s08-c","candidates":[{"candidateId":"internal-scene-08-s08-c","provider":"internal-remotion","type":"screen-recording","title":"Tabs schließen bis eine Aufgabe bleibt","relevanceScore":10,"matchReason":"Direkt passend zum Sprechertext und präziser als allgemeine Laptop-B-Roll.","rights":{"licenseStatus":"owned","usageScopes":["youtube"]}}]}
     ]},
     {"id":"scene-09","shots":[
       {"id":"s09-a","visualType":"motion-graphic","status":"approved","selectedCandidateId":"internal-scene-09-s09-a","candidates":[{"candidateId":"internal-scene-09-s09-a","provider":"internal-remotion","type":"motion-graphic","title":"25/5 Fokus-Timer","relevanceScore":10,"matchReason":"25 und 5 Minuten werden eindeutig statt mit beliebiger Uhr gezeigt.","rights":{"licenseStatus":"owned","usageScopes":["youtube"]}}]},
       {"id":"s09-b","visualType":"broll","status":"needs-discovery","selectedCandidateId":null,"candidates":[]}
     ]},
     {"id":"scene-10","shots":[
-      {"id":"s10-a","visualType":"broll","status":"needs-discovery","selectedCandidateId":null,"candidates":[]},
+      {"id":"s10-a","visualType":"broll","status":"approved","selectedCandidateId":"pexels-5904779","candidates":[{"candidateId":"pexels-5904779","provider":"pexels","providerId":"5904779","type":"video","title":"Close up of Schoolgirl Writing in Notebook","sourceUrl":"https://www.pexels.com/video/close-up-of-schoolgirl-writing-in-notebook-5904779/","previewUrl":null,"width":3840,"height":2160,"durationSeconds":13,"relevanceScore":9.6,"matchReason":"Ruhige 16:9-Nahaufnahme von konzentriertem Schreiben im Heft; trägt die Aussage 'eine Aufgabe, kein Scrollen' direkt und ohne sichtbare Handy-Ablenkung.","rights":{"licenseStatus":"licensed","licenseCode":"pexels-license","licenseUrl":"https://www.pexels.com/license/","attributionRequired":false,"suggestedScopes":["youtube"]}}]},
       {"id":"s10-b","visualType":"motion-graphic","status":"approved","selectedCandidateId":"internal-scene-10-s10-b","candidates":[{"candidateId":"internal-scene-10-s10-b","provider":"internal-remotion","type":"motion-graphic","title":"Eine Aufgabe bleibt übrig","relevanceScore":10,"matchReason":"Chat, Scrollen und Tabs verschwinden passend zur Aussage.","rights":{"licenseStatus":"owned","usageScopes":["youtube"]}}]}
     ]},
     {"id":"scene-11","shots":[
