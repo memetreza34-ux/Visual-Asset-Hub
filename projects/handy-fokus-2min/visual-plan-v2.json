@@ -1,0 +1,321 @@
+{
+  "version": 2,
+  "projectId": "handy-fokus-2min",
+  "format": "horizontal",
+  "phase": 1,
+  "principle": "Visual decisions are completed before voiceover. Phase 3 only times and assembles approved Phase-1 assets.",
+  "globalRules": {
+    "stockIsNotDefault": true,
+    "minimumExternalRelevanceScore": 8,
+    "preferLiteralSemanticMatch": true,
+    "avoidGenericLifestyleStock": true,
+    "avoidTalkingHeads": true,
+    "avoidVisibleBrandLogos": true,
+    "avoidWatermarks": true,
+    "maxOneGenericStudyShotInARow": true,
+    "useInternalGraphicsWhenStockWouldBeVague": true
+  },
+  "scenes": [
+    {
+      "id": "scene-01",
+      "visualIntent": "Hook must instantly show the conflict between studying and the phone, not merely a person at a desk.",
+      "noGo": ["generic student smiling at laptop", "random phone close-up without study context", "business office footage"],
+      "shots": [
+        {
+          "id": "s01-a",
+          "visualType": "broll",
+          "mediaType": "video",
+          "discoveryMode": "provider",
+          "description": "Top-down or close study desk: notebook open, learner actively writing, smartphone beside notes lights up or is checked, causing the hand to stop studying.",
+          "queries": ["student studying desk smartphone distraction close up", "phone notification while studying notebook", "distracted studying phone desk"],
+          "preferredSources": ["pexels", "pixabay"],
+          "priority": "required"
+        },
+        {
+          "id": "s01-b",
+          "visualType": "motion-graphic",
+          "discoveryMode": "internal",
+          "description": "Minimal split comparison: 10 minutes study on one side versus 60 minutes scrolling on the other, with a rapidly moving phone-feed indicator.",
+          "queries": [],
+          "preferredSources": ["internal-remotion"],
+          "priority": "required"
+        }
+      ]
+    },
+    {
+      "id": "scene-02",
+      "visualIntent": "Show that notifications are designed to pull attention repeatedly.",
+      "noGo": ["phone product beauty shot", "random social-media influencer", "unreadable tiny UI"],
+      "shots": [
+        {
+          "id": "s02-a",
+          "visualType": "motion-graphic",
+          "discoveryMode": "internal",
+          "description": "Generic smartphone silhouette with notification bubbles appearing one after another around it; no real app branding.",
+          "queries": [],
+          "preferredSources": ["internal-remotion"],
+          "priority": "required"
+        },
+        {
+          "id": "s02-b",
+          "visualType": "broll",
+          "mediaType": "video",
+          "discoveryMode": "provider",
+          "description": "Hand interrupts reading or note-taking to pick up a phone after a notification.",
+          "queries": ["hand picks up phone while studying", "student checks phone during homework", "phone distraction reading notes"],
+          "preferredSources": ["pexels", "pixabay"],
+          "priority": "optional"
+        }
+      ]
+    },
+    {
+      "id": "scene-03",
+      "visualIntent": "Make context switching visible and fast: task, phone, task, phone.",
+      "noGo": ["generic multitasking office meeting", "stock footage with many people", "unrelated typing footage"],
+      "shots": [
+        {
+          "id": "s03-a",
+          "visualType": "motion-graphic",
+          "discoveryMode": "internal",
+          "description": "Three large panels labeled only with icons: notebook, laptop document, smartphone. A focus marker jumps rapidly between them.",
+          "queries": [],
+          "preferredSources": ["internal-remotion"],
+          "priority": "required"
+        },
+        {
+          "id": "s03-b",
+          "visualType": "broll",
+          "mediaType": "video",
+          "discoveryMode": "provider",
+          "description": "Close-up sequence of the same person alternating between handwritten notes, laptop and smartphone at one desk.",
+          "queries": ["switching between laptop phone notebook studying", "student multitasking phone laptop close up", "study desk phone laptop notebook hands"],
+          "preferredSources": ["pexels", "pixabay"],
+          "priority": "optional"
+        }
+      ]
+    },
+    {
+      "id": "scene-04",
+      "visualIntent": "Show the recovery cost after interruption rather than another generic distracted-student shot.",
+      "noGo": ["sad student portrait", "person holding head with no study context", "phone scrolling"],
+      "shots": [
+        {
+          "id": "s04-a",
+          "visualType": "broll",
+          "mediaType": "video",
+          "discoveryMode": "provider",
+          "description": "Phone is placed face-down; hand returns to notebook and searches several lines/pages to find the previous place.",
+          "queries": ["returning to notes after phone distraction", "student searching notes page close up", "put phone down continue studying"],
+          "preferredSources": ["pexels", "pixabay"],
+          "priority": "required"
+        },
+        {
+          "id": "s04-b",
+          "visualType": "motion-graphic",
+          "discoveryMode": "internal",
+          "description": "Simple focus meter drops to zero after an interruption and slowly climbs back instead of instantly returning to full focus.",
+          "queries": [],
+          "preferredSources": ["internal-remotion"],
+          "priority": "required"
+        }
+      ]
+    },
+    {
+      "id": "scene-05",
+      "visualIntent": "Explain slower learning and weaker memory through a clean visual, not fake neuroscience stock.",
+      "noGo": ["3D brain stock animation", "medical brain scan", "random person thinking"],
+      "shots": [
+        {
+          "id": "s05-a",
+          "visualType": "motion-graphic",
+          "discoveryMode": "internal",
+          "description": "Two progress bars compare uninterrupted study versus repeated interruptions; interrupted bar advances much more slowly.",
+          "queries": [],
+          "preferredSources": ["internal-remotion"],
+          "priority": "required"
+        },
+        {
+          "id": "s05-b",
+          "visualType": "broll",
+          "mediaType": "video",
+          "discoveryMode": "provider",
+          "description": "Close-up of learner rereading the same lines or correcting notes after losing track.",
+          "queries": ["student rereading notes close up", "studying notes correction close up", "homework notebook focused hands"],
+          "preferredSources": ["pexels", "pixabay"],
+          "priority": "optional"
+        }
+      ]
+    },
+    {
+      "id": "scene-06",
+      "visualIntent": "Show automatic phone checking as a habit loop.",
+      "noGo": ["person intentionally making a phone call", "selfie footage", "generic scrolling montage"],
+      "shots": [
+        {
+          "id": "s06-a",
+          "visualType": "broll",
+          "mediaType": "video",
+          "discoveryMode": "provider",
+          "description": "Hand reflexively reaches for a phone beside study materials, unlocks it, then starts scrolling without a deliberate transition.",
+          "queries": ["automatic phone checking habit desk", "reflexively checking smartphone close up", "phone habit scrolling hand desk"],
+          "preferredSources": ["pexels", "pixabay"],
+          "priority": "required"
+        },
+        {
+          "id": "s06-b",
+          "visualType": "motion-graphic",
+          "discoveryMode": "internal",
+          "description": "Tiny sequence: clock icon -> unlock icon -> endless-scroll icon, emphasizing how a quick check expands into an app session.",
+          "queries": [],
+          "preferredSources": ["internal-remotion"],
+          "priority": "required"
+        }
+      ]
+    },
+    {
+      "id": "scene-07",
+      "visualIntent": "Transition from willpower to environment design.",
+      "noGo": ["motivational quote footage", "gym discipline imagery", "generic productivity montage"],
+      "shots": [
+        {
+          "id": "s07-a",
+          "visualType": "motion-graphic",
+          "discoveryMode": "internal",
+          "description": "Willpower icon faces repeated notification arrows and loses; then the phone is physically moved outside a boundary around the study desk.",
+          "queries": [],
+          "preferredSources": ["internal-remotion"],
+          "priority": "required"
+        }
+      ]
+    },
+    {
+      "id": "scene-08",
+      "visualIntent": "Show three concrete actions exactly as spoken: distance, notifications off, only needed tools open.",
+      "noGo": ["generic clean desk only", "phone thrown dramatically", "brand-specific Android/iOS tutorial"],
+      "shots": [
+        {
+          "id": "s08-a",
+          "visualType": "broll",
+          "mediaType": "video",
+          "discoveryMode": "provider",
+          "description": "Phone is deliberately placed into a drawer, bag or outside the immediate desk area.",
+          "queries": ["put smartphone in drawer focus", "phone put away study desk", "placing phone in bag studying"],
+          "preferredSources": ["pexels", "pixabay"],
+          "priority": "required"
+        },
+        {
+          "id": "s08-b",
+          "visualType": "screen-recording",
+          "discoveryMode": "internal",
+          "description": "Brand-neutral mock phone settings screen where notification toggles are switched off.",
+          "queries": [],
+          "preferredSources": ["internal-remotion"],
+          "priority": "required"
+        },
+        {
+          "id": "s08-c",
+          "visualType": "screen-recording",
+          "discoveryMode": "internal",
+          "description": "Mock laptop browser closes multiple tabs until only one learning document remains.",
+          "queries": [],
+          "preferredSources": ["internal-remotion"],
+          "priority": "required"
+        }
+      ]
+    },
+    {
+      "id": "scene-09",
+      "visualIntent": "Make the 25/5 method visually unmistakable.",
+      "noGo": ["random clock footage", "analog wall clock", "generic studying without timer"],
+      "shots": [
+        {
+          "id": "s09-a",
+          "visualType": "motion-graphic",
+          "discoveryMode": "internal",
+          "description": "Large clean timer starts at 25:00, followed by a short 05:00 break card; notebook remains visible in layout.",
+          "queries": [],
+          "preferredSources": ["internal-remotion"],
+          "priority": "required"
+        },
+        {
+          "id": "s09-b",
+          "visualType": "broll",
+          "mediaType": "video",
+          "discoveryMode": "provider",
+          "description": "Focused writing at a desk with a visible generic timer nearby if available.",
+          "queries": ["pomodoro study timer notebook", "study timer desk writing", "focused studying timer close up"],
+          "preferredSources": ["pexels", "pixabay"],
+          "priority": "optional"
+        }
+      ]
+    },
+    {
+      "id": "scene-10",
+      "visualIntent": "Show single-tasking: one task fills the frame and the phone is absent.",
+      "noGo": ["multiple monitors", "busy office", "smartphone visible in foreground"],
+      "shots": [
+        {
+          "id": "s10-a",
+          "visualType": "broll",
+          "mediaType": "video",
+          "discoveryMode": "provider",
+          "description": "Tight calm close-ups of one notebook or one learning document; hand writes continuously; no phone in frame.",
+          "queries": ["focused studying notebook no phone close up", "deep focus writing notes desk", "concentrated study notebook hands"],
+          "preferredSources": ["pexels", "pixabay"],
+          "priority": "required"
+        },
+        {
+          "id": "s10-b",
+          "visualType": "motion-graphic",
+          "discoveryMode": "internal",
+          "description": "Icons for chat, scrolling and extra tabs fade out, leaving one task card centered.",
+          "queries": [],
+          "preferredSources": ["internal-remotion"],
+          "priority": "required"
+        }
+      ]
+    },
+    {
+      "id": "scene-11",
+      "visualIntent": "Show that focus comes from environment setup, not motivation.",
+      "noGo": ["motivational sunrise", "success celebration", "random tidy-room footage"],
+      "shots": [
+        {
+          "id": "s11-a",
+          "visualType": "motion-graphic",
+          "discoveryMode": "internal",
+          "description": "Before/after study environment: left side has phone, notification icons and many tabs; right side removes each distraction one by one.",
+          "queries": [],
+          "preferredSources": ["internal-remotion"],
+          "priority": "required"
+        }
+      ]
+    },
+    {
+      "id": "scene-12",
+      "visualIntent": "End calmly with a credible focused study result, not an exaggerated success shot.",
+      "noGo": ["student cheering", "graduation footage", "generic inspirational landscape"],
+      "shots": [
+        {
+          "id": "s12-a",
+          "visualType": "broll",
+          "mediaType": "video",
+          "discoveryMode": "provider",
+          "description": "Calm completed study desk: several finished notes, hand closes notebook, phone remains out of reach or inside a bag.",
+          "queries": ["finished studying notes desk phone away", "productive study session completed notes", "close notebook after studying desk"],
+          "preferredSources": ["pexels", "pixabay"],
+          "priority": "required"
+        },
+        {
+          "id": "s12-b",
+          "visualType": "motion-graphic",
+          "discoveryMode": "internal",
+          "description": "Final minimal line: fewer distractions -> more usable focus, with no motivational slogan.",
+          "queries": [],
+          "preferredSources": ["internal-remotion"],
+          "priority": "required"
+        }
+      ]
+    }
+  ]
+}
