@@ -1,31 +1,67 @@
-# Video-Projekte
+# Video Projects
 
-`projects/` verbindet die freigegebene Asset-Bibliothek mit einem späteren Renderer wie Remotion.
+`projects/` verbindet Story-Recherche, freigegebene Visuals, Nutzer-Voiceover und den Remotion-Renderer.
 
-Die Asset-Bibliothek bleibt die Quelle für Dateien, Metadaten und Nutzungsrechte. Ein Video-Projekt speichert nur, **welche Asset-IDs in welcher Reihenfolge und Dauer verwendet werden**.
+## Workflow für faceless Dokus
 
-## Projekt anlegen
+### Phase 1 – Recherche + Visuals + Skript
+
+Visuals werden **vor** dem Voiceover festgelegt:
+
+1. Fall/Thema recherchieren
+2. Faktenquellen sichern
+3. Original-/Archivmaterial suchen
+4. Rechte prüfen
+5. Visual-Coverage sicherstellen
+6. Skript und Visual-Beats gemeinsam finalisieren
+
+Archiv-Recherche:
+
+```bash
+npm run documentary:research -- "Suchbegriff" --type video
+```
+
+Referenzvideo strukturell analysieren:
+
+```bash
+npm run reference:inspect -- "https://youtu.be/VIDEO_ID"
+```
+
+Dabei wird standardmäßig kein Referenzvideo heruntergeladen.
+
+### Phase 2 – Nutzer-Voiceover
+
+```bash
+npm run youtube:workflow -- voiceover-attach --project <id> --file ./voiceover.wav
+```
+
+Nur die vom Nutzer gelieferte Audiodatei ist Master-Audio. Die Pipeline erzeugt oder ersetzt keine Stimme.
+
+### Phase 3 – Timing + Assembly
+
+- echte Voiceover-Zeiten bestimmen
+- nur vorher ausgewählte Visuals verwenden
+- Clips trimmen
+- Bilder bewegen
+- vertikale Clips in 16:9 mit Sidefill darstellen
+- keine neue planlose Stock-Suche
+
+### Phase 4 – Render
+
+Remotion konsumiert das geprüfte Render-Manifest und übernimmt Schnitt/Motion/MP4-Export.
+
+## Klassische Asset-Projekte
+
+Projekt anlegen:
 
 ```bash
 npm run video:project -- create \
   --name "Erstes Video" \
-  --format vertical \
+  --format horizontal \
   --scope youtube
 ```
 
-Ergebnis:
-
-```text
-projects/erstes-video/project.json
-```
-
-Unterstützte Formate:
-
-- `vertical` → 1080 × 1920
-- `horizontal` → 1920 × 1080
-- `square` → 1080 × 1080
-
-## Szene hinzufügen
+Asset hinzufügen:
 
 ```bash
 npm run video:project -- add \
@@ -43,7 +79,7 @@ Optional:
 --notes "leichter Zoom im Renderer"
 ```
 
-## Render-Manifest erzeugen
+Export:
 
 ```bash
 npm run video:project -- export --project erstes-video
@@ -55,27 +91,18 @@ Ergebnis:
 projects/erstes-video/render-manifest.json
 ```
 
-Das Render-Manifest enthält unter anderem:
-
-- Projektauflösung und FPS
-- Gesamtdauer und Gesamtframes
-- Reihenfolge der Szenen
-- `fromFrame` und `durationInFrames`
-- Asset-ID und Quelldatei
-- Trim-Start und Fit-Modus
-- erforderliche Attributionen
+Das Manifest enthält Projektauflösung/FPS, Frame-Timing, Szenenreihenfolge, Asset-Quellen, Trim/Fit, Master-Audio und Attributionen.
 
 ## Rechte-Gate
 
-Der Export ist absichtlich streng. Er wird blockiert, wenn:
+Der Export wird blockiert, wenn:
 
-1. eine Asset-ID nicht mehr existiert,
+1. eine Asset-ID fehlt,
 2. ein Asset nicht `approved` ist,
-3. das Asset nicht für den Nutzungsbereich des Projekts freigegeben ist,
-4. keine nutzbare Originalquelle vorhanden ist.
+3. der gewünschte Nutzungsbereich fehlt,
+4. keine nutzbare Originalquelle vorhanden ist,
+5. bei Workflow-v2-Projekten keine echte Nutzer-Voiceover-Datei vorhanden ist.
 
-Damit kann ein späterer Renderer nicht versehentlich ein Asset verwenden, das nur für interne oder eingeschränkte Nutzung vorgesehen ist.
+`unknown` und `restricted` werden nicht automatisch als YouTube-freigegeben behandelt.
 
-## Renderer
-
-Der nächste Layer soll das `render-manifest.json` konsumieren. Für programmatische Multi-Szenen-Videos ist Remotion vorgesehen. Der Renderer soll eine eigene Schicht bleiben; Asset-Katalog und Rechteverwaltung werden nicht in React-Komponenten dupliziert.
+Ein Recherche-Score ist weder eine Rechtefreigabe noch ein Beweis, dass ein Asset exakt das behauptete Ereignis zeigt.
