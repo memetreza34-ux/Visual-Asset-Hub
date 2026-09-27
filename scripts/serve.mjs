@@ -23,7 +23,7 @@ const mimeTypes = {
   '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
   '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.avif': 'image/avif', '.mp4': 'video/mp4', '.webm': 'video/webm',
-  '.mov': 'video/quicktime', '.mkv': 'video/x-matroska'
+  '.mov': 'video/quicktime', '.mkv': 'video/x-matroska', '.ogv': 'video/ogg'
 };
 
 const server = http.createServer(async (request, response) => {
@@ -41,12 +41,13 @@ async function handleApi(request, response, url) {
   response.setHeader('Cache-Control', 'no-store');
 
   if (request.method === 'GET' && url.pathname === '/api/health') {
-    return sendJson(response, 200, { ok: true, writeApiEnabled, host, version: '0.8' });
+    return sendJson(response, 200, { ok: true, writeApiEnabled, host, version: '0.10' });
   }
   if (request.method === 'GET' && url.pathname === '/api/sources') {
     const providers = Object.fromEntries(Object.entries(PROVIDERS).map(([name, config]) => [name, {
       types: config.types,
       requiresKey: config.requiresKey,
+      tier: config.tier,
       configured: !config.requiresKey || Boolean(process.env[config.requiresKey])
     }]));
     return sendJson(response, 200, { providers });
@@ -54,7 +55,7 @@ async function handleApi(request, response, url) {
   if (request.method === 'POST' && url.pathname === '/api/sources/search') {
     requireWriteApi(request);
     const body = await readJsonBody(request);
-    const provider = String(body.provider || 'pexels').toLowerCase();
+    const provider = String(body.provider || 'wikimedia').toLowerCase();
     const type = body.type || (provider === 'openverse' ? 'image' : 'video');
     const result = await searchWithCache({
       root,
@@ -73,7 +74,7 @@ async function handleApi(request, response, url) {
   if (request.method === 'POST' && url.pathname === '/api/sources/grab') {
     requireWriteApi(request);
     const body = await readJsonBody(request);
-    const provider = String(body.provider || 'pexels').toLowerCase();
+    const provider = String(body.provider || 'wikimedia').toLowerCase();
     const type = body.type || (provider === 'openverse' ? 'image' : 'video');
     const query = String(body.query || '').trim();
     const pick = boundedInteger(body.pick, 1, 200, 1);
@@ -154,7 +155,7 @@ function applySourceMetadata(body, metadata) {
   value.attributionRequired = String(Boolean(metadata.attributionRequired));
   value.attributionText = metadata.attributionText || value.attributionText;
   if (!Array.isArray(value.scopes) || !value.scopes.length) value.scopes = metadata.suggestedScopes || ['internal-only'];
-  if (metadata.licenseStatus === 'restricted') value.status = 'review';
+  if (['restricted', 'unknown'].includes(metadata.licenseStatus)) value.status = 'review';
   else if (!value.status && metadata.suggestedStatus) value.status = metadata.suggestedStatus;
   const provenance = `Imported via ${providerLabel(metadata.provider)}${metadata.providerId ? `; provider ID ${metadata.providerId}` : ''}${metadata.upstreamProvider ? `; upstream ${metadata.upstreamProvider}` : ''}.`;
   value.rightsNotes = [value.rightsNotes, metadata.rightsWarning, provenance].filter(Boolean).join(' ');
@@ -244,7 +245,7 @@ function readJsonBody(request) {
   });
 }
 function boundedInteger(value, min, max, fallback) { const number = value === undefined || value === null || value === '' ? fallback : Number(value); if (!Number.isInteger(number) || number < min || number > max) throw new Error(`Zahl muss zwischen ${min} und ${max} liegen.`); return number; }
-function providerLabel(value) { return ({ pexels: 'Pexels', pixabay: 'Pixabay', openverse: 'Openverse' })[value] || String(value || 'Quelle'); }
+function providerLabel(value) { return ({ pexels: 'Pexels', pixabay: 'Pixabay', openverse: 'Openverse', wikimedia: 'Wikimedia Commons', 'internet-archive': 'Internet Archive' })[value] || String(value || 'Quelle'); }
 function toKebab(value) { return value.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`); }
 function setSecurityHeaders(response) {
   response.setHeader('X-Content-Type-Options', 'nosniff');
