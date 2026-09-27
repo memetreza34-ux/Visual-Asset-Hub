@@ -24,6 +24,7 @@ test('production workflow JavaScript parses successfully', () => {
     'scripts/pexels-grab.mjs',
     'scripts/source-search.mjs',
     'scripts/source-grab.mjs',
+    'scripts/video-project.mjs',
     'scripts/lib/source-utils.mjs',
     'scripts/lib/providers/index.mjs',
     'scripts/lib/providers/pixabay.mjs',
@@ -38,13 +39,14 @@ test('production workflow JavaScript parses successfully', () => {
 
 test('package exposes production commands', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
-  assert.equal(pkg.version, '0.7.0');
+  assert.equal(pkg.version, '0.8.0');
   assert.equal(pkg.scripts['media:analyze'], 'node scripts/analyze-media.mjs');
   assert.equal(pkg.scripts['inbox:scan'], 'node scripts/scan-inbox.mjs');
   assert.equal(pkg.scripts['inbox:review'], 'node scripts/review-inbox.mjs');
   assert.equal(pkg.scripts['asset:add'], 'node scripts/add-asset.mjs');
   assert.equal(pkg.scripts['source:search'], 'node scripts/source-search.mjs');
   assert.equal(pkg.scripts['source:grab'], 'node scripts/source-grab.mjs');
+  assert.equal(pkg.scripts['video:project'], 'node scripts/video-project.mjs');
 });
 
 test('local server guards write endpoints and provider provenance', () => {
@@ -75,4 +77,13 @@ test('browser exposes source search, inbox review and library surfaces', () => {
   assert.match(app, /searchSources/);
   assert.match(app, /grabSourceAsset/);
   assert.match(app, /importReviewedAsset/);
+});
+
+test('video project export enforces approved assets and usage scope', () => {
+  const source = fs.readFileSync(path.join(root, 'scripts/video-project.mjs'), 'utf8');
+  assert.match(source, /asset\.status !== 'approved'/);
+  assert.match(source, /usageScopes\?\.includes\(scope\)/);
+  assert.match(source, /render-manifest\.json/);
+  assert.match(source, /durationInFrames/);
+  assert.match(source, /attribution/);
 });
