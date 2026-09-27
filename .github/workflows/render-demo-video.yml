@@ -10,6 +10,13 @@ on:
       - "renderer/src/index.ts"
       - "renderer/package.json"
       - ".github/workflows/render-demo-video.yml"
+  pull_request:
+    paths:
+      - "renderer/src/DemoVideo.tsx"
+      - "renderer/src/Root.tsx"
+      - "renderer/src/index.ts"
+      - "renderer/package.json"
+      - ".github/workflows/render-demo-video.yml"
 
 permissions:
   contents: read
