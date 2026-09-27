@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "handy-fokus-2min",
+  "title": "Warum dein Handy dein Lernen sabotiert – und wie du den Fokus zurückholst",
+  "format": "horizontal",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "defaultUsageScope": "youtube",
+  "targetDurationSeconds": 120,
+  "language": "de",
+  "status": "awaiting-voiceover",
+  "workflow": {
+    "phase1Script": "complete",
+    "phase2Voiceover": "pending-user",
+    "phase3VisualSearch": "blocked-until-voiceover",
+    "phase4Render": "pending"
+  },
+  "scenes": []
+}
