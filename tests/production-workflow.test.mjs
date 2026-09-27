@@ -25,6 +25,8 @@ test('production workflow JavaScript parses successfully', () => {
     'scripts/source-search.mjs',
     'scripts/source-grab.mjs',
     'scripts/video-project.mjs',
+    'scripts/youtube-workflow.mjs',
+    'scripts/align-voiceover.mjs',
     'scripts/lib/source-utils.mjs',
     'scripts/lib/providers/index.mjs',
     'scripts/lib/providers/pixabay.mjs',
@@ -39,7 +41,7 @@ test('production workflow JavaScript parses successfully', () => {
 
 test('package exposes production commands', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
-  assert.equal(pkg.version, '0.8.0');
+  assert.equal(pkg.version, '0.9.0');
   assert.equal(pkg.scripts['media:analyze'], 'node scripts/analyze-media.mjs');
   assert.equal(pkg.scripts['inbox:scan'], 'node scripts/scan-inbox.mjs');
   assert.equal(pkg.scripts['inbox:review'], 'node scripts/review-inbox.mjs');
@@ -47,6 +49,8 @@ test('package exposes production commands', () => {
   assert.equal(pkg.scripts['source:search'], 'node scripts/source-search.mjs');
   assert.equal(pkg.scripts['source:grab'], 'node scripts/source-grab.mjs');
   assert.equal(pkg.scripts['video:project'], 'node scripts/video-project.mjs');
+  assert.equal(pkg.scripts['youtube:workflow'], 'node scripts/youtube-workflow.mjs');
+  assert.equal(pkg.scripts['voiceover:align'], 'node scripts/align-voiceover.mjs');
 });
 
 test('local server guards write endpoints and provider provenance', () => {
@@ -79,11 +83,13 @@ test('browser exposes source search, inbox review and library surfaces', () => {
   assert.match(app, /importReviewedAsset/);
 });
 
-test('video project export enforces approved assets and usage scope', () => {
+test('video project export enforces approved assets, usage scope and workflow-v2 user audio', () => {
   const source = fs.readFileSync(path.join(root, 'scripts/video-project.mjs'), 'utf8');
   assert.match(source, /asset\.status !== 'approved'/);
   assert.match(source, /usageScopes\?\.includes\(scope\)/);
   assert.match(source, /render-manifest\.json/);
   assert.match(source, /durationInFrames/);
   assert.match(source, /attribution/);
+  assert.match(source, /source !== 'user-provided'/);
+  assert.match(source, /generatedByPipeline === true/);
 });
