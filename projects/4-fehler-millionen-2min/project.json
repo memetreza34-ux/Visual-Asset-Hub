@@ -12,11 +12,11 @@
   "referenceStyle": "fast real-media documentary/listicle similar in structure to the supplied Wissenswert reference; do not copy branding, script or copyrighted clips",
   "targetDurationSeconds": 120,
   "requireUserVoiceover": true,
-  "status": "phase1-visual-research",
+  "status": "awaiting-voiceover",
   "workflow": {
     "phase1Research": "complete",
     "phase1Script": "complete",
-    "phase1Visuals": "planned-selected-sources",
+    "phase1Visuals": "complete-selected-sources",
     "phase2Voiceover": "pending-user",
     "phase3TimingAndAssembly": "blocked-until-voiceover",
     "phase4Render": "pending"
@@ -31,6 +31,11 @@
     "longDashboardScenes": false,
     "referenceVideoReuse": false
   },
+  "phase1Artifacts": [
+    "research.json",
+    "voiceover-script.txt",
+    "visual-plan.json"
+  ],
   "cases": [
     "noaa-n-prime",
     "mars-climate-orbiter",
