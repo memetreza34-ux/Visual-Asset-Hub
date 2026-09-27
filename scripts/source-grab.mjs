@@ -8,7 +8,7 @@ const args = parseArgs(process.argv.slice(2));
 loadDotEnv(path.join(root, '.env'));
 if (args.help) { help(); process.exit(0); }
 
-const provider = String(args.provider || 'pexels').toLowerCase();
+const provider = String(args.provider || 'wikimedia').toLowerCase();
 if (!PROVIDERS[provider]) fail(`Provider unbekannt: ${provider}`);
 const type = args.type || (provider === 'openverse' ? 'image' : 'video');
 const query = (args.query || args._.join(' ')).trim();
@@ -37,8 +37,12 @@ try {
 
   console.log(`${provider}: ${asset.title}`);
   console.log(`Creator: ${asset.creator || 'unbekannt'}`);
+  console.log(`Quelle: ${asset.source_url || 'unbekannt'}`);
   console.log(`Lizenz: ${asset.rights?.license_code || asset.rights?.license_status || 'unbekannt'}`);
   if (asset.rights?.warning) console.warn(`RECHTE-HINWEIS: ${asset.rights.warning}`);
+  if (['unknown', 'restricted'].includes(asset.rights?.license_status)) {
+    console.warn('Dieses Asset wird nur in die Review-Inbox geladen und darf nicht automatisch für YouTube freigegeben werden.');
+  }
 
   const downloaded = await downloadAsset({ root, asset, download, provider });
   writeSourceMetadata({ root, downloaded, asset, provider, query });
@@ -64,5 +68,5 @@ function parseArgs(values) {
 function integer(value, min, max, label) { const n = Number(value); if (!Number.isInteger(n) || n < min || n > max) fail(`${label} muss zwischen ${min} und ${max} liegen.`); return n; }
 function fail(message) { console.error(message); process.exit(1); }
 function help() {
-  console.log(`Visual Asset Hub – Asset aus externer Quelle in Inbox laden\n\nBeispiele:\n  npm run source:grab -- "factory automation" --provider pexels --type video --orientation vertical\n  npm run source:grab -- "electrician tools" --provider pixabay --type video --pick 2\n  npm run source:grab -- "circuit board" --provider openverse --type image --pick 3\n\nOptionen:\n  --provider <pexels|pixabay|openverse>\n  --type <video|image>\n  --orientation <vertical|horizontal|square>\n  --pick <n>\n  --per-page <n>\n  --max-dimension <px>   Standard 1920\n  --page <n>\n  --refresh true\n\nPexels benötigt PEXELS_API_KEY, Pixabay PIXABAY_API_KEY. Openverse funktioniert ohne Schlüssel.`);
+  console.log(`Visual Asset Hub – Asset in Inbox laden\n\nKostenlos / Archiv zuerst:\n  npm run source:grab -- "Apollo 11" --provider wikimedia --type image --pick 1\n  npm run source:grab -- "historic news film" --provider internet-archive --type video --pick 2\n  npm run source:grab -- "historic map" --provider openverse --type image --pick 3\n\nStock-Fallback:\n  npm run source:grab -- "factory automation" --provider pexels --type video\n\nProvider:\n  wikimedia | internet-archive | openverse | pexels | pixabay\n\nStandardprovider: wikimedia. Unklare/restriktive Rechte bleiben im Review und werden nicht automatisch für YouTube freigegeben.`);
 }
