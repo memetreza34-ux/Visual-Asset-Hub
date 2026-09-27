@@ -3,6 +3,8 @@ import http from 'node:http';
 import path from 'node:path';
 import process from 'node:process';
 import { spawnSync } from 'node:child_process';
+import { PROVIDERS } from './lib/providers/index.mjs';
+import { chooseDownload, downloadAsset, loadDotEnv, searchWithCache, writeSourceMetadata } from './lib/source-utils.mjs';
 
 const root = process.cwd();
 const host = process.env.HOST || '127.0.0.1';
@@ -10,6 +12,7 @@ const port = Number(process.env.PORT || 4173);
 const inboxRoot = path.join(root, 'inbox');
 const inboxManifest = path.join(root, '.local-storage', 'inbox-analysis', 'manifest.json');
 const writeApiEnabled = ['127.0.0.1', 'localhost', '::1'].includes(host) && process.env.VAH_DISABLE_WRITE_API !== 'true';
+loadDotEnv(path.join(root, '.env'));
 
 if (!Number.isInteger(port) || port < 1 || port > 65535) {
   console.error('PORT muss zwischen 1 und 65535 liegen.');
@@ -38,7 +41,65 @@ async function handleApi(request, response, url) {
   response.setHeader('Cache-Control', 'no-store');
 
   if (request.method === 'GET' && url.pathname === '/api/health') {
-    return sendJson(response, 200, { ok: true, writeApiEnabled, host, version: '0.6' });
+    return sendJson(response, 200, { ok: true, writeApiEnabled, host, version: '0.7' });
+  }
+  if (request.method === 'GET' && url.pathname === '/api/sources') {
+    const providers = Object.fromEntries(Object.entries(PROVIDERS).map(([name, config]) => [name, {
+      types: config.types,
+      requiresKey: config.requiresKey,
+      configured: !config.requiresKey || Boolean(process.env[config.requiresKey])
+    }]));
+    return sendJson(response, 200, { providers });
+  }
+  if (request.method === 'POST' && url.pathname === '/api/sources/search') {
+    requireWriteApi(request);
+    const body = await readJsonBody(request);
+    const provider = String(body.provider || 'pexels').toLowerCase();
+    const type = body.type || (provider === 'openverse' ? 'image' : 'video');
+    const result = await searchWithCache({
+      root,
+      provider,
+      type,
+      query: String(body.query || '').trim(),
+      orientation: body.orientation || undefined,
+      page: boundedInteger(body.page, 1, 100000, 1),
+      perPage: boundedInteger(body.perPage, 1, provider === 'pixabay' ? 200 : 100, 20),
+      locale: body.locale || 'de-DE',
+      language: body.language || 'de',
+      refresh: body.refresh === true
+    });
+    return sendJson(response, 200, result);
+  }
+  if (request.method === 'POST' && url.pathname === '/api/sources/grab') {
+    requireWriteApi(request);
+    const body = await readJsonBody(request);
+    const provider = String(body.provider || 'pexels').toLowerCase();
+    const type = body.type || (provider === 'openverse' ? 'image' : 'video');
+    const query = String(body.query || '').trim();
+    const pick = boundedInteger(body.pick, 1, 200, 1);
+    const perPage = Math.max(pick, boundedInteger(body.perPage, 1, provider === 'pixabay' ? 200 : 100, 20));
+    const result = await searchWithCache({
+      root, provider, type, query,
+      orientation: body.orientation || undefined,
+      page: boundedInteger(body.page, 1, 100000, 1),
+      perPage,
+      locale: body.locale || 'de-DE',
+      language: body.language || 'de',
+      refresh: body.refresh === true
+    });
+    const asset = result.assets[pick - 1];
+    if (!asset) return sendJson(response, 404, { error: `Treffer ${pick} existiert nicht.` });
+    const download = chooseDownload(asset, boundedInteger(body.maxDimension, 480, 7680, 1920));
+    if (!download) return sendJson(response, 422, { error: 'Keine geeignete Download-Datei vorhanden.' });
+    const downloaded = await downloadAsset({ root, asset, download, provider });
+    const sourceMetadata = writeSourceMetadata({ root, downloaded, asset, provider, query });
+    const scan = runNode('scripts/scan-inbox.mjs');
+    return sendJson(response, 201, {
+      message: 'Asset wurde in die Inbox geladen.',
+      downloaded: downloaded.relativePath,
+      sourceMetadata,
+      manifest: scan.status === 0 ? readManifest() : null
+    });
   }
   if (request.method === 'GET' && url.pathname === '/api/inbox') {
     return sendJson(response, 200, readManifest());
@@ -85,16 +146,18 @@ async function handleApi(request, response, url) {
 
 function applySourceMetadata(body, metadata) {
   const value = { ...body };
-  if (!metadata || metadata.provider !== 'pexels') return value;
-  value.license = metadata.licenseStatus || 'licensed';
-  value.source = metadata.sourceName || 'Pexels';
+  if (!metadata?.provider) return value;
+  value.license = metadata.licenseStatus || value.license || 'unknown';
+  value.source = metadata.sourceName || providerLabel(metadata.provider);
   value.sourceUrl = metadata.sourceUrl || value.sourceUrl;
   value.licenseUrl = metadata.licenseUrl || value.licenseUrl;
   value.attributionRequired = String(Boolean(metadata.attributionRequired));
   value.attributionText = metadata.attributionText || value.attributionText;
-  if (!Array.isArray(value.scopes) || !value.scopes.length) value.scopes = metadata.suggestedScopes || ['organic-social', 'youtube'];
-  const provenance = `Imported via Pexels API${metadata.providerId ? `; provider ID ${metadata.providerId}` : ''}.`;
-  value.rightsNotes = [value.rightsNotes, provenance].filter(Boolean).join(' ');
+  if (!Array.isArray(value.scopes) || !value.scopes.length) value.scopes = metadata.suggestedScopes || ['internal-only'];
+  if (metadata.licenseStatus === 'restricted') value.status = 'review';
+  else if (!value.status && metadata.suggestedStatus) value.status = metadata.suggestedStatus;
+  const provenance = `Imported via ${providerLabel(metadata.provider)}${metadata.providerId ? `; provider ID ${metadata.providerId}` : ''}${metadata.upstreamProvider ? `; upstream ${metadata.upstreamProvider}` : ''}.`;
+  value.rightsNotes = [value.rightsNotes, metadata.rightsWarning, provenance].filter(Boolean).join(' ');
   return value;
 }
 
@@ -180,6 +243,8 @@ function readJsonBody(request) {
     request.on('error', reject);
   });
 }
+function boundedInteger(value, min, max, fallback) { const number = value === undefined || value === null || value === '' ? fallback : Number(value); if (!Number.isInteger(number) || number < min || number > max) throw new Error(`Zahl muss zwischen ${min} und ${max} liegen.`); return number; }
+function providerLabel(value) { return ({ pexels: 'Pexels', pixabay: 'Pixabay', openverse: 'Openverse' })[value] || String(value || 'Quelle'); }
 function toKebab(value) { return value.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`); }
 function setSecurityHeaders(response) {
   response.setHeader('X-Content-Type-Options', 'nosniff');
