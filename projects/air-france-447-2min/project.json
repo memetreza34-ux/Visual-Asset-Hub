@@ -1,0 +1,31 @@
+{
+  "version": 2,
+  "workflowVersion": 2,
+  "id": "air-france-447-2min",
+  "title": "Air France 447: Wie ein Airbus mitten im Atlantik verschwand",
+  "format": "horizontal",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "language": "de",
+  "genre": "mini-documentary",
+  "defaultUsageScope": "youtube",
+  "targetDurationSeconds": 120,
+  "requireUserVoiceover": true,
+  "status": "awaiting-voiceover",
+  "workflow": {
+    "phase1Research": "complete",
+    "phase1Script": "complete",
+    "phase1Visuals": "complete",
+    "phase2Voiceover": "pending-user",
+    "phase3TimingAndAssembly": "blocked-until-voiceover",
+    "phase4Render": "pending"
+  },
+  "visualStyle": {
+    "tone": "serious-documentary",
+    "stockPolicy": "exact-event-only-where-possible",
+    "primaryVisuals": ["archival-image", "map-animation", "technical-motion-graphic", "timeline", "data-visualization"],
+    "avoid": ["generic lifestyle stock", "dramatic fake cockpit footage", "random storm footage presented as AF447", "sensational gore", "invented quotes"]
+  },
+  "scenes": []
+}
