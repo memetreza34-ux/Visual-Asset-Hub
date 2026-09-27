@@ -17,8 +17,11 @@ const manifest = readJson(input);
 validateManifest(manifest);
 
 const publicAssets = path.join(rendererRoot, 'public', 'assets');
+const publicAudio = path.join(rendererRoot, 'public', 'audio');
 fs.rmSync(publicAssets, { recursive: true, force: true });
+fs.rmSync(publicAudio, { recursive: true, force: true });
 fs.mkdirSync(publicAssets, { recursive: true });
+fs.mkdirSync(publicAudio, { recursive: true });
 
 const prepared = structuredClone(manifest);
 for (const [index, scene] of prepared.scenes.entries()) {
@@ -26,16 +29,25 @@ for (const [index, scene] of prepared.scenes.entries()) {
   if (!source) fail(`${scene.id || `scene-${index + 1}`}: Asset-Quelle fehlt.`);
   if (/^https?:\/\//i.test(source)) continue;
 
-  const sourceFile = path.resolve(repoRoot, source);
-  const repoPrefix = `${repoRoot}${path.sep}`;
-  if (!sourceFile.startsWith(repoPrefix)) fail(`${scene.id}: Quelle liegt außerhalb des Repositories.`);
-  if (!fs.existsSync(sourceFile) || !fs.statSync(sourceFile).isFile()) fail(`${scene.id}: Datei fehlt: ${source}`);
-
+  const sourceFile = safeRepoFile(source, `${scene.id}: Quelle`);
   const extension = path.extname(sourceFile).toLowerCase();
   const safeId = safeName(scene.asset.id || `asset-${index + 1}`);
   const targetName = `${String(index + 1).padStart(3, '0')}-${safeId}${extension}`;
   fs.copyFileSync(sourceFile, path.join(publicAssets, targetName));
   scene.asset.source = `assets/${targetName}`;
+}
+
+if (prepared.voiceover) {
+  if (prepared.voiceover.sourceType !== 'user-provided') fail('Workflow-v2-Voiceover muss vom Nutzer stammen.');
+  if (prepared.voiceover.generatedByPipeline === true) fail('Automatisch erzeugte Ersatzstimmen sind nicht erlaubt.');
+  const source = prepared.voiceover.source;
+  if (!source) fail('Voiceover-Quelle fehlt.');
+  if (/^https?:\/\//i.test(source)) fail('Workflow-v2-Voiceover muss als lokale, überprüfbare Projektdatei vorliegen.');
+  const sourceFile = safeRepoFile(source, 'Voiceover');
+  const extension = path.extname(sourceFile).toLowerCase();
+  const targetName = `voiceover-master${extension}`;
+  fs.copyFileSync(sourceFile, path.join(publicAudio, targetName));
+  prepared.voiceover.source = `audio/${targetName}`;
 }
 
 const generated = path.join(rendererRoot, 'src', 'generated-manifest.ts');
@@ -49,6 +61,7 @@ fs.writeFileSync(path.join(generatedDir, 'source-manifest.json'), `${JSON.string
 
 console.log(`Renderer vorbereitet: ${prepared.project.title}`);
 console.log(`${prepared.scenes.length} Szenen · ${prepared.project.totalDurationSeconds}s · ${prepared.project.totalFrames} Frames`);
+if (prepared.voiceover) console.log(`Master-Audio: ${prepared.voiceover.source} (${prepared.voiceover.durationSeconds}s)`);
 console.log(`Attribution: generated/attribution.txt`);
 
 function validateManifest(value) {
@@ -64,8 +77,20 @@ function validateManifest(value) {
     if (!Number.isInteger(scene.durationInFrames) || scene.durationInFrames < 1) fail(`${scene.id}: durationInFrames ungültig.`);
     if (!scene.asset?.id || !scene.asset?.type || !scene.asset?.source) fail(`${scene.id}: Asset-Daten unvollständig.`);
   }
+  if (project.workflowVersion === 2) {
+    if (!value.voiceover?.source) fail('Workflow v2 verlangt eine Voiceover-Quelle im Manifest.');
+    if (value.voiceover.sourceType !== 'user-provided') fail('Workflow v2 verlangt eine vom Nutzer gelieferte Voiceover-Datei.');
+    if (value.voiceover.generatedByPipeline === true) fail('Workflow v2 verbietet Pipeline-generierte Ersatzstimmen.');
+  }
 }
 
+function safeRepoFile(source, label) {
+  const sourceFile = path.resolve(repoRoot, source);
+  const repoPrefix = `${repoRoot}${path.sep}`;
+  if (!sourceFile.startsWith(repoPrefix)) fail(`${label} liegt außerhalb des Repositories.`);
+  if (!fs.existsSync(sourceFile) || !fs.statSync(sourceFile).isFile()) fail(`${label} fehlt: ${source}`);
+  return sourceFile;
+}
 function attributionText(value) {
   const lines = (value.attribution || []).map((item) => {
     const urls = [item.sourceUrl, item.licenseUrl].filter(Boolean).join(' | ');
@@ -91,5 +116,5 @@ function readJson(file) { try { return JSON.parse(fs.readFileSync(file, 'utf8'))
 function safeName(value) { return String(value).toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80) || 'asset'; }
 function fail(message) { console.error(message); process.exit(1); }
 function printHelp() {
-  console.log(`Visual Asset Hub Remotion Prepare\n\nIm renderer/-Ordner ausführen:\n  npm run prepare:project -- --project ../projects/erstes-video/render-manifest.json\n\nDer Befehl kopiert nur die im geprüften Manifest referenzierten lokalen Assets nach renderer/public/assets und erzeugt src/generated-manifest.ts.`);
+  console.log(`Visual Asset Hub Remotion Prepare\n\nIm renderer/-Ordner ausführen:\n  npm run prepare:project -- --project ../projects/erstes-video/render-manifest.json\n\nDer Befehl kopiert nur geprüfte lokale Assets und – bei Workflow v2 – ausschließlich die vom Nutzer gelieferte Voiceover-Datei nach renderer/public/.`);
 }
