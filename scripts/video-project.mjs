@@ -78,6 +78,9 @@ function exportProject() {
   const file = projectFile(id);
   const project = readJson(file);
   const scope = args.scope || project.defaultUsageScope || 'youtube';
+  const workflowV2 = project.workflowVersion === 2 || project.requireUserVoiceover === true;
+  if (workflowV2) validateUserVoiceover(project);
+
   const resolved = [];
   const attribution = [];
   let cursor = 0;
@@ -121,8 +124,15 @@ function exportProject() {
     });
   }
 
+  const voiceoverDuration = project.voiceover?.durationSeconds || null;
+  if (voiceoverDuration) {
+    const delta = Math.abs(cursor - voiceoverDuration);
+    if (delta > 1.0) fail(`Szenen-Timeline (${round(cursor, 3)}s) stimmt nicht mit Voiceover (${voiceoverDuration}s) überein. Abweichung: ${round(delta, 3)}s.`);
+  }
+  const totalDurationSeconds = voiceoverDuration || round(cursor, 3);
+
   const manifest = {
-    manifestVersion: 1,
+    manifestVersion: 2,
     generatedAt: new Date().toISOString(),
     project: {
       id: project.id,
@@ -132,9 +142,17 @@ function exportProject() {
       height: project.height,
       fps: project.fps,
       usageScope: scope,
-      totalDurationSeconds: round(cursor, 3),
-      totalFrames: Math.round(cursor * project.fps)
+      workflowVersion: project.workflowVersion || 1,
+      totalDurationSeconds: round(totalDurationSeconds, 3),
+      totalFrames: Math.round(totalDurationSeconds * project.fps)
     },
+    voiceover: project.voiceover ? {
+      source: project.voiceover.path,
+      durationSeconds: project.voiceover.durationSeconds,
+      sha256: project.voiceover.sha256 || null,
+      sourceType: project.voiceover.source || 'unknown',
+      generatedByPipeline: project.voiceover.generatedByPipeline === true
+    } : null,
     scenes: resolved,
     attribution: uniqueAttribution(attribution)
   };
@@ -142,6 +160,16 @@ function exportProject() {
   fs.writeFileSync(target, `${JSON.stringify(manifest, null, 2)}\n`);
   console.log(`Render-Manifest: projects/${id}/render-manifest.json`);
   console.log(`${resolved.length} Szenen · ${manifest.project.totalDurationSeconds}s · ${manifest.project.totalFrames} Frames`);
+  if (manifest.voiceover) console.log(`Master-Audio: ${manifest.voiceover.source} (${manifest.voiceover.durationSeconds}s)`);
+}
+
+function validateUserVoiceover(project) {
+  if (!project.voiceover?.path) fail('Workflow v2 verlangt eine echte Voiceover-Datei. Nutze zuerst youtube:workflow voiceover-attach.');
+  if (project.voiceover.source !== 'user-provided') fail('Workflow v2 akzeptiert nur eine vom Nutzer gelieferte Voiceover-Datei.');
+  if (project.voiceover.generatedByPipeline === true) fail('Workflow v2 verbietet automatisch erzeugte Ersatzstimmen.');
+  if (!Number.isFinite(project.voiceover.durationSeconds) || project.voiceover.durationSeconds <= 0) fail('Voiceover-Dauer fehlt oder ist ungültig.');
+  const source = path.join(root, project.voiceover.path);
+  if (!fs.existsSync(source) || !fs.statSync(source).isFile()) fail(`Voiceover-Datei fehlt: ${project.voiceover.path}`);
 }
 
 function showProject() {
@@ -172,4 +200,4 @@ function round(value,digits){const f=10**digits;return Math.round(value*f)/f;}
 function compact(value){return Object.fromEntries(Object.entries(value).filter(([,item])=>item!==undefined&&item!==''));}
 function uniqueAttribution(items){const seen=new Set();return items.filter((item)=>{const key=`${item.assetId}|${item.text}`;if(seen.has(key))return false;seen.add(key);return true;});}
 function fail(message){console.error(message);process.exit(1);}
-function printHelp(){console.log(`Visual Asset Hub – Video-Projekte\n\nErstellen:\n  npm run video:project -- create --name "Erstes Video" --format vertical --scope youtube\n\nAsset als Szene hinzufügen:\n  npm run video:project -- add --project erstes-video --asset VAH-XXXXXXXX --duration 6\n\nFür Renderer exportieren:\n  npm run video:project -- export --project erstes-video\n\nAnzeigen:\n  npm run video:project -- show --project erstes-video\n\nDer Export blockiert Assets, die nicht approved sind oder den geforderten Nutzungsbereich nicht besitzen.`);}
+function printHelp(){console.log(`Visual Asset Hub – Video-Projekte\n\nErstellen:\n  npm run video:project -- create --name "Erstes Video" --format vertical --scope youtube\n\nAsset als Szene hinzufügen:\n  npm run video:project -- add --project erstes-video --asset VAH-XXXXXXXX --duration 6\n\nFür Renderer exportieren:\n  npm run video:project -- export --project erstes-video\n\nAnzeigen:\n  npm run video:project -- show --project erstes-video\n\nWorkflow-v2-Projekte verlangen eine vom Nutzer gelieferte Voiceover-Datei. Der Export blockiert Ersatzstimmen, nicht-approved Assets und fehlende Nutzungsrechte.`);}
