@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import test from 'node:test';
 
 const root = process.cwd();
+const projectId = 'air-france-447-2min';
 
 test('youtube workflow help is available', () => {
   const result = spawnSync(process.execPath, ['scripts/youtube-workflow.mjs', 'help'], { cwd: root, encoding: 'utf8' });
@@ -11,19 +12,20 @@ test('youtube workflow help is available', () => {
   assert.match(result.stdout, /YouTube Workflow v2/);
 });
 
-test('current test project has a completed phase 1 visual selection', () => {
-  const result = spawnSync(process.execPath, ['scripts/youtube-workflow.mjs', 'phase1-check', '--project', 'handy-fokus-2min'], { cwd: root, encoding: 'utf8' });
+test('current documentary project has a completed phase 1 visual selection', () => {
+  const result = spawnSync(process.execPath, ['scripts/youtube-workflow.mjs', 'phase1-check', '--project', projectId], { cwd: root, encoding: 'utf8' });
   assert.equal(result.status, 0, result.stderr || result.stdout);
   assert.match(result.stdout, /Phase 1 OK/);
 });
 
-test('workflow v2 project declares user voiceover requirement and shot-level visual plan', () => {
-  const project = JSON.parse(fs.readFileSync('projects/handy-fokus-2min/project.json', 'utf8'));
-  const script = JSON.parse(fs.readFileSync('projects/handy-fokus-2min/scene-script.json', 'utf8'));
-  const plan = JSON.parse(fs.readFileSync('projects/handy-fokus-2min/visual-plan-v2.json', 'utf8'));
-  const shortlist = JSON.parse(fs.readFileSync('projects/handy-fokus-2min/asset-shortlist.json', 'utf8'));
+test('documentary project declares user voiceover requirement and shot-level visual plan', () => {
+  const project = JSON.parse(fs.readFileSync(`projects/${projectId}/project.json`, 'utf8'));
+  const script = JSON.parse(fs.readFileSync(`projects/${projectId}/scene-script.json`, 'utf8'));
+  const plan = JSON.parse(fs.readFileSync(`projects/${projectId}/visual-plan-v2.json`, 'utf8'));
+  const shortlist = JSON.parse(fs.readFileSync(`projects/${projectId}/asset-shortlist.json`, 'utf8'));
   assert.equal(project.workflowVersion, 2);
   assert.equal(project.requireUserVoiceover, true);
+  assert.equal(project.genre, 'mini-documentary');
   assert.equal(plan.version, 2);
   assert.equal(shortlist.status, 'approved');
   assert.deepEqual(plan.scenes.map((scene) => scene.id), script.scenes.map((scene) => scene.id));
@@ -34,8 +36,8 @@ test('workflow v2 project declares user voiceover requirement and shot-level vis
   }
 });
 
-test('phase 1 contains at least one precise internal visual and strong required external selections', () => {
-  const shortlist = JSON.parse(fs.readFileSync('projects/handy-fokus-2min/asset-shortlist.json', 'utf8'));
+test('AF447 phase 1 uses exact archival media plus precise internal documentary graphics', () => {
+  const shortlist = JSON.parse(fs.readFileSync(`projects/${projectId}/asset-shortlist.json`, 'utf8'));
   const candidates = shortlist.scenes.flatMap((scene) => scene.shots.flatMap((shot) => shot.candidates || []));
   assert.ok(candidates.some((candidate) => candidate.provider === 'internal-remotion' && candidate.relevanceScore === 10));
   const selectedExternal = shortlist.scenes.flatMap((scene) => scene.shots)
@@ -44,4 +46,6 @@ test('phase 1 contains at least one precise internal visual and strong required 
     .filter((candidate) => candidate && candidate.provider !== 'internal-remotion');
   assert.ok(selectedExternal.length >= 3);
   assert.ok(selectedExternal.every((candidate) => candidate.relevanceScore >= 8 && candidate.matchReason));
+  assert.ok(selectedExternal.some((candidate) => candidate.sourceUrl?.includes('F-GZCP_Aircraft')));
+  assert.ok(selectedExternal.some((candidate) => candidate.sourceUrl?.includes('Wreckage_of_F-GZCP')));
 });
