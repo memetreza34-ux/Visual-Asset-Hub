@@ -7,7 +7,7 @@
     "prepare:project": "node scripts/prepare-project.mjs",
     "studio": "remotion studio src/index.ts",
     "render": "remotion render src/index.ts AssetVideo out/video.mp4",
-    "render:demo": "remotion render src/index.ts VisualAssetHubDemo2Min out/visual-asset-hub-demo-2min.mp4 --codec=h264 --crf=20",
+    "render:demo": "remotion render src/index.ts VisualAssetHubDemo2Min out/visual-asset-hub-demo-2min.mp4 --codec=h264 --crf=20 --scale=0.5",
     "check": "tsc --noEmit"
   },
   "dependencies": {
