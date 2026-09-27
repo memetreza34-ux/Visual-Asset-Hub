@@ -9,7 +9,7 @@ const args = parseArgs(process.argv.slice(2));
 loadDotEnv(path.join(root, '.env'));
 if (args.help) { help(); process.exit(0); }
 
-const provider = String(args.provider || 'pexels').toLowerCase();
+const provider = String(args.provider || 'wikimedia').toLowerCase();
 if (!PROVIDERS[provider]) fail(`Provider unbekannt: ${provider}`);
 const type = args.type || (provider === 'openverse' ? 'image' : 'video');
 const query = (args.query || args._.join(' ')).trim();
@@ -38,7 +38,8 @@ try {
   result.assets.slice(0, 20).forEach((asset, index) => {
     const dims = asset.width && asset.height ? `${asset.width}×${asset.height}` : '?';
     const creator = asset.creator ? ` · ${asset.creator}` : '';
-    console.log(`${String(index + 1).padStart(2, ' ')}. ${asset.title} · ${dims} · ${asset.orientation}${creator}`);
+    const rights = asset.rights?.license_code || asset.rights?.license_status || 'unknown';
+    console.log(`${String(index + 1).padStart(2, ' ')}. ${asset.title} · ${dims} · ${asset.orientation || '?'} · ${rights}${creator}`);
   });
   console.log(`\nGespeichert: ${path.relative(root, output)}`);
 } catch (error) {
@@ -62,5 +63,5 @@ function integer(value, min, max, label) { const n = Number(value); if (!Number.
 function safeName(value) { return String(value).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'search'; }
 function fail(message) { console.error(message); process.exit(1); }
 function help() {
-  console.log(`Visual Asset Hub – Quellenübergreifende Suche\n\nBeispiele:\n  npm run source:search -- "factory automation" --provider pexels --type video --orientation vertical\n  npm run source:search -- "electrical technician" --provider pixabay --type video\n  npm run source:search -- "circuit board" --provider openverse --type image\n\nProvider:\n  pexels     Videos + Bilder, benötigt PEXELS_API_KEY\n  pixabay    Videos + Bilder, benötigt PIXABAY_API_KEY\n  openverse  Bilder, ohne API-Key nutzbar\n\nOptionen:\n  --provider <name>\n  --type <video|image>\n  --orientation <vertical|horizontal|square>\n  --page <n>\n  --per-page <n>\n  --refresh true   Cache ignorieren\n`);
+  console.log(`Visual Asset Hub – Quellenübergreifende Suche\n\nKostenlose Beispiele:\n  npm run source:search -- "Apollo 11" --provider wikimedia --type video\n  npm run source:search -- "historic factory accident" --provider internet-archive --type video\n  npm run source:search -- "circuit board" --provider openverse --type image\n\nStock-Fallbacks:\n  npm run source:search -- "factory automation" --provider pexels --type video\n  npm run source:search -- "electrical technician" --provider pixabay --type video\n\nProvider:\n  wikimedia         Videos + Bilder, ohne API-Key, Archiv/Originalmaterial bevorzugt\n  internet-archive  Videos + Bilder, ohne API-Key, Rechte je Item prüfen\n  openverse         Bilder, ohne API-Key\n  pexels            Videos + Bilder, benötigt PEXELS_API_KEY\n  pixabay           Videos + Bilder, benötigt PIXABAY_API_KEY\n\nStandardprovider ist wikimedia. Für Doku-Recherche über mehrere Archive nutze documentary:research.`);
 }
