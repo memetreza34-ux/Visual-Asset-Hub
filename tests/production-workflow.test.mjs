@@ -22,6 +22,12 @@ test('production workflow JavaScript parses successfully', () => {
     'scripts/review-inbox.mjs',
     'scripts/add-asset.mjs',
     'scripts/pexels-grab.mjs',
+    'scripts/source-search.mjs',
+    'scripts/source-grab.mjs',
+    'scripts/lib/source-utils.mjs',
+    'scripts/lib/providers/index.mjs',
+    'scripts/lib/providers/pixabay.mjs',
+    'scripts/lib/providers/openverse.mjs',
     'scripts/serve.mjs',
     'web/app.js'
   ]) {
@@ -32,28 +38,41 @@ test('production workflow JavaScript parses successfully', () => {
 
 test('package exposes production commands', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
-  assert.equal(pkg.version, '0.6.0');
+  assert.equal(pkg.version, '0.7.0');
   assert.equal(pkg.scripts['media:analyze'], 'node scripts/analyze-media.mjs');
   assert.equal(pkg.scripts['inbox:scan'], 'node scripts/scan-inbox.mjs');
   assert.equal(pkg.scripts['inbox:review'], 'node scripts/review-inbox.mjs');
   assert.equal(pkg.scripts['asset:add'], 'node scripts/add-asset.mjs');
-  assert.equal(pkg.scripts['pexels:grab'], 'node scripts/pexels-grab.mjs');
+  assert.equal(pkg.scripts['source:search'], 'node scripts/source-search.mjs');
+  assert.equal(pkg.scripts['source:grab'], 'node scripts/source-grab.mjs');
 });
 
-test('local server contains guarded inbox write endpoints and provenance protection', () => {
+test('local server guards write endpoints and provider provenance', () => {
   const server = fs.readFileSync(path.join(root, 'scripts/serve.mjs'), 'utf8');
   assert.match(server, /writeApiEnabled/);
+  assert.match(server, /\/api\/sources\/search/);
+  assert.match(server, /\/api\/sources\/grab/);
   assert.match(server, /\/api\/inbox\/scan/);
   assert.match(server, /\/api\/inbox\/import/);
   assert.match(server, /safeInboxFile/);
   assert.match(server, /Cross-Site-Schreibzugriff wurde blockiert/);
-  assert.match(server, /value = 'approved'/);
   assert.match(server, /applySourceMetadata/);
-  assert.match(server, /Imported via Pexels API/);
+  assert.match(server, /licenseStatus === 'restricted'/);
+  assert.match(server, /Imported via/);
 });
 
-test('inbox scan can carry provider metadata into review', () => {
+test('inbox scan carries provider metadata into review', () => {
   const scan = fs.readFileSync(path.join(root, 'scripts/scan-inbox.mjs'), 'utf8');
   assert.match(scan, /sourceMetadata/);
   assert.match(scan, /inbox-source/);
+});
+
+test('browser exposes source search, inbox review and library surfaces', () => {
+  const html = fs.readFileSync(path.join(root, 'web/index.html'), 'utf8');
+  const app = fs.readFileSync(path.join(root, 'web/app.js'), 'utf8');
+  assert.match(html, /id="source-form"/);
+  assert.match(html, /id="review-form"/);
+  assert.match(app, /searchSources/);
+  assert.match(app, /grabSourceAsset/);
+  assert.match(app, /importReviewedAsset/);
 });
