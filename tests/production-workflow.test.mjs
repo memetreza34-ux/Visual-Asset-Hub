@@ -85,7 +85,7 @@ test('local server guards write endpoints and provider provenance', () => {
   assert.match(server, /safeInboxFile/);
   assert.match(server, /Cross-Site-Schreibzugriff wurde blockiert/);
   assert.match(server, /applySourceMetadata/);
-  assert.match(server, /licenseStatus === 'restricted'/);
+  assert.match(server, /\['restricted', 'unknown'\]\.includes\(metadata\.licenseStatus\)/);
   assert.match(server, /Imported via/);
 });
 
