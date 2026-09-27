@@ -1,0 +1,60 @@
+name: Render 2-Minute Demo Video
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [production-v1]
+    paths:
+      - "renderer/src/DemoVideo.tsx"
+      - "renderer/src/Root.tsx"
+      - "renderer/src/index.ts"
+      - "renderer/package.json"
+      - ".github/workflows/render-demo-video.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: render-demo-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: false
+          persist-credentials: false
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install renderer dependencies
+        working-directory: renderer
+        run: npm install --no-audit --no-fund
+
+      - name: Typecheck renderer
+        working-directory: renderer
+        run: npm run check
+
+      - name: Render 120-second MP4
+        working-directory: renderer
+        run: npm run render:demo
+
+      - name: Verify output
+        run: |
+          test -s renderer/out/visual-asset-hub-demo-2min.mp4
+          ls -lh renderer/out/visual-asset-hub-demo-2min.mp4
+
+      - name: Upload rendered video
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-asset-hub-demo-2min
+          path: renderer/out/visual-asset-hub-demo-2min.mp4
+          if-no-files-found: error
+          retention-days: 7
