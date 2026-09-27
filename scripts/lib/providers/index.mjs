@@ -1,11 +1,15 @@
 import { searchPexels } from '../pexels.mjs';
 import { searchPixabay } from './pixabay.mjs';
 import { searchOpenverse } from './openverse.mjs';
+import { searchWikimedia } from './wikimedia.mjs';
+import { searchInternetArchive } from './internet-archive.mjs';
 
 export const PROVIDERS = Object.freeze({
-  pexels: { types: ['video', 'image'], requiresKey: 'PEXELS_API_KEY' },
-  pixabay: { types: ['video', 'image'], requiresKey: 'PIXABAY_API_KEY' },
-  openverse: { types: ['image'], requiresKey: null }
+  wikimedia: { types: ['video', 'image'], requiresKey: null, tier: 'archive', downloadable: true },
+  'internet-archive': { types: ['video', 'image'], requiresKey: null, tier: 'archive', downloadable: true },
+  openverse: { types: ['image'], requiresKey: null, tier: 'open-media', downloadable: true },
+  pexels: { types: ['video', 'image'], requiresKey: 'PEXELS_API_KEY', tier: 'stock-fallback', downloadable: true },
+  pixabay: { types: ['video', 'image'], requiresKey: 'PIXABAY_API_KEY', tier: 'stock-fallback', downloadable: true }
 });
 
 export async function searchProvider({ provider, type = 'video', env = process.env, ...options }) {
@@ -14,6 +18,12 @@ export async function searchProvider({ provider, type = 'video', env = process.e
   if (!config) throw new Error(`Unbekannter Provider: ${provider}. Erlaubt: ${Object.keys(PROVIDERS).join(', ')}`);
   if (!config.types.includes(type)) throw new Error(`${name} unterstützt den Typ ${type} nicht. Erlaubt: ${config.types.join(', ')}`);
 
+  if (name === 'wikimedia') {
+    return searchWikimedia({ query: options.query, type, orientation: options.orientation, page: options.page, perPage: options.perPage, fetchImpl: options.fetchImpl });
+  }
+  if (name === 'internet-archive') {
+    return searchInternetArchive({ query: options.query, type, page: options.page, perPage: options.perPage, fetchImpl: options.fetchImpl });
+  }
   if (name === 'pexels') {
     const result = await searchPexels({
       apiKey: env.PEXELS_API_KEY,
