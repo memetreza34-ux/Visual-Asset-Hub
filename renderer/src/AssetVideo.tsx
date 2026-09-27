@@ -1,4 +1,4 @@
-import {Video} from '@remotion/media';
+import {Audio, Video} from '@remotion/media';
 import {
   AbsoluteFill,
   CanvasImage,
@@ -34,7 +34,15 @@ export type RenderManifest = {
     height: number;
     fps: number;
     totalFrames: number;
+    workflowVersion?: number;
   };
+  voiceover?: {
+    source: string;
+    durationSeconds: number;
+    sha256?: string | null;
+    sourceType?: string;
+    generatedByPipeline?: boolean;
+  } | null;
   scenes: RenderScene[];
 };
 
@@ -93,8 +101,21 @@ const SceneMedia: React.FC<{scene: RenderScene; fps: number}> = ({scene, fps}) =
 };
 
 export const AssetVideo: React.FC<{manifest: RenderManifest}> = ({manifest}) => {
+  if (manifest.project.workflowVersion === 2) {
+    if (!manifest.voiceover?.source) throw new Error('Workflow v2 requires the user voiceover master track.');
+    if (manifest.voiceover.sourceType !== 'user-provided' || manifest.voiceover.generatedByPipeline === true) {
+      throw new Error('Workflow v2 refuses generated or replacement voiceover audio.');
+    }
+  }
+
   return (
     <AbsoluteFill style={{backgroundColor: '#000'}}>
+      {manifest.voiceover?.source ? (
+        <Audio
+          src={sourceFor(manifest.voiceover.source)}
+          durationInFrames={manifest.project.totalFrames}
+        />
+      ) : null}
       {manifest.scenes.map((scene) => (
         <Sequence
           key={scene.id}
