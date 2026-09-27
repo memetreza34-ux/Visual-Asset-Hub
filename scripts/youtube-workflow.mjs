@@ -114,10 +114,10 @@ async function phase1Discover() {
   }
 
   shortlist.generatedAt = new Date().toISOString();
-  shortlist.status = allShotsApproved(shortlist) ? 'approved' : 'needs-review';
+  shortlist.status = requiredShotsApproved(plan, shortlist) ? 'approved' : 'needs-review';
   fs.writeFileSync(shortlistPath, `${JSON.stringify(shortlist, null, 2)}\n`);
   console.log(`Phase-1-Shortlist aktualisiert: ${relative(shortlistPath)}`);
-  console.log(shortlist.status === 'approved' ? 'Phase 1 ist vollständig freigegeben.' : 'Kandidaten gefunden. Vor Voiceover müssen alle externen Shots bewertet und ausgewählt werden.');
+  console.log(shortlist.status === 'approved' ? 'Alle Pflicht-Visuals aus Phase 1 sind freigegeben.' : 'Kandidaten gefunden. Vor Voiceover müssen alle Pflicht-Shots bewertet und ausgewählt werden.');
 }
 
 function phase1Check() {
@@ -127,7 +127,7 @@ function phase1Check() {
     errors.forEach((error) => console.error(`- ${error}`));
     fail(`Phase 1 NICHT fertig (${errors.length} Fehler).`);
   }
-  console.log(`Phase 1 OK: ${summary.scenes} Szenen · ${summary.shots} Shots · alle Visuals vor der Stimme festgelegt.`);
+  console.log(`Phase 1 OK: ${summary.scenes} Szenen · ${summary.requiredShots} Pflicht-Shots freigegeben · ${summary.optionalShots} optionale Shots.`);
 }
 
 function voiceoverAttach() {
@@ -201,7 +201,8 @@ function validatePhase1(projectId) {
   const errors = [];
   const planById = new Map((plan.scenes || []).map((scene) => [scene.id, scene]));
   const shortlistById = new Map((shortlist.scenes || []).map((scene) => [scene.id, scene]));
-  let shotCount = 0;
+  let requiredShots = 0;
+  let optionalShots = 0;
   for (const scene of script.scenes || []) {
     const visualScene = planById.get(scene.id);
     if (!visualScene) { errors.push(`${scene.id}: Visual-Plan fehlt.`); continue; }
@@ -210,24 +211,42 @@ function validatePhase1(projectId) {
     if (!Array.isArray(visualScene.shots) || visualScene.shots.length === 0) { errors.push(`${scene.id}: keine Shots geplant.`); continue; }
     const shortlistScene = shortlistById.get(scene.id);
     for (const shot of visualScene.shots) {
-      shotCount++;
+      const required = shot.priority !== 'optional';
+      if (required) requiredShots++; else optionalShots++;
       if (!shot.description || !shot.visualType) errors.push(`${scene.id}/${shot.id}: Shot unvollständig.`);
       const selected = shortlistScene?.shots?.find((item) => item.id === shot.id);
-      if (!selected || selected.status !== 'approved' || !selected.selectedCandidateId) errors.push(`${scene.id}/${shot.id}: kein in Phase 1 freigegebener Kandidat.`);
-      const candidate = selected?.candidates?.find((item) => item.candidateId === selected.selectedCandidateId);
-      if (!candidate) errors.push(`${scene.id}/${shot.id}: ausgewählter Kandidat existiert nicht.`);
-      if (candidate && candidate.provider !== 'internal-remotion') {
+      if (!selected || selected.status !== 'approved' || !selected.selectedCandidateId) {
+        if (required) errors.push(`${scene.id}/${shot.id}: kein in Phase 1 freigegebener Pflicht-Kandidat.`);
+        continue;
+      }
+      const candidate = selected.candidates?.find((item) => item.candidateId === selected.selectedCandidateId);
+      if (!candidate) {
+        errors.push(`${scene.id}/${shot.id}: ausgewählter Kandidat existiert nicht.`);
+        continue;
+      }
+      if (candidate.provider !== 'internal-remotion') {
         if (!Number.isFinite(candidate.relevanceScore) || candidate.relevanceScore < 8) errors.push(`${scene.id}/${shot.id}: externer Kandidat muss Relevanz >= 8/10 haben.`);
         if (!candidate.matchReason) errors.push(`${scene.id}/${shot.id}: Begründung für die Auswahl fehlt.`);
       }
     }
   }
-  return { errors, summary: { scenes: script.scenes?.length || 0, shots: shotCount } };
+  return { errors, summary: { scenes: script.scenes?.length || 0, requiredShots, optionalShots } };
 }
 
-function allShotsApproved(shortlist) {
-  const shots = (shortlist.scenes || []).flatMap((scene) => scene.shots || []);
-  return shots.length > 0 && shots.every((shot) => shot.status === 'approved' && shot.selectedCandidateId);
+function requiredShotsApproved(plan, shortlist) {
+  const shortlistByScene = new Map((shortlist.scenes || []).map((scene) => [scene.id, scene]));
+  for (const scene of plan.scenes || []) {
+    const shortlistScene = shortlistByScene.get(scene.id);
+    for (const shot of scene.shots || []) {
+      if (shot.priority === 'optional') continue;
+      const selected = shortlistScene?.shots?.find((item) => item.id === shot.id);
+      if (!selected || selected.status !== 'approved' || !selected.selectedCandidateId) return false;
+      const candidate = selected.candidates?.find((item) => item.candidateId === selected.selectedCandidateId);
+      if (!candidate) return false;
+      if (candidate.provider !== 'internal-remotion' && (!Number.isFinite(candidate.relevanceScore) || candidate.relevanceScore < 8 || !candidate.matchReason)) return false;
+    }
+  }
+  return true;
 }
 function requiredProject() { if (!args.project) fail('--project ist erforderlich.'); return slug(args.project); }
 function projectPath(projectId, file) { return path.join(root, 'projects', projectId, file); }
@@ -240,4 +259,4 @@ function slug(value) { const result = String(value).normalize('NFKD').replace(/[
 function integer(value,min,max,label){const n=Number(value);if(!Number.isInteger(n)||n<min||n>max)fail(`${label} muss zwischen ${min} und ${max} liegen.`);return n;}
 function parseArgs(values){const result={};for(let i=0;i<values.length;i++){const token=values[i];if(!token.startsWith('--'))fail(`Unbekanntes Argument: ${token}`);const key=token.slice(2).replace(/-([a-z])/g,(_,c)=>c.toUpperCase());if(key==='help'){result.help=true;continue;}const next=values[i+1];if(!next||next.startsWith('--'))fail(`Wert für ${token} fehlt.`);result[key]=next;i++;}return result;}
 function fail(message){console.error(message);process.exit(1);}
-function help(){console.log(`YouTube Workflow v2\n\nPhase 1 – echte Visuals VOR der Stimme:\n  npm run youtube:workflow -- phase1-discover --project <id>\n  npm run youtube:workflow -- phase1-check --project <id>\n\nPhase 2 – ausschließlich deine Voiceover-Datei:\n  npm run youtube:workflow -- voiceover-attach --project <id> --file ./voiceover.wav\n\nPhase 3 – nur Timing/Assembly, KEINE neue Visual-Suche:\n  npm run youtube:workflow -- phase3-check --project <id>\n\nRegeln:\n- Externe Visuals müssen bereits in Phase 1 gewählt und mit >=8/10 Relevanz bewertet sein.\n- Voiceover wird niemals erzeugt oder ersetzt.\n- Phase 3 darf keine neuen Stock-Entscheidungen treffen.`);}
+function help(){console.log(`YouTube Workflow v2\n\nPhase 1 – echte Visuals VOR der Stimme:\n  npm run youtube:workflow -- phase1-discover --project <id>\n  npm run youtube:workflow -- phase1-check --project <id>\n\nPhase 2 – ausschließlich deine Voiceover-Datei:\n  npm run youtube:workflow -- voiceover-attach --project <id> --file ./voiceover.wav\n\nPhase 3 – nur Timing/Assembly, KEINE neue Visual-Suche:\n  npm run youtube:workflow -- phase3-check --project <id>\n\nRegeln:\n- Pflicht-Visuals werden vor der Stimme gewählt; optionale Ergänzungs-B-Rolls blockieren Phase 2 nicht.\n- Externe Pflicht-Visuals müssen bereits in Phase 1 gewählt und mit >=8/10 Relevanz bewertet sein.\n- Voiceover wird niemals erzeugt oder ersetzt.\n- Phase 3 darf keine neuen Stock-Entscheidungen treffen.`);}
