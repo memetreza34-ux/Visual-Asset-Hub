@@ -1,12 +1,13 @@
 {
   "name": "visual-asset-hub-renderer",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
     "prepare:project": "node scripts/prepare-project.mjs",
     "studio": "remotion studio src/index.ts",
     "render": "remotion render src/index.ts AssetVideo out/video.mp4",
+    "render:demo": "remotion render src/index.ts VisualAssetHubDemo2Min out/visual-asset-hub-demo-2min.mp4 --codec=h264 --crf=20",
     "check": "tsc --noEmit"
   },
   "dependencies": {
