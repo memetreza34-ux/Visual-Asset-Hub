@@ -2,14 +2,6 @@ name: Render 2-Minute Demo Video
 
 on:
   workflow_dispatch:
-  push:
-    branches: [production-v1]
-    paths:
-      - "renderer/src/DemoVideo.tsx"
-      - "renderer/src/Root.tsx"
-      - "renderer/src/index.ts"
-      - "renderer/package.json"
-      - ".github/workflows/render-demo-video.yml"
   pull_request:
     paths:
       - "renderer/src/DemoVideo.tsx"
@@ -19,7 +11,7 @@ on:
       - ".github/workflows/render-demo-video.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: render-demo-${{ github.ref }}
@@ -30,11 +22,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - name: Checkout
+      - name: Checkout production branch
         uses: actions/checkout@v4
         with:
+          ref: production-v1
           lfs: false
-          persist-credentials: false
+          persist-credentials: true
 
       - name: Use Node.js 22
         uses: actions/setup-node@v4
@@ -58,10 +51,17 @@ jobs:
           test -s renderer/out/visual-asset-hub-demo-2min.mp4
           ls -lh renderer/out/visual-asset-hub-demo-2min.mp4
 
-      - name: Upload rendered video
-        uses: actions/upload-artifact@v4
-        with:
-          name: visual-asset-hub-demo-2min
-          path: renderer/out/visual-asset-hub-demo-2min.mp4
-          if-no-files-found: error
-          retention-days: 7
+      - name: Save rendered video to branch
+        if: github.event_name == 'pull_request'
+        run: |
+          mkdir -p demo-output
+          cp renderer/out/visual-asset-hub-demo-2min.mp4 demo-output/visual-asset-hub-demo-2min.mp4
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add demo-output/visual-asset-hub-demo-2min.mp4
+          if git diff --cached --quiet; then
+            echo "Rendered video unchanged."
+          else
+            git commit -m "test: add rendered 2-minute demo video"
+            git push origin HEAD:production-v1
+          fi
