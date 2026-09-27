@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Durchsuchbare Bibliothek, externe Mediensuche und Review-Oberfläche für visuelle Assets." />
+  <meta name="description" content="Archive-first Recherche, Review und Bibliothek für faceless YouTube-Dokumentationen." />
   <title>Visual Asset Hub</title>
   <link rel="stylesheet" href="./styles.css" />
   <script type="module" src="./app.js"></script>
@@ -11,9 +11,9 @@
 <body>
   <header class="hero">
     <div>
-      <span class="eyebrow">Production Workspace</span>
+      <span class="eyebrow">Faceless Documentary Workspace</span>
       <h1>Visual Asset Hub</h1>
-      <p>B-Rolls, Bilder, Animationen und Grafiken finden, analysieren, prüfen, katalogisieren und für Content-Projekte wiederverwenden.</p>
+      <p>Originalmaterial, Archivbilder/-videos, Dokumente und passende B-Rolls recherchieren, Rechte prüfen und für YouTube-Projekte vorbereiten.</p>
     </div>
     <div class="hero-stats">
       <div class="hero-stat"><strong id="asset-count">0</strong><span>katalogisierte Assets</span></div>
@@ -25,13 +25,13 @@
     <section class="source-panel" aria-labelledby="source-title">
       <div class="section-heading">
         <div>
-          <span class="eyebrow">Pexels · Pixabay · Openverse</span>
-          <h2 id="source-title">Externe Medien finden</h2>
-          <p>Durchsuche angebundene Quellen. Ein ausgewählter Treffer wird mit Quellen- und Lizenzmetadaten in die Inbox geladen und anschließend normal geprüft.</p>
+          <span class="eyebrow">Wikimedia · Internet Archive · Openverse · Stock-Fallbacks</span>
+          <h2 id="source-title">Doku-Material finden</h2>
+          <p>Suche zuerst nach echtem Ereignis- und Archivmaterial. Pexels/Pixabay sind nur Fallbacks. Jeder Treffer wird mit Quellen- und Lizenzmetadaten in die Inbox geladen und vor Nutzung geprüft.</p>
         </div>
       </div>
       <form id="source-form" class="source-toolbar">
-        <label class="source-query"><span>Suchbegriff</span><input id="source-query" required placeholder="z. B. factory automation, circuit board …" autocomplete="off" /></label>
+        <label class="source-query"><span>Suchbegriff</span><input id="source-query" required placeholder="z. B. Concorde crash, company scandal, historic accident …" autocomplete="off" /></label>
         <label><span>Quelle</span><select id="source-provider"></select></label>
         <label><span>Typ</span><select id="source-type"></select></label>
         <label><span>Ausrichtung</span><select id="source-orientation"><option value="">Alle</option><option value="vertical">Vertikal</option><option value="horizontal">Horizontal</option><option value="square">Quadratisch</option></select></label>
@@ -46,7 +46,7 @@
         <div>
           <span class="eyebrow">Inbox → Review → Library</span>
           <h2 id="review-title">Neue Assets prüfen</h2>
-          <p>Lege Medien in <code>inbox/</code> oder lade einen Treffer oben hinein. Der Hub analysiert technische Daten und erstellt Video-Previews automatisch.</p>
+          <p>Neue Medien werden technisch analysiert. Unklare oder restriktive Rechte bleiben automatisch im Review und können nicht stillschweigend als YouTube-freigegeben gelten.</p>
         </div>
         <button id="scan-inbox" class="primary-button" type="button">Inbox neu scannen</button>
       </div>
