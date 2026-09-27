@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "projectId": "handy-fokus-2min",
+  "timingMode": "approximate-until-voiceover",
+  "rules": {
+    "primarySources": ["pexels", "pixabay", "openverse"],
+    "preferVideo": true,
+    "minimumUsefulClipSeconds": 4,
+    "avoidLogos": true,
+    "avoidWatermarks": true,
+    "avoidTalkingHeads": true,
+    "visualChangeEverySeconds": "4-8",
+    "licenseReviewRequired": true
+  },
+  "scenes": [
+    {
+      "id": "scene-01",
+      "approxStart": 0,
+      "approxEnd": 10,
+      "purpose": "Hook: Lernen fühlt sich schwer an, Scrollen leicht.",
+      "preferredMedia": "video",
+      "visual": "Close-up of study desk, open notebook and laptop; smartphone next to the notes lights up with notifications and draws attention away from studying.",
+      "queries": ["student studying desk smartphone distraction", "phone notification study desk", "studying with phone distraction"],
+      "fallback": "Top-down image of notebook, laptop and illuminated smartphone."
+    },
+    {
+      "id": "scene-02",
+      "approxStart": 10,
+      "approxEnd": 20,
+      "purpose": "Smartphone konkurriert aktiv um Aufmerksamkeit.",
+      "preferredMedia": "video",
+      "visual": "Hand repeatedly reaches from textbook toward smartphone showing incoming notifications, short-form video feed or messaging screen without readable brands.",
+      "queries": ["hand checking smartphone while studying", "smartphone notifications close up", "phone social media scrolling close up"],
+      "fallback": "Generic phone notification illustration without brand logos."
+    },
+    {
+      "id": "scene-03",
+      "approxStart": 20,
+      "approxEnd": 30,
+      "purpose": "Aufgabenwechsel sichtbar machen.",
+      "preferredMedia": "video",
+      "visual": "Fast sequence between notebook, laptop document and smartphone; hand alternates between all three to visualize context switching.",
+      "queries": ["multitasking laptop phone notebook", "switching between phone and laptop", "student multitasking desk"],
+      "fallback": "Split-screen style image showing notebook, laptop and smartphone."
+    },
+    {
+      "id": "scene-04",
+      "approxStart": 30,
+      "approxEnd": 40,
+      "purpose": "Nach der Unterbrechung muss man wieder ins Thema finden.",
+      "preferredMedia": "video",
+      "visual": "Person returns phone face down, stares at notes, searches through pages and tries to find the previous place again.",
+      "queries": ["student distracted returning to studying", "confused studying notes desk", "trying to focus study desk"],
+      "fallback": "Close-up of finger searching through handwritten notes after putting phone away."
+    },
+    {
+      "id": "scene-05",
+      "approxStart": 40,
+      "approxEnd": 50,
+      "purpose": "Automatisches Handyprüfen zeigen.",
+      "preferredMedia": "video",
+      "visual": "Casual reflexive phone pickup: hand checks lock screen, unlocks device and begins scrolling almost automatically.",
+      "queries": ["checking phone automatically close up", "unlock smartphone scrolling hand", "habit phone checking"],
+      "fallback": "Generic close-up image of hand unlocking smartphone."
+    },
+    {
+      "id": "scene-06",
+      "approxStart": 50,
+      "approxEnd": 60,
+      "purpose": "Lösung 1: Handy außer Reichweite.",
+      "preferredMedia": "video",
+      "visual": "Phone is deliberately placed in a drawer, backpack or another room; camera then returns to a clean study desk.",
+      "queries": ["put phone away drawer studying", "smartphone put in drawer", "phone away focus desk"],
+      "fallback": "Phone placed face down far away from notebook."
+    },
+    {
+      "id": "scene-07",
+      "approxStart": 60,
+      "approxEnd": 70,
+      "purpose": "Lösung 2: Benachrichtigungen reduzieren.",
+      "preferredMedia": "video",
+      "visual": "Close-up of generic smartphone settings where notification toggles are switched off; avoid identifiable app branding.",
+      "queries": ["turn off phone notifications settings", "smartphone notification settings close up", "disable notifications phone"],
+      "fallback": "Minimal graphic of notification bell being switched off."
+    },
+    {
+      "id": "scene-08",
+      "approxStart": 70,
+      "approxEnd": 80,
+      "purpose": "Nur notwendige Lernmittel offen lassen.",
+      "preferredMedia": "video",
+      "visual": "Clean laptop workspace with one document or learning page open, unnecessary browser tabs being closed until only one task remains.",
+      "queries": ["closing browser tabs productivity", "minimal laptop study workspace", "focused laptop work close up"],
+      "fallback": "Laptop screen with one generic document and a clean desk."
+    },
+    {
+      "id": "scene-09",
+      "approxStart": 80,
+      "approxEnd": 90,
+      "purpose": "25-Minuten-Fokusblock visualisieren.",
+      "preferredMedia": "video",
+      "visual": "Study timer starts at 25 minutes beside notebook; learner begins writing while timer runs.",
+      "queries": ["pomodoro timer studying", "25 minute timer study desk", "study timer notebook"],
+      "fallback": "Simple 25:00 timer graphic next to notebook."
+    },
+    {
+      "id": "scene-10",
+      "approxStart": 90,
+      "approxEnd": 100,
+      "purpose": "Eine Aufgabe, kein Scrollen, kein Tab-Wechsel.",
+      "preferredMedia": "video",
+      "visual": "Focused writing and reading close-ups, steady hands, one notebook and one laptop window; phone is absent from frame.",
+      "queries": ["focused student writing notes close up", "deep focus studying desk", "concentrated studying notebook"],
+      "fallback": "Calm close-up of handwritten notes and focused study materials."
+    },
+    {
+      "id": "scene-11",
+      "approxStart": 100,
+      "approxEnd": 110,
+      "purpose": "Fokus als Umgebung statt Motivation darstellen.",
+      "preferredMedia": "video",
+      "visual": "Before-and-after desk comparison: cluttered distracting setup transitions to clean minimal focus setup with phone removed.",
+      "queries": ["clean desk before after productivity", "minimal study desk setup", "organized study workspace"],
+      "fallback": "Two contrasting desk images: distracted vs focused."
+    },
+    {
+      "id": "scene-12",
+      "approxStart": 110,
+      "approxEnd": 120,
+      "purpose": "Ruhiger Abschluss: Lernen bleibt Arbeit, wird aber leichter.",
+      "preferredMedia": "video",
+      "visual": "Calm final shot of productive study session, completed notes, laptop and a phone left far away or inside a bag.",
+      "queries": ["productive study session desk", "finished studying notes desk", "focused student study workspace"],
+      "fallback": "Finished notes and tidy desk with phone out of reach."
+    }
+  ]
+}
