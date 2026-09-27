@@ -81,6 +81,7 @@ export function writeSourceMetadata({ root, downloaded, asset, provider, query }
     searchQuery: query,
     title: asset.title,
     description: asset.description,
+    tags: Array.isArray(asset.tags) ? asset.tags.slice(0, 30) : [],
     sourceName: asset.creator ? `${providerLabel(provider)} — ${asset.creator}` : providerLabel(provider),
     sourceUrl: asset.source_url,
     creator: asset.creator,
