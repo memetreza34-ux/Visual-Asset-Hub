@@ -1,0 +1,250 @@
+{
+  "version": 1,
+  "projectId": "4-fehler-millionen-2min",
+  "timingMode": "approximate-until-user-voiceover",
+  "style": {
+    "target": "fast faceless documentary/listicle",
+    "normalVisualSeconds": "4-7",
+    "insertSeconds": "1.5-4",
+    "realMediaFirst": true,
+    "genericStock": "fallback-only",
+    "longDashboardCards": false,
+    "verticalVideoTreatment": "center original, blurred 16:9 sidefill when needed",
+    "textPolicy": "short numbers/labels only, never paragraph slides"
+  },
+  "beats": [
+    {
+      "id": "b01",
+      "approx": "0-4",
+      "narrationAnchor": "Vier Fehler, die so banal klingen",
+      "visualType": "fast-montage",
+      "visual": "Four very quick real-media flashes: damaged NOAA satellite, Mars Climate Orbiter, French regional train at platform, Hubble mirror/space telescope.",
+      "sources": ["NASA NOAA mishap report", "Wikimedia Mars Climate Orbiter", "Wikimedia Régiolis", "Wikimedia/NASA Hubble"],
+      "motion": "0.8-1.0s cuts, hard sound-design hits, no large dashboard"
+    },
+    {
+      "id": "b02",
+      "approx": "4-7",
+      "narrationAnchor": "wie teuer sie wurden",
+      "visualType": "minimal-title-over-real-media",
+      "visual": "Freeze montage into one darkened real image; large short title: '4 FEHLER. MILLIONENSCHÄDEN.'",
+      "motion": "quick scale-in then immediate cut"
+    },
+    {
+      "id": "b03",
+      "approx": "7-12",
+      "case": "noaa-n-prime",
+      "narrationAnchor": "Nummer vier: ein Satellit und 24 fehlende Schrauben",
+      "visualType": "official-document-still",
+      "visual": "Exact NOAA N-Prime damaged-satellite photograph from the NASA mishap report, cropped full screen.",
+      "sourceUrl": "https://www.nasa.gov/wp-content/uploads/2015/01/65776main_noaa_np_mishap.pdf",
+      "motion": "slow push-in on satellite; tiny label 'NOAA N-Prime · 2003'"
+    },
+    {
+      "id": "b04",
+      "approx": "12-17",
+      "case": "noaa-n-prime",
+      "narrationAnchor": "von der senkrechten in die waagerechte Position",
+      "visualType": "document-diagram-plus-motion",
+      "visual": "NASA report figure showing turnover cart, then simple traced rotation arc over the actual figure.",
+      "sourceUrl": "https://www.nasa.gov/wp-content/uploads/2015/01/65776main_noaa_np_mishap.pdf",
+      "motion": "highlight fixture and tilt direction"
+    },
+    {
+      "id": "b05",
+      "approx": "17-22",
+      "case": "noaa-n-prime",
+      "narrationAnchor": "nicht mit den vorgeschriebenen 24 Schrauben befestigt",
+      "visualType": "official-document-detail",
+      "visual": "Close crop of NASA report figure showing the adapter plate / missing-bolt locations.",
+      "sourceUrl": "https://www.nasa.gov/wp-content/uploads/2015/01/65776main_noaa_np_mishap.pdf",
+      "motion": "24 small markers appear around bolt circle; then all switch to missing"
+    },
+    {
+      "id": "b06",
+      "approx": "22-27",
+      "case": "noaa-n-prime",
+      "narrationAnchor": "rutschte ab und fiel auf den Boden",
+      "visualType": "official-document-still",
+      "visual": "Damaged satellite after the fall from the official mishap report.",
+      "sourceUrl": "https://www.nasa.gov/wp-content/uploads/2015/01/65776main_noaa_np_mishap.pdf",
+      "motion": "subtle handheld-style push; no fake reenactment"
+    },
+    {
+      "id": "b07",
+      "approx": "27-32",
+      "case": "noaa-n-prime",
+      "narrationAnchor": "135 Millionen Dollar",
+      "visualType": "number-overlay-on-real-media",
+      "visual": "Same real damage image with clean '135 MIO. $' counter and small source label NOAA.",
+      "sourceUrl": "https://www.nesdis.noaa.gov/our-satellites/related-information/history-of-noaa-satellites",
+      "motion": "number count-up only"
+    },
+    {
+      "id": "b08",
+      "approx": "32-37",
+      "case": "mars-climate-orbiter",
+      "narrationAnchor": "Nummer drei: Englisch gegen Metrisch",
+      "visualType": "archive-image",
+      "visual": "Actual Mars Climate Orbiter during assembly.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mars_Climate_Orbiter_1.jpg",
+      "rights": "Public domain NASA/JPL",
+      "motion": "Ken Burns push with small 'Mars Climate Orbiter' label"
+    },
+    {
+      "id": "b09",
+      "approx": "37-42",
+      "case": "mars-climate-orbiter",
+      "narrationAnchor": "englischen Einheiten ... metrischen Einheiten",
+      "visualType": "simple-explainer-over-real-media",
+      "visual": "Two clean data tags: 'lb-force·s' on left and 'N·s' on right over a blurred spacecraft background; one value flows into the wrong interpretation.",
+      "motion": "data arrows diverge; no full dashboard"
+    },
+    {
+      "id": "b10",
+      "approx": "42-47",
+      "case": "mars-climate-orbiter",
+      "narrationAnchor": "Die berechnete Flugbahn war falsch",
+      "visualType": "archive-diagram",
+      "visual": "Actual NASA/JPL interplanetary trajectory graphic.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mars_Climate_Orbiter_-_interplanetary_trajectory.png",
+      "rights": "Public domain NASA/JPL",
+      "motion": "trace route line toward Mars"
+    },
+    {
+      "id": "b11",
+      "approx": "47-52",
+      "case": "mars-climate-orbiter",
+      "narrationAnchor": "kam dem Mars viel zu nahe und ging 1999 verloren",
+      "visualType": "archive-image-plus-route",
+      "visual": "NASA Mars encounter/trajectory visual with intended path versus too-low path added as a clean overlay.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mars_Climate_Orbiter_-_Mars_encounter_-_PIA02330.jpg",
+      "rights": "Public domain NASA/JPL",
+      "motion": "low path turns red and disappears behind Mars"
+    },
+    {
+      "id": "b12",
+      "approx": "52-57",
+      "case": "mars-climate-orbiter",
+      "narrationAnchor": "75 Millionen Dollar",
+      "visualType": "number-overlay-on-archive",
+      "visual": "Mars Climate Orbiter image, short '$75 MIO. ENTWICKLUNG' overlay.",
+      "sourceUrl": "https://www.gao.gov/assets/gao-02-195.pdf",
+      "motion": "fast number reveal then cut"
+    },
+    {
+      "id": "b13",
+      "approx": "57-62",
+      "case": "sncf-wide-trains",
+      "narrationAnchor": "Nummer zwei: Züge, die nicht zu allen Bahnsteigen passten",
+      "visualType": "archive-image",
+      "visual": "Actual Alstom Régiolis train filling frame at a station/test environment.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:R%C3%A9giolis_Alstom.jpg",
+      "rights": "Creative Commons; carry exact attribution from Commons"
+    },
+    {
+      "id": "b14",
+      "approx": "62-67",
+      "case": "sncf-wide-trains",
+      "narrationAnchor": "neue, breitere Regionalzüge",
+      "visualType": "archive-image",
+      "visual": "Second real fleet visual: Bombardier Regio 2N beside a platform to show train/platform relationship.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lille_-_Pr%C3%A9sentation_du_Regio_2N_de_Bombardier_le_22_septembre_2014_en_gare_de_Lille-Flandres_(039).JPG",
+      "rights": "Creative Commons; carry exact attribution from Commons"
+    },
+    {
+      "id": "b15",
+      "approx": "67-72",
+      "case": "sncf-wide-trains",
+      "narrationAnchor": "ältere Bahnsteige angepasst werden mussten",
+      "visualType": "photo-plus-diagram-overlay",
+      "visual": "Real train/platform image with a top-down inset: train clearance overlaps old platform edge by a few centimeters.",
+      "motion": "platform edge highlighted and visually trimmed back"
+    },
+    {
+      "id": "b16",
+      "approx": "72-77",
+      "case": "sncf-wide-trains",
+      "narrationAnchor": "rund 1.300 Bahnsteigen",
+      "visualType": "map-plus-number",
+      "visual": "Simple map of France with many station dots, only short '≈ 1.300 Bahnsteige' label; background uses train photo rather than black dashboard.",
+      "sourceUrl": "https://www.assemblee-nationale.fr/14/propositions/pion1968.asp"
+    },
+    {
+      "id": "b17",
+      "approx": "77-82",
+      "case": "sncf-wide-trains",
+      "narrationAnchor": "etwa 50 Millionen Euro",
+      "visualType": "number-overlay-on-real-media",
+      "visual": "Train moving/cropped photo with '≈ 50 MIO. €' and small 'Bahnsteiganpassungen' subtitle.",
+      "motion": "number pop then immediate move to next visual"
+    },
+    {
+      "id": "b18",
+      "approx": "82-87",
+      "case": "sncf-wide-trains",
+      "narrationAnchor": "schlechte Abstimmung zwischen Fahrzeugen und Infrastruktur",
+      "visualType": "two-image-comparison",
+      "visual": "Left: actual train; right: old station platform/track; center link breaks apart to visualize interface failure.",
+      "motion": "split-screen 2-3s, then cut"
+    },
+    {
+      "id": "b19",
+      "approx": "87-92",
+      "case": "hubble-mirror",
+      "narrationAnchor": "Nummer eins: Hubbles unscharfer Blick",
+      "visualType": "archive-before-after",
+      "visual": "Actual Hubble before/after optical correction image comparison.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hubble_Images_of_M100_Before_and_After_Mirror_Repair_-_GPN-2002-000064.jpg",
+      "rights": "NASA/ESA public-domain/credit conditions per Commons"
+    },
+    {
+      "id": "b20",
+      "approx": "92-97",
+      "case": "hubble-mirror",
+      "narrationAnchor": "Fehler im Prüfaufbau für den Hauptspiegel",
+      "visualType": "archive-image",
+      "visual": "Real Hubble primary mirror being worked on; highlight mirror edge, not generic telescope footage.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Working_on_Hubble%27s_Main_Mirror_in_1990_22_lg_web.jpg",
+      "rights": "Public domain NASA"
+    },
+    {
+      "id": "b21",
+      "approx": "97-102",
+      "case": "hubble-mirror",
+      "narrationAnchor": "Abstand einer Linse ... 1,3 Millimeter falsch",
+      "visualType": "minimal-technical-overlay",
+      "visual": "Real mirror/test context stays visible while a tiny lens-spacing diagram shows 1.3 mm offset with caliper-style marker.",
+      "motion": "macro zoom from 1.3 mm marker back to huge mirror"
+    },
+    {
+      "id": "b22",
+      "approx": "102-108",
+      "case": "hubble-mirror",
+      "narrationAnchor": "Astronauten Hubble mit Korrekturoptik praktisch eine Brille verpassen",
+      "visualType": "archive-video",
+      "visual": "Short real Hubble Servicing Mission 1 insert from NASA SVS/Commons.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:The_Big_Fix_%E2%80%93_Hubble%E2%80%99s_Servicing_Mission_1_(David_Leckrone)_(SVS14467_DAVE_WIDE_MP4).webm",
+      "rights": "Public domain in US per Commons page; check listed caveats",
+      "motion": "use original footage, crop only as needed"
+    },
+    {
+      "id": "b23",
+      "approx": "108-114",
+      "case": "hubble-mirror",
+      "narrationAnchor": "rund 500 Millionen Dollar",
+      "visualType": "archive-video-plus-number",
+      "visual": "Continue servicing footage briefly, then freeze on Hubble and overlay '≈ 500 MIO. $ REPARATURMISSION*' with tiny '*inkl. geplanter Wartung/Upgrades'.",
+      "sourceUrl": "https://www.nasa.gov/history/SP-4219/Chapter16.html",
+      "motion": "number appears for under 3 seconds"
+    },
+    {
+      "id": "b24",
+      "approx": "114-120",
+      "narrationAnchor": "fehlende Schrauben ... unterschiedliche Einheitensysteme ... wenige Millimeter",
+      "visualType": "rapid-recap-montage",
+      "visual": "Three fast full-screen callbacks: missing bolts, Mars units, 1.3 mm Hubble marker; end on four-case mosaic.",
+      "motion": "1.2-1.6s callbacks, final 1s hold; no generic outro card"
+    }
+  ]
+}
