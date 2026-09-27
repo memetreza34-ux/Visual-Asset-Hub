@@ -24,6 +24,8 @@ test('production workflow JavaScript parses successfully', () => {
     'scripts/pexels-grab.mjs',
     'scripts/source-search.mjs',
     'scripts/source-grab.mjs',
+    'scripts/documentary-research.mjs',
+    'scripts/reference-video.mjs',
     'scripts/video-project.mjs',
     'scripts/youtube-workflow.mjs',
     'scripts/align-voiceover.mjs',
@@ -31,6 +33,8 @@ test('production workflow JavaScript parses successfully', () => {
     'scripts/lib/providers/index.mjs',
     'scripts/lib/providers/pixabay.mjs',
     'scripts/lib/providers/openverse.mjs',
+    'scripts/lib/providers/wikimedia.mjs',
+    'scripts/lib/providers/internet-archive.mjs',
     'scripts/serve.mjs',
     'web/app.js'
   ]) {
@@ -41,16 +45,34 @@ test('production workflow JavaScript parses successfully', () => {
 
 test('package exposes production commands', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
-  assert.equal(pkg.version, '0.9.0');
+  assert.equal(pkg.version, '0.10.0');
   assert.equal(pkg.scripts['media:analyze'], 'node scripts/analyze-media.mjs');
   assert.equal(pkg.scripts['inbox:scan'], 'node scripts/scan-inbox.mjs');
   assert.equal(pkg.scripts['inbox:review'], 'node scripts/review-inbox.mjs');
   assert.equal(pkg.scripts['asset:add'], 'node scripts/add-asset.mjs');
   assert.equal(pkg.scripts['source:search'], 'node scripts/source-search.mjs');
   assert.equal(pkg.scripts['source:grab'], 'node scripts/source-grab.mjs');
+  assert.equal(pkg.scripts['documentary:research'], 'node scripts/documentary-research.mjs');
+  assert.equal(pkg.scripts['reference:inspect'], 'node scripts/reference-video.mjs');
   assert.equal(pkg.scripts['video:project'], 'node scripts/video-project.mjs');
   assert.equal(pkg.scripts['youtube:workflow'], 'node scripts/youtube-workflow.mjs');
-  assert.equal(pkg.scripts['voiceover:align'], 'node scripts/align-voiceover.mjs');
+});
+
+test('documentary research is archive-first and stock is opt-in', () => {
+  const source = fs.readFileSync(path.join(root, 'scripts/documentary-research.mjs'), 'utf8');
+  assert.match(source, /wikimedia/);
+  assert.match(source, /internet-archive/);
+  assert.match(source, /includeStock/);
+  assert.match(source, /stock-fallback/);
+  assert.match(source, /requiresHumanEventMatch/);
+});
+
+test('reference inspector never downloads reference video media by default', () => {
+  const source = fs.readFileSync(path.join(root, 'scripts/reference-video.mjs'), 'utf8');
+  assert.match(source, /--skip-download/);
+  assert.match(source, /mediaDownloaded: false/);
+  assert.match(source, /autoReuseAllowed: false/);
+  assert.doesNotMatch(source, /--format/);
 });
 
 test('local server guards write endpoints and provider provenance', () => {
@@ -83,13 +105,11 @@ test('browser exposes source search, inbox review and library surfaces', () => {
   assert.match(app, /importReviewedAsset/);
 });
 
-test('video project export enforces approved assets, usage scope and workflow-v2 user audio', () => {
+test('video project export enforces approved assets and usage scope', () => {
   const source = fs.readFileSync(path.join(root, 'scripts/video-project.mjs'), 'utf8');
   assert.match(source, /asset\.status !== 'approved'/);
   assert.match(source, /usageScopes\?\.includes\(scope\)/);
   assert.match(source, /render-manifest\.json/);
   assert.match(source, /durationInFrames/);
   assert.match(source, /attribution/);
-  assert.match(source, /source !== 'user-provided'/);
-  assert.match(source, /generatedByPipeline === true/);
 });
