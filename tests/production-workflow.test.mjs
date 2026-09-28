@@ -31,12 +31,16 @@ test('production workflow JavaScript parses successfully', () => {
     'scripts/reference-video.mjs',
     'scripts/reference-style.mjs',
     'scripts/visual-match.mjs',
+    'scripts/visual-qc.mjs',
     'scripts/clip-find.mjs',
     'scripts/beat-planner.mjs',
+    'scripts/phase1-materialize.mjs',
+    'scripts/phase1-bind.mjs',
     'scripts/map-render.mjs',
     'scripts/frame-extract.mjs',
     'scripts/video-project.mjs',
     'scripts/youtube-workflow.mjs',
+    'scripts/youtube-workflow-v14.mjs',
     'scripts/align-voiceover.mjs',
     'scripts/lib/source-utils.mjs',
     'scripts/lib/wikidata.mjs',
@@ -58,7 +62,7 @@ test('production workflow JavaScript parses successfully', () => {
 
 test('package exposes production commands', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
-  assert.equal(pkg.version, '0.13.0');
+  assert.equal(pkg.version, '0.14.0');
   assert.equal(pkg.scripts['media:analyze'], 'node scripts/analyze-media.mjs');
   assert.equal(pkg.scripts['inbox:scan'], 'node scripts/scan-inbox.mjs');
   assert.equal(pkg.scripts['inbox:review'], 'node scripts/review-inbox.mjs');
@@ -72,12 +76,15 @@ test('package exposes production commands', () => {
   assert.equal(pkg.scripts['reference:inspect'], 'node scripts/reference-video.mjs');
   assert.equal(pkg.scripts['reference:style'], 'node scripts/reference-style.mjs');
   assert.equal(pkg.scripts['visual:match'], 'node scripts/visual-match.mjs');
+  assert.equal(pkg.scripts['visual:qc'], 'node scripts/visual-qc.mjs');
   assert.equal(pkg.scripts['clip:find'], 'node scripts/clip-find.mjs');
   assert.equal(pkg.scripts['beat:plan'], 'node scripts/beat-planner.mjs');
+  assert.equal(pkg.scripts['phase1:materialize'], 'node scripts/phase1-materialize.mjs');
+  assert.equal(pkg.scripts['phase1:bind'], 'node scripts/phase1-bind.mjs');
   assert.equal(pkg.scripts['map:render'], 'node scripts/map-render.mjs');
   assert.equal(pkg.scripts['frame:extract'], 'node scripts/frame-extract.mjs');
   assert.equal(pkg.scripts['video:project'], 'node scripts/video-project.mjs');
-  assert.equal(pkg.scripts['youtube:workflow'], 'node scripts/youtube-workflow.mjs');
+  assert.equal(pkg.scripts['youtube:workflow'], 'node scripts/youtube-workflow-v14.mjs');
 });
 
 test('documentary research is archive-first and stock is opt-in', () => {
@@ -150,6 +157,49 @@ test('beat planner translates phase-1 intent into renderer specs without inventi
   assert.match(planner, /callout/);
 });
 
+test('phase 1 materializer resolves real archive candidates and keeps publish approval separate', () => {
+  const source = fs.readFileSync(path.join(root, 'scripts/phase1-materialize.mjs'), 'utf8');
+  assert.match(source, /archiveFirst: true/);
+  assert.match(source, /autoApproveExternalMedia: false/);
+  assert.match(source, /eventIdentityStillRequiresReview: true/);
+  assert.match(source, /providersFor/);
+  assert.match(source, /editorialScore/);
+  assert.match(source, /downloadSelected/);
+  assert.match(source, /writeSourceMetadata/);
+  assert.match(source, /materialization\.json/);
+});
+
+test('visual QC blocks weak rights or technical candidates and optionally uses OpenCLIP', () => {
+  const source = fs.readFileSync(path.join(root, 'scripts/visual-qc.mjs'), 'utf8');
+  assert.match(source, /unknownRightsPublishable: false/);
+  assert.match(source, /watermarkDetection: 'manual-required'/);
+  assert.match(source, /visual-match\.py/);
+  assert.match(source, /semantic-match-weak/);
+  assert.match(source, /restricted-rights/);
+  assert.match(source, /duplicate-of/);
+});
+
+test('phase 1 binder only binds approved YouTube assets and auto-binding requires QC', () => {
+  const source = fs.readFileSync(path.join(root, 'scripts/phase1-bind.mjs'), 'utf8');
+  assert.match(source, /visual-qc\.json fehlt/);
+  assert.match(source, /auto-source-match/);
+  assert.match(source, /manualReviewed: true/);
+  assert.match(source, /usageScopes\?\.includes\('youtube'\)/);
+  assert.match(source, /qcCandidate\.status === 'blocked'/);
+});
+
+test('v0.14 controller blocks user voiceover until real beat bindings are ready', () => {
+  const source = fs.readFileSync(path.join(root, 'scripts/youtube-workflow-v14.mjs'), 'utf8');
+  assert.match(source, /materialization\.json/);
+  assert.match(source, /visual-qc\.json/);
+  assert.match(source, /beat-bindings\.json/);
+  assert.match(source, /kein echtes Asset gebunden/);
+  assert.match(source, /Voiceover blockiert/);
+  assert.match(source, /source: 'user-provided'/);
+  assert.match(source, /generatedByPipeline: false/);
+  assert.match(source, /delegateLegacy/);
+});
+
 test('map renderer is keyless and preserves map attribution review metadata', () => {
   const map = fs.readFileSync(path.join(root, 'scripts/map-render.mjs'), 'utf8');
   assert.match(map, /maplibre-gl/);
@@ -184,7 +234,7 @@ test('provider layer exposes keyless official archives', () => {
 
 test('local server guards write endpoints and provider provenance', () => {
   const server = fs.readFileSync(path.join(root, 'scripts/serve.mjs'), 'utf8');
-  assert.match(server, /version: '0\.13'/);
+  assert.match(server, /version: '0\.14'/);
   assert.match(server, /writeApiEnabled/);
   assert.match(server, /\/api\/sources\/search/);
   assert.match(server, /\/api\/sources\/grab/);
