@@ -33,6 +33,8 @@ test('production workflow JavaScript parses successfully', () => {
     'scripts/visual-match.mjs',
     'scripts/clip-find.mjs',
     'scripts/beat-planner.mjs',
+    'scripts/map-render.mjs',
+    'scripts/frame-extract.mjs',
     'scripts/video-project.mjs',
     'scripts/youtube-workflow.mjs',
     'scripts/align-voiceover.mjs',
@@ -72,6 +74,8 @@ test('package exposes production commands', () => {
   assert.equal(pkg.scripts['visual:match'], 'node scripts/visual-match.mjs');
   assert.equal(pkg.scripts['clip:find'], 'node scripts/clip-find.mjs');
   assert.equal(pkg.scripts['beat:plan'], 'node scripts/beat-planner.mjs');
+  assert.equal(pkg.scripts['map:render'], 'node scripts/map-render.mjs');
+  assert.equal(pkg.scripts['frame:extract'], 'node scripts/frame-extract.mjs');
   assert.equal(pkg.scripts['video:project'], 'node scripts/video-project.mjs');
   assert.equal(pkg.scripts['youtube:workflow'], 'node scripts/youtube-workflow.mjs');
 });
@@ -146,6 +150,24 @@ test('beat planner translates phase-1 intent into renderer specs without inventi
   assert.match(planner, /callout/);
 });
 
+test('map renderer is keyless and preserves map attribution review metadata', () => {
+  const map = fs.readFileSync(path.join(root, 'scripts/map-render.mjs'), 'utf8');
+  assert.match(map, /maplibre-gl/);
+  assert.match(map, /tiles\.openfreemap\.org/);
+  assert.match(map, /© OpenStreetMap contributors/);
+  assert.match(map, /suggestedStatus: 'review'/);
+  assert.match(map, /toInbox/);
+});
+
+test('freeze-frame extractor inherits parent rights but forces review', () => {
+  const frame = fs.readFileSync(path.join(root, 'scripts/frame-extract.mjs'), 'utf8');
+  assert.match(frame, /ffmpeg/);
+  assert.match(frame, /derived-frame/);
+  assert.match(frame, /suggestedStatus: 'review'/);
+  assert.match(frame, /Dieselben Quellen-\/Lizenzbedingungen/);
+  assert.match(frame, /rights\.usageScopes/);
+});
+
 test('Wikidata expansion supplies aliases without becoming a fact source', () => {
   const source = fs.readFileSync(path.join(root, 'scripts/lib/wikidata.mjs'), 'utf8');
   assert.match(source, /wbsearchentities/);
@@ -162,6 +184,7 @@ test('provider layer exposes keyless official archives', () => {
 
 test('local server guards write endpoints and provider provenance', () => {
   const server = fs.readFileSync(path.join(root, 'scripts/serve.mjs'), 'utf8');
+  assert.match(server, /version: '0\.13'/);
   assert.match(server, /writeApiEnabled/);
   assert.match(server, /\/api\/sources\/search/);
   assert.match(server, /\/api\/sources\/grab/);
