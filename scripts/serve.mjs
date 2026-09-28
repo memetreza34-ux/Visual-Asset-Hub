@@ -41,7 +41,7 @@ async function handleApi(request, response, url) {
   response.setHeader('Cache-Control', 'no-store');
 
   if (request.method === 'GET' && url.pathname === '/api/health') {
-    return sendJson(response, 200, { ok: true, writeApiEnabled, host, version: '0.11' });
+    return sendJson(response, 200, { ok: true, writeApiEnabled, host, version: '0.12' });
   }
   if (request.method === 'GET' && url.pathname === '/api/sources') {
     const providers = Object.fromEntries(Object.entries(PROVIDERS).map(([name, config]) => [name, {
