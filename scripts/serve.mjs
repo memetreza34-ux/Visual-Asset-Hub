@@ -41,7 +41,7 @@ async function handleApi(request, response, url) {
   response.setHeader('Cache-Control', 'no-store');
 
   if (request.method === 'GET' && url.pathname === '/api/health') {
-    return sendJson(response, 200, { ok: true, writeApiEnabled, host, version: '0.10' });
+    return sendJson(response, 200, { ok: true, writeApiEnabled, host, version: '0.11' });
   }
   if (request.method === 'GET' && url.pathname === '/api/sources') {
     const providers = Object.fromEntries(Object.entries(PROVIDERS).map(([name, config]) => [name, {
@@ -55,7 +55,7 @@ async function handleApi(request, response, url) {
   if (request.method === 'POST' && url.pathname === '/api/sources/search') {
     requireWriteApi(request);
     const body = await readJsonBody(request);
-    const provider = String(body.provider || 'wikimedia').toLowerCase();
+    const provider = String(body.provider || 'nasa').toLowerCase();
     const type = body.type || (provider === 'openverse' ? 'image' : 'video');
     const result = await searchWithCache({
       root,
@@ -74,7 +74,7 @@ async function handleApi(request, response, url) {
   if (request.method === 'POST' && url.pathname === '/api/sources/grab') {
     requireWriteApi(request);
     const body = await readJsonBody(request);
-    const provider = String(body.provider || 'wikimedia').toLowerCase();
+    const provider = String(body.provider || 'nasa').toLowerCase();
     const type = body.type || (provider === 'openverse' ? 'image' : 'video');
     const query = String(body.query || '').trim();
     const pick = boundedInteger(body.pick, 1, 200, 1);
@@ -245,7 +245,7 @@ function readJsonBody(request) {
   });
 }
 function boundedInteger(value, min, max, fallback) { const number = value === undefined || value === null || value === '' ? fallback : Number(value); if (!Number.isInteger(number) || number < min || number > max) throw new Error(`Zahl muss zwischen ${min} und ${max} liegen.`); return number; }
-function providerLabel(value) { return ({ pexels: 'Pexels', pixabay: 'Pixabay', openverse: 'Openverse', wikimedia: 'Wikimedia Commons', 'internet-archive': 'Internet Archive' })[value] || String(value || 'Quelle'); }
+function providerLabel(value) { return ({ pexels: 'Pexels', pixabay: 'Pixabay', openverse: 'Openverse', wikimedia: 'Wikimedia Commons', 'internet-archive': 'Internet Archive', nasa: 'NASA Image & Video Library', 'library-of-congress': 'Library of Congress' })[value] || String(value || 'Quelle'); }
 function toKebab(value) { return value.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`); }
 function setSecurityHeaders(response) {
   response.setHeader('X-Content-Type-Options', 'nosniff');
