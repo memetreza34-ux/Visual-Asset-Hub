@@ -4,9 +4,11 @@ import { searchOpenverse } from './openverse.mjs';
 import { searchWikimedia } from './wikimedia.mjs';
 import { searchInternetArchive } from './internet-archive.mjs';
 import { searchNasa } from './nasa.mjs';
+import { searchLibraryOfCongress } from './library-of-congress.mjs';
 
 export const PROVIDERS = Object.freeze({
   nasa: { types: ['video', 'image'], requiresKey: null, tier: 'official-archive', downloadable: true },
+  'library-of-congress': { types: ['video', 'image'], requiresKey: null, tier: 'official-archive', downloadable: true },
   wikimedia: { types: ['video', 'image'], requiresKey: null, tier: 'archive', downloadable: true },
   'internet-archive': { types: ['video', 'image'], requiresKey: null, tier: 'archive', downloadable: true },
   openverse: { types: ['image'], requiresKey: null, tier: 'open-media', downloadable: true },
@@ -22,6 +24,9 @@ export async function searchProvider({ provider, type = 'video', env = process.e
 
   if (name === 'nasa') {
     return searchNasa({ query: options.query, type, page: options.page, perPage: options.perPage, fetchImpl: options.fetchImpl });
+  }
+  if (name === 'library-of-congress') {
+    return searchLibraryOfCongress({ query: options.query, type, page: options.page, perPage: options.perPage, fetchImpl: options.fetchImpl });
   }
   if (name === 'wikimedia') {
     return searchWikimedia({ query: options.query, type, orientation: options.orientation, page: options.page, perPage: options.perPage, fetchImpl: options.fetchImpl });
