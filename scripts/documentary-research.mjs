@@ -43,15 +43,16 @@ for (const provider of providers) {
 
 results.sort((a, b) => b.researchScore - a.researchScore || String(a.title).localeCompare(String(b.title)));
 const report = {
-  version: 1,
+  version: 2,
   generatedAt: new Date().toISOString(),
   query,
   type,
   policy: {
-    order: ['exact-event/archive', 'open-media', 'stock-fallback'],
+    order: ['official-archive', 'archive', 'open-media', 'stock-fallback'],
     stockIncluded: includeStock,
     autoApproveUnknownRights: false,
-    note: 'Score is a research heuristic, not proof that a visual depicts the claimed event. Final Phase-1 review is mandatory.'
+    visualMatchRecommended: true,
+    note: 'Score ist nur Research-Heuristik. Vor Phase-1-Freigabe müssen Ereignisidentität, Rechte und visuelle Relevanz geprüft werden. Für lokale Frames kann visual:match (OpenCLIP) ergänzt werden.'
   },
   providers,
   candidates: results.slice(0, integer(args.limit || '40', 1, 100, 'limit'))
@@ -76,10 +77,7 @@ function rankCandidate(asset, provider, queryText, config) {
   const haystack = `${asset.title || ''} ${asset.description || ''} ${(asset.tags || []).join(' ')}`.toLowerCase();
   const matched = words.filter((word) => haystack.includes(word)).length;
   const exactness = words.length ? matched / words.length : 0;
-  let score = 0;
-  if (config.tier === 'archive') score += 45;
-  else if (config.tier === 'open-media') score += 28;
-  else if (config.tier === 'stock-fallback') score += 5;
+  let score = tierScore(config.tier);
   score += Math.round(exactness * 30);
   if (asset.rights?.license_status === 'public-domain') score += 15;
   else if (asset.rights?.license_status === 'licensed') score += 10;
@@ -94,14 +92,25 @@ function rankCandidate(asset, provider, queryText, config) {
     researchScore: Math.max(0, Math.min(100, score)),
     researchSignals: {
       providerTier: config.tier,
+      providerTierScore: tierScore(config.tier),
       queryTermsMatched: `${matched}/${words.length}`,
       rightsStatus: asset.rights?.license_status || 'unknown',
-      requiresHumanEventMatch: true
+      requiresHumanEventMatch: true,
+      openClipRecommended: true
     }
   };
 }
+function tierScore(tier) {
+  if (tier === 'official-archive') return 60;
+  if (tier === 'archive') return 45;
+  if (tier === 'open-media') return 28;
+  if (tier === 'stock-fallback') return 5;
+  return 0;
+}
 function defaultProviders(type, stock) {
-  const base = type === 'image' ? ['wikimedia', 'internet-archive', 'openverse'] : ['wikimedia', 'internet-archive'];
+  const base = type === 'image'
+    ? ['nasa', 'library-of-congress', 'wikimedia', 'internet-archive', 'openverse']
+    : ['nasa', 'library-of-congress', 'wikimedia', 'internet-archive'];
   if (stock) base.push('pexels', 'pixabay');
   return base;
 }
@@ -111,4 +120,4 @@ function relative(file) { return path.relative(root, file).split(path.sep).join(
 function integer(value, min, max, label) { const n = Number(value); if (!Number.isInteger(n) || n < min || n > max) fail(`${label} muss zwischen ${min} und ${max} liegen.`); return n; }
 function parseArgs(values) { const result = { _: [] }; for (let i = 0; i < values.length; i++) { const token = values[i]; if (!token.startsWith('--')) { result._.push(token); continue; } const key = token.slice(2).replace(/-([a-z])/g, (_, c) => c.toUpperCase()); if (key === 'help') { result.help = true; continue; } const next = values[i + 1]; if (!next || next.startsWith('--')) fail(`Wert für ${token} fehlt.`); result[key] = next; i++; } return result; }
 function fail(message) { console.error(message); process.exit(1); }
-function help() { console.log(`Documentary Research – archiv-first\n\nBeispiele:\n  npm run documentary:research -- "Concorde crash Air France 4590" --type video\n  npm run documentary:research -- "Theranos Elizabeth Holmes" --type image\n  npm run documentary:research -- "warehouse accident" --type video --include-stock true\n\nStandard ohne Keys:\n  video: Wikimedia Commons + Internet Archive\n  image: Wikimedia Commons + Internet Archive + Openverse\n\nStock ist standardmäßig AUS. Mit --include-stock true werden Pexels/Pixabay nur als nachrangige Fallbacks ergänzt.`); }
+function help() { console.log(`Documentary Research – archive-first\n\nBeispiele:\n  npm run documentary:research -- "Concorde crash Air France 4590" --type video\n  npm run documentary:research -- "Theranos Elizabeth Holmes" --type image\n  npm run documentary:research -- "warehouse accident" --type video --include-stock true\n\nStandard ohne Keys:\n  video: NASA + Library of Congress + Wikimedia Commons + Internet Archive\n  image: NASA + Library of Congress + Wikimedia Commons + Internet Archive + Openverse\n\nPriorität:\n  official-archive > archive > open-media > stock-fallback\n\nStock ist standardmäßig AUS. Mit --include-stock true werden Pexels/Pixabay nur als nachrangige Fallbacks ergänzt.`); }
