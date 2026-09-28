@@ -26,7 +26,7 @@
     "map:render": "node scripts/map-render.mjs",
     "frame:extract": "node scripts/frame-extract.mjs",
     "video:project": "node scripts/video-project.mjs",
-    "youtube:workflow": "node scripts/youtube-workflow.mjs",
+    "youtube:workflow": "node scripts/youtube-workflow-v14.mjs",
     "voiceover:align": "node scripts/align-voiceover.mjs",
     "pexels:search": "node scripts/pexels-search.mjs",
     "pexels:grab": "node scripts/pexels-grab.mjs",
