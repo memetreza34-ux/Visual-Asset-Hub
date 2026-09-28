@@ -32,6 +32,7 @@ test('production workflow JavaScript parses successfully', () => {
     'scripts/reference-style.mjs',
     'scripts/visual-match.mjs',
     'scripts/clip-find.mjs',
+    'scripts/beat-planner.mjs',
     'scripts/video-project.mjs',
     'scripts/youtube-workflow.mjs',
     'scripts/align-voiceover.mjs',
@@ -55,7 +56,7 @@ test('production workflow JavaScript parses successfully', () => {
 
 test('package exposes production commands', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
-  assert.equal(pkg.version, '0.12.0');
+  assert.equal(pkg.version, '0.13.0');
   assert.equal(pkg.scripts['media:analyze'], 'node scripts/analyze-media.mjs');
   assert.equal(pkg.scripts['inbox:scan'], 'node scripts/scan-inbox.mjs');
   assert.equal(pkg.scripts['inbox:review'], 'node scripts/review-inbox.mjs');
@@ -70,6 +71,7 @@ test('package exposes production commands', () => {
   assert.equal(pkg.scripts['reference:style'], 'node scripts/reference-style.mjs');
   assert.equal(pkg.scripts['visual:match'], 'node scripts/visual-match.mjs');
   assert.equal(pkg.scripts['clip:find'], 'node scripts/clip-find.mjs');
+  assert.equal(pkg.scripts['beat:plan'], 'node scripts/beat-planner.mjs');
   assert.equal(pkg.scripts['video:project'], 'node scripts/video-project.mjs');
   assert.equal(pkg.scripts['youtube:workflow'], 'node scripts/youtube-workflow.mjs');
 });
@@ -131,6 +133,19 @@ test('visual matcher and clip finder keep semantic ranking separate from fact pr
   assert.match(finder, /proofOfEventIdentity: false/);
 });
 
+test('beat planner translates phase-1 intent into renderer specs without inventing new story', () => {
+  const planner = fs.readFileSync(path.join(root, 'scripts/beat-planner.mjs'), 'utf8');
+  assert.match(planner, /editorialIntentWins: true/);
+  assert.match(planner, /phase1Locked: true/);
+  assert.match(planner, /stockFallbackOnly: true/);
+  assert.match(planner, /presentationFor/);
+  assert.match(planner, /qualityGate/);
+  assert.match(planner, /minimumSemanticRelevance: 0\.7/);
+  assert.match(planner, /freeze-frame/);
+  assert.match(planner, /map/);
+  assert.match(planner, /callout/);
+});
+
 test('Wikidata expansion supplies aliases without becoming a fact source', () => {
   const source = fs.readFileSync(path.join(root, 'scripts/lib/wikidata.mjs'), 'utf8');
   assert.match(source, /wbsearchentities/);
@@ -178,11 +193,29 @@ test('browser exposes source search, inbox review and library surfaces', () => {
   assert.match(archiveFirst, /Stock-Fallback/);
 });
 
-test('video project export enforces approved assets and usage scope', () => {
+test('video project export enforces rights and passes editorial presentation to renderer', () => {
   const source = fs.readFileSync(path.join(root, 'scripts/video-project.mjs'), 'utf8');
   assert.match(source, /asset\.status !== 'approved'/);
   assert.match(source, /usageScopes\?\.includes\(scope\)/);
   assert.match(source, /render-manifest\.json/);
-  assert.match(source, /durationInFrames/);
-  assert.match(source, /attribution/);
+  assert.match(source, /manifestVersion: 3/);
+  assert.match(source, /freeze-frame/);
+  assert.match(source, /overlays: normalizeOverlays/);
+  assert.match(source, /presentation/);
+  assert.match(source, /transition/);
+});
+
+test('renderer supports documentary overlays, maps, article shots and freeze frames', () => {
+  const renderer = fs.readFileSync(path.join(root, 'renderer/src/AssetVideo.tsx'), 'utf8');
+  const overlays = fs.readFileSync(path.join(root, 'renderer/src/EditorialOverlays.tsx'), 'utf8');
+  const prepare = fs.readFileSync(path.join(root, 'renderer/scripts/prepare-project.mjs'), 'utf8');
+  assert.match(renderer, /VerticalBlurVideo/);
+  assert.match(renderer, /ArticleScreenshot/);
+  assert.match(renderer, /MapImage/);
+  assert.match(renderer, /FreezeFrame/);
+  assert.match(renderer, /EditorialOverlays/);
+  assert.match(overlays, /kind: 'label' \| 'headline' \| 'number' \| 'callout' \| 'source'/);
+  assert.match(overlays, /spring/);
+  assert.match(prepare, /-preview/);
+  assert.match(prepare, /freeze-frame/);
 });
