@@ -11,7 +11,7 @@
   "genre": "faceless-listicle-documentary",
   "targetDurationSeconds": 105,
   "requireUserVoiceover": false,
-  "status": "phase1-research",
+  "status": "new-test-render-complete",
   "referenceStyle": "fast real-media documentary/listicle inspired by the pacing of the supplied reference; original script, original case selection and no copied branding",
   "editingRules": {
     "normalVisualSeconds": "3-6",
@@ -22,6 +22,21 @@
     "longDashboardScenes": false,
     "textPolicy": "short labels/numbers only",
     "referenceVideoReuse": false
+  },
+  "testRender": {
+    "renderedAt": "2026-09-28",
+    "durationSeconds": 118.422,
+    "width": 1280,
+    "height": 720,
+    "fps": 30,
+    "videoCodec": "h264",
+    "audioCodec": "aac",
+    "visualShots": 23,
+    "script": "voiceover-script.txt",
+    "visualPlan": "visual-plan.json",
+    "visualMode": "procedural-standin",
+    "targetProductionVisualMode": "real-media-first",
+    "note": "This is a completely new end-to-end test video. The repo research/visual plan points to real open-media sources; the local test render uses procedural stand-in visuals because those remote assets were not available as local render files in this execution environment."
   },
   "places": [
     "socotra-yemen",
