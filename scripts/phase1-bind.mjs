@@ -36,18 +36,21 @@ function autoBind() {
   for (const shot of shotPlan.shots || []) {
     if (bindingFor(shot.id)?.assetId) continue;
     const beat = materialization.beats?.find((item) => item.id === shot.id);
-    if (!beat?.selectedCandidateId) continue;
-    const candidate = beat.candidates?.find((item) => item.candidateId === beat.selectedCandidateId);
-    if (!candidate) continue;
+    if (!beat) continue;
     const qcBeat = qc.beats?.find((item) => item.id === shot.id);
-    const qcCandidate = qcBeat?.candidates?.find((item) => item.candidateId === candidate.candidateId);
+    const candidateId = qcBeat?.bestCandidateId || beat.selectedCandidateId;
+    if (!candidateId) continue;
+    const candidate = beat.candidates?.find((item) => item.candidateId === candidateId);
+    if (!candidate) continue;
+    const qcCandidate = qcBeat?.candidates?.find((item) => item.candidateId === candidateId);
     if (!qcCandidate || qcCandidate.status === 'blocked' || Number(qcCandidate.score || 0) < Number(qc.policy?.minimumScore || 70)) continue;
     const asset = findCatalogAssetForCandidate(candidate);
     if (!asset || !assetReady(asset)) continue;
     upsert({
       beatId: shot.id,
       assetId: asset.id,
-      candidateId: candidate.candidateId,
+      candidateId,
+      phase1ReferenceCandidateId: beat.selectedCandidateId || null,
       sourceUrl: candidate.sourceUrl || asset.rights?.sourceUrl || null,
       qcScore: qcCandidate.score,
       qcStatus: qcCandidate.status,
@@ -146,4 +149,4 @@ function safeName(value) { return String(value || '').toLowerCase().normalize('N
 function slug(value) { return safeName(value); }
 function parseArgs(values) { const result = {}; for (let i = 0; i < values.length; i++) { const token = values[i]; if (!token.startsWith('--')) fail(`Unbekanntes Argument: ${token}`); const key = token.slice(2).replace(/-([a-z])/g, (_, c) => c.toUpperCase()); if (key === 'help') { result.help = true; continue; } const next = values[i + 1]; if (!next || next.startsWith('--')) fail(`Wert für ${token} fehlt.`); result[key] = next; i++; } return result; }
 function fail(message) { console.error(message); process.exit(1); }
-function help() { console.log(`Phase-1 Asset Binding\n\nAutomatisch nur nach bestandenem Visual-QC:\n  npm run phase1:bind -- auto --project <id>\n\nExplizit nach bewusster redaktioneller Prüfung:\n  npm run phase1:bind -- set --project <id> --beat b03 --asset VAH-XXXXXXXX\n\nGate prüfen:\n  npm run phase1:bind -- check --project <id>\n\nNur approved Assets mit YouTube-Scope und geklärten Rechten können gebunden werden. Auto-Binding verlangt zusätzlich einen ausreichenden Visual-QC-Score.`); }
+function help() { console.log(`Phase-1 Asset Binding\n\nAutomatisch nur nach bestandenem Visual-QC:\n  npm run phase1:bind -- auto --project <id>\n\nExplizit nach bewusster redaktioneller Prüfung:\n  npm run phase1:bind -- set --project <id> --beat b03 --asset VAH-XXXXXXXX\n\nGate prüfen:\n  npm run phase1:bind -- check --project <id>\n\nAuto-Binding bevorzugt den besten heruntergeladenen QC-Kandidaten. So können nicht direkt ingestierbare Phase-1-Referenzseiten als Quellen erhalten bleiben, ohne die Pipeline zu blockieren.`); }
