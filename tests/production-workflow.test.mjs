@@ -26,6 +26,9 @@ test('production workflow JavaScript parses successfully', () => {
     'scripts/source-grab.mjs',
     'scripts/documentary-research.mjs',
     'scripts/reference-video.mjs',
+    'scripts/reference-style.mjs',
+    'scripts/visual-match.mjs',
+    'scripts/clip-find.mjs',
     'scripts/video-project.mjs',
     'scripts/youtube-workflow.mjs',
     'scripts/align-voiceover.mjs',
@@ -35,6 +38,8 @@ test('production workflow JavaScript parses successfully', () => {
     'scripts/lib/providers/openverse.mjs',
     'scripts/lib/providers/wikimedia.mjs',
     'scripts/lib/providers/internet-archive.mjs',
+    'scripts/lib/providers/nasa.mjs',
+    'scripts/lib/providers/library-of-congress.mjs',
     'scripts/serve.mjs',
     'web/app.js'
   ]) {
@@ -45,7 +50,7 @@ test('production workflow JavaScript parses successfully', () => {
 
 test('package exposes production commands', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
-  assert.equal(pkg.version, '0.10.0');
+  assert.equal(pkg.version, '0.11.0');
   assert.equal(pkg.scripts['media:analyze'], 'node scripts/analyze-media.mjs');
   assert.equal(pkg.scripts['inbox:scan'], 'node scripts/scan-inbox.mjs');
   assert.equal(pkg.scripts['inbox:review'], 'node scripts/review-inbox.mjs');
@@ -54,17 +59,23 @@ test('package exposes production commands', () => {
   assert.equal(pkg.scripts['source:grab'], 'node scripts/source-grab.mjs');
   assert.equal(pkg.scripts['documentary:research'], 'node scripts/documentary-research.mjs');
   assert.equal(pkg.scripts['reference:inspect'], 'node scripts/reference-video.mjs');
+  assert.equal(pkg.scripts['reference:style'], 'node scripts/reference-style.mjs');
+  assert.equal(pkg.scripts['visual:match'], 'node scripts/visual-match.mjs');
+  assert.equal(pkg.scripts['clip:find'], 'node scripts/clip-find.mjs');
   assert.equal(pkg.scripts['video:project'], 'node scripts/video-project.mjs');
   assert.equal(pkg.scripts['youtube:workflow'], 'node scripts/youtube-workflow.mjs');
 });
 
 test('documentary research is archive-first and stock is opt-in', () => {
   const source = fs.readFileSync(path.join(root, 'scripts/documentary-research.mjs'), 'utf8');
+  assert.match(source, /official-archive/);
+  assert.match(source, /library-of-congress/);
   assert.match(source, /wikimedia/);
   assert.match(source, /internet-archive/);
   assert.match(source, /includeStock/);
   assert.match(source, /stock-fallback/);
   assert.match(source, /requiresHumanEventMatch/);
+  assert.match(source, /if \(tier === 'official-archive'\) return 60/);
 });
 
 test('reference inspector never downloads reference video media by default', () => {
@@ -73,6 +84,31 @@ test('reference inspector never downloads reference video media by default', () 
   assert.match(source, /mediaDownloaded: false/);
   assert.match(source, /autoReuseAllowed: false/);
   assert.doesNotMatch(source, /--format/);
+});
+
+test('reference style analyzer uses PySceneDetect and FFmpeg frames', () => {
+  const source = fs.readFileSync(path.join(root, 'scripts/reference-style.mjs'), 'utf8');
+  const python = fs.readFileSync(path.join(root, 'scripts/reference-style.py'), 'utf8');
+  assert.match(source, /reference-style\.py/);
+  assert.match(source, /ffmpeg/);
+  assert.match(source, /style-profile\.json/);
+  assert.match(python, /ContentDetector/);
+  assert.match(python, /cutsPerMinute/);
+});
+
+test('visual matcher and clip finder keep semantic ranking separate from fact proof', () => {
+  const matcher = fs.readFileSync(path.join(root, 'scripts/visual-match.py'), 'utf8');
+  const finder = fs.readFileSync(path.join(root, 'scripts/clip-find.mjs'), 'utf8');
+  assert.match(matcher, /open_clip/);
+  assert.match(matcher, /clipSimilarity/);
+  assert.match(finder, /visual-match\.py/);
+  assert.match(finder, /proofOfEventIdentity: false/);
+});
+
+test('provider layer exposes keyless official archives', () => {
+  const providers = fs.readFileSync(path.join(root, 'scripts/lib/providers/index.mjs'), 'utf8');
+  assert.match(providers, /nasa: \{ types: \['video', 'image'\], requiresKey: null, tier: 'official-archive'/);
+  assert.match(providers, /'library-of-congress': \{ types: \['video', 'image'\], requiresKey: null, tier: 'official-archive'/);
 });
 
 test('local server guards write endpoints and provider provenance', () => {
