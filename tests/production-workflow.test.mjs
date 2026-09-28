@@ -25,6 +25,8 @@ test('production workflow JavaScript parses successfully', () => {
     'scripts/source-search.mjs',
     'scripts/source-grab.mjs',
     'scripts/documentary-research.mjs',
+    'scripts/research-discover.mjs',
+    'scripts/article-capture.mjs',
     'scripts/entity-expand.mjs',
     'scripts/reference-video.mjs',
     'scripts/reference-style.mjs',
@@ -53,7 +55,7 @@ test('production workflow JavaScript parses successfully', () => {
 
 test('package exposes production commands', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
-  assert.equal(pkg.version, '0.11.0');
+  assert.equal(pkg.version, '0.12.0');
   assert.equal(pkg.scripts['media:analyze'], 'node scripts/analyze-media.mjs');
   assert.equal(pkg.scripts['inbox:scan'], 'node scripts/scan-inbox.mjs');
   assert.equal(pkg.scripts['inbox:review'], 'node scripts/review-inbox.mjs');
@@ -61,6 +63,8 @@ test('package exposes production commands', () => {
   assert.equal(pkg.scripts['source:search'], 'node scripts/source-search.mjs');
   assert.equal(pkg.scripts['source:grab'], 'node scripts/source-grab.mjs');
   assert.equal(pkg.scripts['documentary:research'], 'node scripts/documentary-research.mjs');
+  assert.equal(pkg.scripts['research:discover'], 'node scripts/research-discover.mjs');
+  assert.equal(pkg.scripts['research:capture'], 'node scripts/article-capture.mjs');
   assert.equal(pkg.scripts['entity:expand'], 'node scripts/entity-expand.mjs');
   assert.equal(pkg.scripts['reference:inspect'], 'node scripts/reference-video.mjs');
   assert.equal(pkg.scripts['reference:style'], 'node scripts/reference-style.mjs');
@@ -81,6 +85,23 @@ test('documentary research is archive-first and stock is opt-in', () => {
   assert.match(source, /stock-fallback/);
   assert.match(source, /requiresHumanEventMatch/);
   assert.match(source, /if \(tier === 'official-archive'\) return 60/);
+});
+
+test('research discovery uses keyless GDELT and optional self-hosted SearXNG', () => {
+  const source = fs.readFileSync(path.join(root, 'scripts/research-discover.mjs'), 'utf8');
+  assert.match(source, /api\.gdeltproject\.org/);
+  assert.match(source, /SEARXNG_URL/);
+  assert.match(source, /format', 'json'/);
+  assert.match(source, /autoReuseMedia: false/);
+  assert.match(source, /authorityBoost/);
+});
+
+test('article capture stores screenshot and source evidence without granting reuse rights', () => {
+  const source = fs.readFileSync(path.join(root, 'scripts/article-capture.mjs'), 'utf8');
+  assert.match(source, /import\('playwright'\)/);
+  assert.match(source, /page\.screenshot/);
+  assert.match(source, /canonicalUrl/);
+  assert.match(source, /screenshotDoesNotGrantReuseRights: true/);
 });
 
 test('reference inspector never downloads reference video media by default', () => {
