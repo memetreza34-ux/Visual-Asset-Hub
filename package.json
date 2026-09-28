@@ -1,6 +1,6 @@
 {
   "name": "visual-asset-hub",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "private": true,
   "type": "module",
   "engines": { "node": ">=22" },
@@ -12,6 +12,8 @@
     "source:search": "node scripts/source-search.mjs",
     "source:grab": "node scripts/source-grab.mjs",
     "documentary:research": "node scripts/documentary-research.mjs",
+    "research:discover": "node scripts/research-discover.mjs",
+    "research:capture": "node scripts/article-capture.mjs",
     "entity:expand": "node scripts/entity-expand.mjs",
     "reference:inspect": "node scripts/reference-video.mjs",
     "reference:style": "node scripts/reference-style.mjs",
