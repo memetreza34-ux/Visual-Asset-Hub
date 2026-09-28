@@ -86,7 +86,9 @@ function presentationFor(type, text) {
   if (/map|route|trajectory/.test(type) || /karte|route|flugbahn|bahnsteig/.test(text)) return 'map';
   if (/freeze/.test(type) || /freeze/.test(text)) return 'freeze-frame';
   if (/vertical|phone|smartphone|tiktok|reel/.test(type)) return 'vertical-blur';
-  if (/comparison|before-after|two-image/.test(type)) return 'comparison';
+  // Multi-asset comparisons are resolved during preprocessing; until a secondary asset is attached,
+  // keep the renderer presentation valid instead of emitting an unsupported "comparison" mode.
+  if (/comparison|before-after|two-image/.test(type)) return 'auto';
   if (/title/.test(type)) return 'headline';
   return 'auto';
 }
@@ -122,7 +124,7 @@ function preprocessFor(type, presentation, text) {
   if (presentation === 'map') steps.push({ tool: 'map', action: 'prepare-16x9-map-base', required: false });
   if (/archive-video|video/.test(type)) steps.push({ tool: 'clip:find', action: 'rank-best-subclip', required: false });
   if (/document|article/.test(presentation)) steps.push({ tool: 'research:capture', action: 'capture-source-if-needed', required: false });
-  if (/comparison/.test(presentation)) steps.push({ tool: 'editorial', action: 'resolve-secondary-asset', required: true });
+  if (/comparison|before-after|two-image/.test(type)) steps.push({ tool: 'editorial', action: 'resolve-secondary-asset', required: true });
   if (/vertical/.test(presentation)) steps.push({ tool: 'renderer', action: 'blur-sidefill', required: true });
   return steps;
 }
@@ -130,7 +132,7 @@ function motionFor(presentation, type, text) {
   if (presentation === 'freeze-frame') return 'freeze + subtle push-in';
   if (presentation === 'article' || presentation === 'document') return 'top-focus + slow document pan';
   if (presentation === 'map') return /trace|route|flugbahn/.test(text) ? 'route trace + gentle map push' : 'gentle map push + marker';
-  if (presentation === 'comparison') return 'split-screen + hard cut';
+  if (/comparison|before-after|two-image/.test(type)) return 'resolve secondary asset, then split-screen or hard-cut comparison';
   if (presentation === 'headline') return 'fast scale-in + short hold';
   if (/counter|count-up|number/.test(text)) return 'impact number reveal';
   return 'subtle documentary push/pan';
