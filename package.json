@@ -12,6 +12,7 @@
     "source:search": "node scripts/source-search.mjs",
     "source:grab": "node scripts/source-grab.mjs",
     "documentary:research": "node scripts/documentary-research.mjs",
+    "entity:expand": "node scripts/entity-expand.mjs",
     "reference:inspect": "node scripts/reference-video.mjs",
     "reference:style": "node scripts/reference-style.mjs",
     "visual:match": "node scripts/visual-match.mjs",
