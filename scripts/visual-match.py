@@ -41,14 +41,16 @@ def main():
     else:
         device = "cpu"
 
+    def amp():
+        return torch.autocast(device_type="cuda") if device == "cuda" else contextlib.nullcontext()
+
     model, _, preprocess = open_clip.create_model_and_transforms(args.model, pretrained=args.pretrained)
     model = model.to(device)
     model.eval()
     tokenizer = open_clip.get_tokenizer(args.model)
     text = tokenizer([args.query]).to(device)
 
-    amp_context = torch.autocast(device_type="cuda") if device == "cuda" else contextlib.nullcontext()
-    with torch.no_grad(), amp_context:
+    with torch.no_grad(), amp():
         text_features = model.encode_text(text)
         text_features = text_features / text_features.norm(dim=-1, keepdim=True)
 
@@ -56,7 +58,7 @@ def main():
     for file in files:
         try:
             image = preprocess(Image.open(file).convert("RGB")).unsqueeze(0).to(device)
-            with torch.no_grad(), amp_context:
+            with torch.no_grad(), amp():
                 image_features = model.encode_image(image)
                 image_features = image_features / image_features.norm(dim=-1, keepdim=True)
                 similarity = float((image_features @ text_features.T).squeeze().detach().cpu().item())
