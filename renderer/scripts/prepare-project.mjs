@@ -27,14 +27,23 @@ const prepared = structuredClone(manifest);
 for (const [index, scene] of prepared.scenes.entries()) {
   const source = scene.asset?.source;
   if (!source) fail(`${scene.id || `scene-${index + 1}`}: Asset-Quelle fehlt.`);
-  if (/^https?:\/\//i.test(source)) continue;
-
-  const sourceFile = safeRepoFile(source, `${scene.id}: Quelle`);
-  const extension = path.extname(sourceFile).toLowerCase();
   const safeId = safeName(scene.asset.id || `asset-${index + 1}`);
-  const targetName = `${String(index + 1).padStart(3, '0')}-${safeId}${extension}`;
-  fs.copyFileSync(sourceFile, path.join(publicAssets, targetName));
-  scene.asset.source = `assets/${targetName}`;
+  if (!/^https?:\/\//i.test(source)) {
+    const sourceFile = safeRepoFile(source, `${scene.id}: Quelle`);
+    const extension = path.extname(sourceFile).toLowerCase();
+    const targetName = `${String(index + 1).padStart(3, '0')}-${safeId}${extension}`;
+    fs.copyFileSync(sourceFile, path.join(publicAssets, targetName));
+    scene.asset.source = `assets/${targetName}`;
+  }
+
+  const preview = scene.asset?.preview;
+  if (preview && !/^https?:\/\//i.test(preview)) {
+    const previewFile = safeRepoFile(preview, `${scene.id}: Preview`);
+    const extension = path.extname(previewFile).toLowerCase() || '.jpg';
+    const targetName = `${String(index + 1).padStart(3, '0')}-${safeId}-preview${extension}`;
+    fs.copyFileSync(previewFile, path.join(publicAssets, targetName));
+    scene.asset.preview = `assets/${targetName}`;
+  }
 }
 
 if (prepared.voiceover) {
@@ -76,6 +85,8 @@ function validateManifest(value) {
     if (!Number.isInteger(scene.fromFrame) || scene.fromFrame < 0) fail(`${scene.id}: fromFrame ungültig.`);
     if (!Number.isInteger(scene.durationInFrames) || scene.durationInFrames < 1) fail(`${scene.id}: durationInFrames ungültig.`);
     if (!scene.asset?.id || !scene.asset?.type || !scene.asset?.source) fail(`${scene.id}: Asset-Daten unvollständig.`);
+    if (scene.presentation && !['auto','vertical-blur','contain','article','document','map','freeze-frame','headline'].includes(scene.presentation)) fail(`${scene.id}: presentation ungültig.`);
+    if (scene.transition && !['cut','fade'].includes(scene.transition)) fail(`${scene.id}: transition ungültig.`);
   }
   if (project.workflowVersion === 2) {
     if (!value.voiceover?.source) fail('Workflow v2 verlangt eine Voiceover-Quelle im Manifest.');
@@ -116,5 +127,5 @@ function readJson(file) { try { return JSON.parse(fs.readFileSync(file, 'utf8'))
 function safeName(value) { return String(value).toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80) || 'asset'; }
 function fail(message) { console.error(message); process.exit(1); }
 function printHelp() {
-  console.log(`Visual Asset Hub Remotion Prepare\n\nIm renderer/-Ordner ausführen:\n  npm run prepare:project -- --project ../projects/erstes-video/render-manifest.json\n\nDer Befehl kopiert nur geprüfte lokale Assets und – bei Workflow v2 – ausschließlich die vom Nutzer gelieferte Voiceover-Datei nach renderer/public/.`);
+  console.log(`Visual Asset Hub Remotion Prepare\n\nIm renderer/-Ordner ausführen:\n  npm run prepare:project -- --project ../projects/erstes-video/render-manifest.json\n\nDer Befehl kopiert geprüfte lokale Assets, vorhandene Preview-/Freeze-Frames und – bei Workflow v2 – ausschließlich die vom Nutzer gelieferte Voiceover-Datei nach renderer/public/.`);
 }
