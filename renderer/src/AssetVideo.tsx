@@ -18,7 +18,7 @@ export type RenderScene = {
   trimStartSeconds?: number;
   fit?: 'cover' | 'contain';
   transition?: 'cut' | 'fade';
-  presentation?: 'auto' | 'vertical-blur' | 'contain';
+  presentation?: 'auto' | 'vertical-blur' | 'contain' | 'article' | 'document';
   asset: {
     id: string;
     type: string;
@@ -88,6 +88,34 @@ const DocumentaryImage: React.FC<{scene: RenderScene; fps: number}> = ({scene, f
   );
 };
 
+const ArticleScreenshot: React.FC<{scene: RenderScene; fps: number}> = ({scene, fps}) => {
+  const frame = useCurrentFrame();
+  const duration = scene.durationInFrames;
+  const opacity = sceneOpacity(frame, duration, fps, scene.transition);
+  const progress = interpolate(frame, [0, Math.max(1, duration - 1)], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+  const scale = 1.02 + progress * 0.045;
+  const y = interpolate(progress, [0, 1], [1.5, -3.5]);
+  return (
+    <AbsoluteFill style={{backgroundColor: '#101010', overflow: 'hidden', opacity}}>
+      <CanvasImage
+        src={sourceFor(scene.asset.source)}
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          objectPosition: '50% 0%',
+          transform: `translateY(${y}%) scale(${scale})`,
+          filter: 'contrast(1.02) saturate(0.95)',
+        }}
+      />
+      <AbsoluteFill style={{boxShadow: 'inset 0 0 110px rgba(0,0,0,0.32)'}} />
+    </AbsoluteFill>
+  );
+};
+
 const StandardVideo: React.FC<{scene: RenderScene; fps: number}> = ({scene, fps}) => {
   const frame = useCurrentFrame();
   const opacity = sceneOpacity(frame, scene.durationInFrames, fps, scene.transition);
@@ -147,7 +175,10 @@ const VerticalBlurVideo: React.FC<{scene: RenderScene; fps: number}> = ({scene, 
 
 const SceneMedia: React.FC<{scene: RenderScene; fps: number}> = ({scene, fps}) => {
   const isVideo = ['video', 'animation', 'screen-recording', 'overlay'].includes(scene.asset.type);
-  if (!isVideo) return <DocumentaryImage scene={scene} fps={fps} />;
+  if (!isVideo) {
+    if (scene.presentation === 'article' || scene.presentation === 'document') return <ArticleScreenshot scene={scene} fps={fps} />;
+    return <DocumentaryImage scene={scene} fps={fps} />;
+  }
   const vertical = scene.presentation === 'vertical-blur' || (scene.presentation !== 'contain' && scene.asset.orientation === 'vertical');
   return vertical ? <VerticalBlurVideo scene={scene} fps={fps} /> : <StandardVideo scene={scene} fps={fps} />;
 };
