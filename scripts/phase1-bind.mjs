@@ -30,16 +30,18 @@ else if (command === 'show') process.stdout.write(`${JSON.stringify(bindings, nu
 else fail(`Unbekannter Befehl: ${command}`);
 
 function autoBind() {
+  if (!materialization) fail('materialization.json fehlt. Erst phase1:materialize ausführen.');
+  if (!qc) fail('visual-qc.json fehlt. Erst visual:qc ausführen.');
   let added = 0;
   for (const shot of shotPlan.shots || []) {
     if (bindingFor(shot.id)?.assetId) continue;
-    const beat = materialization?.beats?.find((item) => item.id === shot.id);
+    const beat = materialization.beats?.find((item) => item.id === shot.id);
     if (!beat?.selectedCandidateId) continue;
     const candidate = beat.candidates?.find((item) => item.candidateId === beat.selectedCandidateId);
     if (!candidate) continue;
-    const qcBeat = qc?.beats?.find((item) => item.id === shot.id);
+    const qcBeat = qc.beats?.find((item) => item.id === shot.id);
     const qcCandidate = qcBeat?.candidates?.find((item) => item.candidateId === candidate.candidateId);
-    if (qcCandidate?.status === 'blocked') continue;
+    if (!qcCandidate || qcCandidate.status === 'blocked' || Number(qcCandidate.score || 0) < Number(qc.policy?.minimumScore || 70)) continue;
     const asset = findCatalogAssetForCandidate(candidate);
     if (!asset || !assetReady(asset)) continue;
     upsert({
@@ -47,10 +49,12 @@ function autoBind() {
       assetId: asset.id,
       candidateId: candidate.candidateId,
       sourceUrl: candidate.sourceUrl || asset.rights?.sourceUrl || null,
-      qcScore: qcCandidate?.score ?? null,
+      qcScore: qcCandidate.score,
+      qcStatus: qcCandidate.status,
       status: 'bound-approved-asset',
       boundAt: new Date().toISOString(),
-      bindingMode: 'auto-source-match'
+      bindingMode: 'auto-source-match',
+      manualReviewed: false
     });
     added++;
   }
@@ -79,12 +83,15 @@ function setBinding() {
     candidateId: candidate?.candidateId || null,
     sourceUrl,
     qcScore: qcCandidate?.score ?? null,
+    qcStatus: qcCandidate?.status ?? null,
     status: 'bound-approved-asset',
     boundAt: new Date().toISOString(),
-    bindingMode: 'explicit'
+    bindingMode: 'explicit',
+    manualReviewed: true,
+    forcedAgainstQc: qcCandidate?.status === 'blocked' && args.force === 'true'
   });
   save();
-  console.log(`${beatId} → ${assetId} gebunden.`);
+  console.log(`${beatId} → ${assetId} gebunden (explizite redaktionelle Freigabe).`);
 }
 
 function checkBindings() {
@@ -98,10 +105,12 @@ function checkBindings() {
     if (asset.status !== 'approved') errors.push(`${shot.id}: Asset ${asset.id} ist ${asset.status}, nicht approved.`);
     if (!asset.rights?.usageScopes?.includes('youtube')) errors.push(`${shot.id}: Asset ${asset.id} ist nicht für youtube freigegeben.`);
     if (['unknown', 'restricted'].includes(asset.rights?.licenseStatus)) errors.push(`${shot.id}: Asset ${asset.id} hat ${asset.rights.licenseStatus}-Rechte.`);
-    const qcBeat = qc?.beats?.find((item) => item.id === shot.id);
-    const matchingQc = qcBeat?.candidates?.find((item) => item.file && asset.storage?.path && normalizedPath(asset.storage.path) === normalizedPath(item.file));
-    if (matchingQc?.status === 'blocked') errors.push(`${shot.id}: Visual QC blockiert das gebundene Medium.`);
-    if (!matchingQc && qcBeat?.candidates?.length) warnings.push(`${shot.id}: gebundenes Asset konnte keinem QC-Download eindeutig zugeordnet werden.`);
+    if (binding.bindingMode === 'auto-source-match') {
+      if (!Number.isFinite(binding.qcScore) || binding.qcScore < Number(qc?.policy?.minimumScore || 70)) errors.push(`${shot.id}: Auto-Binding hat keinen ausreichenden QC-Score.`);
+      if (binding.qcStatus === 'blocked') errors.push(`${shot.id}: Auto-Binding wurde von Visual-QC blockiert.`);
+    }
+    if (binding.bindingMode === 'explicit' && binding.manualReviewed !== true) errors.push(`${shot.id}: explizites Binding ist nicht als redaktionell geprüft markiert.`);
+    if (binding.forcedAgainstQc) warnings.push(`${shot.id}: QC-Block wurde bewusst überschrieben.`);
   }
   if (warnings.length) warnings.forEach((item) => console.warn(`WARN ${item}`));
   if (errors.length) { errors.forEach((item) => console.error(`- ${item}`)); fail(`Phase-1-Binding NICHT fertig (${errors.length} Fehler).`); }
@@ -131,11 +140,10 @@ function upsert(value) {
 function bindingFor(beatId) { return bindings.beats.find((item) => item.beatId === beatId); }
 function save() { bindings.updatedAt = new Date().toISOString(); fs.writeFileSync(bindingFile, `${JSON.stringify(bindings, null, 2)}\n`); }
 function canonical(value) { try { const url = new URL(value); url.hash = ''; for (const key of [...url.searchParams.keys()]) if (/^(utm_|fbclid|gclid)/i.test(key)) url.searchParams.delete(key); return url.toString().replace(/\/$/, ''); } catch { return null; } }
-function normalizedPath(value) { return String(value || '').replace(/\\/g, '/').replace(/^\.\//, ''); }
 function readOptional(file) { return fs.existsSync(file) ? readJson(file) : null; }
 function readJson(file) { try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch (error) { fail(`JSON ungültig: ${path.relative(root, file)} – ${error.message}`); } }
 function safeName(value) { return String(value || '').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80); }
 function slug(value) { return safeName(value); }
 function parseArgs(values) { const result = {}; for (let i = 0; i < values.length; i++) { const token = values[i]; if (!token.startsWith('--')) fail(`Unbekanntes Argument: ${token}`); const key = token.slice(2).replace(/-([a-z])/g, (_, c) => c.toUpperCase()); if (key === 'help') { result.help = true; continue; } const next = values[i + 1]; if (!next || next.startsWith('--')) fail(`Wert für ${token} fehlt.`); result[key] = next; i++; } return result; }
 function fail(message) { console.error(message); process.exit(1); }
-function help() { console.log(`Phase-1 Asset Binding\n\nAutomatisch bereits importierte/approved Assets per Source-URL binden:\n  npm run phase1:bind -- auto --project <id>\n\nExplizit binden:\n  npm run phase1:bind -- set --project <id> --beat b03 --asset VAH-XXXXXXXX\n\nGate prüfen:\n  npm run phase1:bind -- check --project <id>\n\nNur approved Assets mit YouTube-Scope und geklärten Rechten können gebunden werden.`); }
+function help() { console.log(`Phase-1 Asset Binding\n\nAutomatisch nur nach bestandenem Visual-QC:\n  npm run phase1:bind -- auto --project <id>\n\nExplizit nach bewusster redaktioneller Prüfung:\n  npm run phase1:bind -- set --project <id> --beat b03 --asset VAH-XXXXXXXX\n\nGate prüfen:\n  npm run phase1:bind -- check --project <id>\n\nNur approved Assets mit YouTube-Scope und geklärten Rechten können gebunden werden. Auto-Binding verlangt zusätzlich einen ausreichenden Visual-QC-Score.`); }
