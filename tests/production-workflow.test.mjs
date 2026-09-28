@@ -25,6 +25,7 @@ test('production workflow JavaScript parses successfully', () => {
     'scripts/source-search.mjs',
     'scripts/source-grab.mjs',
     'scripts/documentary-research.mjs',
+    'scripts/entity-expand.mjs',
     'scripts/reference-video.mjs',
     'scripts/reference-style.mjs',
     'scripts/visual-match.mjs',
@@ -33,6 +34,7 @@ test('production workflow JavaScript parses successfully', () => {
     'scripts/youtube-workflow.mjs',
     'scripts/align-voiceover.mjs',
     'scripts/lib/source-utils.mjs',
+    'scripts/lib/wikidata.mjs',
     'scripts/lib/providers/index.mjs',
     'scripts/lib/providers/pixabay.mjs',
     'scripts/lib/providers/openverse.mjs',
@@ -41,7 +43,8 @@ test('production workflow JavaScript parses successfully', () => {
     'scripts/lib/providers/nasa.mjs',
     'scripts/lib/providers/library-of-congress.mjs',
     'scripts/serve.mjs',
-    'web/app.js'
+    'web/app.js',
+    'web/archive-first.js'
   ]) {
     const result = check(file);
     assert.equal(result.status, 0, `${file}\n${result.stderr || result.stdout}`);
@@ -58,6 +61,7 @@ test('package exposes production commands', () => {
   assert.equal(pkg.scripts['source:search'], 'node scripts/source-search.mjs');
   assert.equal(pkg.scripts['source:grab'], 'node scripts/source-grab.mjs');
   assert.equal(pkg.scripts['documentary:research'], 'node scripts/documentary-research.mjs');
+  assert.equal(pkg.scripts['entity:expand'], 'node scripts/entity-expand.mjs');
   assert.equal(pkg.scripts['reference:inspect'], 'node scripts/reference-video.mjs');
   assert.equal(pkg.scripts['reference:style'], 'node scripts/reference-style.mjs');
   assert.equal(pkg.scripts['visual:match'], 'node scripts/visual-match.mjs');
@@ -72,6 +76,7 @@ test('documentary research is archive-first and stock is opt-in', () => {
   assert.match(source, /library-of-congress/);
   assert.match(source, /wikimedia/);
   assert.match(source, /internet-archive/);
+  assert.match(source, /expandEntityQuery/);
   assert.match(source, /includeStock/);
   assert.match(source, /stock-fallback/);
   assert.match(source, /requiresHumanEventMatch/);
@@ -105,6 +110,14 @@ test('visual matcher and clip finder keep semantic ranking separate from fact pr
   assert.match(finder, /proofOfEventIdentity: false/);
 });
 
+test('Wikidata expansion supplies aliases without becoming a fact source', () => {
+  const source = fs.readFileSync(path.join(root, 'scripts/lib/wikidata.mjs'), 'utf8');
+  assert.match(source, /wbsearchentities/);
+  assert.match(source, /wbgetentities/);
+  assert.match(source, /aliases/);
+  assert.match(source, /variants/);
+});
+
 test('provider layer exposes keyless official archives', () => {
   const providers = fs.readFileSync(path.join(root, 'scripts/lib/providers/index.mjs'), 'utf8');
   assert.match(providers, /nasa: \{ types: \['video', 'image'\], requiresKey: null, tier: 'official-archive'/);
@@ -134,11 +147,14 @@ test('inbox scan carries provider metadata into review', () => {
 test('browser exposes source search, inbox review and library surfaces', () => {
   const html = fs.readFileSync(path.join(root, 'web/index.html'), 'utf8');
   const app = fs.readFileSync(path.join(root, 'web/app.js'), 'utf8');
+  const archiveFirst = fs.readFileSync(path.join(root, 'web/archive-first.js'), 'utf8');
   assert.match(html, /id="source-form"/);
-  assert.match(html, /id="review-form"/);
+  assert.match(html, /archive-first\.js/);
+  assert.match(html, /NASA · Library of Congress/);
   assert.match(app, /searchSources/);
   assert.match(app, /grabSourceAsset/);
   assert.match(app, /importReviewedAsset/);
+  assert.match(archiveFirst, /Stock-Fallback/);
 });
 
 test('video project export enforces approved assets and usage scope', () => {
