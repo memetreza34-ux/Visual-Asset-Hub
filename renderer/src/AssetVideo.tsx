@@ -8,6 +8,7 @@ import {
   staticFile,
   useCurrentFrame,
 } from 'remotion';
+import {EditorialOverlays, type RenderOverlay} from './EditorialOverlays';
 
 export type RenderScene = {
   id: string;
@@ -18,12 +19,14 @@ export type RenderScene = {
   trimStartSeconds?: number;
   fit?: 'cover' | 'contain';
   transition?: 'cut' | 'fade';
-  presentation?: 'auto' | 'vertical-blur' | 'contain' | 'article' | 'document';
+  presentation?: 'auto' | 'vertical-blur' | 'contain' | 'article' | 'document' | 'map' | 'freeze-frame' | 'headline';
+  overlays?: RenderOverlay[];
   asset: {
     id: string;
     type: string;
     title: string;
     source: string;
+    preview?: string | null;
     orientation?: string;
   };
 };
@@ -116,6 +119,47 @@ const ArticleScreenshot: React.FC<{scene: RenderScene; fps: number}> = ({scene, 
   );
 };
 
+const MapImage: React.FC<{scene: RenderScene; fps: number}> = ({scene, fps}) => {
+  const frame = useCurrentFrame();
+  const duration = scene.durationInFrames;
+  const opacity = sceneOpacity(frame, duration, fps, scene.transition);
+  const progress = interpolate(frame, [0, Math.max(1, duration - 1)], [0, 1], {
+    extrapolateLeft: 'clamp', extrapolateRight: 'clamp'
+  });
+  const scale = 1.02 + progress * 0.055;
+  return (
+    <AbsoluteFill style={{backgroundColor: '#0b0e11', overflow: 'hidden', opacity}}>
+      <CanvasImage
+        src={sourceFor(scene.asset.source)}
+        style={{
+          width: '100%', height: '100%', objectFit: 'cover',
+          transform: `scale(${scale})`, filter: 'saturate(0.9) contrast(1.04) brightness(0.9)'
+        }}
+      />
+      <AbsoluteFill style={{background: 'radial-gradient(circle at 50% 48%, rgba(0,0,0,0) 38%, rgba(0,0,0,0.26) 100%)'}} />
+    </AbsoluteFill>
+  );
+};
+
+const FreezeFrame: React.FC<{scene: RenderScene; fps: number}> = ({scene, fps}) => {
+  const frame = useCurrentFrame();
+  const opacity = sceneOpacity(frame, scene.durationInFrames, fps, scene.transition);
+  const progress = interpolate(frame, [0, Math.max(1, scene.durationInFrames - 1)], [0, 1], {
+    extrapolateLeft: 'clamp', extrapolateRight: 'clamp'
+  });
+  const freezeSource = scene.asset.type === 'image' ? scene.asset.source : scene.asset.preview;
+  if (!freezeSource) return <StandardVideo scene={scene} fps={fps} />;
+  return (
+    <AbsoluteFill style={{backgroundColor: '#080808', overflow: 'hidden', opacity}}>
+      <CanvasImage
+        src={sourceFor(freezeSource)}
+        style={{width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${1.015 + progress * 0.045})`}}
+      />
+      <AbsoluteFill style={{boxShadow: 'inset 0 0 90px rgba(0,0,0,0.24)'}} />
+    </AbsoluteFill>
+  );
+};
+
 const StandardVideo: React.FC<{scene: RenderScene; fps: number}> = ({scene, fps}) => {
   const frame = useCurrentFrame();
   const opacity = sceneOpacity(frame, scene.durationInFrames, fps, scene.transition);
@@ -146,14 +190,8 @@ const VerticalBlurVideo: React.FC<{scene: RenderScene; fps: number}> = ({scene, 
         muted
         trimBefore={trimBefore}
         style={{
-          position: 'absolute',
-          width: '112%',
-          height: '112%',
-          left: '-6%',
-          top: '-6%',
-          objectFit: 'cover',
-          filter: 'blur(30px) saturate(0.9) brightness(0.62)',
-          transform: 'scale(1.08)',
+          position: 'absolute', width: '112%', height: '112%', left: '-6%', top: '-6%', objectFit: 'cover',
+          filter: 'blur(30px) saturate(0.9) brightness(0.62)', transform: 'scale(1.08)',
         }}
       />
       <AbsoluteFill style={{backgroundColor: 'rgba(0,0,0,0.12)'}} />
@@ -162,10 +200,7 @@ const VerticalBlurVideo: React.FC<{scene: RenderScene; fps: number}> = ({scene, 
         muted
         trimBefore={trimBefore}
         style={{
-          position: 'absolute',
-          width: '100%',
-          height: '100%',
-          objectFit: 'contain',
+          position: 'absolute', width: '100%', height: '100%', objectFit: 'contain',
           filter: 'drop-shadow(0 0 26px rgba(0,0,0,0.45))',
         }}
       />
@@ -175,12 +210,25 @@ const VerticalBlurVideo: React.FC<{scene: RenderScene; fps: number}> = ({scene, 
 
 const SceneMedia: React.FC<{scene: RenderScene; fps: number}> = ({scene, fps}) => {
   const isVideo = ['video', 'animation', 'screen-recording', 'overlay'].includes(scene.asset.type);
+  if (scene.presentation === 'freeze-frame') return <FreezeFrame scene={scene} fps={fps} />;
   if (!isVideo) {
     if (scene.presentation === 'article' || scene.presentation === 'document') return <ArticleScreenshot scene={scene} fps={fps} />;
+    if (scene.presentation === 'map') return <MapImage scene={scene} fps={fps} />;
     return <DocumentaryImage scene={scene} fps={fps} />;
   }
   const vertical = scene.presentation === 'vertical-blur' || (scene.presentation !== 'contain' && scene.asset.orientation === 'vertical');
   return vertical ? <VerticalBlurVideo scene={scene} fps={fps} /> : <StandardVideo scene={scene} fps={fps} />;
+};
+
+const SceneLayer: React.FC<{scene: RenderScene; fps: number}> = ({scene, fps}) => {
+  const headlineMode = scene.presentation === 'headline';
+  return (
+    <AbsoluteFill>
+      <SceneMedia scene={scene} fps={fps} />
+      {headlineMode ? <AbsoluteFill style={{background: 'linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.52))'}} /> : null}
+      <EditorialOverlays overlays={scene.overlays} />
+    </AbsoluteFill>
+  );
 };
 
 export const AssetVideo: React.FC<{manifest: RenderManifest}> = ({manifest}) => {
@@ -194,21 +242,11 @@ export const AssetVideo: React.FC<{manifest: RenderManifest}> = ({manifest}) => 
   return (
     <AbsoluteFill style={{backgroundColor: '#000'}}>
       {manifest.voiceover?.source ? (
-        <Audio
-          src={sourceFor(manifest.voiceover.source)}
-          durationInFrames={manifest.project.totalFrames}
-        />
+        <Audio src={sourceFor(manifest.voiceover.source)} durationInFrames={manifest.project.totalFrames} />
       ) : null}
       {manifest.scenes.map((scene) => (
-        <Sequence
-          key={scene.id}
-          from={scene.fromFrame}
-          durationInFrames={scene.durationInFrames}
-          name={scene.title}
-        >
-          <AbsoluteFill>
-            <SceneMedia scene={scene} fps={manifest.project.fps} />
-          </AbsoluteFill>
+        <Sequence key={scene.id} from={scene.fromFrame} durationInFrames={scene.durationInFrames} name={scene.title}>
+          <SceneLayer scene={scene} fps={manifest.project.fps} />
         </Sequence>
       ))}
     </AbsoluteFill>
