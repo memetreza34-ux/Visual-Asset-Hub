@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "projectId": "5-orte-wie-andere-planeten-2min",
+  "researchedAt": "2026-09-28",
+  "policy": {
+    "factsFromPrimaryOrHighAuthoritySources": true,
+    "visualsFromOpenOrReviewableSources": true,
+    "noReferenceVideoReuse": true
+  },
+  "places": [
+    {
+      "id": "socotra-yemen",
+      "facts": [
+        "UNESCO reports that 37% of Socotra's terrestrial plant species are endemic.",
+        "The Dragon Blood tree is one of the island's emblematic endemic plants and has an umbrella-like crown adapted to the dry climate."
+      ],
+      "factSources": [
+        "https://www.unesco.org/en/articles/unwelcome-guests-socotra-confronted-invasive-aliens"
+      ],
+      "visualSources": [
+        "https://commons.wikimedia.org/wiki/File:Dragonblood_tree_in_Socotra_1.jpg",
+        "https://commons.wikimedia.org/wiki/File:Dragon%E2%80%99s_blood_trees,_Diksam_plateau,_Socotra_Island.jpg",
+        "https://commons.wikimedia.org/wiki/File:Dragon%27s_Blood_Trees,_Socotra_Island.jpg"
+      ]
+    },
+    {
+      "id": "salar-de-uyuni-bolivia",
+      "facts": [
+        "NASA Earth Observatory identifies Salar de Uyuni as the largest salt flat in the world.",
+        "During wet periods, a thin layer of water can turn the flat surface into a giant mirror-like landscape."
+      ],
+      "factSources": [
+        "https://science.nasa.gov/earth/earth-observatory/salar-de-uyuni-bolivia-6096/"
+      ],
+      "visualSources": [
+        "https://commons.wikimedia.org/wiki/File:Salar_deUyuni.jpg",
+        "https://commons.wikimedia.org/wiki/File:Uyuni_Reflection.jpg",
+        "https://commons.wikimedia.org/wiki/Category:Salar_de_Uyuni_reflections"
+      ]
+    },
+    {
+      "id": "zhangye-colorful-hills-china",
+      "facts": [
+        "UNESCO's tentative-list description dates the colorful strata to roughly 114 to 106 million years ago.",
+        "The red, gray and yellow bands are linked to different iron-bearing minerals in sandstone, siltstone and mudstone."
+      ],
+      "factSources": [
+        "https://whc.unesco.org/en/tentativelists/6841"
+      ],
+      "visualSources": [
+        "https://commons.wikimedia.org/wiki/File:Zhangye_Danxia.JPG",
+        "https://commons.wikimedia.org/wiki/File:Zhangye_Danxia_National_Geopark.jpg"
+      ]
+    },
+    {
+      "id": "mount-bromo-indonesia",
+      "facts": [
+        "Smithsonian's Global Volcanism Program lists Bromo at 2,329 m elevation inside the 16-km-wide Tengger caldera.",
+        "Bromo is the youngest and only currently active cone in the caldera and commonly emits gas, steam and occasional ash."
+      ],
+      "factSources": [
+        "https://volcano.si.edu/volcano.cfm?vn=263310"
+      ],
+      "visualSources": [
+        "https://commons.wikimedia.org/wiki/File:Mount_Bromo_is_one_of_active_volcanoes_in_Indonesia.jpg",
+        "https://commons.wikimedia.org/wiki/File:Mount_Bromo,_Tengger,_and_Semeru_in_East_Java,_Indonesia.jpg",
+        "https://commons.wikimedia.org/wiki/File:Mount_Bromo.jpg"
+      ]
+    },
+    {
+      "id": "lencois-maranhenses-brazil",
+      "facts": [
+        "UNESCO describes Lençóis Maranhenses as a vast dune field in a semi-humid climate rather than a true desert.",
+        "Rainwater creates temporary inter-dunal lagoons during the rainy season.",
+        "The UNESCO property covers 156,562 hectares and the dune field covers about 90,000 hectares."
+      ],
+      "factSources": [
+        "https://whc.unesco.org/en/list/1611"
+      ],
+      "visualSources": [
+        "https://commons.wikimedia.org/wiki/File:Lagoon_in_sanddunes,_Len%C3%A7%C3%B3is_Maranhenses.jpg",
+        "https://commons.wikimedia.org/wiki/File:Lagoon_in_high_sanddunes,_Len%C3%A7%C3%B3is_Maranhenses.jpg",
+        "https://commons.wikimedia.org/wiki/File:Lagoon_in_curved_sanddunes,_Len%C3%A7%C3%B3is_Maranhenses.jpg",
+        "https://commons.wikimedia.org/wiki/File:The_dunes_and_lagoons_of_Len%C3%A7%C3%B3is_Maranhenses_National_Park,_Brazil_(Copernicus_2024-12-29).webp"
+      ]
+    }
+  ]
+}
