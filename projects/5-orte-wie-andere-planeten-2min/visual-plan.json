@@ -1,0 +1,187 @@
+{
+  "version": 1,
+  "projectId": "5-orte-wie-andere-planeten-2min",
+  "style": {
+    "normalVisualSeconds": "3-6",
+    "insertSeconds": "1.5-3",
+    "realMediaFirst": true,
+    "stockFallbackOnly": true,
+    "hardCutsPreferred": true,
+    "noDashboardCards": true,
+    "textPolicy": "short location labels and single facts only"
+  },
+  "beats": [
+    {
+      "id": "b01",
+      "narrationAnchor": "Diese fünf Orte sehen so fremd aus",
+      "visualType": "fast-montage",
+      "visual": "Rapid 0.8-1.0 second flashes of Socotra trees, Uyuni reflection, Zhangye bands, Bromo caldera and Lençóis lagoons.",
+      "sources": [
+        "https://commons.wikimedia.org/wiki/File:Dragonblood_tree_in_Socotra_1.jpg",
+        "https://commons.wikimedia.org/wiki/File:Uyuni_Reflection.jpg",
+        "https://commons.wikimedia.org/wiki/File:Zhangye_Danxia.JPG",
+        "https://commons.wikimedia.org/wiki/File:Mount_Bromo,_Tengger,_and_Semeru_in_East_Java,_Indonesia.jpg",
+        "https://commons.wikimedia.org/wiki/File:Lagoon_in_sanddunes,_Len%C3%A7%C3%B3is_Maranhenses.jpg"
+      ],
+      "motion": "very fast hard cuts"
+    },
+    {
+      "id": "b02",
+      "case": "socotra-yemen",
+      "narrationAnchor": "Nummer fünf: Socotra im Jemen",
+      "visualType": "archive-image",
+      "visual": "Wide Socotra landscape with a Dragon Blood tree and mountains.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dragonblood_tree_in_Socotra_1.jpg",
+      "motion": "slow push-in; small location label"
+    },
+    {
+      "id": "b03",
+      "case": "socotra-yemen",
+      "narrationAnchor": "37 Prozent ihrer Landpflanzenarten endemisch",
+      "visualType": "archive-image-plus-number",
+      "visual": "Dense field of Dragon Blood trees; short '37 % endemisch' overlay.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dragon%27s_Blood_Trees,_Socotra_Island.jpg",
+      "motion": "gentle pan"
+    },
+    {
+      "id": "b04",
+      "case": "socotra-yemen",
+      "narrationAnchor": "Drachenblutbaum",
+      "visualType": "archive-image",
+      "visual": "Close prominent Dragon Blood tree with umbrella crown.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dragon%E2%80%99s_blood_trees,_Diksam_plateau,_Socotra_Island.jpg",
+      "motion": "detail push-in on crown"
+    },
+    {
+      "id": "b05",
+      "case": "salar-de-uyuni-bolivia",
+      "narrationAnchor": "Nummer vier: Salar de Uyuni in Bolivien",
+      "visualType": "archive-image",
+      "visual": "Huge white Salar de Uyuni landscape.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Salar_deUyuni.jpg",
+      "motion": "wide slow pan"
+    },
+    {
+      "id": "b06",
+      "case": "salar-de-uyuni-bolivia",
+      "narrationAnchor": "größte Salzfläche der Erde",
+      "visualType": "real-media-plus-label",
+      "visual": "Flat white horizon; tiny label 'größte Salzfläche der Erde'.",
+      "sourceUrl": "https://science.nasa.gov/earth/earth-observatory/salar-de-uyuni-bolivia-6096/",
+      "motion": "very subtle push"
+    },
+    {
+      "id": "b07",
+      "case": "salar-de-uyuni-bolivia",
+      "narrationAnchor": "Himmel und Boden spiegeln sich ineinander",
+      "visualType": "archive-image",
+      "visual": "Mirror effect on Salar de Uyuni during wet season.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Uyuni_Reflection.jpg",
+      "motion": "slow zoom toward horizon"
+    },
+    {
+      "id": "b08",
+      "case": "zhangye-colorful-hills-china",
+      "narrationAnchor": "Nummer drei: die farbigen Hügel von Zhangye",
+      "visualType": "archive-image",
+      "visual": "Full-frame Zhangye colorful bands.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Zhangye_Danxia.JPG",
+      "motion": "horizontal pan across bands"
+    },
+    {
+      "id": "b09",
+      "case": "zhangye-colorful-hills-china",
+      "narrationAnchor": "vor mehr als hundert Millionen Jahren",
+      "visualType": "archive-image-plus-number",
+      "visual": "Second Zhangye view; small '106–114 Mio. Jahre' fact label.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Zhangye_Danxia_National_Geopark.jpg",
+      "motion": "slow push"
+    },
+    {
+      "id": "b10",
+      "case": "zhangye-colorful-hills-china",
+      "narrationAnchor": "eisenhaltige Mineralien färben",
+      "visualType": "detail-crop",
+      "visual": "Close crop of red, yellow and gray strata, with three tiny color callouts.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Zhangye_Danxia.JPG",
+      "motion": "three quick detail cuts"
+    },
+    {
+      "id": "b11",
+      "case": "mount-bromo-indonesia",
+      "narrationAnchor": "Nummer zwei: Mount Bromo in Indonesien",
+      "visualType": "archive-image",
+      "visual": "Wide Bromo-Tengger-Semeru panorama.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mount_Bromo,_Tengger,_and_Semeru_in_East_Java,_Indonesia.jpg",
+      "motion": "slow push through haze"
+    },
+    {
+      "id": "b12",
+      "case": "mount-bromo-indonesia",
+      "narrationAnchor": "mitten in der gewaltigen Tengger-Caldera",
+      "visualType": "archive-image-plus-map",
+      "visual": "Bromo wide shot, then short generated map pin on East Java.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mount_Bromo.jpg",
+      "motion": "cut from landscape to 2s map and back"
+    },
+    {
+      "id": "b13",
+      "case": "mount-bromo-indonesia",
+      "narrationAnchor": "Vulkan ist weiterhin aktiv",
+      "visualType": "archive-image",
+      "visual": "Active Bromo crater/volcano scene with atmospheric plume.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mount_Bromo_is_one_of_active_volcanoes_in_Indonesia.jpg",
+      "motion": "tight crop and slow upward pan"
+    },
+    {
+      "id": "b14",
+      "case": "lencois-maranhenses-brazil",
+      "narrationAnchor": "Nummer eins: Lençóis Maranhenses in Brasilien",
+      "visualType": "archive-image",
+      "visual": "White dunes and turquoise lagoon full frame.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lagoon_in_sanddunes,_Len%C3%A7%C3%B3is_Maranhenses.jpg",
+      "motion": "slow cinematic push"
+    },
+    {
+      "id": "b15",
+      "case": "lencois-maranhenses-brazil",
+      "narrationAnchor": "wie eine riesige Wüste",
+      "visualType": "archive-image",
+      "visual": "Higher dune viewpoint that initially reads as desert.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lagoon_in_high_sanddunes,_Len%C3%A7%C3%B3is_Maranhenses.jpg",
+      "motion": "start tight on dune, reveal lagoon"
+    },
+    {
+      "id": "b16",
+      "case": "lencois-maranhenses-brazil",
+      "narrationAnchor": "tausende Wasserflächen bilden",
+      "visualType": "archive-image",
+      "visual": "Curved dunes with rain-fed lagoon.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lagoon_in_curved_sanddunes,_Len%C3%A7%C3%B3is_Maranhenses.jpg",
+      "motion": "pan following lagoon shape"
+    },
+    {
+      "id": "b17",
+      "case": "lencois-maranhenses-brazil",
+      "narrationAnchor": "Lagunen werden ausschließlich von Regenwasser gespeist",
+      "visualType": "satellite-image",
+      "visual": "Copernicus satellite view showing dune-and-lagoon pattern; tiny 'Regenwasser' callout.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:The_dunes_and_lagoons_of_Len%C3%A7%C3%B3is_Maranhenses_National_Park,_Brazil_(Copernicus_2024-12-29).webp",
+      "motion": "slow map-like push"
+    },
+    {
+      "id": "b18",
+      "narrationAnchor": "Welcher dieser Orte sieht für dich am wenigsten nach Erde aus?",
+      "visualType": "rapid-recap-montage",
+      "visual": "Five quick callbacks, then final five-place mosaic. No generic outro card.",
+      "sources": [
+        "https://commons.wikimedia.org/wiki/File:Dragonblood_tree_in_Socotra_1.jpg",
+        "https://commons.wikimedia.org/wiki/File:Uyuni_Reflection.jpg",
+        "https://commons.wikimedia.org/wiki/File:Zhangye_Danxia.JPG",
+        "https://commons.wikimedia.org/wiki/File:Mount_Bromo,_Tengger,_and_Semeru_in_East_Java,_Indonesia.jpg",
+        "https://commons.wikimedia.org/wiki/File:Lagoon_in_sanddunes,_Len%C3%A7%C3%B3is_Maranhenses.jpg"
+      ],
+      "motion": "1s hard cuts, final 2s hold"
+    }
+  ]
+}
