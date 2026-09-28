@@ -6,6 +6,7 @@ const root = process.cwd();
 const [command, ...rest] = process.argv.slice(2);
 const args = parseArgs(rest);
 const catalog = readJson(path.join(root, 'catalog/assets.json'));
+const PRESENTATIONS = ['auto', 'vertical-blur', 'contain', 'article', 'document', 'map', 'freeze-frame', 'headline'];
 
 if (!command || command === 'help' || args.help) {
   printHelp();
@@ -57,6 +58,10 @@ function addScene() {
   if (!asset) fail(`Asset nicht gefunden: ${assetId}`);
   const duration = number(args.duration || defaultDuration(asset), 0.2, 3600, 'duration');
   const sceneNumber = project.scenes.length + 1;
+  const presentation = args.presentation || 'auto';
+  const transition = args.transition || 'cut';
+  if (!PRESENTATIONS.includes(presentation)) fail(`--presentation muss ${PRESENTATIONS.join(', ')} sein.`);
+  if (!['cut', 'fade'].includes(transition)) fail('--transition muss cut oder fade sein.');
   const scene = {
     id: args.sceneId ? slug(args.sceneId) : `scene-${String(sceneNumber).padStart(2, '0')}`,
     title: String(args.sceneTitle || args.title || asset.title).trim(),
@@ -64,13 +69,16 @@ function addScene() {
     assetId,
     trimStartSeconds: number(args.trimStart || '0', 0, 3600, 'trim-start'),
     fit: args.fit || 'cover',
+    presentation,
+    transition,
+    overlays: buildOverlays(args),
     notes: args.notes || undefined
   };
   if (!['cover', 'contain'].includes(scene.fit)) fail('--fit muss cover oder contain sein.');
   project.scenes.push(compact(scene));
   project.updatedAt = new Date().toISOString();
   fs.writeFileSync(file, `${JSON.stringify(project, null, 2)}\n`);
-  console.log(`${scene.id}: ${assetId} zu ${id} hinzugefügt.`);
+  console.log(`${scene.id}: ${assetId} zu ${id} hinzugefügt · ${presentation}.`);
 }
 
 function exportProject() {
@@ -95,6 +103,8 @@ function exportProject() {
     const durationSeconds = number(scene.durationSeconds, 0.2, 3600, 'scene duration');
     const fromFrame = Math.round(cursor * project.fps);
     const durationInFrames = Math.max(1, Math.round(durationSeconds * project.fps));
+    const presentation = PRESENTATIONS.includes(scene.presentation) ? scene.presentation : 'auto';
+    const transition = ['cut', 'fade'].includes(scene.transition) ? scene.transition : 'cut';
     resolved.push({
       index: index + 1,
       id: scene.id,
@@ -104,6 +114,9 @@ function exportProject() {
       durationInFrames,
       trimStartSeconds: scene.trimStartSeconds || 0,
       fit: scene.fit || 'cover',
+      presentation,
+      transition,
+      overlays: normalizeOverlays(scene.overlays),
       notes: scene.notes,
       asset: {
         id: asset.id,
@@ -132,7 +145,7 @@ function exportProject() {
   const totalDurationSeconds = voiceoverDuration || round(cursor, 3);
 
   const manifest = {
-    manifestVersion: 2,
+    manifestVersion: 3,
     generatedAt: new Date().toISOString(),
     project: {
       id: project.id,
@@ -161,6 +174,31 @@ function exportProject() {
   console.log(`Render-Manifest: projects/${id}/render-manifest.json`);
   console.log(`${resolved.length} Szenen · ${manifest.project.totalDurationSeconds}s · ${manifest.project.totalFrames} Frames`);
   if (manifest.voiceover) console.log(`Master-Audio: ${manifest.voiceover.source} (${manifest.voiceover.durationSeconds}s)`);
+}
+
+function buildOverlays(values) {
+  const result = [];
+  if (values.label) result.push({ kind: 'label', text: values.label, position: 'top-left' });
+  if (values.headline) result.push({ kind: 'headline', text: values.headline, subtext: values.subheadline || undefined, position: 'center' });
+  if (values.numberText) result.push({ kind: 'number', text: values.numberText, subtext: values.numberSubtext || undefined, position: 'bottom-left' });
+  if (values.callout) result.push({
+    kind: 'callout', text: values.callout, position: 'point',
+    x: percent(values.calloutX, 50), y: percent(values.calloutY, 50)
+  });
+  if (values.sourceLabel) result.push({ kind: 'source', text: values.sourceLabel, position: 'bottom-right' });
+  return result;
+}
+
+function normalizeOverlays(value) {
+  if (!Array.isArray(value)) return [];
+  return value.map((item) => ({
+    kind: ['label', 'headline', 'number', 'callout', 'source'].includes(item?.kind) ? item.kind : 'label',
+    text: String(item?.text || '').trim().slice(0, 180),
+    subtext: item?.subtext ? String(item.subtext).trim().slice(0, 180) : undefined,
+    position: item?.position || undefined,
+    x: item?.x === undefined ? undefined : percent(item.x, 50),
+    y: item?.y === undefined ? undefined : percent(item.y, 50)
+  })).filter((item) => item.text);
 }
 
 function validateUserVoiceover(project) {
@@ -196,8 +234,9 @@ function slugRequired(value,label){if(!value)fail(`${label} ist erforderlich.`);
 function slug(value){const result=String(value).normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');if(!result)fail('Ungültige ID.');return result;}
 function integer(value,min,max,label){const n=Number(value);if(!Number.isInteger(n)||n<min||n>max)fail(`${label} muss zwischen ${min} und ${max} liegen.`);return n;}
 function number(value,min,max,label){const n=Number(value);if(!Number.isFinite(n)||n<min||n>max)fail(`${label} muss zwischen ${min} und ${max} liegen.`);return n;}
+function percent(value, fallback){const n=value===undefined||value===null||value===''?fallback:Number(value);return Number.isFinite(n)?Math.max(0,Math.min(100,n)):fallback;}
 function round(value,digits){const f=10**digits;return Math.round(value*f)/f;}
-function compact(value){return Object.fromEntries(Object.entries(value).filter(([,item])=>item!==undefined&&item!==''));}
+function compact(value){return Object.fromEntries(Object.entries(value).filter(([,item])=>item!==undefined&&item!==''&&!(Array.isArray(item)&&item.length===0)));}
 function uniqueAttribution(items){const seen=new Set();return items.filter((item)=>{const key=`${item.assetId}|${item.text}`;if(seen.has(key))return false;seen.add(key);return true;});}
 function fail(message){console.error(message);process.exit(1);}
-function printHelp(){console.log(`Visual Asset Hub – Video-Projekte\n\nErstellen:\n  npm run video:project -- create --name "Erstes Video" --format vertical --scope youtube\n\nAsset als Szene hinzufügen:\n  npm run video:project -- add --project erstes-video --asset VAH-XXXXXXXX --duration 6\n\nFür Renderer exportieren:\n  npm run video:project -- export --project erstes-video\n\nAnzeigen:\n  npm run video:project -- show --project erstes-video\n\nWorkflow-v2-Projekte verlangen eine vom Nutzer gelieferte Voiceover-Datei. Der Export blockiert Ersatzstimmen, nicht-approved Assets und fehlende Nutzungsrechte.`);}
+function printHelp(){console.log(`Visual Asset Hub – Video-Projekte\n\nErstellen:\n  npm run video:project -- create --name "Erstes Video" --format horizontal --scope youtube\n\nAsset als Szene hinzufügen:\n  npm run video:project -- add --project erstes-video --asset VAH-XXXXXXXX --duration 5 --presentation auto --transition cut\n\nEditorial-Optionen:\n  --presentation auto|vertical-blur|contain|article|document|map|freeze-frame|headline\n  --label "NOAA N-Prime · 2003"\n  --headline "4 FEHLER. MILLIONENSCHÄDEN."\n  --number-text "135 MIO. $" --number-subtext "Reparaturkosten"\n  --callout "24 Schrauben" --callout-x 63 --callout-y 44\n  --source-label "NASA"\n\nFür Renderer exportieren:\n  npm run video:project -- export --project erstes-video\n\nWorkflow-v2-Projekte verlangen die Nutzer-Voiceover-Datei. Der Export blockiert Ersatzstimmen, nicht-approved Assets und fehlende Nutzungsrechte.`);}
