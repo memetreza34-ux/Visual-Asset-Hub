@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "workflowVersion": 2,
+  "id": "5-orte-wie-andere-planeten-2min",
+  "title": "5 Orte auf der Erde, die aussehen wie ein anderer Planet",
+  "format": "horizontal",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "language": "de",
+  "genre": "faceless-listicle-documentary",
+  "targetDurationSeconds": 105,
+  "requireUserVoiceover": false,
+  "status": "phase1-research",
+  "referenceStyle": "fast real-media documentary/listicle inspired by the pacing of the supplied reference; original script, original case selection and no copied branding",
+  "editingRules": {
+    "normalVisualSeconds": "3-6",
+    "insertSeconds": "1.5-3",
+    "preferRealMedia": true,
+    "genericStockIsFallbackOnly": true,
+    "hardCutsPreferred": true,
+    "longDashboardScenes": false,
+    "textPolicy": "short labels/numbers only",
+    "referenceVideoReuse": false
+  },
+  "places": [
+    "socotra-yemen",
+    "salar-de-uyuni-bolivia",
+    "zhangye-colorful-hills-china",
+    "mount-bromo-indonesia",
+    "lencois-maranhenses-brazil"
+  ]
+}
