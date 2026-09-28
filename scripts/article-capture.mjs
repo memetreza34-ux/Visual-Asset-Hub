@@ -75,18 +75,54 @@ try {
       note: 'Vor Veröffentlichung Rechte, Zitatumfang und Kontext prüfen. Das Tool speichert eine Rechercheaufnahme, keine automatische Medienfreigabe.'
     }
   };
+
+  if (args.toInbox === 'true') {
+    const inboxDir = path.join(root, 'inbox');
+    fs.mkdirSync(inboxDir, { recursive: true });
+    const inboxName = uniqueName(inboxDir, `article-${id}.png`);
+    const inboxFile = path.join(inboxDir, inboxName);
+    fs.copyFileSync(screenshotPath, inboxFile);
+    const sourceDir = path.join(root, '.local-storage', 'inbox-source');
+    fs.mkdirSync(sourceDir, { recursive: true });
+    const sourceMetadata = {
+      provider: 'article-capture',
+      providerId: id,
+      searchQuery: null,
+      title: extracted.h1 || extracted.title || `Article capture ${url.hostname}`,
+      description: extracted.description || `Editorial screenshot captured from ${url.hostname}`,
+      tags: ['article', 'screenshot', 'editorial'],
+      sourceName: url.hostname,
+      sourceUrl: extracted.canonical || page.url(),
+      creator: extracted.author || null,
+      licenseStatus: 'unknown',
+      licenseCode: 'editorial-review-required',
+      attributionRequired: true,
+      attributionText: extracted.author ? `${extracted.author} · ${url.hostname}` : url.hostname,
+      suggestedScopes: ['internal-only'],
+      suggestedStatus: 'review',
+      rightsWarning: 'Ein Screenshot einer Webseite ist nicht automatisch frei nutzbar. Zitatrecht, Umfang, Kontext und Rechte vor YouTube-Veröffentlichung manuell prüfen.',
+      downloadedAt: new Date().toISOString(),
+      downloadedFile: `inbox/${inboxName}`
+    };
+    fs.writeFileSync(path.join(sourceDir, `${inboxName}.json`), `${JSON.stringify(sourceMetadata, null, 2)}\n`);
+    report.inboxFile = `inbox/${inboxName}`;
+    report.inboxStatus = 'review';
+  }
+
   fs.writeFileSync(metadataPath, `${JSON.stringify(report, null, 2)}\n`);
   console.log(`Artikel erfasst: ${report.title || url.hostname}`);
   console.log(`Screenshot: ${relative(screenshotPath)}`);
   console.log(`Text: ${relative(textPath)}`);
+  if (report.inboxFile) console.log(`Inbox: ${report.inboxFile} · Rechteprüfung erforderlich`);
   console.log(`Metadaten: ${relative(metadataPath)}`);
 } finally {
   await browser.close();
 }
 
+function uniqueName(dir, desired) { const ext = path.extname(desired), stem = path.basename(desired, ext); let name = desired, n = 2; while (fs.existsSync(path.join(dir, name))) name = `${stem}-${n++}${ext}`; return name; }
 function relative(file) { return path.relative(root, file).split(path.sep).join('/'); }
 function safeName(value) { return String(value).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 90) || 'article'; }
 function integer(value, min, max, label) { const number = Number(value); if (!Number.isInteger(number) || number < min || number > max) fail(`${label} muss zwischen ${min} und ${max} liegen.`); return number; }
 function parseArgs(values) { const result = { _: [] }; for (let i = 0; i < values.length; i++) { const token = values[i]; if (!token.startsWith('--')) { result._.push(token); continue; } const key = token.slice(2).replace(/-([a-z])/g, (_, c) => c.toUpperCase()); if (key === 'help') { result.help = true; continue; } const next = values[i + 1]; if (!next || next.startsWith('--')) fail(`Wert für ${token} fehlt.`); result[key] = next; i++; } return result; }
 function fail(message) { console.error(message); process.exit(1); }
-function help() { console.log(`Article Capture\n\n  npm run research:capture -- "https://example.org/article"\n\nSpeichert lokal:\n- Full-page Screenshot\n- Haupttext\n- Titel/Autor/Datum/Canonical-Metadaten\n\nOptional:\n  --full-page false\n  --width 1440\n  --height 1000\n  --wait-ms 1200\n\nBenötigt Playwright + Chromium. Kein API-Key.`); }
+function help() { console.log(`Article Capture\n\n  npm run research:capture -- "https://example.org/article"\n\nSpeichert lokal:\n- Full-page Screenshot\n- Haupttext\n- Titel/Autor/Datum/Canonical-Metadaten\n\nOptional:\n  --to-inbox true       Screenshot zusätzlich als REVIEW-Asset in inbox/ ablegen\n  --full-page false\n  --width 1440\n  --height 1000\n  --wait-ms 1200\n\nBenötigt Playwright + Chromium. Kein API-Key. Screenshots werden niemals automatisch als frei nutzbar markiert.`); }
