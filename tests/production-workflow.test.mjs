@@ -52,6 +52,9 @@ test('production workflow JavaScript parses successfully', () => {
     'scripts/lib/providers/nasa.mjs',
     'scripts/lib/providers/noaa.mjs',
     'scripts/lib/providers/usgs.mjs',
+    'scripts/lib/providers/nara.mjs',
+    'scripts/lib/providers/smithsonian.mjs',
+    'scripts/lib/providers/europeana.mjs',
     'scripts/lib/providers/library-of-congress.mjs',
     'scripts/serve.mjs',
     'web/app.js',
@@ -64,7 +67,7 @@ test('production workflow JavaScript parses successfully', () => {
 
 test('package exposes production commands', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
-  assert.equal(pkg.version, '0.15.0');
+  assert.equal(pkg.version, '0.16.0');
   assert.equal(pkg.scripts['media:analyze'], 'node scripts/analyze-media.mjs');
   assert.equal(pkg.scripts['inbox:scan'], 'node scripts/scan-inbox.mjs');
   assert.equal(pkg.scripts['inbox:review'], 'node scripts/review-inbox.mjs');
@@ -94,6 +97,9 @@ test('documentary research is archive-first and stock is opt-in', () => {
   assert.match(source, /official-archive/);
   assert.match(source, /noaa/);
   assert.match(source, /usgs/);
+  assert.match(source, /nara/);
+  assert.match(source, /smithsonian/);
+  assert.match(source, /europeana/);
   assert.match(source, /library-of-congress/);
   assert.match(source, /wikimedia/);
   assert.match(source, /internet-archive/);
@@ -164,7 +170,9 @@ test('beat planner translates phase-1 intent into renderer specs without inventi
 test('phase 1 materializer resolves real archive candidates and keeps publish approval separate', () => {
   const source = fs.readFileSync(path.join(root, 'scripts/phase1-materialize.mjs'), 'utf8');
   assert.match(source, /archiveFirst: true/);
-  assert.match(source, /officialProviderOrder: \['nasa', 'noaa', 'usgs', 'library-of-congress'\]/);
+  assert.match(source, /officialProviderOrder: \['nasa', 'noaa', 'usgs', 'nara', 'smithsonian', 'library-of-congress'\]/);
+  assert.match(source, /archiveProviderOrder: \['europeana', 'wikimedia', 'internet-archive'\]/);
+  assert.match(source, /optionalKeyProviders: \['nara', 'smithsonian', 'europeana'\]/);
   assert.match(source, /autoApproveExternalMedia: false/);
   assert.match(source, /eventIdentityStillRequiresReview: true/);
   assert.match(source, /providersFor/);
@@ -219,6 +227,29 @@ test('NOAA and USGS providers are keyless official sources with conservative rig
   assert.match(usgs, /suggested_status: 'review'/);
 });
 
+test('optional archive providers require environment keys and keep review gates', () => {
+  const providers = fs.readFileSync(path.join(root, 'scripts/lib/providers/index.mjs'), 'utf8');
+  const smithsonian = fs.readFileSync(path.join(root, 'scripts/lib/providers/smithsonian.mjs'), 'utf8');
+  const europeana = fs.readFileSync(path.join(root, 'scripts/lib/providers/europeana.mjs'), 'utf8');
+  const nara = fs.readFileSync(path.join(root, 'scripts/lib/providers/nara.mjs'), 'utf8');
+  const env = fs.readFileSync(path.join(root, '.env.example'), 'utf8');
+  assert.match(providers, /nara: \{ types: \['video', 'image'\], requiresKey: 'NARA_API_KEY'/);
+  assert.match(providers, /smithsonian: \{ types: \['image'\], requiresKey: 'SMITHSONIAN_API_KEY'/);
+  assert.match(providers, /europeana: \{ types: \['video', 'image'\], requiresKey: 'EUROPEANA_API_KEY'/);
+  assert.match(smithsonian, /api\.si\.edu\/openaccess\/api\/v1\.0/);
+  assert.match(smithsonian, /cc0-1\.0/);
+  assert.match(smithsonian, /suggested_status: 'review'/);
+  assert.match(europeana, /api\.europeana\.eu\/record\/v2\/search\.json/);
+  assert.match(europeana, /searchParams\.delete\('wskey'\)/);
+  assert.match(europeana, /suggested_status: 'review'/);
+  assert.match(nara, /catalog\.archives\.gov\/api\/v2\/records\/search/);
+  assert.match(nara, /'x-api-key': apiKey/);
+  assert.match(nara, /suggested_status: 'review'/);
+  assert.match(env, /SMITHSONIAN_API_KEY=/);
+  assert.match(env, /EUROPEANA_API_KEY=/);
+  assert.match(env, /NARA_API_KEY=/);
+});
+
 test('map renderer is keyless and preserves map attribution review metadata', () => {
   const map = fs.readFileSync(path.join(root, 'scripts/map-render.mjs'), 'utf8');
   assert.match(map, /maplibre-gl/);
@@ -255,7 +286,7 @@ test('provider layer exposes keyless official archives', () => {
 
 test('local server guards write endpoints and provider provenance', () => {
   const server = fs.readFileSync(path.join(root, 'scripts/serve.mjs'), 'utf8');
-  assert.match(server, /version: '0\.(13|14|15)'/);
+  assert.match(server, /version: '0\.16'/);
   assert.match(server, /writeApiEnabled/);
   assert.match(server, /\/api\/sources\/search/);
   assert.match(server, /\/api\/sources\/grab/);
@@ -285,6 +316,9 @@ test('browser exposes source search, inbox review and library surfaces', () => {
   assert.match(app, /importReviewedAsset/);
   assert.match(archiveFirst, /NOAA/);
   assert.match(archiveFirst, /U\.S\. Geological Survey/);
+  assert.match(archiveFirst, /National Archives Catalog/);
+  assert.match(archiveFirst, /Smithsonian Open Access/);
+  assert.match(archiveFirst, /Europeana/);
   assert.match(archiveFirst, /Stock-Fallback/);
 });
 
