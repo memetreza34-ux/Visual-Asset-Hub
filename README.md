@@ -1,82 +1,87 @@
 # Visual Asset Hub
 
-Lokaler Recherche-, Asset- und Rendering-Hub für **faceless YouTube-Dokumentationen/Listicles** mit echten Visuals, sauberer Rechteprüfung und einer vom Nutzer gelieferten Voiceover-Datei als Master-Audio.
+Lokaler Produktions-Hub für **faceless YouTube-Dokumentationen/Listicles** mit echten Visuals, sauberer Rechteprüfung und einer vom Nutzer gelieferten Voiceover-Datei als Master-Audio.
 
-**Aktueller Entwicklungsstand: Production Workflow v0.13.0**
+**Aktueller Stand: Production Workflow v0.16.0 + modulare Open-Source Toolchain**
 
-## Grundidee
+## Grundregel
 
-Der Hub ist **archive-first**, nicht stock-first:
+Der Hub ist **real-media-first und archive-first**:
 
 1. exaktes Ereignis-/Originalmaterial
 2. offizielle Archive und Behördenquellen
 3. Archivmaterial
-4. Dokumente, Screenshots, Karten und Presse-/Faktenquellen
-5. sehr spezifische B-Roll
-6. erklärende Grafiken
-7. generischer Stock nur als Fallback
+4. echte Dokumente, Screenshots, wissenschaftliche Abbildungen und offizielle Karten/Diagramme
+5. sehr spezifische reale B-Roll
+6. generischer Stock nur als Fallback
 
-Visuals werden bereits in **Phase 1** recherchiert und ausgewählt. Die spätere Schnittphase darf die Story nicht neu erfinden.
+**Keine automatisch erfundenen Remotion-Erklärgrafiken.** Keine Elektronen-/Partikelanimationen, keine generischen Pfeile/Kreise/Callouts und keine mittigen Infokarten als Standard. Wenn ein Beat eine Erklärung braucht, sucht Phase 1 dafür reales Material oder eine echte offizielle Abbildung.
 
-## Produktionsfluss
+Siehe `docs/REAL-MEDIA-EDITING-POLICY.md`.
+
+## Drei Phasen
 
 ```text
-THEMA
-  ↓
-Story-/Faktenrecherche
-  ↓
-Visual-Recherche + Rechteprüfung
-  ↓
-visual-plan.json
-  ↓
-beat:plan → shot-plan.json
-  ↓
-benötigte Maps / Freeze-Frames / Artikel-Inserts vorbereiten
-  ↓
-NUTZER-VOICEOVER
-  ↓
-Voiceover-Timings
-  ↓
-freigegebene Assets auf echte Audio-Timeline legen
-  ↓
-Remotion
-  ↓
-FINAL MP4
+PHASE 1 — ChatGPT / Recherche
+Thema → Fakten → Skript → echte Medien → Rechte/QC → visual-plan.json → shot-plan.json
+
+PHASE 2 — Nutzer
+finales Skript → eigene Voiceover-Datei
+
+PHASE 3 — Antigravity
+Voiceover-Timings → festgelegte Phase-1-Assets → Trim/Crop/Cut → dezente Bewegung → Final MP4
 ```
+
+Phase 3 darf die Story und Bildwelt nicht neu erfinden.
 
 ## Schnellstart
 
-Voraussetzungen:
+Kernvoraussetzungen:
 
 - Node.js 22+
 - FFmpeg inklusive `ffprobe`
-- optional `yt-dlp` für Referenzvideo-Metadaten/Untertitel
-- optional `whisper.cpp` für lokale Voiceover-Zeitmarken
-- optional PySceneDetect + OpenCLIP für Shot-/Subclip-Intelligenz
-- optional Playwright + Chromium für Artikel-/Karten-Inserts
 
 ```bash
 npm run check
+npm run tools:doctor
 npm run serve
 ```
 
 Browser: `http://127.0.0.1:4173`
 
-## Phase 1 – Story + Fakten + Visuals
+`tools:doctor` zeigt, welche optionalen Open-Source-Helfer auf dem Rechner vorhanden sind. Fehlende optionale Tools blockieren den normalen Workflow nicht.
 
-Breite Story-/Quellenrecherche:
+## Phase 1 — Recherche
+
+### Story-/Quellen-Discovery
 
 ```bash
 npm run research:discover -- "Mars Climate Orbiter unit conversion failure"
 ```
 
-GDELT läuft ohne API-Key. Optional kann eine eigene SearXNG-Instanz ergänzt werden:
+GDELT funktioniert ohne Key. Optional kann eine eigene SearXNG-Instanz genutzt werden:
 
 ```env
 SEARXNG_URL=http://127.0.0.1:8080
 ```
 
-Treffer dienen zur **Discovery**. Sie werden nicht automatisch zu Produktionsassets oder als frei nutzbar erklärt.
+Treffer sind Discovery-Signale und werden nicht automatisch zu freigegebenen Produktionsassets.
+
+### Webseiteninhalt sauber extrahieren
+
+```bash
+npm run research:extract -- --url "https://example.org/article" --output .local-storage/research/article.json
+```
+
+Wenn Trafilatura installiert ist, werden Haupttext und Metadaten ohne Navigation/Footer extrahiert.
+
+### Quelle archivieren
+
+```bash
+npm run tools -- archive --url "https://example.org/source"
+```
+
+ArchiveBox wird bevorzugt. Wenn es fehlt, nutzt der Hub den vorhandenen Playwright-Capture als Fallback.
 
 ### Entity-/Alias-Erweiterung
 
@@ -84,22 +89,35 @@ Treffer dienen zur **Discovery**. Sie werden nicht automatisch zu Produktionsass
 npm run entity:expand -- "Mars Climate Orbiter"
 ```
 
-Wikidata liefert alternative Labels/Aliase, damit Archive nicht nur mit einer Schreibweise durchsucht werden.
+Wikidata liefert alternative Namen für bessere Archivtreffer.
 
-## Archive-first Medienrecherche
+## Archive-first Medienquellen
 
 ```bash
 npm run documentary:research -- "Mars Climate Orbiter" --type image
 npm run documentary:research -- "Apollo 11" --type video
 ```
 
-Keyless-Quellen:
+### Ohne API-Key
 
-- **NASA Image & Video Library**
-- **Library of Congress**
-- **Wikimedia Commons**
-- **Internet Archive**
-- **Openverse** für offene Bilder
+- NASA Image & Video Library
+- NOAA
+- USGS
+- Library of Congress
+- Wikimedia Commons
+- Internet Archive
+- Openverse für Bilder
+
+### Optional mit kostenlosen Keys
+
+- NARA / National Archives
+- Smithsonian Open Access
+- Europeana
+
+### Stock nur als Fallback
+
+- Pexels
+- Pixabay
 
 Ranking:
 
@@ -107,112 +125,83 @@ Ranking:
 official-archive > archive > open-media > stock-fallback
 ```
 
-Pexels/Pixabay bleiben optionale Fallbacks.
-
-## Referenzstil analysieren
-
-```bash
-npm run reference:inspect -- "https://youtu.be/VIDEO_ID"
-python3 -m pip install "scenedetect[opencv]"
-npm run reference:style -- --file ./reference.mp4
-```
-
-`reference:style` erzeugt ein `style-profile.json` mit Shot-Längen, Cuts/Minute und repräsentativen Frames.
-
-## Best Subclip statt komplettes Archivvideo
-
-```bash
-python3 -m pip install open_clip_torch pillow
-npm run visual:match -- --query "damaged satellite on factory floor" --images frame1.jpg,frame2.jpg
-npm run clip:find -- --profile .local-storage/reference-style/archive/style-profile.json --query "damaged satellite on factory floor" --extract true
-```
-
-CLIP-Scores sind nur Relevanzsignale. Ereignisidentität und Rechte müssen weiter geprüft werden.
-
-## Editorial Beat Planner
-
-Nach der Phase-1-Recherche wird der visuelle Plan in konkrete Shot-Anweisungen übersetzt:
+## Visual- und Shot-Plan
 
 ```bash
 npm run beat:plan -- --plan projects/<id>/visual-plan.json
 ```
 
-Optional mit dem Schnittprofil eines Referenzvideos:
+Der Planner erzeugt `shot-plan.json` mit Shot-Dauer, Medienpriorität, Präsentation und Preprocessing. Er erzeugt **keine automatischen Erklärgrafiken** und erfindet keine neue Story.
+
+## Phase-1 Materialisierung
 
 ```bash
-npm run beat:plan -- \
-  --plan projects/<id>/visual-plan.json \
-  --style-profile .local-storage/reference-style/reference/style-profile.json
+npm run phase1:materialize -- --project <id> --download-top 1
 ```
 
-Ergebnis: `shot-plan.json` mit u. a.:
-
-- `presentation`: auto / article / document / map / freeze-frame / headline / vertical-blur
-- Shot-Dauerbereich
-- harte Cuts oder Fade
-- Medienpriorität
-- Headline-/Zahl-/Callout-/Quellen-Overlays
-- notwendige Preprocessing-Schritte
-- Qualitäts-Gate: Event-Match, Rechteprüfung und semantische Relevanz
-
-**Wichtig:** `beat:plan` übersetzt den bereits recherchierten Phase-1-Intent. Es erfindet keine neue Story und startet keine planlose B-Roll-Suche.
-
-## Artikel-/Dokument-Inserts
+Danach optional der neue einfache Qualitäts-Pass:
 
 ```bash
-npm install --no-save playwright
-npx playwright install chromium
-npm run research:capture -- "https://example.org/article" --to-inbox true
+npm run phase1:quality -- --project <id>
 ```
 
-Screenshot, Haupttext, Titel, Autor, Datum und Canonical-URL werden gespeichert. Screenshots erhalten absichtlich Review-Rechte.
+Er prüft die bereits heruntergeladenen Medien technisch und nutzt pyiqa, wenn es vorhanden ist.
 
-## Doku-Karten ohne API-Key
+Nur bei Bedarf mit schweren optionalen Modellen:
 
 ```bash
-npm install --no-save playwright maplibre-gl
-npx playwright install chromium
-
-npm run map:render -- \
-  --center "2.35,48.86" \
-  --zoom 5 \
-  --marker "2.35,48.86,Paris" \
-  --title "Frankreich" \
-  --to-inbox true
+npm run phase1:quality -- --project <id> --deep true
 ```
 
-Routen:
+Deep Mode ergänzt Asset-Memory mit OpenCLIP/sqlite-vec und DINOv2-Dublettenprüfung. Er ist nicht erforderlich, um normale Videos zu produzieren.
+
+Danach:
 
 ```bash
-npm run map:render -- \
-  --center "-20,20" \
-  --zoom 2 \
-  --route "-43.17,-22.90;-17,5;2.35,48.86" \
-  --title "Route"
-```
-
-MapLibre + OpenFreeMap werden verwendet. OpenStreetMap-Attribution bleibt verpflichtend und die Karte landet bei `--to-inbox true` zunächst im Review.
-
-## Freeze-Frames
-
-Aus einem katalogisierten Video:
-
-```bash
-npm run frame:extract -- --asset VAH-XXXXXXXX --at 12.4
-```
-
-Der extrahierte Frame landet standardmäßig in `inbox/`, übernimmt die Quellen-/Lizenzbedingungen des Parent-Assets und bleibt trotzdem erneut im Review.
-
-## Inbox / Rechte-Gate
-
-```bash
+npm run visual:qc -- --project <id>
 npm run inbox:scan
 npm run inbox:review
+npm run phase1:bind -- --project <id>
 ```
 
-Automatisch erkannt werden u. a. SHA-256, Auflösung, Ausrichtung, Dauer, FPS, Codec, Audio und Preview. `unknown` und `restricted` bleiben im Review.
+Phase 1 ist erst fertig, wenn die benötigten Beats an tatsächlich geprüfte Assets gebunden sind.
 
-## Phase 2 – deine Voiceover
+## Best Subclip statt komplettes Archivvideo
+
+```bash
+npm run clip:find -- --profile <style-profile.json> --query "damaged satellite" --extract true
+```
+
+OpenCLIP kann passende Shots ranken. Der Score beweist weder Ereignisidentität noch Nutzungsrechte.
+
+## Bildvorbereitung
+
+```bash
+npm run image:prepare -- --file ./inbox/photo.jpg --output ./tmp/photo-16x9.jpg
+```
+
+Sharp/libvips wird bevorzugt und nutzt einen Attention-Crop. Ohne Sharp gibt es einen FFmpeg-Fallback. Es werden keine Bildinhalte generiert.
+
+Optionale Spezialfälle:
+
+```bash
+npm run tools -- image-quality --file ./inbox/photo.jpg
+npm run tools -- smart-crop --file ./inbox/photo.jpg --prompt "volcano" --output ./tmp/crop.jpg
+npm run tools -- visual-dedupe --images a.jpg,b.jpg,c.jpg
+```
+
+GroundingDINO/SAM und DINOv2 sind schwere optionale Helfer und standardmäßig aus.
+
+## Lokales Asset-Gedächtnis
+
+```bash
+npm run tools -- asset-memory-index --file ./library/image.jpg --id VAH-123 --title "Chaiten lightning"
+npm run tools -- asset-memory-search --query "dark ash cloud with lightning"
+```
+
+OpenCLIP erzeugt Embeddings; sqlite-vec speichert und durchsucht sie lokal. Das spart bei späteren Videos unnötige Neusuche.
+
+## Phase 2 — Nutzer-Voiceover
 
 ```bash
 npm run youtube:workflow -- voiceover-attach --project <id> --file ./voiceover.wav
@@ -220,69 +209,116 @@ npm run youtube:workflow -- voiceover-attach --project <id> --file ./voiceover.w
 
 Die Pipeline erzeugt oder ersetzt die Stimme nicht.
 
-Optional:
+Arbeitskopie auf saubere Lautheit bringen:
+
+```bash
+npm run audio:prepare -- --file ./voiceover.wav --output ./voiceover-normalized.wav
+```
+
+`ffmpeg-normalize` wird bevorzugt; FFmpeg `loudnorm` ist der Fallback.
+
+Zeitmarken:
 
 ```bash
 npm run voiceover:align -- --project <id>
 ```
 
-## Phase 3/4 – Schnitt + Remotion
-
-Der Renderer unterstützt inzwischen:
-
-- harte Cuts als Standard
-- normale 16:9-Videos
-- vertikale Clips mit Blur-Sidefill
-- dokumentarische Ken-Burns-Bewegungen
-- Artikel-/Dokument-Screenshots
-- Doku-Karten
-- Freeze-Frames
-- Headline-Overlays
-- Impact-Zahlen
-- punktgenaue Callouts
-- Quellenlabels
-- Nutzer-Voiceover als Masterspur
-- stumme B-Roll
-
-Beispiel beim Szenenaufbau:
+Optional Precision Mode mit WhisperX:
 
 ```bash
-npm run video:project -- add \
-  --project beispiel \
-  --asset VAH-XXXXXXXX \
-  --duration 5 \
-  --presentation map \
-  --label "Frankreich · 2014" \
-  --callout "Bahnsteigkante" \
-  --callout-x 63 \
-  --callout-y 44 \
-  --source-label "Assemblée nationale"
+npm run tools -- voiceover-precision --file ./voiceover.wav --output .local-storage/whisperx/words.json
 ```
 
-Remotion bleibt Schnitt-/Motion-Schicht; es soll nicht die komplette Bildwelt als Dashboard erzeugen.
+Die Nutzer-Voiceover bleibt immer Master-Audio.
 
-## Wichtige Befehle
+## Phase 3 — Antigravity / Assembly
+
+Erlaubt:
+
+- echte Videos trimmen
+- echte Fotos/B-Rolls einsetzen
+- harte Schnitte
+- Crops/Reframing
+- dezente Push-ins/Pans
+- Freeze-Frames aus freigegebenem Material
+- Vertical-Blur-Sidefill
+- echte Dokument-/Artikel-Crops
+- echte offizielle Karten/Diagramme aus Phase 1
+
+Nicht automatisch erlaubt:
+
+- erfundene Teilchen-/Elektronenanimationen
+- generische Pfeile/Kreise/Callouts
+- mittige Infokarten
+- Kapitelkarten als Lückenfüller
+- große Zahlen-Overlays nur weil die Voiceover eine Zahl nennt
+- beliebige Ersatz-B-Roll, wenn ein Phase-1-Asset fehlt
+
+Wenn das richtige Material fehlt, geht der Beat zurück in Phase 1.
+
+## Final-QC
 
 ```bash
-npm run research:discover -- "Suchbegriff"
-npm run research:capture -- "https://example.org/article" --to-inbox true
-npm run documentary:research -- "Suchbegriff" --type video
-npm run entity:expand -- "Entity"
-npm run reference:inspect -- "https://youtu.be/VIDEO_ID"
-npm run reference:style -- --file ./reference.mp4
-npm run visual:match -- --query "Beschreibung" --images a.jpg,b.jpg
-npm run clip:find -- --profile <style-profile.json> --query "Beschreibung" --extract true
-npm run beat:plan -- --plan projects/<id>/visual-plan.json
-npm run map:render -- --center "13.4,52.5" --zoom 5 --marker "13.4,52.5,Berlin"
-npm run frame:extract -- --asset VAH-XXXXXXXX --at 3.2
-npm run inbox:scan
-npm run inbox:review
-npm run youtube:workflow -- help
-npm run video:project -- help
-npm run check
-npm run serve
+npm run final:qc -- --file ./final.mp4
 ```
+
+Optional VMAF gegen eine Master-/Referenzdatei:
+
+```bash
+npm run final:qc -- --file ./final-encode.mp4 --reference ./master.mp4
+```
+
+VMAF wird nur genutzt, wenn der lokale FFmpeg-Build `libvmaf` enthält.
+
+## Open-Source Toolbox
+
+Alle neuen Helfer laufen über **einen** Einstiegspunkt:
+
+```bash
+npm run tools -- doctor
+npm run tools -- help
+```
+
+Integriert sind:
+
+- Trafilatura
+- ArchiveBox
+- MediaInfo
+- Sharp/libvips
+- sqlite-vec + OpenCLIP
+- pyiqa
+- WhisperX
+- ffmpeg-normalize
+- VMAF
+- gallery-dl
+- yt-dlp
+- DINOv2
+- GroundingDINO
+- Segment Anything
+- Real-ESRGAN
+
+Details und Installationsstufen: `docs/OPEN-SOURCE-TOOLCHAIN.md`.
+
+## Rights-Gate für technische Downloader
+
+`gallery-dl` und `yt-dlp` bedeuten nicht automatisch, dass ein Medium verwendet werden darf.
+
+```bash
+npm run tools -- safe-fetch --url "https://..." --rights-cleared true
+```
+
+Ohne explizites `--rights-cleared true` blockiert der Hub den Download. Auch dieser Flag ist nur Workflow-Dokumentation und kein Rechtsnachweis.
+
+## Optionales KI-Upscaling
+
+Real-ESRGAN ist standardmäßig aus:
+
+```bash
+npm run tools -- enhance --file old-photo.jpg --allow-ai-enhancement true
+```
+
+Jede Ausgabe erhält eine Sidecar-Datei, die das AI-Upscaling markiert. Solche Bilder dürfen nicht als forensische/wissenschaftliche Detailbeweise behandelt werden.
 
 ## Sicherheit / Rechte
 
-Die schreibende Browser-API läuft nur lokal. YouTube, Newsseiten und andere fremde Plattformen werden nicht allein deshalb als Produktionsquelle behandelt, weil ein technischer Download oder Screenshot möglich wäre. Automatische Wiederverwendung bleibt gesperrt, solange keine passende Rechtsgrundlage oder Freigabe geprüft wurde.
+Die schreibende Browser-API läuft nur lokal. Fremde Plattformen werden nicht deshalb zu Produktionsquellen, weil ein technischer Download möglich ist. Externe Medien bleiben im Rechte-/Event-Review. Nutzer-Voiceover, Quellen-Provenance und die Real-Media-First-Regel bleiben feste Bestandteile des Workflows.
