@@ -2,19 +2,22 @@
 
 ## Status
 
-Recherche, Skript und redaktionelle Bildwelt sind vorbereitet. **Phase 1 ist nach Workflow v3 noch nicht abgeschlossen**, bis alle Produktionsmedien lokal materialisiert, qualitativ geprüft, rechtegeprüft, in den Katalog aufgenommen und an die geplanten Shots gebunden wurden.
+Recherche, Skript und redaktionelle Bildwelt sind vorbereitet. **Phase 1 ist nach Workflow v3.1 noch nicht abgeschlossen**, bis alle Produktionsmedien lokal materialisiert, qualitativ geprüft, rechtegeprüft, evidenzgesichert, in den Katalog aufgenommen und an die geplanten Shots gebunden wurden.
 
-## Phase 1 v3 — noch auszuführen
+## Phase 1 v3.1 — noch auszuführen
 
 ```bash
 npm run beat:plan -- --plan projects/5-naturphaenomene-wie-cgi-2min/visual-plan.json
 npm run phase1:materialize -- --project 5-naturphaenomene-wie-cgi-2min --download-top 1
 npm run phase1:quality -- --project 5-naturphaenomene-wie-cgi-2min
 npm run visual:qc -- --project 5-naturphaenomene-wie-cgi-2min
-# Download-Inbox prüfen/importieren und Rechte bestätigen
+# Download-Inbox prüfen/importieren und Rechte bestätigen.
+# Ein approved Import erzeugt automatisch catalog/rights-evidence/<ASSET-ID>.json.
 npm run phase1:bind -- auto --project 5-naturphaenomene-wie-cgi-2min
 npm run youtube:workflow -- phase1-check --project 5-naturphaenomene-wie-cgi-2min
 ```
+
+Der Materializer prüft zuerst bereits vorhandene `approved` YouTube-Assets aus der lokalen Bibliothek. Nur wenn kein ausreichend starker lokaler Treffer existiert, werden externe Quellen benötigt.
 
 Erst wenn `phase1-check` erfolgreich ist, darf Phase 2 beginnen.
 
@@ -73,6 +76,8 @@ Wenn ein Sachverhalt visuell erklärt werden muss, muss Phase 1 ein echtes Foto,
 ## Rechte-Regeln
 
 - Credits aus `assets.json` übernehmen.
+- Für jedes gebundene Produktionsasset müssen `rights.checkedAt` und eine passende `catalog/rights-evidence/<ASSET-ID>.json` vorhanden sein.
+- Die Evidence-Akte dokumentiert die Prüfung, ist aber keine automatische Rechtsmeinung.
 - NOAA Ocean Today `Bioluminescent Ocean` bleibt als excerpted B-roll gesperrt.
 - Chasing-Sprites/TLE-Chasers-Material im NASA-SVS-Paket bleibt gesperrt.
 - Keine Logos so inszenieren, dass eine Partnerschaft mit NASA, NOAA oder USGS suggeriert wird.
@@ -85,10 +90,11 @@ Wenn ein Sachverhalt visuell erklärt werden muss, muss Phase 1 ein echtes Foto,
 - `visual-plan.json` — redaktionelle Bildwelt
 - `shot-plan.json` — v3 Multi-Shot-Plan
 - `assets.json` — geprüfte Quellenliste
-- `materialization.json` — lokale Phase-1-Downloads
+- `materialization.json` — lokale Phase-1-Downloads/Reuse
 - `phase1-quality.json` — technische/Bildqualitäts-Signale
 - `visual-qc.json` — kombinierte Relevanz-/Qualitäts-/Rechte-QC
 - `beat-bindings.json` — gebundene Produktionsassets
+- `catalog/rights-evidence/<ASSET-ID>.json` — dauerhafte Rights-Audit-Akte je Asset
 - `timings.json` — echte Voiceover-Beats
 - `phase3-handoff.json` — lokale Antigravity-Timeline
 - `render-manifest.json` — Renderer-Manifest
