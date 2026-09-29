@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "workflowVersion": 3,
   "id": "5-naturphaenomene-wie-cgi-2min",
   "title": "5 Naturphänomene, die wie CGI aussehen – aber echt sind",
@@ -11,7 +11,7 @@
   "genre": "faceless-science-listicle-documentary",
   "targetDurationSeconds": 105,
   "requireUserVoiceover": true,
-  "status": "phase1-prepared-awaiting-user-voiceover",
+  "status": "phase1-complete-awaiting-user-voiceover",
   "referenceStyle": "fast real-media documentary/listicle pacing; original script and case selection; no copied branding or reference footage",
   "editingRules": {
     "normalVisualSeconds": "3-6",
@@ -28,7 +28,18 @@
   "phaseContract": {
     "phase1": "ChatGPT: research, final script, concrete visual sources, visual plan, shot plan and rights notes",
     "phase2": "User: create and provide final voiceover from voiceover-script.txt",
-    "phase3": "Antigravity: align user voiceover, use Phase-1 assets, edit/animate and render final video"
+    "phase3": "Antigravity: fetch locked Phase-1 media, align user voiceover, cut/animate and render final video"
+  },
+  "phase1": {
+    "completedAt": "2026-09-29",
+    "scriptLocked": true,
+    "visualBeats": 17,
+    "assetHandoffMode": "verified-source-urls",
+    "selectedAssetRecords": 11,
+    "blockedSourceRecords": 2,
+    "binaryMediaCommittedToGit": false,
+    "binaryMaterialization": "phase3-fetch-only-from-assets.json-or-derived-from-those-assets",
+    "phase2Ready": true
   },
   "cases": [
     "volcanic-lightning",
