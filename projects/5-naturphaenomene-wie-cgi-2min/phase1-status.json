@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "projectId": "5-naturphaenomene-wie-cgi-2min",
+  "phase": 1,
+  "status": "complete",
+  "completedAt": "2026-09-29",
+  "readyForPhase2": true,
+  "deliverables": {
+    "project": "project.json",
+    "research": "research.json",
+    "finalVoiceoverScript": "voiceover-script.txt",
+    "visualPlan": "visual-plan.json",
+    "shotPlan": "shot-plan.json",
+    "assetHandoff": "assets.json"
+  },
+  "counts": {
+    "cases": 5,
+    "visualBeats": 17,
+    "selectedAssetRecords": 11,
+    "blockedMediaRecords": 2
+  },
+  "assetPolicy": {
+    "mode": "verified-source-urls",
+    "officialSources": ["USGS", "NOAA Ocean Exploration", "NASA", "NASA Earth Observatory", "ISS Crew Earth Observations"],
+    "stockUsed": false,
+    "aiImagesUsed": false,
+    "referenceVideoMediaUsed": false,
+    "binaryFilesCommitted": false,
+    "phase3Rule": "Antigravity may fetch only the locked source/directMedia URLs from assets.json or create crops/frames/subclips derived from those same assets. Any substitution requires a new Phase-1 review."
+  },
+  "blockedMedia": [
+    "NOAA Ocean Today Bioluminescent Ocean as excerpted B-roll: blocked because its FAQ requires use in entirety and prohibits alteration/transformation.",
+    "Third-party Chasing Sprites/TLE Chasers media on NASA SVS package: blocked because the page identifies it as copyrighted/used with permission."
+  ],
+  "nextAction": "User creates the voiceover from voiceover-script.txt without changing the script and provides the final audio for Phase 3."
+}
