@@ -50,6 +50,8 @@ test('production workflow JavaScript parses successfully', () => {
     'scripts/lib/providers/wikimedia.mjs',
     'scripts/lib/providers/internet-archive.mjs',
     'scripts/lib/providers/nasa.mjs',
+    'scripts/lib/providers/noaa.mjs',
+    'scripts/lib/providers/usgs.mjs',
     'scripts/lib/providers/library-of-congress.mjs',
     'scripts/serve.mjs',
     'web/app.js',
@@ -62,7 +64,7 @@ test('production workflow JavaScript parses successfully', () => {
 
 test('package exposes production commands', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
-  assert.equal(pkg.version, '0.14.0');
+  assert.equal(pkg.version, '0.15.0');
   assert.equal(pkg.scripts['media:analyze'], 'node scripts/analyze-media.mjs');
   assert.equal(pkg.scripts['inbox:scan'], 'node scripts/scan-inbox.mjs');
   assert.equal(pkg.scripts['inbox:review'], 'node scripts/review-inbox.mjs');
@@ -90,6 +92,8 @@ test('package exposes production commands', () => {
 test('documentary research is archive-first and stock is opt-in', () => {
   const source = fs.readFileSync(path.join(root, 'scripts/documentary-research.mjs'), 'utf8');
   assert.match(source, /official-archive/);
+  assert.match(source, /noaa/);
+  assert.match(source, /usgs/);
   assert.match(source, /library-of-congress/);
   assert.match(source, /wikimedia/);
   assert.match(source, /internet-archive/);
@@ -160,6 +164,7 @@ test('beat planner translates phase-1 intent into renderer specs without inventi
 test('phase 1 materializer resolves real archive candidates and keeps publish approval separate', () => {
   const source = fs.readFileSync(path.join(root, 'scripts/phase1-materialize.mjs'), 'utf8');
   assert.match(source, /archiveFirst: true/);
+  assert.match(source, /officialProviderOrder: \['nasa', 'noaa', 'usgs', 'library-of-congress'\]/);
   assert.match(source, /autoApproveExternalMedia: false/);
   assert.match(source, /eventIdentityStillRequiresReview: true/);
   assert.match(source, /providersFor/);
@@ -201,6 +206,19 @@ test('v0.14 controller blocks user voiceover until real beat bindings are ready'
   assert.match(source, /delegateLegacy/);
 });
 
+test('NOAA and USGS providers are keyless official sources with conservative rights handling', () => {
+  const providers = fs.readFileSync(path.join(root, 'scripts/lib/providers/index.mjs'), 'utf8');
+  const noaa = fs.readFileSync(path.join(root, 'scripts/lib/providers/noaa.mjs'), 'utf8');
+  const usgs = fs.readFileSync(path.join(root, 'scripts/lib/providers/usgs.mjs'), 'utf8');
+  assert.match(providers, /noaa: \{ types: \['video', 'image'\], requiresKey: null, tier: 'official-archive'/);
+  assert.match(providers, /usgs: \{ types: \['video', 'image'\], requiresKey: null, tier: 'official-archive'/);
+  assert.match(noaa, /noaa-media-review/);
+  assert.match(noaa, /suggested_status: 'review'/);
+  assert.match(usgs, /usgs-public-domain/);
+  assert.match(usgs, /Public\s\+Domain/);
+  assert.match(usgs, /suggested_status: 'review'/);
+});
+
 test('map renderer is keyless and preserves map attribution review metadata', () => {
   const map = fs.readFileSync(path.join(root, 'scripts/map-render.mjs'), 'utf8');
   assert.match(map, /maplibre-gl/);
@@ -230,6 +248,8 @@ test('Wikidata expansion supplies aliases without becoming a fact source', () =>
 test('provider layer exposes keyless official archives', () => {
   const providers = fs.readFileSync(path.join(root, 'scripts/lib/providers/index.mjs'), 'utf8');
   assert.match(providers, /nasa: \{ types: \['video', 'image'\], requiresKey: null, tier: 'official-archive'/);
+  assert.match(providers, /noaa: \{ types: \['video', 'image'\], requiresKey: null, tier: 'official-archive'/);
+  assert.match(providers, /usgs: \{ types: \['video', 'image'\], requiresKey: null, tier: 'official-archive'/);
   assert.match(providers, /'library-of-congress': \{ types: \['video', 'image'\], requiresKey: null, tier: 'official-archive'/);
 });
 
@@ -260,10 +280,11 @@ test('browser exposes source search, inbox review and library surfaces', () => {
   const archiveFirst = fs.readFileSync(path.join(root, 'web/archive-first.js'), 'utf8');
   assert.match(html, /id="source-form"/);
   assert.match(html, /archive-first\.js/);
-  assert.match(html, /NASA · Library of Congress/);
   assert.match(app, /searchSources/);
   assert.match(app, /grabSourceAsset/);
   assert.match(app, /importReviewedAsset/);
+  assert.match(archiveFirst, /NOAA/);
+  assert.match(archiveFirst, /U\.S\. Geological Survey/);
   assert.match(archiveFirst, /Stock-Fallback/);
 });
 
