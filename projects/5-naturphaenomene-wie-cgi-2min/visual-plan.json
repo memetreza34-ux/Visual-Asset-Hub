@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "projectId": "5-naturphaenomene-wie-cgi-2min",
   "style": {
     "normalVisualSeconds": "3-6",
@@ -9,14 +9,20 @@
     "stockFallbackOnly": true,
     "hardCutsPreferred": true,
     "noDashboardCards": true,
-    "textPolicy": "short labels, one number or one callout only"
+    "noCenterCards": true,
+    "noSyntheticExplainers": true,
+    "noAutomaticCallouts": true,
+    "noArrowsCirclesMarkers": true,
+    "noParticleOrElectronAnimations": true,
+    "textPolicy": "none by default; narration explains the idea while real footage/photo/document stays on screen",
+    "remotionRole": "trim, crop, hard cut, subtle push/pan, vertical sidefill when needed; no invented explanatory visuals"
   },
   "beats": [
     {
       "id": "b01",
       "narrationAnchor": "Diese Aufnahmen sehen aus wie CGI",
       "visualType": "fast-montage",
-      "visual": "Fünf sehr schnelle echte Motive: Vulkanblitz, NOAA-Dragonfish mit Photophoren, Lenticularwolke, roter Sprite, leuchtende Nachtwolken. Keine Titelkarte davor.",
+      "visual": "Fünf sehr schnelle echte Motive: Vulkanblitz, NOAA-Dragonfish mit Photophoren, Lenticularwolke, roter Sprite, leuchtende Nachtwolken. Keine Titelkarte, kein mittiger Text.",
       "sources": [
         "https://www.usgs.gov/media/images/chait-n-plume-lightning",
         "https://oceanexplorer.noaa.gov/multimedia/okeanos-explorations-ex1907-dailyupdates-nov4-media-dive04-dragonfish/",
@@ -24,7 +30,7 @@
         "https://science.nasa.gov/earth/earth-observatory/red-sprites-above-the-us-and-central-america-86463/",
         "https://science.nasa.gov/earth/earth-observatory/noctilucent-clouds-8366/"
       ],
-      "motion": "0.6-0.9s hard cuts, strongest visual first and last"
+      "motion": "0.6-0.9s hard cuts, strongest visual first and last; real media only"
     },
     {
       "id": "b02",
@@ -35,28 +41,28 @@
       "sourceUrl": "https://www.usgs.gov/media/images/chait-n-plume-lightning",
       "directMediaUrl": "https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/vhp_img1416.jpg",
       "rights": "USGS Multimedia Gallery; public domain unless otherwise noted; credit USGS",
-      "motion": "hard cut, 4% push-in toward main lightning cluster"
+      "motion": "hard cut, 4% push-in toward main lightning cluster; no text overlay"
     },
     {
       "id": "b03",
       "case": "volcanic-lightning",
       "narrationAnchor": "Ascheteilchen in der Eruptionswolke elektrisch aufladen",
-      "visualType": "freeze-highlight",
-      "visual": "Aus demselben USGS-Motiv ein anderer enger Crop auf Aschewolke und feine Blitzverzweigungen; kurzer Callout auf geladene Aschezone.",
+      "visualType": "detail-crop",
+      "visual": "Anderer enger Crop desselben echten USGS-Chaitén-Fotos auf Aschewolke und feine Blitzverzweigungen. Keine gezeichneten Elektronen, Partikel, Kreise, Pfeile oder Callouts.",
       "sourceUrl": "https://www.usgs.gov/media/images/chait-n-plume-lightning",
       "directMediaUrl": "https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/vhp_img1416.jpg",
       "rights": "same USGS public-domain item as b02",
-      "motion": "freeze-like crop, 6% push, one subtle circle/callout; no repeated full-frame composition"
+      "motion": "distinct tight crop + subtle push only"
     },
     {
       "id": "b04",
       "case": "volcanic-lightning",
       "narrationAnchor": "entlädt sie sich als Blitz",
       "visualType": "official-document-insert",
-      "visual": "Kurzer USGS-Erklärseiten-Inset zur Vulkanblitz-Entstehung, nur relevanter Abschnitt/Headline, danach zurück aufs Foto.",
+      "visual": "Kurzer echter USGS-Erklärseiten-Crop zur Vulkanblitz-Entstehung, nur relevanter Abschnitt/Headline. Kein nachgebautes Remotion-Diagramm.",
       "sourceUrl": "https://volcanoes.usgs.gov/volcanic_ash/lightning.html",
       "rights": "official USGS explanatory page; factual/editorial crop with source credit",
-      "motion": "2s article/document crop then hard cut back to lightning detail"
+      "motion": "2s real document crop, then hard cut back to real lightning image"
     },
     {
       "id": "b05",
@@ -67,7 +73,7 @@
       "sourceUrl": "https://oceanexplorer.noaa.gov/multimedia/okeanos-explorations-ex1907-dailyupdates-nov4-media-dive04-dragonfish/",
       "directMediaUrl": "https://oceanexplorer.noaa.gov/wp-content/uploads/2019/11/dive04-dragonfish-1280x720-1.mp4",
       "rights": "credit NOAA Ocean Exploration, 2019 Southeastern U.S. Deep-sea Exploration; no copyright notice on item",
-      "motion": "select strongest 3-5s section showing photophores; mute source audio"
+      "motion": "select strongest 3-5s real section showing photophores; skip title/logo slate; mute source audio"
     },
     {
       "id": "b06",
@@ -78,17 +84,17 @@
       "sourceUrl": "https://oceanexplorer.noaa.gov/multimedia/video-shorts-ex1705-squid/",
       "directMediaUrl": "https://oceanexplorer.noaa.gov/wp-content/uploads/2021/02/ex1705-squid.mp4",
       "rights": "credit NOAA Ocean Exploration, Mountains in the Deep: Exploring the Central Pacific Basin; no copyright notice on item",
-      "motion": "use strongest 3-4s moment; hard cut from dragonfish; mute source audio"
+      "motion": "use strongest 3-4s real moment; skip intro/title frames; hard cut from dragonfish; mute source audio"
     },
     {
       "id": "b07",
       "case": "bioluminescence",
       "narrationAnchor": "Meist erscheint es blau oder blaugrün",
-      "visualType": "derived-frame-plus-label",
-      "visual": "Freeze/frame crop from one of the already approved NOAA Ocean Exploration clips where the luminous organs are clearest; short label 'blau / blaugrün'. No separate copyrighted still.",
+      "visualType": "derived-frame",
+      "visual": "Freeze/frame crop from one of the already approved NOAA Ocean Exploration clips where the luminous organs are clearest. No color label and no graphic overlay.",
       "sourceUrl": "https://oceanexplorer.noaa.gov/multimedia/okeanos-explorations-ex1907-dailyupdates-nov4-media-dive04-dragonfish/",
       "rights": "derived from approved NOAA Ocean Exploration video; preserve exact source credit",
-      "motion": "brief freeze + subtle push-in, color label only"
+      "motion": "brief real frame hold + subtle push-in only"
     },
     {
       "id": "b08",
@@ -99,18 +105,18 @@
       "sourceUrl": "https://science.nasa.gov/earth/earth-observatory/marvelous-lenticularis-153312/",
       "directMediaUrl": "https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/imagerecords/153000/153312/nzcloud_oli_20240907_lrg.jpg?crop=faces%2Cfocalpoint&fit=clip&h=6406&w=6589",
       "rights": "NASA Earth Observatory / Lauren Dauphin using USGS Landsat data; informational/editorial use with credit",
-      "motion": "slow push from wide map-like view toward cloud"
+      "motion": "slow push from wide view toward cloud; no label"
     },
     {
       "id": "b09",
       "case": "lenticular-clouds",
       "narrationAnchor": "Starker Wind wird über Berge gedrückt und erzeugt Wellen in der Luft",
       "visualType": "detail-crop",
-      "visual": "Engerer Crop derselben NASA-Aufnahme: Bergkette plus langgestreckte Wolke; kleiner Pfeil von Gebirge zur Wolke.",
+      "visual": "Engerer Crop derselben echten NASA-Aufnahme: Bergkette plus langgestreckte Wolke. Keine Pfeile, Windlinien oder Remotion-Erklärgrafik.",
       "sourceUrl": "https://science.nasa.gov/earth/earth-observatory/marvelous-lenticularis-153312/",
       "directMediaUrl": "https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/imagerecords/153000/153312/nzcloud_oli_20240907_lrg.jpg?crop=faces%2Cfocalpoint&fit=clip&h=6406&w=6589",
       "rights": "same NASA/USGS asset as b08",
-      "motion": "different crop; arrow callout only, no explanatory panel"
+      "motion": "different real crop + subtle directional push only"
     },
     {
       "id": "b10",
@@ -131,28 +137,28 @@
       "sourceUrl": "https://science.nasa.gov/earth/earth-observatory/red-sprites-above-the-us-and-central-america-86463/",
       "directMediaUrl": "https://svs.gsfc.nasa.gov/vis/a010000/a014200/a014206/iss044e045576_lrg_2015.jpeg",
       "rights": "NASA/ISS Crew Earth Observations still; do not use copyrighted third-party sprite media from SVS package",
-      "motion": "slow push toward red sprite; tiny label 'Sprite'"
+      "motion": "slow push toward red sprite; no label"
     },
     {
       "id": "b12",
       "case": "red-sprites",
       "narrationAnchor": "hoch über Gewittern und keine gewöhnlichen Blitze",
-      "visualType": "freeze-highlight",
-      "visual": "Enger Crop des NASA-ISS-Fotos auf Sprite und helle Gewitterzelle; vertikale Entfernung visuell durch zwei kleine Marker zeigen.",
+      "visualType": "detail-crop",
+      "visual": "Enger echter Crop des NASA-ISS-Fotos auf Sprite und helle Gewitterzelle. Keine Marker, Linien oder Callouts.",
       "sourceUrl": "https://science.nasa.gov/earth/earth-observatory/red-sprites-above-the-us-and-central-america-86463/",
       "directMediaUrl": "https://svs.gsfc.nasa.gov/vis/a010000/a014200/a014206/iss044e045576_lrg_2015.jpeg",
       "rights": "same NASA/ISS still as b11",
-      "motion": "tight crop + callout, no external copyrighted sprite footage"
+      "motion": "tight real crop + subtle push only"
     },
     {
       "id": "b13",
       "case": "red-sprites",
       "narrationAnchor": "bis ungefähr hundert Kilometer über die Erdoberfläche",
-      "visualType": "official-image-plus-number",
-      "visual": "Zweites NASA-Earth-Observatory-Sprite-Foto bzw. alternate crop; kurze Einblendung 'bis ~100 km'.",
+      "visualType": "official-archive-image",
+      "visual": "Zweites NASA-Earth-Observatory-Sprite-Foto bzw. alternate approved crop. Die Höhe wird nur gesprochen, nicht als große Remotion-Zahl eingeblendet.",
       "sourceUrl": "https://science.nasa.gov/earth/earth-observatory/red-sprites-above-the-us-and-central-america-86463/",
       "rights": "NASA Earth Observatory / ISS Crew Earth Observations",
-      "motion": "hard cut to alternate composition, impact number bottom-left"
+      "motion": "hard cut to alternate real composition; no overlay"
     },
     {
       "id": "b14",
@@ -163,17 +169,17 @@
       "sourceUrl": "https://science.nasa.gov/earth/earth-observatory/noctilucent-clouds-8366/",
       "directMediaUrl": "https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/imagerecords/8000/8366/npnoctilucent_aim_2007162_lrg.jpg?crop=faces%2Cfocalpoint&fit=clip&h=765&w=800",
       "rights": "NASA Earth Observatory / University of Colorado LASP data-processing credit; preserve attribution",
-      "motion": "slow center push; no extra text on first reveal"
+      "motion": "slow center push; no extra text"
     },
     {
       "id": "b15",
       "case": "noctilucent-clouds",
       "narrationAnchor": "ungefähr achtzig Kilometer über der Erde",
-      "visualType": "official-image-plus-number",
-      "visual": "NASA-ISS-Nachtwolkenbild mit Erdkrümmung/Horizont und kleinem '≈ 80 km' Label.",
+      "visualType": "official-archive-image",
+      "visual": "NASA-ISS-Nachtwolkenbild mit Erdkrümmung/Horizont. Die Höhe wird gesprochen, nicht als große Zahl eingeblendet.",
       "sourceUrl": "https://www.nasa.gov/image-article/noctilucent-clouds-as-seen-from-iss/",
       "rights": "NASA-credit ISS image; informational/editorial use with credit",
-      "motion": "subtle push + single ≈80 km number overlay"
+      "motion": "subtle push only; no overlay"
     },
     {
       "id": "b16",
@@ -189,7 +195,7 @@
       "id": "b17",
       "narrationAnchor": "Welches dieser fünf Phänomene hättest du ohne Beweis für CGI gehalten?",
       "visualType": "rapid-recap-montage",
-      "visual": "Fünf kurze Rückblenden aus den bereits ausgewählten Phase-1-Assets; am Ende 1.5s auf stärkstem Vulkanblitz oder Sprite halten. Keine Outro-Karte.",
+      "visual": "Fünf kurze Rückblenden aus den bereits ausgewählten Phase-1-Assets; am Ende 1.5s auf stärkstem Vulkanblitz oder Sprite halten. Keine Outro-Karte und kein mittiger Text.",
       "sources": [
         "https://www.usgs.gov/media/images/chait-n-plume-lightning",
         "https://oceanexplorer.noaa.gov/multimedia/okeanos-explorations-ex1907-dailyupdates-nov4-media-dive04-dragonfish/",
@@ -197,7 +203,7 @@
         "https://science.nasa.gov/earth/earth-observatory/red-sprites-above-the-us-and-central-america-86463/",
         "https://science.nasa.gov/earth/earth-observatory/noctilucent-clouds-8366/"
       ],
-      "motion": "0.7-1.0s hard cuts; no generic subscribe animation"
+      "motion": "0.7-1.0s hard cuts; no subscribe animation, no generated outro"
     }
   ]
 }
