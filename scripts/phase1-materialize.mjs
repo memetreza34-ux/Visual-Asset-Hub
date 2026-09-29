@@ -42,7 +42,7 @@ const report = {
     eventIdentityStillRequiresReview: true,
     unknownRightsBlockedFromPublish: true,
     minimumEditorialScoreForSelection: 62,
-    note: 'Phase 1 lädt bekannte direkte Medien und ausgewählte Provider-Treffer lokal herunter. Download ist keine Rechtefreigabe; QC, Rechteprüfung und Binding bleiben Pflicht.'
+    note: 'Phase 1 lädt bekannte direkte Medien und ausgewählte Provider-Treffer lokal herunter. Download ist keine Rechtefreigabe; Quality-QC, Visual-QC, Rechteprüfung und Binding bleiben Pflicht.'
   },
   beats: []
 };
@@ -59,7 +59,7 @@ report.summary = summarize(report.beats);
 saveReport();
 console.log(`\nMaterialisierung: ${relative(outputFile)}`);
 console.log(`${report.summary.selected}/${report.summary.total} Shots mit Vorauswahl · ${report.summary.downloaded} Downloads · ${report.summary.blocked} blockiert`);
-console.log('Nächster Schritt: visual:qc → Inbox/Katalog-Rechteprüfung → phase1:bind → youtube:workflow phase1-check.');
+console.log('Nächster Schritt: phase1:quality → visual:qc → Inbox/Katalog-Rechteprüfung → phase1:bind → youtube:workflow phase1-check.');
 
 async function materializeShot(shot) {
   const mediaType = inferMediaType(shot);
@@ -118,10 +118,11 @@ async function materializeShot(shot) {
 
 function exactSourceCandidate(shot, mediaType) {
   const direct = String(shot.directMediaUrl || '').trim();
+  const provider = providerFromUrl(shot.sourceUrl || direct) || 'exact-source';
   const downloads = direct ? [{quality:'phase1-direct',url:direct,width:null,height:null,size:null,file_type:guessMime(direct, mediaType),preview_url:null}] : [];
   return {
     candidateId: `exact-source-${shot.id}`,
-    provider: 'exact-source',
+    provider,
     providerTier: 'phase1-source',
     providerId: null,
     type: mediaType,
@@ -129,14 +130,14 @@ function exactSourceCandidate(shot, mediaType) {
     description: 'Exact source URL locked in Phase 1.',
     sourceUrl: shot.sourceUrl,
     previewUrl: null,
-    creator: null,
+    creator: officialCreator(provider),
     width: null,
     height: null,
     durationSeconds: null,
     downloads,
     rights: rightsFromHint(shot.rightsHint),
     editorialScore: 96,
-    editorialSignals: {exactPhase1Source:true,hasDirectMedia:Boolean(direct),sourceTier:'phase1-source',eventIdentityReviewRequired:true},
+    editorialSignals: {exactPhase1Source:true,hasDirectMedia:Boolean(direct),sourceTier:'phase1-source',providerDetectedFromUrl:provider !== 'exact-source',eventIdentityReviewRequired:true},
     downloadable: Boolean(direct),
     ingestion: direct ? 'phase1-direct-download' : 'source-specific-or-manual'
   };
@@ -247,6 +248,23 @@ function rightsFromHint(hint) {
   if (/creative commons|\bcc\b/.test(text)) return {license_status:'licensed',warning:'Exact CC terms/attribution must be verified at source.'};
   return {license_status:'unknown',warning:'Rights hint requires source verification.'};
 }
+function providerFromUrl(value) {
+  let host = '';
+  try { host = new URL(String(value || '')).hostname.toLowerCase(); } catch { return null; }
+  if (host.endsWith('nasa.gov')) return 'nasa';
+  if (host.endsWith('noaa.gov')) return 'noaa';
+  if (host.endsWith('usgs.gov')) return 'usgs';
+  if (host === 'catalog.archives.gov' || host.endsWith('.archives.gov')) return 'nara';
+  if (host.endsWith('si.edu')) return 'smithsonian';
+  if (host.endsWith('loc.gov')) return 'library-of-congress';
+  if (host.endsWith('europeana.eu')) return 'europeana';
+  if (host.endsWith('wikimedia.org')) return 'wikimedia';
+  if (host.endsWith('archive.org')) return 'internet-archive';
+  return null;
+}
+function officialCreator(provider) {
+  return ({nasa:'NASA',noaa:'NOAA',usgs:'U.S. Geological Survey',nara:'National Archives',smithsonian:'Smithsonian Institution','library-of-congress':'Library of Congress',europeana:'Europeana',wikimedia:'Wikimedia Commons','internet-archive':'Internet Archive'})[provider] || null;
+}
 function guessMime(url, type) { const value = String(url).toLowerCase().split('?')[0]; if (value.endsWith('.mp4')) return 'video/mp4'; if (value.endsWith('.webm')) return 'video/webm'; if (value.endsWith('.png')) return 'image/png'; if (value.endsWith('.webp')) return 'image/webp'; return type === 'video' ? 'video/mp4' : 'image/jpeg'; }
 function tierScore(tier) { if (tier === 'official-archive') return 46; if (tier === 'archive') return 34; if (tier === 'open-media') return 23; if (tier === 'stock-fallback') return 4; return 0; }
 function summarize(beats) { return {total:beats.length,selected:beats.filter((x)=>x.selectedCandidateId).length,downloaded:beats.reduce((sum,x)=>sum+(x.downloads || []).filter((d)=>d.status==='downloaded').length,0),blocked:beats.filter((x)=>x.status.startsWith('blocked')).length,rightsReview:beats.filter((x)=>x.status==='selected-needs-rights-review').length,eventReview:beats.filter((x)=>x.status==='selected-needs-event-review').length}; }
@@ -262,4 +280,4 @@ function readJson(file) { try { return JSON.parse(fs.readFileSync(file,'utf8'));
 function integer(value,min,max,label) { const n=Number(value); if(!Number.isInteger(n)||n<min||n>max) fail(`${label} muss zwischen ${min} und ${max} liegen.`); return n; }
 function parseArgs(values) { const result={_:[]}; for(let i=0;i<values.length;i++){const token=values[i];if(!token.startsWith('--')){result._.push(token);continue;}const key=token.slice(2).replace(/-([a-z])/g,(_,c)=>c.toUpperCase());if(key==='help'){result.help=true;continue;}const next=values[i+1];if(!next||next.startsWith('--'))fail(`Wert für ${token} fehlt.`);result[key]=next;i++;}return result; }
 function fail(message) { console.error(message); process.exit(1); }
-function help() { console.log(`Phase-1 Materializer v4\n\n  npm run phase1:materialize -- --project <id> --download-top 1\n\nBekannte directMediaUrl-Dateien aus Phase 1 werden jetzt lokal heruntergeladen. Danach folgen Visual-QC, Katalog-/Rechteprüfung und Binding. Phase 3 darf nicht mehr aus dem Internet nachladen.`); }
+function help() { console.log(`Phase-1 Materializer v4\n\n  npm run phase1:materialize -- --project <id> --download-top 1\n\nBekannte directMediaUrl-Dateien aus Phase 1 werden lokal heruntergeladen und behalten, soweit anhand der offiziellen URL erkennbar, ihre echte Provider-Provenance. Danach: phase1:quality → visual:qc → Katalog-/Rechteprüfung → Binding. Phase 3 darf nicht mehr aus dem Internet nachladen.`); }
