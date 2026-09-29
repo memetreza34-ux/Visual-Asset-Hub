@@ -1,17 +1,22 @@
 {
-  "version": 2,
+  "version": 3,
   "projectId": "5-naturphaenomene-wie-cgi-2min",
   "phase": 1,
-  "status": "complete",
-  "completedAt": "2026-09-29",
-  "readyForPhase2": true,
+  "status": "needs-v3-local-materialization",
+  "readyForPhase2": false,
+  "completedAt": null,
   "deliverables": {
     "project": "project.json",
     "research": "research.json",
     "finalVoiceoverScript": "voiceover-script.txt",
     "visualPlan": "visual-plan.json",
     "shotPlan": "shot-plan.json",
-    "assetHandoff": "assets.json"
+    "assetHandoff": "assets.json",
+    "requiredBeforePhase2": [
+      "materialization.json",
+      "visual-qc.json",
+      "beat-bindings.json"
+    ]
   },
   "counts": {
     "cases": 5,
@@ -20,13 +25,13 @@
     "blockedMediaRecords": 2
   },
   "assetPolicy": {
-    "mode": "verified-source-urls",
+    "mode": "local-before-phase2",
     "officialSources": ["USGS", "NOAA Ocean Exploration", "NASA", "NASA Earth Observatory", "ISS Crew Earth Observations"],
     "stockUsed": false,
     "aiImagesUsed": false,
     "referenceVideoMediaUsed": false,
-    "binaryFilesCommitted": false,
-    "phase3Rule": "Antigravity may fetch only locked source/directMedia URLs from assets.json or create simple crops/frames/subclips derived from those same real assets. Any substitution requires a new Phase-1 review."
+    "phase3NetworkAllowed": false,
+    "phase3Rule": "Antigravity may use only locally materialized and approved Phase-1 assets plus deterministic crops/frames/subclips derived from those same assets. Any substitution returns the shot to Phase 1."
   },
   "assemblyPolicy": {
     "remotionRole": "assembly-only",
@@ -43,5 +48,5 @@
     "NOAA Ocean Today Bioluminescent Ocean as excerpted B-roll: blocked because its FAQ requires use in entirety and prohibits alteration/transformation.",
     "Third-party Chasing Sprites/TLE Chasers media on NASA SVS package: blocked because the page identifies it as copyrighted/used with permission."
   ],
-  "nextAction": "User creates the voiceover from voiceover-script.txt without changing the script and provides the final audio for Phase 3."
+  "nextAction": "Run beat:plan v3, phase1:materialize with local downloads, visual:qc, catalog/review, phase1:bind, then youtube:workflow phase1-check. Only then may the user voiceover be attached."
 }
