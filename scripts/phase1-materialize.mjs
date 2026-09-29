@@ -14,7 +14,7 @@ const projectId = slug(args.project || '');
 if (!projectId) fail('--project ist erforderlich.');
 const projectDir = path.join(root, 'projects', projectId);
 const planFile = path.resolve(args.plan || path.join(projectDir, 'shot-plan.json'));
-if (!fs.existsSync(planFile)) fail(`Shot-Plan fehlt: ${relative(planFile)}. Zuerst: npm run beat:plan -- --plan projects/${projectId}/visual-plan.json`);
+if (!fs.existsSync(planFile)) fail(`Shot-Plan fehlt: ${relative(planFile)}. Zuerst beat:plan ausführen.`);
 const plan = readJson(planFile);
 if (!Array.isArray(plan.shots) || !plan.shots.length) fail('shot-plan.json enthält keine Shots.');
 
@@ -26,18 +26,20 @@ const refresh = args.refresh === 'true';
 const outputFile = path.resolve(args.output || path.join(projectDir, 'materialization.json'));
 
 const report = {
-  version: 1,
+  version: 2,
   generatedAt: new Date().toISOString(),
   projectId,
   sourceShotPlan: relative(planFile),
   policy: {
     archiveFirst: true,
+    officialProviderOrder: ['nasa', 'noaa', 'usgs', 'library-of-congress'],
+    archiveProviderOrder: ['wikimedia', 'internet-archive'],
     stockFallbackOnly: true,
     autoApproveExternalMedia: false,
     eventIdentityStillRequiresReview: true,
     unknownRightsBlockedFromPublish: true,
     minimumEditorialScoreForSelection: 62,
-    note: 'Materializer findet und priorisiert konkrete Produktionsmedien. Automatische Auswahl ist nur eine redaktionelle Vorauswahl und ersetzt weder Ereignis- noch Rechteprüfung.'
+    note: 'Materializer priorisiert offizielle und archivierte Quellen. Automatische Vorauswahl ersetzt weder Ereignis- noch Rechteprüfung.'
   },
   beats: []
 };
@@ -47,16 +49,15 @@ for (const [index, shot] of plan.shots.entries()) {
   const beat = await materializeShot(shot);
   report.beats.push(beat);
   if (downloadTop > 0 && beat.selectedCandidateId) await downloadSelected(beat, downloadTop);
-  fs.mkdirSync(path.dirname(outputFile), { recursive: true });
-  fs.writeFileSync(outputFile, `${JSON.stringify(report, null, 2)}\n`);
+  saveReport();
 }
 
 report.completedAt = new Date().toISOString();
 report.summary = summarize(report.beats);
-fs.writeFileSync(outputFile, `${JSON.stringify(report, null, 2)}\n`);
+saveReport();
 console.log(`\nMaterialisierung: ${relative(outputFile)}`);
 console.log(`${report.summary.selected}/${report.summary.total} Beats mit Vorauswahl · ${report.summary.downloaded} Downloads · ${report.summary.blocked} blockiert`);
-console.log('Nächster Schritt: heruntergeladene Medien prüfen/importieren, danach phase1:bind.');
+console.log('Nächster Schritt: visual:qc → Inbox-Rechteprüfung → phase1:bind.');
 
 async function materializeShot(shot) {
   const mediaType = inferMediaType(shot);
@@ -66,34 +67,7 @@ async function materializeShot(shot) {
   const seen = new Set();
   const warnings = [];
 
-  if (shot.sourceUrl) {
-    candidates.push({
-      candidateId: `exact-source-${shot.id}`,
-      provider: 'exact-source',
-      providerTier: 'phase1-source',
-      providerId: null,
-      type: mediaType,
-      title: shot.visualIntent || shot.narrationAnchor || shot.id,
-      description: 'Exact source URL locked in Phase 1.',
-      sourceUrl: shot.sourceUrl,
-      previewUrl: null,
-      creator: null,
-      width: null,
-      height: null,
-      durationSeconds: null,
-      rights: rightsFromHint(shot.rightsHint),
-      editorialScore: 96,
-      editorialSignals: {
-        exactPhase1Source: true,
-        sourceTier: 'phase1-source',
-        genericStockPenalty: 0,
-        queryMatch: 'locked-source',
-        eventIdentityReviewRequired: true
-      },
-      downloadable: false,
-      ingestion: 'source-specific-or-manual'
-    });
-  }
+  if (shot.sourceUrl) candidates.push(exactSourceCandidate(shot, mediaType));
 
   for (const provider of providers) {
     const config = PROVIDERS[provider];
@@ -105,16 +79,9 @@ async function materializeShot(shot) {
     for (const query of queries.slice(0, 3)) {
       try {
         const result = await searchWithCache({
-          root,
-          provider,
-          type: mediaType,
-          query,
-          orientation: 'horizontal',
-          page: 1,
-          perPage: perProvider,
-          locale: 'de-DE',
-          language: 'de',
-          refresh
+          root, provider, type: mediaType, query,
+          orientation: 'horizontal', page: 1, perPage: perProvider,
+          locale: 'de-DE', language: 'de', refresh
         });
         for (const asset of result.assets || []) {
           const key = `${provider}:${asset.provider_id || asset.source_url || asset.title}`;
@@ -131,7 +98,11 @@ async function materializeShot(shot) {
   candidates.sort((a, b) => b.editorialScore - a.editorialScore || String(a.title).localeCompare(String(b.title)));
   const shortlisted = candidates.slice(0, limitPerBeat);
   const selected = shortlisted.find((candidate) => candidate.editorialScore >= 62 && candidate.rights?.license_status !== 'restricted') || null;
-  const status = !selected ? 'blocked-no-candidate' : selected.rights?.license_status === 'unknown' ? 'selected-needs-rights-review' : 'selected-needs-event-review';
+  const status = !selected
+    ? 'blocked-no-candidate'
+    : selected.rights?.license_status === 'unknown'
+      ? 'selected-needs-rights-review'
+      : 'selected-needs-event-review';
 
   console.log(`  Typ ${mediaType} · Provider ${providers.join(', ') || 'keine'} · Kandidaten ${shortlisted.length}`);
   if (selected) console.log(`  Vorauswahl [${selected.editorialScore}] ${selected.provider}: ${selected.title}`);
@@ -152,6 +123,29 @@ async function materializeShot(shot) {
     status,
     warnings,
     candidates: shortlisted
+  };
+}
+
+function exactSourceCandidate(shot, mediaType) {
+  return {
+    candidateId: `exact-source-${shot.id}`,
+    provider: 'exact-source',
+    providerTier: 'phase1-source',
+    providerId: null,
+    type: mediaType,
+    title: shot.visualIntent || shot.narrationAnchor || shot.id,
+    description: 'Exact source URL locked in Phase 1.',
+    sourceUrl: shot.sourceUrl,
+    previewUrl: null,
+    creator: null,
+    width: null,
+    height: null,
+    durationSeconds: null,
+    rights: rightsFromHint(shot.rightsHint),
+    editorialScore: 96,
+    editorialSignals: { exactPhase1Source: true, sourceTier: 'phase1-source', eventIdentityReviewRequired: true },
+    downloadable: false,
+    ingestion: 'source-specific-or-manual'
   };
 }
 
@@ -178,6 +172,7 @@ function scoreCandidate(asset, provider, config, shot, searchQuery) {
   score -= genericStockPenalty;
   if (shot.case && haystack.includes(String(shot.case).replace(/-/g, ' '))) score += 8;
   score = clamp(score, 0, 100);
+
   return {
     candidateId: `${provider}-${asset.provider_id || safeName(asset.title || asset.source_url)}`,
     provider,
@@ -215,8 +210,11 @@ function scoreCandidate(asset, provider, config, shot, searchQuery) {
 async function downloadSelected(beat, count) {
   const selectedIndex = beat.candidates.findIndex((item) => item.candidateId === beat.selectedCandidateId);
   if (selectedIndex < 0) return;
-  const queue = [beat.candidates[selectedIndex], ...beat.candidates.filter((_, i) => i !== selectedIndex)].filter((item) => item.downloadable).slice(0, count);
+  const queue = [beat.candidates[selectedIndex], ...beat.candidates.filter((_, i) => i !== selectedIndex)]
+    .filter((item) => item.downloadable)
+    .slice(0, count);
   beat.downloads = [];
+
   for (const candidate of queue) {
     const download = chooseDownload(candidate, 1920);
     if (!download) {
@@ -224,15 +222,14 @@ async function downloadSelected(beat, count) {
       continue;
     }
     try {
-      const downloaded = await downloadAsset({ root, asset: candidateToAsset(candidate), download, provider: candidate.provider });
-      const metadata = writeSourceMetadata({ root, downloaded, asset: candidateToAsset(candidate), provider: candidate.provider, query: beat.queries[0] || beat.visualIntent });
+      const asset = candidateToAsset(candidate);
+      const downloaded = await downloadAsset({ root, asset, download, provider: candidate.provider });
+      const metadata = writeSourceMetadata({ root, downloaded, asset, provider: candidate.provider, query: beat.queries[0] || beat.visualIntent });
       const analysis = analyzeDownloaded(downloaded.target);
       const bindingMetaDir = path.join(root, '.local-storage', 'beat-downloads');
       fs.mkdirSync(bindingMetaDir, { recursive: true });
       const sidecar = {
-        projectId,
-        beatId: beat.id,
-        candidateId: candidate.candidateId,
+        projectId, beatId: beat.id, candidateId: candidate.candidateId,
         editorialScore: candidate.editorialScore,
         downloadedFile: downloaded.relativePath,
         sourceMetadata: metadata,
@@ -279,14 +276,17 @@ function candidateToAsset(candidate) {
 function providersFor(shot, mediaType, stock) {
   const priority = shot.mediaPriority || [];
   const ordered = [];
-  const push = (...values) => values.forEach((value) => { if (!ordered.includes(value) && PROVIDERS[value]?.types.includes(mediaType)) ordered.push(value); });
+  const push = (...values) => values.forEach((value) => {
+    if (!ordered.includes(value) && PROVIDERS[value]?.types.includes(mediaType)) ordered.push(value);
+  });
+
   for (const item of priority) {
-    if (/official/.test(item)) push('nasa', 'library-of-congress');
+    if (/official/.test(item)) push('nasa', 'noaa', 'usgs', 'library-of-congress');
     if (/archive/.test(item)) push('wikimedia', 'internet-archive');
     if (/open-media/.test(item)) push('openverse');
     if (/stock/.test(item) && stock) push('pexels', 'pixabay');
   }
-  push('nasa', 'library-of-congress', 'wikimedia', 'internet-archive');
+  push('nasa', 'noaa', 'usgs', 'library-of-congress', 'wikimedia', 'internet-archive');
   if (mediaType === 'image') push('openverse');
   if (stock) push('pexels', 'pixabay');
   return ordered;
@@ -347,6 +347,7 @@ function summarize(beats) {
     eventReview: beats.filter((x) => x.status === 'selected-needs-event-review').length
   };
 }
+function saveReport() { fs.mkdirSync(path.dirname(outputFile), { recursive: true }); fs.writeFileSync(outputFile, `${JSON.stringify(report, null, 2)}\n`); }
 function tokens(value) { return unique(String(value || '').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').split(/[^a-z0-9]+/).filter((x) => x.length >= 3)).slice(0, 20); }
 function humanize(value) { return String(value || '').replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()); }
 function unique(values) { const seen = new Set(); const out = []; for (const value of values) { const text = String(value || '').trim(); const key = text.toLowerCase(); if (!text || seen.has(key)) continue; seen.add(key); out.push(text); } return out; }
@@ -358,4 +359,4 @@ function readJson(file) { try { return JSON.parse(fs.readFileSync(file, 'utf8'))
 function integer(value, min, max, label) { const n = Number(value); if (!Number.isInteger(n) || n < min || n > max) fail(`${label} muss zwischen ${min} und ${max} liegen.`); return n; }
 function parseArgs(values) { const result = { _: [] }; for (let i = 0; i < values.length; i++) { const token = values[i]; if (!token.startsWith('--')) { result._.push(token); continue; } const key = token.slice(2).replace(/-([a-z])/g, (_, c) => c.toUpperCase()); if (key === 'help') { result.help = true; continue; } const next = values[i + 1]; if (!next || next.startsWith('--')) fail(`Wert für ${token} fehlt.`); result[key] = next; i++; } return result; }
 function fail(message) { console.error(message); process.exit(1); }
-function help() { console.log(`Phase-1 Materializer\n\n  npm run phase1:materialize -- --project <id>\n  npm run phase1:materialize -- --project <id> --download-top 1\n\nFunktion:\n- liest shot-plan.json\n- sucht archive-first pro Beat\n- priorisiert Original-/Behörden-/Archivmaterial\n- bewertet Rechte, Auflösung und textuelle Ereignisnähe\n- kann Top-Kandidaten in die Review-Inbox laden\n- schreibt projects/<id>/materialization.json\n\nOptionen:\n  --include-stock true   Pexels/Pixabay nur als Fallback\n  --download-top 0..3   Top-Kandidaten pro Beat herunterladen\n  --refresh true        Provider-Cache umgehen\n\nExterne Medien werden nie automatisch für YouTube freigegeben.`); }
+function help() { console.log(`Phase-1 Materializer\n\n  npm run phase1:materialize -- --project <id>\n  npm run phase1:materialize -- --project <id> --download-top 1\n\nStandard ohne API-Key:\n  NASA → NOAA → USGS → Library of Congress → Wikimedia → Internet Archive → Openverse (Bilder)\n\nStock ist standardmäßig AUS. Mit --include-stock true folgen Pexels/Pixabay nur als Fallback.\nExterne Medien werden nie automatisch für YouTube freigegeben.`); }
