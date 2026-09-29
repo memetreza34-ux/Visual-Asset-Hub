@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "projectId": "5-naturphaenomene-wie-cgi-2min",
   "phase": 1,
   "status": "complete",
@@ -26,7 +26,18 @@
     "aiImagesUsed": false,
     "referenceVideoMediaUsed": false,
     "binaryFilesCommitted": false,
-    "phase3Rule": "Antigravity may fetch only the locked source/directMedia URLs from assets.json or create crops/frames/subclips derived from those same assets. Any substitution requires a new Phase-1 review."
+    "phase3Rule": "Antigravity may fetch only locked source/directMedia URLs from assets.json or create simple crops/frames/subclips derived from those same real assets. Any substitution requires a new Phase-1 review."
+  },
+  "assemblyPolicy": {
+    "remotionRole": "assembly-only",
+    "syntheticExplainerGraphics": false,
+    "automaticOverlays": false,
+    "centerTextCards": false,
+    "arrowsCirclesCallouts": false,
+    "particleOrElectronAnimations": false,
+    "largeAutomaticNumberOverlays": false,
+    "allowedDefaultActions": ["trim", "hard-cut", "crop", "reframe", "subtle-push", "subtle-pan", "vertical-sidefill"],
+    "explanationRule": "Use a real image, video, document or official diagram selected in Phase 1 instead of drawing the explanation in Remotion."
   },
   "blockedMedia": [
     "NOAA Ocean Today Bioluminescent Ocean as excerpted B-roll: blocked because its FAQ requires use in entirety and prohibits alteration/transformation.",
