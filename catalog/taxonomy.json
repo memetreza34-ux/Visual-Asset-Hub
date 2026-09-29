@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "assetTypes": [
     "video",
     "image",
@@ -47,7 +47,21 @@
   "cameraMovements": ["static", "pan", "tilt", "zoom", "dolly", "tracking", "handheld", "orbit", "drone", "screen-capture", "mixed", "not-applicable"],
   "styles": ["realistic", "cinematic", "documentary", "studio", "ugc", "minimal", "isometric-3d", "illustration-2d", "illustration-3d", "motion-graphics", "ui", "transparent-overlay", "texture", "mixed"],
   "usageScopes": ["organic-social", "paid-ads", "youtube", "website", "app", "presentation", "client-work", "editorial", "internal-only"],
-  "licenseStatuses": ["owned", "licensed", "public-domain", "cc0", "cc-by", "editorial-only", "restricted", "unknown"],
+  "licenseStatuses": [
+    "owned",
+    "licensed",
+    "public-domain",
+    "cc0",
+    "cc-by",
+    "cc-by-sa",
+    "cc-by-nd",
+    "cc-by-nc",
+    "cc-by-nc-sa",
+    "cc-by-nc-nd",
+    "editorial-only",
+    "restricted",
+    "unknown"
+  ],
   "lifecycleStatuses": ["inbox", "review", "approved", "restricted", "archived"],
   "qualityRatings": [1, 2, 3, 4, 5]
 }
