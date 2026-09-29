@@ -1,0 +1,161 @@
+{
+  "version": 1,
+  "projectId": "5-naturphaenomene-wie-cgi-2min",
+  "preparedAt": "2026-09-29",
+  "policy": {
+    "realMediaFirst": true,
+    "officialSourcesPreferred": true,
+    "doNotUseReferenceVideoMedia": true,
+    "doNotUseBlockedThirdPartyMedia": true,
+    "finalPublishRequiresRightsReview": true
+  },
+  "assets": [
+    {
+      "id": "volcanic-lightning-chaiten-usgs",
+      "case": "volcanic-lightning",
+      "type": "image",
+      "provider": "USGS",
+      "sourceUrl": "https://www.usgs.gov/media/images/chait-n-plume-lightning",
+      "directMediaUrl": "https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/vhp_img1416.jpg",
+      "credit": "U.S. Geological Survey / Volcano Hazards Program",
+      "intendedBeats": ["b01","b02","b03","b17"],
+      "reusePlan": "b02 full frame; b03 distinct tight crop/freeze only; montage frames may reuse briefly",
+      "rightsStatus": "review",
+      "publishScope": "blocked-until-review",
+      "notes": "Official USGS media page. Confirm exact Sources/Usage metadata before approving YouTube scope."
+    },
+    {
+      "id": "volcanic-lightning-usgs-explainer",
+      "case": "volcanic-lightning",
+      "type": "document",
+      "provider": "USGS",
+      "sourceUrl": "https://volcanoes.usgs.gov/volcanic_ash/lightning.html",
+      "credit": "U.S. Geological Survey",
+      "intendedBeats": ["b04"],
+      "reusePlan": "capture only the relevant lightning explanation heading/paragraph; 2-3 second editorial insert",
+      "rightsStatus": "review",
+      "publishScope": "blocked-until-review"
+    },
+    {
+      "id": "bioluminescent-ocean-noaa-master",
+      "case": "bioluminescence",
+      "type": "video",
+      "provider": "NOAA Ocean Today",
+      "sourceUrl": "https://oceantoday.noaa.gov/bioluminescentocean/",
+      "directMediaUrl": "https://cdn.oceanservice.noaa.gov/oceantodayprod/media/bioluminescentocean/otkn_820d_bioluminescentocean_lg.mp4",
+      "credit": "NOAA Ocean Today",
+      "intendedBeats": ["b01","b05","b06","b17"],
+      "reusePlan": "run clip:find after download; choose two visually distinct underwater 3-5 second subclips; mute source audio",
+      "rightsStatus": "review",
+      "publishScope": "blocked-until-review",
+      "notes": "Official NOAA-hosted 1280x720 downloadable master. Review credits for the exact selected segments before approval."
+    },
+    {
+      "id": "bioluminescence-noaa-still",
+      "case": "bioluminescence",
+      "type": "image-or-derived-frame",
+      "provider": "NOAA Ocean Exploration",
+      "sourceUrl": "https://oceanexplorer.noaa.gov/ocean-fact/bioluminescence/",
+      "credit": "Use exact credit printed on selected NOAA item",
+      "intendedBeats": ["b07"],
+      "reusePlan": "prefer a rights-cleared NOAA still; otherwise extract a frame from the approved NOAA master video",
+      "rightsStatus": "review",
+      "publishScope": "blocked-until-review"
+    },
+    {
+      "id": "lenticular-taieri-pet-nasa",
+      "case": "lenticular-clouds",
+      "type": "image",
+      "provider": "NASA Earth Observatory",
+      "sourceUrl": "https://science.nasa.gov/earth/earth-observatory/marvelous-lenticularis-153312/",
+      "directMediaUrl": "https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/imagerecords/153000/153312/nzcloud_oli_20240907_lrg.jpg?crop=faces%2Cfocalpoint&fit=clip&h=6406&w=6589",
+      "credit": "NASA Earth Observatory / Lauren Dauphin; Landsat data from U.S. Geological Survey",
+      "intendedBeats": ["b01","b08","b09","b17"],
+      "reusePlan": "b08 wide; b09 different mountain/cloud crop with one callout",
+      "rightsStatus": "review",
+      "publishScope": "blocked-until-review"
+    },
+    {
+      "id": "lenticular-oib-nasa",
+      "case": "lenticular-clouds",
+      "type": "image",
+      "provider": "NASA Operation IceBridge",
+      "sourceUrl": "https://espo.nasa.gov/image/Lenticular_clouds",
+      "credit": "NASA / John Sonntag",
+      "intendedBeats": ["b10"],
+      "reusePlan": "full-frame alternative perspective; gentle lateral pan",
+      "rightsStatus": "review",
+      "publishScope": "blocked-until-review"
+    },
+    {
+      "id": "red-sprite-iss-nasa",
+      "case": "red-sprites",
+      "type": "image",
+      "provider": "NASA Earth Observatory / ISS Crew Earth Observations",
+      "sourceUrl": "https://science.nasa.gov/earth/earth-observatory/red-sprites-above-the-us-and-central-america-86463/",
+      "directMediaUrl": "https://svs.gsfc.nasa.gov/vis/a010000/a014200/a014206/iss044e045576_lrg_2015.jpeg",
+      "credit": "NASA",
+      "intendedBeats": ["b01","b11","b12","b17"],
+      "reusePlan": "b11 wide ISS context; b12 tight sprite/thunderstorm crop",
+      "rightsStatus": "review",
+      "publishScope": "blocked-until-review",
+      "notes": "This specific ISS still is NASA-credit. Do not inherit rights assumptions from the other imagery on the SVS package."
+    },
+    {
+      "id": "red-sprite-second-nasa-still",
+      "case": "red-sprites",
+      "type": "image",
+      "provider": "NASA Earth Observatory / ISS Crew Earth Observations",
+      "sourceUrl": "https://science.nasa.gov/earth/earth-observatory/red-sprites-above-the-us-and-central-america-86463/",
+      "credit": "NASA / ISS Crew Earth Observations",
+      "intendedBeats": ["b13"],
+      "reusePlan": "use the second 2015 sprite photo on the NASA Earth Observatory page, not third-party ground imagery",
+      "rightsStatus": "review",
+      "publishScope": "blocked-until-review"
+    },
+    {
+      "id": "noctilucent-aim-nasa",
+      "case": "noctilucent-clouds",
+      "type": "image",
+      "provider": "NASA Earth Observatory / AIM",
+      "sourceUrl": "https://science.nasa.gov/earth/earth-observatory/noctilucent-clouds-8366/",
+      "directMediaUrl": "https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/imagerecords/8000/8366/npnoctilucent_aim_2007162_lrg.jpg?crop=faces%2Cfocalpoint&fit=clip&h=765&w=800",
+      "credit": "NASA Earth Observatory; Cloud Imaging and Particle Size Experiment data-processing team, University of Colorado LASP",
+      "intendedBeats": ["b01","b14","b17"],
+      "reusePlan": "main reveal; slow push",
+      "rightsStatus": "review",
+      "publishScope": "blocked-until-review"
+    },
+    {
+      "id": "noctilucent-iss-nasa",
+      "case": "noctilucent-clouds",
+      "type": "image",
+      "provider": "NASA / ISS",
+      "sourceUrl": "https://www.nasa.gov/image-article/noctilucent-clouds-as-seen-from-iss/",
+      "credit": "NASA",
+      "intendedBeats": ["b15"],
+      "reusePlan": "prefer this NASA-credit ISS image for the ≈80 km beat",
+      "rightsStatus": "review",
+      "publishScope": "blocked-until-review"
+    },
+    {
+      "id": "noctilucent-south-pacific-nasa",
+      "case": "noctilucent-clouds",
+      "type": "image",
+      "provider": "NASA Earth Observatory / ISS",
+      "sourceUrl": "https://science.nasa.gov/earth/earth-observatory/polar-mesospheric-clouds-south-pacific-ocean-80217/",
+      "credit": "NASA Earth Observatory / ISS Crew Earth Observations",
+      "intendedBeats": ["b16"],
+      "reusePlan": "use horizon contrast to explain sunlight reaching high clouds after ground-level sunset",
+      "rightsStatus": "review",
+      "publishScope": "blocked-until-review"
+    }
+  ],
+  "blockedMedia": [
+    {
+      "sourceUrl": "https://svs.gsfc.nasa.gov/14206",
+      "description": "Chasing Sprites / TLE Chasers third-party sprite footage and photos",
+      "reason": "NASA page explicitly states that the sprite imagery is copyrighted and used with permission. Do not use it in the final YouTube video without separate clearance."
+    }
+  ]
+}
