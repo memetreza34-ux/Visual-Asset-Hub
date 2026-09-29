@@ -215,7 +215,7 @@ test('NOAA and USGS providers are keyless official sources with conservative rig
   assert.match(noaa, /noaa-media-review/);
   assert.match(noaa, /suggested_status: 'review'/);
   assert.match(usgs, /usgs-public-domain/);
-  assert.match(usgs, /Public\s\+Domain/);
+  assert.match(usgs, /Public\\s\+Domain/);
   assert.match(usgs, /suggested_status: 'review'/);
 });
 
