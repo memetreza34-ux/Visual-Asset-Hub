@@ -34,7 +34,7 @@
     "visualExplanationRule": "If narration needs a visual explanation, Phase 1 must provide a real photo, video, document or official diagram instead of creating a synthetic Remotion explainer."
   },
   "phaseContract": {
-    "phase1": "ChatGPT: research, final script, multi-shot visual plan, download concrete real media locally, QC, rights review, catalog import and binding",
+    "phase1": "ChatGPT: research, final script, multi-shot visual plan, download concrete real media locally, quality QC, semantic QC, rights review, catalog import and binding",
     "phase2": "User: create and provide final voiceover from voiceover-script.txt only after strict phase1-check passes",
     "phase3": "Antigravity: NO network fetch; align user voiceover, trim/crop/cut only locally locked Phase-1 assets, apply subtle planned motion and render"
   },
@@ -47,9 +47,9 @@
     "blockedSourceRecords": 2,
     "binaryMediaCommittedToGit": false,
     "binaryMaterialization": "required-before-phase2",
-    "strictGate": "materialization.json + visual-qc.json + approved local catalog assets + beat-bindings.json",
+    "strictGate": "materialization.json + phase1-quality.json + visual-qc.json + approved local catalog assets + beat-bindings.json",
     "phase2Ready": false,
-    "nextAction": "Regenerate shot-plan with beat:plan v3, run phase1:materialize with local downloads, visual:qc, catalog/review, phase1:bind, then youtube:workflow phase1-check."
+    "nextAction": "Regenerate shot-plan with beat:plan v3, run phase1:materialize, phase1:quality, visual:qc, catalog/review, phase1:bind, then youtube:workflow phase1-check."
   },
   "cases": [
     "volcanic-lightning",
