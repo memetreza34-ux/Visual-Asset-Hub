@@ -15,20 +15,36 @@ Phase 1 ist abgeschlossen. Ab hier wird **keine Voiceover erzeugt und kein Video
 Die Nutzer-Voiceover ist die Master-Timeline. Antigravity darf:
 
 - die in `assets.json` festgelegten URLs/Dateien laden,
-- aus diesen Assets die in `shot-plan.json` vorgesehenen Crops, Freeze-Frames und Subclips erzeugen,
+- aus diesen realen Assets Crops, Standbilder und Subclips erzeugen,
 - die tatsächlichen Voiceover-Timings auf die 17 Beats legen,
-- harte Schnitte, subtile Push-ins, Callouts und kurze Quellenlabels umsetzen,
+- harte Schnitte, Trims, Reframing und sehr subtile Push-ins/Pans umsetzen,
+- vertikale Clips bei Bedarf sauber mit Sidefill darstellen,
 - anschließend das finale 1920×1080-Video rendern.
+
+### Remotion-Regel: Assembly only
+
+Remotion ist **kein Erklärgrafik-Generator**. Es darf das echte Material nur schneiden und dezent bewegen.
+
+Standardmäßig verboten:
+
+- mittige Titel-/Infokarten während des Videos,
+- automatisch erzeugte Pfeile, Kreise, Marker oder Callouts,
+- Elektronen-, Partikel-, Strom-, Wind- oder andere erfundene Erkläranimationen,
+- große Zahlen-Overlays nur weil im Sprechertext eine Zahl vorkommt,
+- künstliche Diagramme, wenn eine echte Quelle/Abbildung vorhanden ist,
+- generische Icon-/Dashboard-Szenen zwischen echten Aufnahmen.
+
+Wenn ein Sachverhalt visuell erklärt werden muss, muss Phase 1 dafür **ein echtes Foto, Video, Dokument oder offizielles Diagramm** bereitstellen. Die Voiceover darf Dinge erklären, ohne dass Remotion sie künstlich nachzeichnet.
 
 Antigravity darf **keine neue Story und keine beliebigen Ersatz-B-Rolls** suchen. Wenn ein festgelegtes Asset technisch nicht verfügbar ist, muss der Beat zurück in Phase 1.
 
 ## Bildwelt
 
-- Vulkanblitze: echtes USGS-Chaitén-Foto + kurzer USGS-Erklärseiten-Crop.
-- Biolumineszenz: zwei unterschiedliche NOAA-Ocean-Exploration-Videos (Dragonfish + Dana Octopus Squid), kein Ocean-Today-Subclip.
-- Lenticularwolken: NASA/USGS-Landsat + NASA Operation IceBridge.
-- Rote Sprites: ausschließlich NASA/ISS-Earth-Observatory-Stills; kein fremdes TLE-Chasers-Material.
-- Leuchtende Nachtwolken: NASA AIM + NASA/ISS-Earth-Observatory-Material.
+- Vulkanblitze: echtes USGS-Chaitén-Foto + kurzer echter USGS-Erklärseiten-Crop; keine Elektronen-/Asche-Partikelanimation.
+- Biolumineszenz: zwei unterschiedliche NOAA-Ocean-Exploration-Videos (Dragonfish + Dana Octopus Squid); Intro-/Logo-Slates werden übersprungen.
+- Lenticularwolken: NASA/USGS-Landsat + NASA Operation IceBridge; keine Windpfeile.
+- Rote Sprites: ausschließlich NASA/ISS-Earth-Observatory-Stills; keine Marker/Callouts und kein fremdes TLE-Chasers-Material.
+- Leuchtende Nachtwolken: NASA AIM + NASA/ISS-Earth-Observatory-Material; Höhenangaben bleiben in der Voiceover statt als große Zahl im Bild.
 
 ## Rechte-Regeln
 
