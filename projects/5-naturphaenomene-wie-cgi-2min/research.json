@@ -1,12 +1,13 @@
 {
-  "version": 1,
+  "version": 2,
   "projectId": "5-naturphaenomene-wie-cgi-2min",
   "researchedAt": "2026-09-29",
   "policy": {
     "factsFromPrimaryOrHighAuthoritySources": true,
     "visualsFromOfficialOrReviewableSources": true,
     "noReferenceVideoReuse": true,
-    "noUnreviewedCopyrightedSocialClips": true
+    "noUnreviewedCopyrightedSocialClips": true,
+    "noPartialUseWhenSourceTermsRequireWholeWork": true
   },
   "cases": [
     {
@@ -25,8 +26,8 @@
         "directMediaUrl": "https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/vhp_img1416.jpg",
         "provider": "USGS",
         "credit": "U.S. Geological Survey / Volcano Hazards Program",
-        "rightsStatus": "review",
-        "rightsNote": "Official USGS media page. Confirm Sources/Usage field for the exact item before YouTube approval."
+        "rightsStatus": "editorial-pass-with-credit",
+        "rightsNote": "USGS says its Multimedia Gallery is public domain unless otherwise noted. The selected item is an official Volcano Hazards Program image and no third-party copyright notice was found in the item page review. Credit USGS."
       },
       "fallbackVisualSources": [
         "https://www.usgs.gov/media/images/eyjafjallajokull-plume-lightning",
@@ -38,26 +39,35 @@
       "facts": [
         "NOAA defines bioluminescence as light produced by an organism through a chemical reaction.",
         "NOAA notes that bioluminescence is especially common in the ocean and is usually blue or blue-green because those wavelengths travel well through seawater.",
-        "NOAA Ocean Today provides a downloadable 1280x720 documentary video about the bioluminescent ocean."
+        "NOAA Ocean Exploration publishes downloadable expedition videos and states that its video portal footage is public domain; individual multimedia pages carry the required credit."
       ],
       "factSources": [
         "https://oceanexplorer.noaa.gov/ocean-fact/bioluminescence/",
         "https://oceanservice.noaa.gov/facts/biolum.html",
-        "https://oceantoday.noaa.gov/bioluminescentocean/"
+        "https://oceanexplorer.noaa.gov/about/media-kit/"
       ],
-      "primaryVisual": {
+      "primaryVisuals": [
+        {
+          "sourceUrl": "https://oceanexplorer.noaa.gov/multimedia/okeanos-explorations-ex1907-dailyupdates-nov4-media-dive04-dragonfish/",
+          "directMediaUrl": "https://oceanexplorer.noaa.gov/wp-content/uploads/2019/11/dive04-dragonfish-1280x720-1.mp4",
+          "provider": "NOAA Ocean Exploration",
+          "credit": "NOAA Ocean Exploration, 2019 Southeastern U.S. Deep-sea Exploration",
+          "rightsStatus": "editorial-pass-with-credit",
+          "rightsNote": "The NOAA Ocean Exploration item page marks this as NOAA Ocean Exploration media, offers direct SD/HD downloads, and contains no copyright notice. NOAA Ocean Exploration states portal footage is public domain and asks that the listed credit be included."
+        },
+        {
+          "sourceUrl": "https://oceanexplorer.noaa.gov/multimedia/video-shorts-ex1705-squid/",
+          "directMediaUrl": "https://oceanexplorer.noaa.gov/wp-content/uploads/2021/02/ex1705-squid.mp4",
+          "provider": "NOAA Ocean Exploration",
+          "credit": "NOAA Ocean Exploration, Mountains in the Deep: Exploring the Central Pacific Basin",
+          "rightsStatus": "editorial-pass-with-credit",
+          "rightsNote": "The item page identifies NOAA Ocean Exploration as the credit source, offers a direct MP4 download, and shows no copyright notice. Use the exact credit."
+        }
+      ],
+      "blockedVisual": {
         "sourceUrl": "https://oceantoday.noaa.gov/bioluminescentocean/",
-        "directMediaUrl": "https://cdn.oceanservice.noaa.gov/oceantodayprod/media/bioluminescentocean/otkn_820d_bioluminescentocean_lg.mp4",
-        "provider": "NOAA Ocean Today",
-        "credit": "NOAA Ocean Today",
-        "rightsStatus": "review",
-        "rightsNote": "Official NOAA-hosted downloadable video. Review exact production credits and any third-party segments before selecting final subclips."
-      },
-      "fallbackVisualSources": [
-        "https://oceanexplorer.noaa.gov/education/bioluminescence/",
-        "https://oceanexplorer.noaa.gov/multimedia/edu-resources-dsd-bioluminescence/",
-        "https://oceanexplorer.noaa.gov/expedition-19biolum-multimedia/"
-      ]
+        "reason": "Ocean Today permits sharing/embedding and use of nearly all videos in their entirety, but its FAQ says not to alter, transform, build upon, or extract footage. Therefore this produced video must not be cut into B-roll for this project."
+      }
     },
     {
       "id": "lenticular-clouds",
@@ -75,8 +85,8 @@
         "directMediaUrl": "https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/imagerecords/153000/153312/nzcloud_oli_20240907_lrg.jpg?crop=faces%2Cfocalpoint&fit=clip&h=6406&w=6589",
         "provider": "NASA Earth Observatory",
         "credit": "NASA Earth Observatory / Lauren Dauphin; Landsat data from USGS",
-        "rightsStatus": "review",
-        "rightsNote": "NASA/USGS-derived image. Verify NASA media usage guidance and any embedded third-party restrictions before approval."
+        "rightsStatus": "editorial-pass-with-credit",
+        "rightsNote": "NASA media are generally available for factual informational/editorial use with source acknowledgement, subject to third-party exceptions. This image is NASA Earth Observatory using USGS Landsat data."
       },
       "fallbackVisualSources": [
         "https://www.nasa.gov/image-article/a-particular-lenticular-cloud/",
@@ -95,18 +105,18 @@
         "https://science.nasa.gov/earth/earth-observatory/elusive-sprite-captured-from-the-international-space-station-78487/"
       ],
       "primaryVisual": {
-        "sourceUrl": "https://svs.gsfc.nasa.gov/14206",
+        "sourceUrl": "https://science.nasa.gov/earth/earth-observatory/red-sprites-above-the-us-and-central-america-86463/",
         "directMediaUrl": "https://svs.gsfc.nasa.gov/vis/a010000/a014200/a014206/iss044e045576_lrg_2015.jpeg",
-        "provider": "NASA Scientific Visualization Studio / ISS Crew Earth Observations",
-        "credit": "NASA",
-        "rightsStatus": "review",
-        "rightsNote": "Use only the NASA-credit ISS still identified in the asset plan. Do not use the other sprite footage on the SVS page because that page explicitly says those sprite images are copyrighted and used with permission."
+        "provider": "NASA Earth Observatory / ISS Crew Earth Observations",
+        "credit": "NASA / ISS Crew Earth Observations",
+        "rightsStatus": "editorial-pass-with-credit",
+        "rightsNote": "NASA Earth Observatory identifies these as astronaut photographs and states they are made freely available on the Internet. Use only the NASA/ISS stills from this page."
       },
       "blockedSources": [
         {
           "url": "https://svs.gsfc.nasa.gov/14206",
-          "scope": "Chasing Sprites/TLE Chasers footage except NASA ISS still",
-          "reason": "NASA page explicitly marks much of the sprite imagery as copyrighted and used with permission. Reference-only unless separately cleared."
+          "scope": "Chasing Sprites/TLE Chasers footage except specifically identified NASA ISS still",
+          "reason": "The NASA SVS package explicitly states that much of the ground sprite imagery is copyrighted and used with permission. Reference-only unless separately cleared."
         }
       ]
     },
@@ -120,18 +130,18 @@
       "factSources": [
         "https://science.nasa.gov/missions/aim/nasa-noctilucent-clouds/",
         "https://science.nasa.gov/earth/earth-observatory/noctilucent-clouds-8366/",
-        "https://www.nasa.gov/image-article/space-station-view-of-noctilucent-clouds/"
+        "https://www.nasa.gov/image-article/noctilucent-clouds-as-seen-from-iss/"
       ],
       "primaryVisual": {
         "sourceUrl": "https://science.nasa.gov/earth/earth-observatory/noctilucent-clouds-8366/",
         "directMediaUrl": "https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/imagerecords/8000/8366/npnoctilucent_aim_2007162_lrg.jpg?crop=faces%2Cfocalpoint&fit=clip&h=765&w=800",
         "provider": "NASA Earth Observatory / AIM",
         "credit": "NASA Earth Observatory; Cloud Imaging and Particle Size Experiment team, University of Colorado LASP",
-        "rightsStatus": "review",
-        "rightsNote": "NASA page credits a university data-processing team. Keep attribution and verify exact reuse terms before approval."
+        "rightsStatus": "editorial-pass-with-attribution-review",
+        "rightsNote": "NASA informational/editorial media guidance applies, but retain the University of Colorado LASP data-processing credit shown by NASA."
       },
       "fallbackVisualSources": [
-        "https://www.nasa.gov/image-article/night-shining-clouds/",
+        "https://www.nasa.gov/image-article/noctilucent-clouds-as-seen-from-iss/",
         "https://science.nasa.gov/earth/earth-observatory/polar-mesospheric-clouds-south-pacific-ocean-80217/"
       ]
     }
