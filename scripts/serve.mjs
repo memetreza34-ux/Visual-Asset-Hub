@@ -7,6 +7,7 @@ import { PROVIDERS } from './lib/providers/index.mjs';
 import { chooseDownload, downloadAsset, loadDotEnv, searchWithCache, writeSourceMetadata } from './lib/source-utils.mjs';
 
 const root = process.cwd();
+const packageVersion = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8')).version;
 const host = process.env.HOST || '127.0.0.1';
 const port = Number(process.env.PORT || 4173);
 const inboxRoot = path.join(root, 'inbox');
@@ -41,7 +42,7 @@ async function handleApi(request, response, url) {
   response.setHeader('Cache-Control', 'no-store');
 
   if (request.method === 'GET' && url.pathname === '/api/health') {
-    return sendJson(response, 200, { ok: true, writeApiEnabled, host, version: '0.16' });
+    return sendJson(response, 200, { ok: true, writeApiEnabled, host, version: packageVersion });
   }
   if (request.method === 'GET' && url.pathname === '/api/sources') {
     const providers = Object.fromEntries(Object.entries(PROVIDERS).map(([name, config]) => [name, {
