@@ -2,13 +2,14 @@
 
 ## Status
 
-Recherche, Skript und redaktionelle Bildwelt sind vorbereitet. **Phase 1 ist nach Workflow v3 noch nicht abgeschlossen**, bis alle Produktionsmedien lokal materialisiert, geprüft, in den Katalog aufgenommen und an die geplanten Shots gebunden wurden.
+Recherche, Skript und redaktionelle Bildwelt sind vorbereitet. **Phase 1 ist nach Workflow v3 noch nicht abgeschlossen**, bis alle Produktionsmedien lokal materialisiert, qualitativ geprüft, rechtegeprüft, in den Katalog aufgenommen und an die geplanten Shots gebunden wurden.
 
 ## Phase 1 v3 — noch auszuführen
 
 ```bash
 npm run beat:plan -- --plan projects/5-naturphaenomene-wie-cgi-2min/visual-plan.json
 npm run phase1:materialize -- --project 5-naturphaenomene-wie-cgi-2min --download-top 1
+npm run phase1:quality -- --project 5-naturphaenomene-wie-cgi-2min
 npm run visual:qc -- --project 5-naturphaenomene-wie-cgi-2min
 # Download-Inbox prüfen/importieren und Rechte bestätigen
 npm run phase1:bind -- auto --project 5-naturphaenomene-wie-cgi-2min
@@ -85,7 +86,8 @@ Wenn ein Sachverhalt visuell erklärt werden muss, muss Phase 1 ein echtes Foto,
 - `shot-plan.json` — v3 Multi-Shot-Plan
 - `assets.json` — geprüfte Quellenliste
 - `materialization.json` — lokale Phase-1-Downloads
-- `visual-qc.json` — technische/semantische QC
+- `phase1-quality.json` — technische/Bildqualitäts-Signale
+- `visual-qc.json` — kombinierte Relevanz-/Qualitäts-/Rechte-QC
 - `beat-bindings.json` — gebundene Produktionsassets
 - `timings.json` — echte Voiceover-Beats
 - `phase3-handoff.json` — lokale Antigravity-Timeline
