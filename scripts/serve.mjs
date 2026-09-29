@@ -56,7 +56,7 @@ async function handleApi(request, response, url) {
     requireWriteApi(request);
     const body = await readJsonBody(request);
     const provider = String(body.provider || 'nasa').toLowerCase();
-    const type = body.type || (provider === 'openverse' ? 'image' : 'video');
+    const type = body.type || defaultProviderType(provider);
     const result = await searchWithCache({
       root,
       provider,
@@ -75,7 +75,7 @@ async function handleApi(request, response, url) {
     requireWriteApi(request);
     const body = await readJsonBody(request);
     const provider = String(body.provider || 'nasa').toLowerCase();
-    const type = body.type || (provider === 'openverse' ? 'image' : 'video');
+    const type = body.type || defaultProviderType(provider);
     const query = String(body.query || '').trim();
     const pick = boundedInteger(body.pick, 1, 200, 1);
     const perPage = Math.max(pick, boundedInteger(body.perPage, 1, provider === 'pixabay' ? 200 : 100, 20));
@@ -243,6 +243,10 @@ function readJsonBody(request) {
     request.on('end', () => { try { resolve(body ? JSON.parse(body) : {}); } catch { reject(new Error('Ungültiges JSON.')); } });
     request.on('error', reject);
   });
+}
+function defaultProviderType(provider) {
+  const types = PROVIDERS[provider]?.types || [];
+  return types.includes('video') ? 'video' : (types[0] || 'image');
 }
 function boundedInteger(value, min, max, fallback) { const number = value === undefined || value === null || value === '' ? fallback : Number(value); if (!Number.isInteger(number) || number < min || number > max) throw new Error(`Zahl muss zwischen ${min} und ${max} liegen.`); return number; }
 function providerLabel(value) { return ({ pexels: 'Pexels', pixabay: 'Pixabay', openverse: 'Openverse', europeana: 'Europeana', smithsonian: 'Smithsonian Open Access', nara: 'National Archives Catalog', wikimedia: 'Wikimedia Commons', 'internet-archive': 'Internet Archive', nasa: 'NASA Image & Video Library', noaa: 'NOAA', usgs: 'U.S. Geological Survey', 'library-of-congress': 'Library of Congress' })[value] || String(value || 'Quelle'); }
