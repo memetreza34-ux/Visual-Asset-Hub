@@ -1,132 +1,176 @@
-# Editorial Shot Planning
+# Editorial Shot Planning — Workflow v3
 
 ## Ziel
 
-Der Workflow soll dynamische faceless Story-Dokus/Listicles erzeugen, bei denen **echtes Material und die Aussage des Sprechertextes** den Schnitt bestimmen. Remotion ist Schnitt-/Motion-Schicht, nicht die Quelle der Geschichte.
+Dynamische faceless Story-Dokus/Listicles, bei denen **echtes Material und die Aussage des Sprechertexts** den Schnitt bestimmen. Remotion/Antigravity ist Assembly-/Motion-Schicht, nicht die Quelle der Geschichte.
 
 ## Reihenfolge
 
 ```text
 research.json
   ↓
-visual-plan.json
+voiceover-script.txt + visual-plan.json
   ↓
 beat:plan
   ↓
-shot-plan.json
+shot-plan.json (1 Beat → 1..n Shots)
   ↓
-Assets / Maps / Freeze-Frames / Artikel-Inserts vorbereiten
+phase1:materialize
+  ↓
+phase1:quality
+  ↓
+visual:qc
+  ↓
+Rechte/Katalog + beat-bindings.json
+  ↓
+STRICT PHASE-1 LOCK
   ↓
 Nutzer-Voiceover
   ↓
-Timings
+voiceover:align
   ↓
-project.json / render-manifest.json
+timings.json
   ↓
-Remotion
+phase3:prepare
+  ↓
+phase3-handoff.json + render-manifest.json
+  ↓
+lokale Assembly / Render
 ```
 
-## Regeln
+## Kernregeln
 
-1. **Phase-1-Intent gewinnt.** Der Beat Planner darf keine neue Geschichte erfinden.
-2. **Originalmaterial vor Stock.** Exaktes Ereignis-/Originalmaterial, offizielle Archive und Dokumente haben Vorrang.
-3. **Stock ist Fallback.** Generische B-Roll wird verworfen, wenn exaktes Material existiert.
-4. **Rechte bleiben ein eigenes Gate.** Ein hoher CLIP- oder Research-Score ist keine Nutzungsfreigabe.
-5. **Voiceover bleibt Master.** Die Timeline richtet sich nach der vom Nutzer gelieferten Audio.
-6. **Kurze Visual-Beats.** Der Referenzstil kann über `reference:style` Shot-Längen/Cuts pro Minute liefern.
+1. **Phase-1-Intent gewinnt.** Der Planner darf keine neue Geschichte erfinden.
+2. **Mehrere Shots pro Beat sind erlaubt.** Ein längerer Sprecher-Beat kann mehrere kurze reale Bilder/Clips/Crops enthalten.
+3. **Originalmaterial vor Stock.** Exaktes Ereignis-/Originalmaterial, offizielle Archive und Dokumente haben Vorrang.
+4. **Stock ist Fallback.** Generische B-Roll wird verworfen, wenn exaktes Material existiert.
+5. **Rechte sind ein eigenes Gate.** Research-, CLIP- oder Quality-Score ist keine Nutzungsfreigabe.
+6. **Voiceover bleibt Master.** Die Timeline richtet sich nach der Nutzer-Audio.
+7. **Phase 3 ist offline.** Keine Runtime-Suche und kein Medien-Nachladen.
+8. **Keine synthetischen Erklärgrafiken als Standard.** Wenn eine Erklärung ein Visual braucht, muss Phase 1 reales Material oder eine offizielle Abbildung liefern.
+
+## Multi-Shot pro Sprecher-Beat
+
+Explizit:
+
+```json
+{
+  "id": "b03",
+  "narrationAnchor": "...",
+  "shots": [
+    {
+      "visualType": "official-archive-video",
+      "visual": "wide eruption shot",
+      "sourceUrl": "https://...",
+      "directMediaUrl": "https://.../clip.mp4"
+    },
+    {
+      "visualType": "detail-crop",
+      "visual": "tight crop of ash plume",
+      "focus": { "x": 70, "y": 35 }
+    }
+  ]
+}
+```
+
+Alternativ kann `shotCount` gesetzt werden. Ohne explizite Vorgabe erzeugt der Planner bei Montagen, Vergleichen und längeren Visual-Intents mehrere Varianten.
+
+Jeder Output-Shot besitzt:
+
+- eigene `id`
+- `beatId`
+- `shotIndex`
+- `shotCount`
+- `visualIntent`
+- Quellen-/Rechtehinweis
+- Renderer-Präsentation
+- geplante Bewegung/Focal Point
+- Qualitäts-Gate
 
 ## Präsentationsmodi
 
-- `auto` – normales Foto/Video, dokumentarische Bewegung
-- `vertical-blur` – vertikaler Internet-/Handyclips mit unscharfem 16:9-Sidefill
-- `contain` – Medien vollständig zeigen
-- `article` – Screenshot einer News-/Webseite, Fokus auf oberen Artikelbereich
-- `document` – Bericht/PDF/Screenshot mit langsamer Dokumentfahrt
-- `map` – statische Doku-Karte mit Zoom/Callout
-- `freeze-frame` – vorbereitetes Standbild/Preview statt weiterlaufendem Video
-- `headline` – echtes Material bleibt Hintergrund, kurze starke Headline darüber
+- `auto` — normales Foto/Video
+- `vertical-blur` — vertikaler Clip mit 16:9-Sidefill
+- `contain` — Medium vollständig zeigen
+- `article` — echter Webseiten-/Artikel-Crop
+- `document` — echter Bericht/PDF/Screenshot
+- `map` — vorbereitete echte/statische Karte
+- `freeze-frame` — Standbild aus freigegebenem Parent-Asset
+- `headline` — nur explizit redaktionell freigegeben; kein Default
 
 ## Overlays
 
-Der Renderer unterstützt:
+Overlays sind **nicht automatisch**. Der Planner übernimmt höchstens explizite `source`, `label` oder `number`-Angaben aus Phase 1. Generische Callouts, Pfeile, Kreise, Kapitelkarten oder mittige Infokarten werden nicht erfunden.
 
-- `label` – kurze Einordnung, z. B. `NOAA N-Prime · 2003`
-- `headline` – kurze zentrale Aussage
-- `number` – Impact-Zahl wie `135 MIO. $`
-- `callout` – punktgenaue Markierung mit x/y-Position
-- `source` – dezentes Quellenlabel
+## Focal Point + Motion
 
-Keine Absatzkarten und keine langen Dashboard-Texte.
+Phase 1 kann den Bildfokus definieren:
 
-## Beat Planner
-
-```bash
-npm run beat:plan -- --plan projects/<id>/visual-plan.json
+```json
+{
+  "focus": { "x": 78, "y": 31 },
+  "motion": "subtle push toward sprite"
+}
 ```
 
-Mit Referenzstil:
+Im Render-Manifest wird daraus eine deterministische Motion-Spezifikation. Unterstützt werden unter anderem:
+
+- `static`
+- `push`
+- `pull`
+- `pan-left`
+- `pan-right`
+- `pan-up`
+- `pan-down`
+
+Der Renderer verwendet **keine zufällige Bewegungsrichtung** mehr.
+
+## Lokale Materialisierung
 
 ```bash
-npm run beat:plan -- \
-  --plan projects/<id>/visual-plan.json \
-  --style-profile .local-storage/reference-style/reference/style-profile.json
+npm run phase1:materialize -- --project <id> --download-top 1
+npm run phase1:quality -- --project <id>
+npm run visual:qc -- --project <id>
 ```
 
-Der Output `shot-plan.json` enthält pro Beat:
-
-- redaktionellen Visual-Typ
-- Medienpriorität
-- Ziel-Shotlänge
-- Renderer-Modus
-- Transition
-- Overlays
-- Preprocessing-Anweisungen
-- Qualitäts-Gate
-
-## Maps
+Bekannte `directMediaUrl`-Dateien werden in Phase 1 lokal heruntergeladen. Danach folgen Rechte-/Katalogprüfung und Binding.
 
 ```bash
-npm run map:render -- \
-  --center "2.35,48.86" \
-  --zoom 5 \
-  --marker "2.35,48.86,Paris" \
-  --title "Frankreich" \
-  --to-inbox true
+npm run phase1:bind -- auto --project <id>
+npm run youtube:workflow -- phase1-check --project <id>
 ```
 
-MapLibre + OpenFreeMap; OpenStreetMap-Attribution bleibt erforderlich.
-
-## Freeze Frames
+## Phase 3
 
 ```bash
-npm run frame:extract -- --asset VAH-XXXXXXXX --at 12.4
+npm run voiceover:align -- --project <id> --model ./models/ggml-small.bin
+npm run phase3:prepare -- --project <id>
 ```
 
-Der Frame übernimmt die Rechte-/Quelleninformationen des Parent-Assets, bleibt aber erneut `review`.
+`phase3:prepare` verteilt mehrere Shots deterministisch innerhalb des echten Beat-Timings. Ist ein Beat zu kurz für die geplante Shot-Anzahl, wird geblockt statt eine fehlerhafte Timeline zu erzeugen.
 
-## Projekt-Szene
+Der Handoff setzt zwingend:
 
-```bash
-npm run video:project -- add \
-  --project <id> \
-  --asset VAH-XXXXXXXX \
-  --duration 5 \
-  --presentation map \
-  --transition cut \
-  --label "Frankreich · 2014" \
-  --number-text "≈ 50 MIO. €" \
-  --callout "Bahnsteigkante" \
-  --callout-x 63 \
-  --callout-y 44 \
-  --source-label "Assemblée nationale"
+```json
+{
+  "networkAllowed": false,
+  "phase1AssetsOnly": true,
+  "randomReplacementBroll": false,
+  "syntheticExplainerGraphics": false
+}
 ```
 
-## Ziel
+## Maps und Freeze Frames
+
+Maps und Freeze Frames werden **vor** dem finalen Render als konkrete Assets vorbereitet und durchlaufen erneut Review. Sie sind keine frei erfundenen Phase-3-Visuals.
+
+## Zielbild
 
 Ein fertiges Video soll wie eine redaktionell geschnittene Doku wirken:
 
 - echte Clips/Bilder dominieren
-- Dokumente/Headlines nur als kurze Beweise
+- mehrere kurze Shots pro Sprecherabschnitt sind möglich
+- Dokumente/Artikel nur als kurze Belege
 - Karten nur wenn räumliche Erklärung nötig ist
-- Freeze/Callout nur für entscheidende Details
-- harte Cuts und kurze Inserts statt langer Präsentationsfolien
+- harte Cuts und gezielte Reframes statt Präsentationsfolien
+- keine synthetischen Lückenfüller
