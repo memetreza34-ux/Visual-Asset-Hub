@@ -11,13 +11,20 @@ function read(file) {
   return fs.readFileSync(path.join(root, file), 'utf8');
 }
 
-test('open-source toolbox parses and is exposed through package scripts', () => {
-  const result = spawnSync(process.execPath, ['--check', 'scripts/open-source-toolchain.mjs'], { cwd: root, encoding: 'utf8' });
-  assert.equal(result.status, 0, result.stderr || result.stdout);
+function check(file) {
+  return spawnSync(process.execPath, ['--check', file], { cwd: root, encoding: 'utf8' });
+}
+
+test('open-source toolbox and Phase 1 quality pass parse and are exposed', () => {
+  for (const file of ['scripts/open-source-toolchain.mjs', 'scripts/phase1-quality-pass.mjs']) {
+    const result = check(file);
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+  }
   const pkg = JSON.parse(read('package.json'));
   assert.equal(pkg.scripts.tools, 'node scripts/open-source-toolchain.mjs');
   assert.equal(pkg.scripts['tools:doctor'], 'node scripts/open-source-toolchain.mjs doctor');
   assert.equal(pkg.scripts['research:extract'], 'node scripts/open-source-toolchain.mjs research-extract');
+  assert.equal(pkg.scripts['phase1:quality'], 'node scripts/phase1-quality-pass.mjs');
   assert.equal(pkg.scripts['image:prepare'], 'node scripts/open-source-toolchain.mjs image-prepare');
   assert.equal(pkg.scripts['audio:prepare'], 'node scripts/open-source-toolchain.mjs audio-prepare');
   assert.equal(pkg.scripts['final:qc'], 'node scripts/open-source-toolchain.mjs final-qc');
@@ -35,6 +42,19 @@ test('toolbox integrates light open-source quality tools with graceful fallbacks
   assert.match(source, /libvmaf/);
   assert.match(source, /optionalToolsNeverBlockNormalWorkflow: true/);
   assert.match(source, /heavyAiToolsDefaultOff: true/);
+  assert.match(source, /name === 'ffmpeg' \|\| name === 'ffprobe'/);
+  assert.match(source, /return \['-version'\]/);
+});
+
+test('Phase 1 quality pass is lightweight by default and deep mode is opt-in', () => {
+  const source = read('scripts/phase1-quality-pass.mjs');
+  assert.match(source, /defaultPassIsLightweight: true/);
+  assert.match(source, /deepToolsOptIn: true/);
+  assert.match(source, /image-quality/);
+  assert.match(source, /asset-memory-index/);
+  assert.match(source, /visual-dedupe/);
+  assert.match(source, /args\.deep === 'true'/);
+  assert.match(source, /qualityDoesNotGrantRights: true/);
 });
 
 test('safe fetch requires an explicit rights-cleared gate', () => {
