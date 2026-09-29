@@ -98,7 +98,7 @@ function mapRights(uri, item) {
     attribution_text: provider,
     suggested_status: 'review'
   };
-  if (/creativecommons\.org\/publicdomain\/zero|creativecommons\.org\/publicdomain\/mark|rightsstatements\.org\/vocab\/noc/.test(value)) {
+  if (/creativecommons\.org\/publicdomain\/zero|creativecommons\.org\/publicdomain\/mark/.test(value)) {
     return {
       ...base,
       license_status: 'public-domain',
@@ -109,13 +109,25 @@ function mapRights(uri, item) {
     };
   }
   if (/creativecommons\.org\/licenses\//.test(value)) {
+    const code = ccCode(value);
+    const restricted = /-nc(?:-|$)|-nd(?:-|$)/.test(code);
+    if (restricted) {
+      return {
+        ...base,
+        license_status: 'restricted',
+        license_code: code,
+        attribution_required: true,
+        suggested_scopes: ['internal-only'],
+        warning: 'Diese Creative-Commons-Lizenz enthält NC und/oder ND. Sie wird für den normalen YouTube-Produktionsworkflow blockiert, bis eine bewusste Rechteprüfung etwas anderes ergibt.'
+      };
+    }
     return {
       ...base,
       license_status: 'licensed',
-      license_code: ccCode(value),
-      attribution_required: !/\/zero\//.test(value),
+      license_code: code,
+      attribution_required: true,
       suggested_scopes: ['youtube', 'website', 'organic-social', 'client-work'],
-      warning: 'Europeana meldet eine Creative-Commons-Lizenz. Exakte Version, Attribution und mögliche NC/ND-Einschränkungen vor Veröffentlichung prüfen.'
+      warning: 'Europeana meldet eine offene Creative-Commons-Lizenz ohne erkannte NC/ND-Beschränkung. Exakte Version, Attribution und Original-Datenprovider trotzdem prüfen.'
     };
   }
   return {
