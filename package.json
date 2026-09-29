@@ -1,6 +1,6 @@
 {
   "name": "visual-asset-hub",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "private": true,
   "type": "module",
   "engines": { "node": ">=22" },
@@ -25,6 +25,7 @@
     "phase1:materialize": "node scripts/phase1-materialize.mjs",
     "phase1:quality": "node scripts/phase1-quality-pass.mjs",
     "phase1:bind": "node scripts/phase1-bind.mjs",
+    "rights:evidence": "node scripts/rights-evidence.mjs",
     "phase3:prepare": "node scripts/phase3-prepare.mjs",
     "map:render": "node scripts/map-render.mjs",
     "frame:extract": "node scripts/frame-extract.mjs",
