@@ -11,7 +11,7 @@ if (args.help) { help(); process.exit(0); }
 
 const provider = String(args.provider || 'wikimedia').toLowerCase();
 if (!PROVIDERS[provider]) fail(`Provider unbekannt: ${provider}`);
-const type = args.type || (provider === 'openverse' ? 'image' : 'video');
+const type = args.type || defaultType(provider);
 const query = (args.query || args._.join(' ')).trim();
 if (!query) fail('Suchbegriff fehlt.');
 const perPage = integer(args.perPage || '20', 1, provider === 'pixabay' ? 200 : 100, 'per-page');
@@ -46,6 +46,10 @@ try {
   fail(error instanceof Error ? error.message : String(error));
 }
 
+function defaultType(provider) {
+  const types = PROVIDERS[provider]?.types || [];
+  return types.includes('video') ? 'video' : (types[0] || 'image');
+}
 function parseArgs(values) {
   const result = { _: [] };
   for (let i = 0; i < values.length; i++) {
@@ -63,5 +67,5 @@ function integer(value, min, max, label) { const n = Number(value); if (!Number.
 function safeName(value) { return String(value).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'search'; }
 function fail(message) { console.error(message); process.exit(1); }
 function help() {
-  console.log(`Visual Asset Hub – Quellenübergreifende Suche\n\nOffizielle/Archiv-Beispiele:\n  npm run source:search -- "Kilauea eruption" --provider usgs --type image\n  npm run source:search -- "hurricane satellite" --provider noaa --type image\n  npm run source:search -- "Apollo 11" --provider nasa --type video\n  npm run source:search -- "historic factory accident" --provider internet-archive --type video\n  npm run source:search -- "circuit board" --provider openverse --type image\n\nStock-Fallbacks:\n  npm run source:search -- "factory automation" --provider pexels --type video\n  npm run source:search -- "electrical technician" --provider pixabay --type video\n\nProvider ohne Key:\n  nasa | noaa | usgs | library-of-congress | wikimedia | internet-archive | openverse\n\nStock mit Key:\n  pexels | pixabay\n\nFür Doku-Recherche über mehrere Archive nutze documentary:research.`);
+  console.log(`Visual Asset Hub – Quellenübergreifende Suche\n\nBeispiele:\n  npm run source:search -- "Kilauea eruption" --provider usgs --type image\n  npm run source:search -- "Apollo spacesuit" --provider smithsonian\n  npm run source:search -- "Berlin 1945" --provider europeana --type image\n  npm run source:search -- "Apollo 11" --provider nara --type image\n\nKeylos:\n  nasa | noaa | usgs | library-of-congress | wikimedia | internet-archive | openverse\n\nOptionale kostenlose Keys:\n  nara (NARA_API_KEY) | smithsonian (SMITHSONIAN_API_KEY, Bilder) | europeana (EUROPEANA_API_KEY)\n\nStock-Fallback:\n  pexels | pixabay\n\nFür Doku-Recherche über mehrere Archive nutze documentary:research.`);
 }
