@@ -26,20 +26,21 @@ const refresh = args.refresh === 'true';
 const outputFile = path.resolve(args.output || path.join(projectDir, 'materialization.json'));
 
 const report = {
-  version: 2,
+  version: 3,
   generatedAt: new Date().toISOString(),
   projectId,
   sourceShotPlan: relative(planFile),
   policy: {
     archiveFirst: true,
-    officialProviderOrder: ['nasa', 'noaa', 'usgs', 'library-of-congress'],
-    archiveProviderOrder: ['wikimedia', 'internet-archive'],
+    officialProviderOrder: ['nasa', 'noaa', 'usgs', 'nara', 'smithsonian', 'library-of-congress'],
+    archiveProviderOrder: ['europeana', 'wikimedia', 'internet-archive'],
+    optionalKeyProviders: ['nara', 'smithsonian', 'europeana'],
     stockFallbackOnly: true,
     autoApproveExternalMedia: false,
     eventIdentityStillRequiresReview: true,
     unknownRightsBlockedFromPublish: true,
     minimumEditorialScoreForSelection: 62,
-    note: 'Materializer priorisiert offizielle und archivierte Quellen. Automatische Vorauswahl ersetzt weder Ereignis- noch Rechteprüfung.'
+    note: 'Materializer priorisiert offizielle und archivierte Quellen. Kostenlose Key-Provider werden nur genutzt, wenn der jeweilige Key vorhanden ist. Automatische Vorauswahl ersetzt weder Ereignis- noch Rechteprüfung.'
   },
   beats: []
 };
@@ -281,12 +282,12 @@ function providersFor(shot, mediaType, stock) {
   });
 
   for (const item of priority) {
-    if (/official/.test(item)) push('nasa', 'noaa', 'usgs', 'library-of-congress');
-    if (/archive/.test(item)) push('wikimedia', 'internet-archive');
+    if (/official/.test(item)) push('nasa', 'noaa', 'usgs', 'nara', 'smithsonian', 'library-of-congress');
+    if (/archive/.test(item)) push('europeana', 'wikimedia', 'internet-archive');
     if (/open-media/.test(item)) push('openverse');
     if (/stock/.test(item) && stock) push('pexels', 'pixabay');
   }
-  push('nasa', 'noaa', 'usgs', 'library-of-congress', 'wikimedia', 'internet-archive');
+  push('nasa', 'noaa', 'usgs', 'nara', 'smithsonian', 'library-of-congress', 'europeana', 'wikimedia', 'internet-archive');
   if (mediaType === 'image') push('openverse');
   if (stock) push('pexels', 'pixabay');
   return ordered;
@@ -359,4 +360,4 @@ function readJson(file) { try { return JSON.parse(fs.readFileSync(file, 'utf8'))
 function integer(value, min, max, label) { const n = Number(value); if (!Number.isInteger(n) || n < min || n > max) fail(`${label} muss zwischen ${min} und ${max} liegen.`); return n; }
 function parseArgs(values) { const result = { _: [] }; for (let i = 0; i < values.length; i++) { const token = values[i]; if (!token.startsWith('--')) { result._.push(token); continue; } const key = token.slice(2).replace(/-([a-z])/g, (_, c) => c.toUpperCase()); if (key === 'help') { result.help = true; continue; } const next = values[i + 1]; if (!next || next.startsWith('--')) fail(`Wert für ${token} fehlt.`); result[key] = next; i++; } return result; }
 function fail(message) { console.error(message); process.exit(1); }
-function help() { console.log(`Phase-1 Materializer\n\n  npm run phase1:materialize -- --project <id>\n  npm run phase1:materialize -- --project <id> --download-top 1\n\nStandard ohne API-Key:\n  NASA → NOAA → USGS → Library of Congress → Wikimedia → Internet Archive → Openverse (Bilder)\n\nStock ist standardmäßig AUS. Mit --include-stock true folgen Pexels/Pixabay nur als Fallback.\nExterne Medien werden nie automatisch für YouTube freigegeben.`); }
+function help() { console.log(`Phase-1 Materializer\n\n  npm run phase1:materialize -- --project <id>\n  npm run phase1:materialize -- --project <id> --download-top 1\n\nKeylos immer aktiv:\n  NASA → NOAA → USGS → Library of Congress → Wikimedia → Internet Archive → Openverse (Bilder)\n\nOptional mit kostenlosen Keys:\n  NARA_API_KEY → National Archives Catalog\n  SMITHSONIAN_API_KEY → Smithsonian Open Access (Bilder)\n  EUROPEANA_API_KEY → Europeana\n\nStock ist standardmäßig AUS. Mit --include-stock true folgen Pexels/Pixabay nur als Fallback.\nExterne Medien werden nie automatisch für YouTube freigegeben.`); }
