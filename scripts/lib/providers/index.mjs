@@ -7,12 +7,18 @@ import { searchNasa } from './nasa.mjs';
 import { searchLibraryOfCongress } from './library-of-congress.mjs';
 import { searchNoaa } from './noaa.mjs';
 import { searchUsgs } from './usgs.mjs';
+import { searchSmithsonian } from './smithsonian.mjs';
+import { searchEuropeana } from './europeana.mjs';
+import { searchNara } from './nara.mjs';
 
 export const PROVIDERS = Object.freeze({
   nasa: { types: ['video', 'image'], requiresKey: null, tier: 'official-archive', downloadable: true },
   noaa: { types: ['video', 'image'], requiresKey: null, tier: 'official-archive', downloadable: true },
   usgs: { types: ['video', 'image'], requiresKey: null, tier: 'official-archive', downloadable: true },
+  nara: { types: ['video', 'image'], requiresKey: 'NARA_API_KEY', tier: 'official-archive', downloadable: true },
+  smithsonian: { types: ['image'], requiresKey: 'SMITHSONIAN_API_KEY', tier: 'official-archive', downloadable: true },
   'library-of-congress': { types: ['video', 'image'], requiresKey: null, tier: 'official-archive', downloadable: true },
+  europeana: { types: ['video', 'image'], requiresKey: 'EUROPEANA_API_KEY', tier: 'archive', downloadable: true },
   wikimedia: { types: ['video', 'image'], requiresKey: null, tier: 'archive', downloadable: true },
   'internet-archive': { types: ['video', 'image'], requiresKey: null, tier: 'archive', downloadable: true },
   openverse: { types: ['image'], requiresKey: null, tier: 'open-media', downloadable: true },
@@ -35,8 +41,17 @@ export async function searchProvider({ provider, type = 'video', env = process.e
   if (name === 'usgs') {
     return searchUsgs({ query: options.query, type, page: options.page, perPage: options.perPage, fetchImpl: options.fetchImpl });
   }
+  if (name === 'nara') {
+    return searchNara({ apiKey: env.NARA_API_KEY, query: options.query, type, page: options.page, perPage: options.perPage, fetchImpl: options.fetchImpl });
+  }
+  if (name === 'smithsonian') {
+    return searchSmithsonian({ apiKey: env.SMITHSONIAN_API_KEY, query: options.query, type, page: options.page, perPage: options.perPage, fetchImpl: options.fetchImpl });
+  }
   if (name === 'library-of-congress') {
     return searchLibraryOfCongress({ query: options.query, type, page: options.page, perPage: options.perPage, fetchImpl: options.fetchImpl });
+  }
+  if (name === 'europeana') {
+    return searchEuropeana({ apiKey: env.EUROPEANA_API_KEY, query: options.query, type, page: options.page, perPage: options.perPage, fetchImpl: options.fetchImpl });
   }
   if (name === 'wikimedia') {
     return searchWikimedia({ query: options.query, type, orientation: options.orientation, page: options.page, perPage: options.perPage, fetchImpl: options.fetchImpl });
