@@ -2,11 +2,11 @@
 
 Lokaler Produktions-Hub für **faceless YouTube-Dokumentationen/Listicles** mit echten Visuals, sauberer Rechteprüfung und einer vom Nutzer gelieferten Voiceover-Datei als Master-Audio.
 
-**Aktueller Stand: Production Workflow v0.16.0 + modulare Open-Source Toolchain**
+**Aktueller Stand: Production Workflow v0.17.0 / Workflow v3**
 
-## Grundregel
+## Kernprinzip
 
-Der Hub ist **real-media-first und archive-first**:
+Der Hub ist **real-media-first, archive-first und local-before-phase2**:
 
 1. exaktes Ereignis-/Originalmaterial
 2. offizielle Archive und Behördenquellen
@@ -15,24 +15,36 @@ Der Hub ist **real-media-first und archive-first**:
 5. sehr spezifische reale B-Roll
 6. generischer Stock nur als Fallback
 
-**Keine automatisch erfundenen Remotion-Erklärgrafiken.** Keine Elektronen-/Partikelanimationen, keine generischen Pfeile/Kreise/Callouts und keine mittigen Infokarten als Standard. Wenn ein Beat eine Erklärung braucht, sucht Phase 1 dafür reales Material oder eine echte offizielle Abbildung.
-
-Siehe `docs/REAL-MEDIA-EDITING-POLICY.md`.
+Keine automatisch erfundenen Remotion-Erklärgrafiken. Keine Elektronen-/Partikelanimationen, generischen Pfeile/Kreise/Callouts oder mittigen Infokarten als Standard. Wenn ein Beat visuell erklärt werden muss, sucht Phase 1 reales Material oder eine echte offizielle Abbildung.
 
 ## Drei Phasen
 
 ```text
 PHASE 1 — ChatGPT / Recherche
-Thema → Fakten → Skript → echte Medien → Rechte/QC → visual-plan.json → shot-plan.json
+Thema
+→ Fakten + Quellen
+→ finales Skript
+→ visual-plan.json
+→ Multi-Shot shot-plan.json
+→ reale Medien lokal herunterladen
+→ phase1-quality.json
+→ visual-qc.json
+→ Rechte/Katalog
+→ beat-bindings.json
+→ STRICT LOCK
 
 PHASE 2 — Nutzer
 finales Skript → eigene Voiceover-Datei
 
-PHASE 3 — Antigravity
-Voiceover-Timings → festgelegte Phase-1-Assets → Trim/Crop/Cut → dezente Bewegung → Final MP4
+PHASE 3 — Antigravity / Assembly
+Voiceover-Timings
+→ phase3-handoff.json
+→ nur lokale Phase-1-Assets
+→ Trim/Crop/Cut + geplante subtile Bewegung
+→ Render
 ```
 
-Phase 3 darf die Story und Bildwelt nicht neu erfinden.
+**Phase 3 hat bei Workflow v3 keinen Netzwerkzugriff auf Medien.** Wenn ein Asset fehlt, geht der Shot zurück in Phase 1.
 
 ## Schnellstart
 
@@ -49,11 +61,9 @@ npm run serve
 
 Browser: `http://127.0.0.1:4173`
 
-`tools:doctor` zeigt, welche optionalen Open-Source-Helfer auf dem Rechner vorhanden sind. Fehlende optionale Tools blockieren den normalen Workflow nicht.
+## Phase 1 — Recherche und echte Visuals
 
-## Phase 1 — Recherche
-
-### Story-/Quellen-Discovery
+Story-/Quellen-Discovery:
 
 ```bash
 npm run research:discover -- "Mars Climate Orbiter unit conversion failure"
@@ -65,38 +75,25 @@ GDELT funktioniert ohne Key. Optional kann eine eigene SearXNG-Instanz genutzt w
 SEARXNG_URL=http://127.0.0.1:8080
 ```
 
-Treffer sind Discovery-Signale und werden nicht automatisch zu freigegebenen Produktionsassets.
-
-### Webseiteninhalt sauber extrahieren
+Webtext extrahieren:
 
 ```bash
-npm run research:extract -- --url "https://example.org/article" --output .local-storage/research/article.json
+npm run research:extract -- --url "https://example.org/article"
 ```
 
-Wenn Trafilatura installiert ist, werden Haupttext und Metadaten ohne Navigation/Footer extrahiert.
-
-### Quelle archivieren
+Quelle archivieren:
 
 ```bash
 npm run tools -- archive --url "https://example.org/source"
 ```
 
-ArchiveBox wird bevorzugt. Wenn es fehlt, nutzt der Hub den vorhandenen Playwright-Capture als Fallback.
-
-### Entity-/Alias-Erweiterung
+Alias-/Entity-Erweiterung:
 
 ```bash
 npm run entity:expand -- "Mars Climate Orbiter"
 ```
 
-Wikidata liefert alternative Namen für bessere Archivtreffer.
-
-## Archive-first Medienquellen
-
-```bash
-npm run documentary:research -- "Mars Climate Orbiter" --type image
-npm run documentary:research -- "Apollo 11" --type video
-```
+## Medienquellen
 
 ### Ohne API-Key
 
@@ -125,81 +122,67 @@ Ranking:
 official-archive > archive > open-media > stock-fallback
 ```
 
-## Visual- und Shot-Plan
+## Multi-Shot-Plan
 
 ```bash
 npm run beat:plan -- --plan projects/<id>/visual-plan.json
 ```
 
-Der Planner erzeugt `shot-plan.json` mit Shot-Dauer, Medienpriorität, Präsentation und Preprocessing. Er erzeugt **keine automatischen Erklärgrafiken** und erfindet keine neue Story.
+Workflow v3 erlaubt **mehrere Visual-Shots pro Sprecher-Beat**. Jeder Shot besitzt eine eigene Shot-ID und verweist über `beatId` auf den Sprecher-Beat. Damit können innerhalb eines längeren Satzes mehrere echte Bilder, Clips, Crops oder Perspektiven wechseln.
 
-## Phase-1 Materialisierung
+Explizit kann Phase 1 `beat.shots[]` oder `beat.shotCount` vorgeben. Sonst erzeugt der Planner bei Montagen, Vergleichen und längeren Visual-Intents sinnvolle Subshots.
+
+## Lokale Materialisierung vor Phase 2
 
 ```bash
 npm run phase1:materialize -- --project <id> --download-top 1
 ```
 
-Danach optional der neue einfache Qualitäts-Pass:
+Bekannte `directMediaUrl`-Dateien aus Phase 1 werden jetzt ebenfalls lokal heruntergeladen. Ein Download ist noch keine Rechtefreigabe.
+
+Danach zwingend:
 
 ```bash
 npm run phase1:quality -- --project <id>
+npm run visual:qc -- --project <id>
+npm run inbox:scan
+npm run inbox:review
+# geprüfte Dateien in den Katalog importieren
+npm run phase1:bind -- auto --project <id>
+npm run youtube:workflow -- phase1-check --project <id>
 ```
 
-Er prüft die bereits heruntergeladenen Medien technisch und nutzt pyiqa, wenn es vorhanden ist.
+`phase1-quality.json` nutzt technische QC und – wenn vorhanden – pyiqa. `visual-qc.json` kombiniert anschließend:
 
-Nur bei Bedarf mit schweren optionalen Modellen:
+- redaktionelle Relevanz
+- Auflösung/Technik
+- pyiqa-Qualität
+- Rechte-Status
+- Provider-Tier
+- Duplikate
+- optional OpenCLIP
+
+Rechte und exakte Ereignisidentität bleiben separate Review-Gates.
+
+### Deep Mode nur bei Bedarf
 
 ```bash
 npm run phase1:quality -- --project <id> --deep true
 ```
 
-Deep Mode ergänzt Asset-Memory mit OpenCLIP/sqlite-vec und DINOv2-Dublettenprüfung. Er ist nicht erforderlich, um normale Videos zu produzieren.
+Deep Mode ergänzt OpenCLIP/sqlite-vec Asset-Memory und DINOv2-Dublettenprüfung. Schwere Modelle bleiben optional.
 
-Danach:
+## Phase 1 ist erst fertig, wenn
 
-```bash
-npm run visual:qc -- --project <id>
-npm run inbox:scan
-npm run inbox:review
-npm run phase1:bind -- --project <id>
-```
+- jeder geplante Shot einen Kandidaten besitzt,
+- jedes Produktionsasset lokal vorliegt,
+- jedes Asset im Katalog `approved` ist,
+- `youtube` in den Usage Scopes steht,
+- `unknown`, `restricted` und `editorial-only` nicht als Publish-Rechte durchgehen,
+- Visual-QC bestanden ist,
+- jeder Shot in `beat-bindings.json` gebunden ist.
 
-Phase 1 ist erst fertig, wenn die benötigten Beats an tatsächlich geprüfte Assets gebunden sind.
-
-## Best Subclip statt komplettes Archivvideo
-
-```bash
-npm run clip:find -- --profile <style-profile.json> --query "damaged satellite" --extract true
-```
-
-OpenCLIP kann passende Shots ranken. Der Score beweist weder Ereignisidentität noch Nutzungsrechte.
-
-## Bildvorbereitung
-
-```bash
-npm run image:prepare -- --file ./inbox/photo.jpg --output ./tmp/photo-16x9.jpg
-```
-
-Sharp/libvips wird bevorzugt und nutzt einen Attention-Crop. Ohne Sharp gibt es einen FFmpeg-Fallback. Es werden keine Bildinhalte generiert.
-
-Optionale Spezialfälle:
-
-```bash
-npm run tools -- image-quality --file ./inbox/photo.jpg
-npm run tools -- smart-crop --file ./inbox/photo.jpg --prompt "volcano" --output ./tmp/crop.jpg
-npm run tools -- visual-dedupe --images a.jpg,b.jpg,c.jpg
-```
-
-GroundingDINO/SAM und DINOv2 sind schwere optionale Helfer und standardmäßig aus.
-
-## Lokales Asset-Gedächtnis
-
-```bash
-npm run tools -- asset-memory-index --file ./library/image.jpg --id VAH-123 --title "Chaiten lightning"
-npm run tools -- asset-memory-search --query "dark ash cloud with lightning"
-```
-
-OpenCLIP erzeugt Embeddings; sqlite-vec speichert und durchsucht sie lokal. Das spart bei späteren Videos unnötige Neusuche.
+Erst dann akzeptiert Workflow v3 eine Voiceover-Datei.
 
 ## Phase 2 — Nutzer-Voiceover
 
@@ -209,77 +192,96 @@ npm run youtube:workflow -- voiceover-attach --project <id> --file ./voiceover.w
 
 Die Pipeline erzeugt oder ersetzt die Stimme nicht.
 
-Arbeitskopie auf saubere Lautheit bringen:
+Optional Lautheit vorbereiten:
 
 ```bash
 npm run audio:prepare -- --file ./voiceover.wav --output ./voiceover-normalized.wav
 ```
 
-`ffmpeg-normalize` wird bevorzugt; FFmpeg `loudnorm` ist der Fallback.
-
-Zeitmarken:
+## Voiceover → Beat-Timings
 
 ```bash
-npm run voiceover:align -- --project <id>
+npm run voiceover:align -- --project <id> --model ./models/ggml-small.bin
 ```
 
-Optional Precision Mode mit WhisperX:
+Editorial-v3-Projekte werden automatisch über `visual-plan.json` / `narrationAnchor` auf echte Voiceover-Zeitspannen ausgerichtet. Klassische `scene-script.json`-Projekte bleiben unterstützt.
+
+Optionaler Precision-Modus:
 
 ```bash
-npm run tools -- voiceover-precision --file ./voiceover.wav --output .local-storage/whisperx/words.json
+npm run tools -- voiceover-precision --file ./voiceover.wav
 ```
 
-Die Nutzer-Voiceover bleibt immer Master-Audio.
+## Phase 3 — lokaler Antigravity-Handoff
 
-## Phase 3 — Antigravity / Assembly
+```bash
+npm run phase3:prepare -- --project <id>
+```
+
+Der Befehl erzeugt:
+
+- `phase3-handoff.json`
+- `project.scenes`
+- `render-manifest.json`
+
+Ein Sprecher-Beat mit mehreren geplanten Shots wird innerhalb seiner echten Voiceover-Zeit **deterministisch und proportional** aufgeteilt. Ist ein Beat zu kurz für die geplante Shot-Anzahl, blockiert die Pipeline statt eine fehlerhafte Timeline zu erzeugen.
+
+Danach:
+
+```bash
+npm run youtube:workflow -- phase3-check --project <id>
+```
+
+### Phase-3-Regeln
 
 Erlaubt:
 
 - echte Videos trimmen
-- echte Fotos/B-Rolls einsetzen
-- harte Schnitte
+- echte Bilder einsetzen
 - Crops/Reframing
-- dezente Push-ins/Pans
+- harte Schnitte
 - Freeze-Frames aus freigegebenem Material
 - Vertical-Blur-Sidefill
-- echte Dokument-/Artikel-Crops
+- subtile Push-ins/Pans
+- echte Artikel-/Dokument-Crops
 - echte offizielle Karten/Diagramme aus Phase 1
 
-Nicht automatisch erlaubt:
+Nicht erlaubt:
 
+- Runtime-Download fremder Medien
+- zufällige Ersatz-B-Roll
 - erfundene Teilchen-/Elektronenanimationen
 - generische Pfeile/Kreise/Callouts
-- mittige Infokarten
-- Kapitelkarten als Lückenfüller
-- große Zahlen-Overlays nur weil die Voiceover eine Zahl nennt
-- beliebige Ersatz-B-Roll, wenn ein Phase-1-Asset fehlt
+- mittige Infokarten als Lückenfüller
+- große automatische Zahlen-Overlays
 
-Wenn das richtige Material fehlt, geht der Beat zurück in Phase 1.
+## Focal Point und Motion
 
-## Final-QC
+Workflow v3 trägt `focus` und `motion` bis in das Render-Manifest durch. Der Renderer entscheidet die Bewegungsrichtung nicht mehr zufällig.
 
-```bash
-npm run final:qc -- --file ./final.mp4
+Beispiel:
+
+```json
+{
+  "focus": { "x": 78, "y": 31 },
+  "motion": { "type": "push", "scaleFrom": 1.01, "scaleTo": 1.06 }
+}
 ```
 
-Optional VMAF gegen eine Master-/Referenzdatei:
+Unterstützt werden unter anderem `static`, `push`, `pull`, `pan-left`, `pan-right`, `pan-up`, `pan-down`.
 
-```bash
-npm run final:qc -- --file ./final-encode.mp4 --reference ./master.mp4
-```
+## Renderer-Sicherheit v3
 
-VMAF wird nur genutzt, wenn der lokale FFmpeg-Build `libvmaf` enthält.
+`video-project`, `renderer/scripts/prepare-project.mjs` und der Remotion-Renderer blockieren bei Workflow v3 Remote-Medien. Das Rendern verwendet ausschließlich lokal kopierte Phase-1-Assets und die echte Nutzer-Voiceover.
 
 ## Open-Source Toolbox
-
-Alle neuen Helfer laufen über **einen** Einstiegspunkt:
 
 ```bash
 npm run tools -- doctor
 npm run tools -- help
 ```
 
-Integriert sind:
+Integriert:
 
 - Trafilatura
 - ArchiveBox
@@ -297,28 +299,47 @@ Integriert sind:
 - Segment Anything
 - Real-ESRGAN
 
-Details und Installationsstufen: `docs/OPEN-SOURCE-TOOLCHAIN.md`.
+Schwere Tools sind standardmäßig AUS und blockieren den normalen Workflow nicht.
 
 ## Rights-Gate für technische Downloader
-
-`gallery-dl` und `yt-dlp` bedeuten nicht automatisch, dass ein Medium verwendet werden darf.
 
 ```bash
 npm run tools -- safe-fetch --url "https://..." --rights-cleared true
 ```
 
-Ohne explizites `--rights-cleared true` blockiert der Hub den Download. Auch dieser Flag ist nur Workflow-Dokumentation und kein Rechtsnachweis.
+Ohne `--rights-cleared true` wird der technische Download blockiert. Der Flag ist nur Workflow-Dokumentation und kein Rechtsnachweis.
 
-## Optionales KI-Upscaling
-
-Real-ESRGAN ist standardmäßig aus:
+## Final-QC
 
 ```bash
-npm run tools -- enhance --file old-photo.jpg --allow-ai-enhancement true
+npm run final:qc -- --file ./final.mp4
 ```
 
-Jede Ausgabe erhält eine Sidecar-Datei, die das AI-Upscaling markiert. Solche Bilder dürfen nicht als forensische/wissenschaftliche Detailbeweise behandelt werden.
+Optional VMAF:
+
+```bash
+npm run final:qc -- --file ./final-encode.mp4 --reference ./master.mp4
+```
+
+## Wichtige Dateien pro v3-Projekt
+
+```text
+project.json
+research.json
+voiceover-script.txt
+visual-plan.json
+shot-plan.json
+materialization.json
+phase1-quality.json
+visual-qc.json
+beat-bindings.json
+
+audio/voiceover-master.*
+timings.json
+phase3-handoff.json
+render-manifest.json
+```
 
 ## Sicherheit / Rechte
 
-Die schreibende Browser-API läuft nur lokal. Fremde Plattformen werden nicht deshalb zu Produktionsquellen, weil ein technischer Download möglich ist. Externe Medien bleiben im Rechte-/Event-Review. Nutzer-Voiceover, Quellen-Provenance und die Real-Media-First-Regel bleiben feste Bestandteile des Workflows.
+Die schreibende Browser-API läuft nur lokal. Technische Downloadbarkeit bedeutet nicht Nutzungsrecht. Externe Medien bleiben im Rechte-/Event-Review. Nutzer-Voiceover, Quellen-Provenance, lokale Phase-1-Materialisierung und die Real-Media-First-Regel sind feste Bestandteile von Workflow v3.
