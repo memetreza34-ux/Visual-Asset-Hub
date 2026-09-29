@@ -6,37 +6,40 @@ import test from 'node:test';
 const root = process.cwd();
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 
-test('editorial YouTube workflow auto-detects visual-plan and locks phase 1 before voiceover', () => {
-  const source = read('scripts/youtube-workflow.mjs');
-  assert.match(source, /workflowMode\(projectId\)/);
-  assert.match(source, /visual-plan\.json/);
-  assert.match(source, /validateEditorialPhase1/);
-  assert.match(source, /ensureShotPlan/);
-  assert.match(source, /phase1ShotPlan: mode === 'editorial' \? 'complete'/);
-  assert.match(source, /Voiceover wird nicht akzeptiert, solange Phase 1 nicht vollständig freigegeben ist/);
-  assert.match(source, /source: 'user-provided'/);
-  assert.match(source, /generatedByPipeline: false/);
+test('workflow v3 is the only package entrypoint for YouTube production', () => {
+  const pkg = JSON.parse(read('package.json'));
+  assert.equal(pkg.scripts['youtube:workflow'], 'node scripts/youtube-workflow-v3.mjs');
+  const source = read('scripts/youtube-workflow-v3.mjs');
+  assert.match(source, /phase1-plan/);
+  assert.match(source, /phase1-materialize/);
+  assert.match(source, /phase1-check/);
+  assert.match(source, /voiceover-attach/);
+  assert.match(source, /voiceover-align/);
+  assert.match(source, /phase3-prepare/);
+  assert.match(source, /phase3-check/);
 });
 
-test('editorial phase-1 gate requires concrete external sources and renderer specs', () => {
-  const source = read('scripts/youtube-workflow.mjs');
-  assert.match(source, /externer\/archivierter Visual-Beat hat noch keine konkrete Quelle/);
-  assert.match(source, /Renderer-Spezifikation unvollständig/);
-  assert.match(source, /Rechte-Gate fehlt/);
-  assert.match(source, /requiresExternalMedia/);
+test('phase 1 strict gate validates every planned shot, not only narration beats', () => {
+  const source = read('scripts/youtube-workflow-v3.mjs');
+  assert.match(source, /for \(const shot of shots\.shots/);
+  assert.match(source, /shot\.beatId \|\| shot\.id/);
+  assert.match(source, /kein Produktionsasset gebunden/);
+  assert.match(source, /lokale Materialisierung vor Phase 2/);
 });
 
-test('phase 3 accepts beat timings for editorial projects and checks real voiceover length', () => {
-  const source = read('scripts/youtube-workflow.mjs');
-  assert.match(source, /timings\.beats \|\| timings\.scenes/);
-  assert.match(source, /project\.voiceover\.durationSeconds/);
-  assert.match(source, /Timeline endet/);
-});
-
-test('comparison intent does not emit an unsupported renderer presentation', () => {
+test('multi-shot planner keeps every shot linked to a narration beat', () => {
   const planner = read('scripts/beat-planner.mjs');
-  const project = read('scripts/video-project.mjs');
-  assert.match(planner, /if \(\/comparison\|before-after\|two-image\/\.test\(type\)\) return 'auto'/);
-  assert.match(planner, /resolve-secondary-asset/);
-  assert.doesNotMatch(project, /PRESENTATIONS = \[[^\]]*'comparison'/s);
+  assert.match(planner, /beatId: baseId/);
+  assert.match(planner, /shotIndex/);
+  assert.match(planner, /shotCount/);
+  assert.match(planner, /beat\.shots/);
+  assert.match(planner, /automaticVariant/);
+});
+
+test('renderer planning remains real-media assembly only', () => {
+  const planner = read('scripts/beat-planner.mjs');
+  assert.match(planner, /remotionRole: 'assembly-only'/);
+  assert.match(planner, /syntheticExplainerGraphics: false/);
+  assert.match(planner, /calloutsDisabled: true/);
+  assert.match(planner, /rejectSyntheticExplainerWhenRealMediaExists: true/);
 });
