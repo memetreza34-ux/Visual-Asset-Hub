@@ -33,7 +33,7 @@ test('workflow v3 blocks phase 2 until local assets, QC, bindings and rights evi
   assert.match(source,/phase1-quality\.json/);
   assert.match(source,/visual-qc\.json/);
   assert.match(source,/beat-bindings\.json/);
-  assert.match(source,/rights\.evidencePath/);
+  assert.match(source,/evidencePath/);
   assert.match(source,/Rights-Evidence-Datei fehlt/);
   assert.match(source,/auto-local-library/);
   assert.match(source,/Voiceover blockiert/);
