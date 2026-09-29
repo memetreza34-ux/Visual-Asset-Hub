@@ -1,0 +1,8 @@
+# Optional lightweight helpers. The normal Node/FFmpeg workflow still works without these.
+trafilatura>=2.0
+sqlite-vec>=0.1
+Pillow>=10
+open_clip_torch>=2.24
+
+# Image quality; optional because some metrics may download model weights on first use.
+pyiqa>=0.1
