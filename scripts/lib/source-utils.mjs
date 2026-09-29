@@ -50,7 +50,7 @@ export async function downloadAsset({ root, asset, download, provider }) {
   const tmp = `${target}.part`;
   const maxBytes = 700 * 1024 * 1024;
   const response = await fetch(download.url, {
-    headers: { 'User-Agent': 'Visual-Asset-Hub/0.11', Accept: '*/*' },
+    headers: { 'User-Agent': 'Visual-Asset-Hub/0.15', Accept: '*/*' },
     redirect: 'follow'
   });
   if (!response.ok || !response.body) throw new Error(`Download fehlgeschlagen (${response.status}).`);
@@ -120,7 +120,7 @@ function score(item, maxDimension, type) {
   const usable = longest > 0 && longest <= maxDimension ? 2_000_000_000_000 : 0;
   const nearTarget = longest > 0 ? -Math.abs(maxDimension - longest) * 1_000_000 : 0;
   const sizePenalty = Number(item.size || 0) > 350 * 1024 * 1024 ? -1_000_000_000_000 : 0;
-  const quality = ['medium', 'hd', 'fullhd', 'large', 'original', 'archive'].includes(String(item.quality || '').toLowerCase()) ? 500_000_000_000 : 0;
+  const quality = ['medium', 'hd', 'fullhd', 'large', 'original', 'archive', 'official'].includes(String(item.quality || '').toLowerCase()) ? 500_000_000_000 : 0;
   const imageFallback = type === 'image' && !longest ? 1_000_000 : 0;
   return usable + quality + area + nearTarget + sizePenalty + imageFallback;
 }
@@ -152,5 +152,5 @@ function uniqueInboxName(root, base) {
 }
 function safeName(value) { return String(value || 'asset').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 70) || 'asset'; }
 function relative(root, file) { return path.relative(root, file).split(path.sep).join('/'); }
-function providerLabel(value) { return ({ pexels: 'Pexels', pixabay: 'Pixabay', openverse: 'Openverse', wikimedia: 'Wikimedia Commons', 'internet-archive': 'Internet Archive', nasa: 'NASA Image and Video Library', 'library-of-congress': 'Library of Congress' })[value] || value; }
+function providerLabel(value) { return ({ pexels: 'Pexels', pixabay: 'Pixabay', openverse: 'Openverse', wikimedia: 'Wikimedia Commons', 'internet-archive': 'Internet Archive', nasa: 'NASA Image and Video Library', noaa: 'NOAA', usgs: 'U.S. Geological Survey', 'library-of-congress': 'Library of Congress' })[value] || value; }
 function compact(value) { return Object.fromEntries(Object.entries(value).filter(([, item]) => item !== undefined && item !== null && item !== '')); }
