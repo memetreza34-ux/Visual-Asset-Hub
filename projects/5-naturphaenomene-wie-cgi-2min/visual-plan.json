@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "projectId": "5-naturphaenomene-wie-cgi-2min",
   "style": {
     "normalVisualSeconds": "3-6",
@@ -16,10 +16,10 @@
       "id": "b01",
       "narrationAnchor": "Diese Aufnahmen sehen aus wie CGI",
       "visualType": "fast-montage",
-      "visual": "Fünf sehr schnelle echte Motive: Vulkanblitz, blaues Biolumineszenz-Motiv, Lenticularwolke, roter Sprite, leuchtende Nachtwolken. Keine Titelkarte davor.",
+      "visual": "Fünf sehr schnelle echte Motive: Vulkanblitz, NOAA-Dragonfish mit Photophoren, Lenticularwolke, roter Sprite, leuchtende Nachtwolken. Keine Titelkarte davor.",
       "sources": [
         "https://www.usgs.gov/media/images/chait-n-plume-lightning",
-        "https://oceantoday.noaa.gov/bioluminescentocean/",
+        "https://oceanexplorer.noaa.gov/multimedia/okeanos-explorations-ex1907-dailyupdates-nov4-media-dive04-dragonfish/",
         "https://science.nasa.gov/earth/earth-observatory/marvelous-lenticularis-153312/",
         "https://science.nasa.gov/earth/earth-observatory/red-sprites-above-the-us-and-central-america-86463/",
         "https://science.nasa.gov/earth/earth-observatory/noctilucent-clouds-8366/"
@@ -34,7 +34,7 @@
       "visual": "USGS-Foto des Chaitén-Ausbruchs mit verzweigten Blitzen in dunkler Eruptionswolke vollflächig.",
       "sourceUrl": "https://www.usgs.gov/media/images/chait-n-plume-lightning",
       "directMediaUrl": "https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/vhp_img1416.jpg",
-      "rights": "USGS item; exact Sources/Usage field must be confirmed before YouTube approval",
+      "rights": "USGS Multimedia Gallery; public domain unless otherwise noted; credit USGS",
       "motion": "hard cut, 4% push-in toward main lightning cluster"
     },
     {
@@ -45,7 +45,7 @@
       "visual": "Aus demselben USGS-Motiv ein anderer enger Crop auf Aschewolke und feine Blitzverzweigungen; kurzer Callout auf geladene Aschezone.",
       "sourceUrl": "https://www.usgs.gov/media/images/chait-n-plume-lightning",
       "directMediaUrl": "https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/vhp_img1416.jpg",
-      "rights": "USGS item; review required",
+      "rights": "same USGS public-domain item as b02",
       "motion": "freeze-like crop, 6% push, one subtle circle/callout; no repeated full-frame composition"
     },
     {
@@ -55,7 +55,7 @@
       "visualType": "official-document-insert",
       "visual": "Kurzer USGS-Erklärseiten-Inset zur Vulkanblitz-Entstehung, nur relevanter Abschnitt/Headline, danach zurück aufs Foto.",
       "sourceUrl": "https://volcanoes.usgs.gov/volcanic_ash/lightning.html",
-      "rights": "official USGS explanatory page; screenshot for editorial context requires review",
+      "rights": "official USGS explanatory page; factual/editorial crop with source credit",
       "motion": "2s article/document crop then hard cut back to lightning detail"
     },
     {
@@ -63,32 +63,32 @@
       "case": "bioluminescence",
       "narrationAnchor": "Nummer vier: Biolumineszenz",
       "visualType": "official-archive-video",
-      "visual": "NOAA Ocean Today: stärkster dunkler Unterwasser-Shot mit sichtbar leuchtendem Organismus oder Lichtreaktion.",
-      "sourceUrl": "https://oceantoday.noaa.gov/bioluminescentocean/",
-      "directMediaUrl": "https://cdn.oceanservice.noaa.gov/oceantodayprod/media/bioluminescentocean/otkn_820d_bioluminescentocean_lg.mp4",
-      "rights": "official NOAA-hosted downloadable video; exact segment and third-party credits must be reviewed",
-      "motion": "use clip:find on full NOAA video; select 3-5s high-contrast luminous shot; mute source audio"
+      "visual": "NOAA Ocean Exploration Dragon Fish Charms ROV: dunkler Dragonfish mit sichtbaren lichtproduzierenden Photophoren und leuchtendem Köder am Kinn.",
+      "sourceUrl": "https://oceanexplorer.noaa.gov/multimedia/okeanos-explorations-ex1907-dailyupdates-nov4-media-dive04-dragonfish/",
+      "directMediaUrl": "https://oceanexplorer.noaa.gov/wp-content/uploads/2019/11/dive04-dragonfish-1280x720-1.mp4",
+      "rights": "credit NOAA Ocean Exploration, 2019 Southeastern U.S. Deep-sea Exploration; no copyright notice on item",
+      "motion": "select strongest 3-5s section showing photophores; mute source audio"
     },
     {
       "id": "b06",
       "case": "bioluminescence",
       "narrationAnchor": "Licht durch eine chemische Reaktion",
       "visualType": "official-archive-video",
-      "visual": "Zweiter, klar anderer NOAA-Unterwasser-Subclip mit aktivem Leuchten; kein Talking Head.",
-      "sourceUrl": "https://oceantoday.noaa.gov/bioluminescentocean/",
-      "directMediaUrl": "https://cdn.oceanservice.noaa.gov/oceantodayprod/media/bioluminescentocean/otkn_820d_bioluminescentocean_lg.mp4",
-      "rights": "official NOAA-hosted downloadable video; review exact subclip",
-      "motion": "clip:find separate 3-4s shot, no reuse of b05 frames"
+      "visual": "NOAA Ocean Exploration Dana Octopus Squid: kurzer echter Clip mit biolumineszenten Spotlights an zwei Armen.",
+      "sourceUrl": "https://oceanexplorer.noaa.gov/multimedia/video-shorts-ex1705-squid/",
+      "directMediaUrl": "https://oceanexplorer.noaa.gov/wp-content/uploads/2021/02/ex1705-squid.mp4",
+      "rights": "credit NOAA Ocean Exploration, Mountains in the Deep: Exploring the Central Pacific Basin; no copyright notice on item",
+      "motion": "use strongest 3-4s moment; hard cut from dragonfish; mute source audio"
     },
     {
       "id": "b07",
       "case": "bioluminescence",
       "narrationAnchor": "Meist erscheint es blau oder blaugrün",
-      "visualType": "official-image-plus-label",
-      "visual": "NOAA Biolumineszenz-Foto oder Frame mit blauem Licht; nur kleines Label 'blau / blaugrün'.",
-      "sourceUrl": "https://oceanexplorer.noaa.gov/ocean-fact/bioluminescence/",
-      "rights": "NOAA page contains credited scientific imagery; exact image reuse rights must be confirmed before approval",
-      "motion": "subtle push-in, short color label, no infographic card"
+      "visualType": "derived-frame-plus-label",
+      "visual": "Freeze/frame crop from one of the already approved NOAA Ocean Exploration clips where the luminous organs are clearest; short label 'blau / blaugrün'. No separate copyrighted still.",
+      "sourceUrl": "https://oceanexplorer.noaa.gov/multimedia/okeanos-explorations-ex1907-dailyupdates-nov4-media-dive04-dragonfish/",
+      "rights": "derived from approved NOAA Ocean Exploration video; preserve exact source credit",
+      "motion": "brief freeze + subtle push-in, color label only"
     },
     {
       "id": "b08",
@@ -98,7 +98,7 @@
       "visual": "NASA Landsat-Aufnahme der langen Taieri-Pet-Lenticularwolke über Neuseeland, zunächst volle Landschaft.",
       "sourceUrl": "https://science.nasa.gov/earth/earth-observatory/marvelous-lenticularis-153312/",
       "directMediaUrl": "https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/imagerecords/153000/153312/nzcloud_oli_20240907_lrg.jpg?crop=faces%2Cfocalpoint&fit=clip&h=6406&w=6589",
-      "rights": "NASA Earth Observatory / Lauren Dauphin using USGS Landsat data; review NASA usage guidance",
+      "rights": "NASA Earth Observatory / Lauren Dauphin using USGS Landsat data; informational/editorial use with credit",
       "motion": "slow push from wide map-like view toward cloud"
     },
     {
@@ -109,7 +109,7 @@
       "visual": "Engerer Crop derselben NASA-Aufnahme: Bergkette plus langgestreckte Wolke; kleiner Pfeil von Gebirge zur Wolke.",
       "sourceUrl": "https://science.nasa.gov/earth/earth-observatory/marvelous-lenticularis-153312/",
       "directMediaUrl": "https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/imagerecords/153000/153312/nzcloud_oli_20240907_lrg.jpg?crop=faces%2Cfocalpoint&fit=clip&h=6406&w=6589",
-      "rights": "same reviewed NASA/USGS asset as b08",
+      "rights": "same NASA/USGS asset as b08",
       "motion": "different crop; arrow callout only, no explanatory panel"
     },
     {
@@ -119,7 +119,7 @@
       "visualType": "official-archive-image",
       "visual": "NASA OIB-Lenticularwolken aus boden-/flugzeugnaher Perspektive als visueller Wechsel von der Satellitenansicht.",
       "sourceUrl": "https://espo.nasa.gov/image/Lenticular_clouds",
-      "rights": "NASA/John Sonntag; review NASA media guidance",
+      "rights": "NASA/John Sonntag; informational/editorial use with NASA credit",
       "motion": "gentle lateral pan; no UFO graphic, only the real cloud"
     },
     {
@@ -130,7 +130,7 @@
       "visual": "NASA-ISS-Foto mit rotem Sprite rechts über Gewitter und Stadtlichtern, vollständiger Frame.",
       "sourceUrl": "https://science.nasa.gov/earth/earth-observatory/red-sprites-above-the-us-and-central-america-86463/",
       "directMediaUrl": "https://svs.gsfc.nasa.gov/vis/a010000/a014200/a014206/iss044e045576_lrg_2015.jpeg",
-      "rights": "NASA-credit ISS still. Do not use copyrighted third-party sprite imagery from the surrounding SVS package.",
+      "rights": "NASA/ISS Crew Earth Observations still; do not use copyrighted third-party sprite media from SVS package",
       "motion": "slow push toward red sprite; tiny label 'Sprite'"
     },
     {
@@ -141,7 +141,7 @@
       "visual": "Enger Crop des NASA-ISS-Fotos auf Sprite und helle Gewitterzelle; vertikale Entfernung visuell durch zwei kleine Marker zeigen.",
       "sourceUrl": "https://science.nasa.gov/earth/earth-observatory/red-sprites-above-the-us-and-central-america-86463/",
       "directMediaUrl": "https://svs.gsfc.nasa.gov/vis/a010000/a014200/a014206/iss044e045576_lrg_2015.jpeg",
-      "rights": "same NASA-credit ISS still as b11",
+      "rights": "same NASA/ISS still as b11",
       "motion": "tight crop + callout, no external copyrighted sprite footage"
     },
     {
@@ -151,7 +151,7 @@
       "visualType": "official-image-plus-number",
       "visual": "Zweites NASA-Earth-Observatory-Sprite-Foto bzw. alternate crop; kurze Einblendung 'bis ~100 km'.",
       "sourceUrl": "https://science.nasa.gov/earth/earth-observatory/red-sprites-above-the-us-and-central-america-86463/",
-      "rights": "NASA Earth Observatory ISS imagery; review exact downloaded still",
+      "rights": "NASA Earth Observatory / ISS Crew Earth Observations",
       "motion": "hard cut to alternate composition, impact number bottom-left"
     },
     {
@@ -162,7 +162,7 @@
       "visual": "NASA AIM-Aufnahme der leuchtenden Nachtwolken über der Polarregion mit intensivem Blau.",
       "sourceUrl": "https://science.nasa.gov/earth/earth-observatory/noctilucent-clouds-8366/",
       "directMediaUrl": "https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/imagerecords/8000/8366/npnoctilucent_aim_2007162_lrg.jpg?crop=faces%2Cfocalpoint&fit=clip&h=765&w=800",
-      "rights": "NASA Earth Observatory / University of Colorado LASP data-processing credit; attribution and rights review required",
+      "rights": "NASA Earth Observatory / University of Colorado LASP data-processing credit; preserve attribution",
       "motion": "slow center push; no extra text on first reveal"
     },
     {
@@ -170,9 +170,9 @@
       "case": "noctilucent-clouds",
       "narrationAnchor": "ungefähr achtzig Kilometer über der Erde",
       "visualType": "official-image-plus-number",
-      "visual": "NASA Nachtwolken-Motiv oder ISS-Fallback mit kleinem '≈ 80 km' Label; Erdkrümmung/Horizont bevorzugen.",
-      "sourceUrl": "https://www.nasa.gov/image-article/space-station-view-of-noctilucent-clouds/",
-      "rights": "ESA/NASA credit; exact image must be reviewed before approval",
+      "visual": "NASA-ISS-Nachtwolkenbild mit Erdkrümmung/Horizont und kleinem '≈ 80 km' Label.",
+      "sourceUrl": "https://www.nasa.gov/image-article/noctilucent-clouds-as-seen-from-iss/",
+      "rights": "NASA-credit ISS image; informational/editorial use with credit",
       "motion": "subtle push + single ≈80 km number overlay"
     },
     {
@@ -182,17 +182,17 @@
       "visualType": "official-archive-image",
       "visual": "NASA-Nachtwolkenbild mit sichtbarem dunklem unteren Horizont und beleuchteten blauen Wolken; Fokus auf Kontrast Tag/Nacht.",
       "sourceUrl": "https://science.nasa.gov/earth/earth-observatory/polar-mesospheric-clouds-south-pacific-ocean-80217/",
-      "rights": "NASA Earth Observatory / ISS imagery; verify item credit and reuse terms",
+      "rights": "NASA Earth Observatory / ISS imagery; preserve item credit",
       "motion": "slow upward pan from dark horizon to luminous clouds"
     },
     {
       "id": "b17",
       "narrationAnchor": "Welches dieser fünf Phänomene hättest du ohne Beweis für CGI gehalten?",
       "visualType": "rapid-recap-montage",
-      "visual": "Fünf kurze Rückblenden aus bereits freigegebenen Phase-1-Assets, am Ende 1.5s auf stärkstem Vulkanblitz oder Sprite halten. Keine Outro-Karte.",
+      "visual": "Fünf kurze Rückblenden aus den bereits ausgewählten Phase-1-Assets; am Ende 1.5s auf stärkstem Vulkanblitz oder Sprite halten. Keine Outro-Karte.",
       "sources": [
         "https://www.usgs.gov/media/images/chait-n-plume-lightning",
-        "https://oceantoday.noaa.gov/bioluminescentocean/",
+        "https://oceanexplorer.noaa.gov/multimedia/okeanos-explorations-ex1907-dailyupdates-nov4-media-dive04-dragonfish/",
         "https://science.nasa.gov/earth/earth-observatory/marvelous-lenticularis-153312/",
         "https://science.nasa.gov/earth/earth-observatory/red-sprites-above-the-us-and-central-america-86463/",
         "https://science.nasa.gov/earth/earth-observatory/noctilucent-clouds-8366/"
