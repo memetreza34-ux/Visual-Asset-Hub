@@ -11,7 +11,7 @@ export async function searchSmithsonian({ apiKey, query, type = 'image', page = 
   const pageNumber = Math.max(1, Number(page) || 1);
   const params = new URLSearchParams({
     api_key: apiKey,
-    q: `${query.trim()} AND online_media_type:Images`,
+    q: `${query.trim()} AND online_media_type:"Images" AND media_usage:CC0`,
     start: String((pageNumber - 1) * rows),
     rows: String(rows),
     sort: 'relevancy'
@@ -37,8 +37,8 @@ function normalizeRow(row) {
   const media = findMedia(row?.content?.descriptiveNonRepeating?.online_media?.media || []);
   if (!media.length) return null;
   const cc0Media = media.filter((item) => String(item?.usage?.access || '').toUpperCase() === 'CC0');
-  const usable = cc0Media.length ? cc0Media : media;
-  const downloads = usable.map((item) => mediaDownload(item)).filter(Boolean);
+  if (!cc0Media.length) return null;
+  const downloads = cc0Media.map((item) => mediaDownload(item)).filter(Boolean);
   if (!downloads.length) return null;
 
   const sourceUrl = normalizeSourceUrl(row?.url) || `${SITE}/search?edan_q=${encodeURIComponent(row?.title || row?.id || '')}`;
@@ -49,7 +49,6 @@ function normalizeRow(row) {
     row?.content?.descriptiveNonRepeating?.unit_code
   ]) || 'Smithsonian Institution';
   const preview = downloads.find((item) => item.preview_url)?.preview_url || downloads[0]?.url || null;
-  const allCc0 = usable.length > 0 && usable.every((item) => String(item?.usage?.access || '').toUpperCase() === 'CC0');
 
   return {
     provider: 'smithsonian',
@@ -67,7 +66,7 @@ function normalizeRow(row) {
     preview_url: preview,
     tags: collectTags(row).slice(0, 30),
     downloads,
-    rights: allCc0 ? {
+    rights: {
       license_status: 'public-domain',
       license_code: 'cc0-1.0',
       license_url: 'https://creativecommons.org/publicdomain/zero/1.0/',
@@ -76,15 +75,6 @@ function normalizeRow(row) {
       suggested_scopes: ['youtube', 'website', 'organic-social', 'client-work'],
       suggested_status: 'review',
       warning: 'Die API kennzeichnet die verwendete Mediendatei als CC0. Vor Veröffentlichung trotzdem konkrete Objektseite, Marken/Logos und dargestellte Drittinhalte prüfen.'
-    } : {
-      license_status: 'unknown',
-      license_code: 'smithsonian-rights-review',
-      license_url: RIGHTS_URL,
-      attribution_required: true,
-      attribution_text: `Smithsonian Institution${creator && creator !== 'Smithsonian Institution' ? ` — ${text(creator)}` : ''}`,
-      suggested_scopes: ['internal-only'],
-      suggested_status: 'review',
-      warning: 'Für dieses Smithsonian-Medium wurde kein eindeutiger CC0-Medienstatus erkannt. Vor Nutzung die konkrete Objektseite prüfen.'
     }
   };
 }
