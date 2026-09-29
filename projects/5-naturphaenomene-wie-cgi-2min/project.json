@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "workflowVersion": 3,
   "id": "5-naturphaenomene-wie-cgi-2min",
   "title": "5 Naturphänomene, die wie CGI aussehen – aber echt sind",
@@ -21,14 +21,22 @@
     "genericStockIsFallbackOnly": true,
     "hardCutsPreferred": true,
     "longDashboardScenes": false,
-    "textPolicy": "short labels/numbers only",
     "referenceVideoReuse": false,
-    "voiceoverMasterTimeline": true
+    "voiceoverMasterTimeline": true,
+    "remotionRole": "assembly-only",
+    "syntheticExplainerGraphics": false,
+    "automaticCallouts": false,
+    "automaticArrowsCirclesMarkers": false,
+    "particleOrElectronAnimations": false,
+    "centerTextCards": false,
+    "automaticChapterCards": false,
+    "textPolicy": "no burned-in explanatory text by default; only an explicitly approved small source or data label when genuinely necessary",
+    "visualExplanationRule": "If narration needs a visual explanation, Phase 1 must provide a real photo, video, document or official diagram instead of creating a synthetic Remotion explainer."
   },
   "phaseContract": {
-    "phase1": "ChatGPT: research, final script, concrete visual sources, visual plan, shot plan and rights notes",
+    "phase1": "ChatGPT: research, final script, concrete real visual sources, visual plan, shot plan and rights notes",
     "phase2": "User: create and provide final voiceover from voiceover-script.txt",
-    "phase3": "Antigravity: fetch locked Phase-1 media, align user voiceover, cut/animate and render final video"
+    "phase3": "Antigravity: fetch locked Phase-1 media, align user voiceover, trim/crop/cut real media, apply only subtle motion and render final video"
   },
   "phase1": {
     "completedAt": "2026-09-29",
