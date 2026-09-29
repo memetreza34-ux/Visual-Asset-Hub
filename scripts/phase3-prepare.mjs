@@ -39,13 +39,16 @@ for (const [beatId, shots] of shotsByBeat.entries()) {
   const start = number(beatTiming.start, `${beatId}.start`);
   const end = number(beatTiming.end, `${beatId}.end`);
   if (end <= start) fail(`${beatId}: Timing ungültig.`);
+  const beatDuration = end - start;
+  if (beatDuration / shots.length < 0.2) fail(`${beatId}: ${shots.length} Shots sind für ${beatDuration.toFixed(2)}s zu viele. Phase 1 muss die Shot-Anzahl reduzieren.`);
+
   const weights = shots.map((shot) => targetWeight(shot));
   const totalWeight = weights.reduce((sum, value) => sum + value, 0) || shots.length;
+  let cumulativeWeight = 0;
   let cursor = start;
   for (let index = 0; index < shots.length; index++) {
-    const remaining = end - cursor;
-    const duration = index === shots.length - 1 ? remaining : (end - start) * (weights[index] / totalWeight);
-    const shotEnd = index === shots.length - 1 ? end : Math.min(end, cursor + Math.max(0.35, duration));
+    cumulativeWeight += weights[index];
+    const shotEnd = index === shots.length - 1 ? end : start + beatDuration * (cumulativeWeight / totalWeight);
     timeline.push(resolveShot(shots[index], {start: cursor, end: shotEnd, confidence: beatTiming.confidence ?? null}));
     cursor = shotEnd;
   }
@@ -130,22 +133,8 @@ function resolveShot(shot, timing) {
     alignmentConfidence: timing.confidence ?? null
   };
 }
-
-function groupByBeat(shots) {
-  const map = new Map();
-  for (const shot of shots) {
-    const id = shot.beatId || shot.id;
-    if (!map.has(id)) map.set(id, []);
-    map.get(id).push(shot);
-  }
-  return map;
-}
-function targetWeight(shot) {
-  const value = shot.targetDurationSeconds;
-  if (Array.isArray(value) && value.length >= 2) return Math.max(0.5, (Number(value[0]) + Number(value[1])) / 2);
-  const n = Number(value);
-  return Number.isFinite(n) && n > 0 ? n : 1;
-}
+function groupByBeat(shots) { const map = new Map(); for (const shot of shots) { const id = shot.beatId || shot.id; if (!map.has(id)) map.set(id, []); map.get(id).push(shot); } return map; }
+function targetWeight(shot) { const value = shot.targetDurationSeconds; if (Array.isArray(value) && value.length >= 2) return Math.max(0.1, (Number(value[0]) + Number(value[1])) / 2); const n = Number(value); return Number.isFinite(n) && n > 0 ? n : 1; }
 function validateTimeline(items, audioDuration) {
   if (!items.length) fail('Leere Phase-3-Timeline.');
   let last = 0;
@@ -154,7 +143,7 @@ function validateTimeline(items, audioDuration) {
     if (ids.has(item.id)) fail(`Doppelte Shot-ID: ${item.id}`);
     ids.add(item.id);
     if (item.start + 0.05 < last) fail(`${item.id}: Timeline überlappt.`);
-    if (item.end <= item.start) fail(`${item.id}: Dauer ungültig.`);
+    if (item.end - item.start < 0.19) fail(`${item.id}: Shot ist kürzer als 0.2s.`);
     last = item.end;
   }
   const delta = Math.abs(last - Number(audioDuration || 0));
@@ -167,4 +156,4 @@ function relative(file) { return path.relative(root, file).split(path.sep).join(
 function slug(value) { return String(value || '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
 function parseArgs(values) { const out = {}; for (let i = 0; i < values.length; i++) { const token = values[i]; if (!token.startsWith('--')) fail(`Unbekannt: ${token}`); const key = token.slice(2).replace(/-([a-z])/g, (_, c) => c.toUpperCase()); if (key === 'help') { out.help = true; continue; } const next = values[i + 1]; if (!next || next.startsWith('--')) fail(`Wert für ${token} fehlt.`); out[key] = next; i++; } return out; }
 function fail(message) { console.error(message); process.exit(1); }
-function help() { console.log(`Phase 3 Prepare v3\n\n  npm run phase3:prepare -- --project <id>\n\nNimmt Beat-Timings + Multi-Shot-Plan + lokale Phase-1-Bindings und erzeugt:\n- phase3-handoff.json (für Antigravity, networkAllowed=false)\n- project.scenes\n- render-manifest.json\n\nEin Beat mit mehreren Shots wird deterministisch nach den geplanten Shot-Gewichten aufgeteilt.`); }
+function help() { console.log(`Phase 3 Prepare v3\n\n  npm run phase3:prepare -- --project <id>\n\nNimmt Beat-Timings + Multi-Shot-Plan + lokale Phase-1-Bindings und erzeugt phase3-handoff.json + render-manifest.json. Multi-Shots werden exakt proportional innerhalb des echten Voiceover-Beats verteilt; zu viele Shots für einen zu kurzen Beat werden geblockt.`); }
