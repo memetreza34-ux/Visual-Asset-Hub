@@ -10,7 +10,7 @@ if (args.help) { help(); process.exit(0); }
 
 const provider = String(args.provider || 'wikimedia').toLowerCase();
 if (!PROVIDERS[provider]) fail(`Provider unbekannt: ${provider}`);
-const type = args.type || (provider === 'openverse' ? 'image' : 'video');
+const type = args.type || defaultType(provider);
 const query = (args.query || args._.join(' ')).trim();
 if (!query) fail('Suchbegriff fehlt.');
 const pick = integer(args.pick || '1', 1, 200, 'pick');
@@ -52,6 +52,10 @@ try {
   fail(error instanceof Error ? error.message : String(error));
 }
 
+function defaultType(provider) {
+  const types = PROVIDERS[provider]?.types || [];
+  return types.includes('video') ? 'video' : (types[0] || 'image');
+}
 function parseArgs(values) {
   const result = { _: [] };
   for (let i = 0; i < values.length; i++) {
@@ -68,5 +72,5 @@ function parseArgs(values) {
 function integer(value, min, max, label) { const n = Number(value); if (!Number.isInteger(n) || n < min || n > max) fail(`${label} muss zwischen ${min} und ${max} liegen.`); return n; }
 function fail(message) { console.error(message); process.exit(1); }
 function help() {
-  console.log(`Visual Asset Hub – Asset in Inbox laden\n\nOffizielle/Archiv-Beispiele:\n  npm run source:grab -- "Kilauea eruption" --provider usgs --type image --pick 1\n  npm run source:grab -- "hurricane satellite" --provider noaa --type image --pick 1\n  npm run source:grab -- "Apollo 11" --provider nasa --type image --pick 1\n  npm run source:grab -- "historic news film" --provider internet-archive --type video --pick 2\n  npm run source:grab -- "historic map" --provider openverse --type image --pick 3\n\nStock-Fallback:\n  npm run source:grab -- "factory automation" --provider pexels --type video\n\nProvider ohne Key:\n  nasa | noaa | usgs | library-of-congress | wikimedia | internet-archive | openverse\n\nStock mit Key:\n  pexels | pixabay\n\nUnklare/restriktive Rechte bleiben immer im Review und werden nicht automatisch für YouTube freigegeben.`);
+  console.log(`Visual Asset Hub – Asset in Inbox laden\n\nBeispiele:\n  npm run source:grab -- "Kilauea eruption" --provider usgs --type image --pick 1\n  npm run source:grab -- "Apollo spacesuit" --provider smithsonian --pick 1\n  npm run source:grab -- "Berlin 1945" --provider europeana --type image --pick 1\n  npm run source:grab -- "Apollo 11" --provider nara --type image --pick 1\n\nKeylos:\n  nasa | noaa | usgs | library-of-congress | wikimedia | internet-archive | openverse\n\nOptionale kostenlose Keys:\n  nara (NARA_API_KEY) | smithsonian (SMITHSONIAN_API_KEY, Bilder) | europeana (EUROPEANA_API_KEY)\n\nStock-Fallback:\n  pexels | pixabay\n\nUnklare/restriktive Rechte bleiben immer im Review und werden nicht automatisch für YouTube freigegeben.`);
 }
