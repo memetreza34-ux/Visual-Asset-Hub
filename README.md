@@ -178,7 +178,6 @@ Neben dem allgemeinen `licenseStatus` können Assets jetzt speichern:
 licenseCode
 licenseVersion
 commercialUse
-DerivativesAllowed
 derivativesAllowed
 shareAlike
 checkedAt
@@ -189,10 +188,10 @@ Unterstützte Lizenzstatus umfassen u. a. `public-domain`, `cc0`, `cc-by`, `cc-b
 
 ## Rights-Evidence
 
-Ein Asset mit `status=approved` erzeugt beim Import automatisch eine lokale Audit-Akte:
+Ein Asset mit `status=approved` erzeugt beim Import automatisch eine **dauerhafte kleine Audit-Akte**:
 
 ```text
-.local-storage/rights-evidence/<ASSET-ID>/evidence.json
+catalog/rights-evidence/<ASSET-ID>.json
 ```
 
 Manuell:
@@ -207,6 +206,8 @@ Optional kann zusätzlich die Quellseite mit Playwright erfasst werden:
 ```bash
 npm run rights:evidence -- snapshot --asset VAH-XXXXXXXX --capture true
 ```
+
+Der große Quellseiten-Capture bleibt lokal unter `.local-storage/rights-evidence/<ASSET-ID>/source-capture/`; die kleine Evidence-JSON bleibt dagegen zusammen mit dem Katalog erhalten.
 
 Die Evidence enthält unter anderem Quelle, Lizenzstatus/-code, Prüfzeitpunkt, Asset-SHA, Attribution und einen Fingerprint. **Sie ist eine Audit-Akte und keine automatische Rechtsmeinung.** Ein Screenshot einer Quellseite erzeugt ebenfalls kein Nutzungsrecht.
 
@@ -250,7 +251,7 @@ Bei `approved` wird automatisch Rights-Evidence angelegt. Wenn OpenCLIP/sqlite-v
 - Visual-QC bestanden ist,
 - jeder Shot in `beat-bindings.json` gebunden ist,
 - für jedes gebundene Asset `rights.checkedAt` gesetzt ist,
-- die zugehörige Rights-Evidence-Datei lokal existiert und zum Katalog passt.
+- die zugehörige Rights-Evidence-Datei dauerhaft existiert und zum Katalog passt.
 
 Erst dann akzeptiert Workflow v3 eine Voiceover-Datei.
 
@@ -400,8 +401,9 @@ render-manifest.json
 Zusätzlich außerhalb des Projektordners:
 
 ```text
-.local-storage/rights-evidence/<ASSET-ID>/evidence.json
-.local-storage/asset-memory.sqlite   # optional
+catalog/rights-evidence/<ASSET-ID>.json                # dauerhaft
+.local-storage/rights-evidence/<ASSET-ID>/source-capture/  # optional, groß
+.local-storage/asset-memory.sqlite                     # optional
 ```
 
 ## Sicherheit / Rechte
