@@ -30,6 +30,7 @@ const report = {
     syntheticExplainerGraphics: false,
     defaultOverlayMode: 'none',
     explicitOverlayOnly: true,
+    calloutsDisabled: true,
     remotionRole: 'assembly-only',
     autoReuseUnclearedMedia: false,
     note: 'Der Planner schneidet und bewegt recherchierte reale Medien. Er erzeugt keine automatischen Infografiken, Teilchen-/Elektronenanimationen, Pfeile, Kreise, Callouts oder mittigen Textkarten. Wenn eine Erklärung visuell nötig ist, muss Phase 1 ein echtes Foto, Video, Dokument oder offizielles Diagramm festlegen.'
