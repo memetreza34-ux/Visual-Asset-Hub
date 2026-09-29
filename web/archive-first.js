@@ -1,5 +1,7 @@
 const labels = {
   nasa: 'NASA Image & Video Library',
+  noaa: 'NOAA',
+  usgs: 'U.S. Geological Survey',
   'library-of-congress': 'Library of Congress',
   wikimedia: 'Wikimedia Commons',
   'internet-archive': 'Internet Archive',
@@ -8,7 +10,7 @@ const labels = {
   pixabay: 'Pixabay · Stock-Fallback'
 };
 
-const preferred = ['nasa', 'library-of-congress', 'wikimedia', 'internet-archive', 'openverse', 'pexels', 'pixabay'];
+const preferred = ['nasa', 'noaa', 'usgs', 'library-of-congress', 'wikimedia', 'internet-archive', 'openverse', 'pexels', 'pixabay'];
 const select = document.querySelector('#source-provider');
 if (select) {
   let initialized = false;
