@@ -1,0 +1,5 @@
+# Optional quality/retrieval models. Install when semantic memory and image quality scoring are wanted.
+torch>=2.2
+torchvision>=0.17
+open_clip_torch>=2.24
+pyiqa>=0.1
