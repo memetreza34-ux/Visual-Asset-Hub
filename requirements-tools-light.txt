@@ -1,9 +1,7 @@
-# Optional lightweight helpers. The normal Node/FFmpeg workflow still works without these.
+# Lightweight optional helpers. No large vision/AI model stack here.
 trafilatura>=2.0
 sqlite-vec>=0.1
 Pillow>=10
-open_clip_torch>=2.24
-pyiqa>=0.1
 ffmpeg-normalize>=1.31
 gallery-dl>=1.29
 yt-dlp>=2025.1
