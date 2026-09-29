@@ -41,7 +41,7 @@ async function handleApi(request, response, url) {
   response.setHeader('Cache-Control', 'no-store');
 
   if (request.method === 'GET' && url.pathname === '/api/health') {
-    return sendJson(response, 200, { ok: true, writeApiEnabled, host, version: '0.13' });
+    return sendJson(response, 200, { ok: true, writeApiEnabled, host, version: '0.15' });
   }
   if (request.method === 'GET' && url.pathname === '/api/sources') {
     const providers = Object.fromEntries(Object.entries(PROVIDERS).map(([name, config]) => [name, {
@@ -245,7 +245,7 @@ function readJsonBody(request) {
   });
 }
 function boundedInteger(value, min, max, fallback) { const number = value === undefined || value === null || value === '' ? fallback : Number(value); if (!Number.isInteger(number) || number < min || number > max) throw new Error(`Zahl muss zwischen ${min} und ${max} liegen.`); return number; }
-function providerLabel(value) { return ({ pexels: 'Pexels', pixabay: 'Pixabay', openverse: 'Openverse', wikimedia: 'Wikimedia Commons', 'internet-archive': 'Internet Archive', nasa: 'NASA Image & Video Library', 'library-of-congress': 'Library of Congress' })[value] || String(value || 'Quelle'); }
+function providerLabel(value) { return ({ pexels: 'Pexels', pixabay: 'Pixabay', openverse: 'Openverse', wikimedia: 'Wikimedia Commons', 'internet-archive': 'Internet Archive', nasa: 'NASA Image & Video Library', noaa: 'NOAA', usgs: 'U.S. Geological Survey', 'library-of-congress': 'Library of Congress' })[value] || String(value || 'Quelle'); }
 function toKebab(value) { return value.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`); }
 function setSecurityHeaders(response) {
   response.setHeader('X-Content-Type-Options', 'nosniff');
