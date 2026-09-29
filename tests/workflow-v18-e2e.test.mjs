@@ -7,7 +7,6 @@ import {spawnSync} from 'node:child_process';
 import test from 'node:test';
 
 const repo=process.cwd();
-
 function writeJson(file,value){fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,`${JSON.stringify(value,null,2)}\n`);}
 function run(cwd,args){return spawnSync(process.execPath,args,{cwd,encoding:'utf8',stdio:['ignore','pipe','pipe']});}
 
@@ -28,9 +27,9 @@ test('offline v3 gate reaches a local-only multi-shot render manifest',()=>{
     fs.writeFileSync(audioFile,'offline fixture audio');
     const checkedAt='2026-09-29T18:00:00.000Z';
     const sourceUrl='https://example.org/public-domain-volcano';
-    const evidenceRel=`.local-storage/rights-evidence/${assetId}/evidence.json`;
+    const evidenceRel=`catalog/rights-evidence/${assetId}.json`;
     writeJson(path.join(tmp,evidenceRel),{
-      version:1,assetId,assetSha256:null,generatedAt:checkedAt,checkedAt,sourceName:'Fixture Archive',sourceUrl,licenseStatus:'public-domain',licenseCode:'public-domain',licenseVersion:null,licenseUrl:null,commercialUse:true,derivativesAllowed:true,shareAlike:false,attributionRequired:false,attributionText:null,usageScopes:['youtube'],sourceCapture:null,policy:{snapshotIsAuditRecordNotLegalOpinion:true}
+      version:2,assetId,assetSha256:null,generatedAt:checkedAt,checkedAt,sourceName:'Fixture Archive',sourceUrl,licenseStatus:'public-domain',licenseCode:'public-domain',licenseVersion:null,licenseUrl:null,commercialUse:true,derivativesAllowed:true,shareAlike:false,attributionRequired:false,attributionText:null,usageScopes:['youtube'],sourceCapture:null,policy:{snapshotIsAuditRecordNotLegalOpinion:true,persistentJsonTrackedWithCatalog:true}
     });
     writeJson(path.join(tmp,'catalog','assets.json'),{
       catalogVersion:1,updatedAt:checkedAt,assets:[{
