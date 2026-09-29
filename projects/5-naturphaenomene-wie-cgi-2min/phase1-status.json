@@ -14,6 +14,7 @@
     "assetHandoff": "assets.json",
     "requiredBeforePhase2": [
       "materialization.json",
+      "phase1-quality.json",
       "visual-qc.json",
       "beat-bindings.json"
     ]
@@ -48,5 +49,5 @@
     "NOAA Ocean Today Bioluminescent Ocean as excerpted B-roll: blocked because its FAQ requires use in entirety and prohibits alteration/transformation.",
     "Third-party Chasing Sprites/TLE Chasers media on NASA SVS package: blocked because the page identifies it as copyrighted/used with permission."
   ],
-  "nextAction": "Run beat:plan v3, phase1:materialize with local downloads, visual:qc, catalog/review, phase1:bind, then youtube:workflow phase1-check. Only then may the user voiceover be attached."
+  "nextAction": "Run beat:plan v3, phase1:materialize, phase1:quality, visual:qc, catalog/review, phase1:bind, then youtube:workflow phase1-check. Only then may the user voiceover be attached."
 }
