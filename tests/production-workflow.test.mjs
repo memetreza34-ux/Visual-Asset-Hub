@@ -255,7 +255,7 @@ test('provider layer exposes keyless official archives', () => {
 
 test('local server guards write endpoints and provider provenance', () => {
   const server = fs.readFileSync(path.join(root, 'scripts/serve.mjs'), 'utf8');
-  assert.match(server, /version: '0\.(13|14)'/);
+  assert.match(server, /version: '0\.(13|14|15)'/);
   assert.match(server, /writeApiEnabled/);
   assert.match(server, /\/api\/sources\/search/);
   assert.match(server, /\/api\/sources\/grab/);
