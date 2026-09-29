@@ -23,6 +23,7 @@
     "clip:find": "node scripts/clip-find.mjs",
     "beat:plan": "node scripts/beat-planner.mjs",
     "phase1:materialize": "node scripts/phase1-materialize.mjs",
+    "phase1:quality": "node scripts/phase1-quality-pass.mjs",
     "phase1:bind": "node scripts/phase1-bind.mjs",
     "map:render": "node scripts/map-render.mjs",
     "frame:extract": "node scripts/frame-extract.mjs",
