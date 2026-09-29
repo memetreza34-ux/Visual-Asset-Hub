@@ -23,13 +23,7 @@ for (const beat of materialization.beats || []) {
   }
 }
 const unique=[...new Map(downloads.map((item)=>[`${item.beatId}:${item.candidateId}:${item.relativeFile}`,item])).values()];
-const report={
-  version:3,
-  projectId,
-  generatedAt:new Date().toISOString(),
-  policy:{defaultPassIsLightweight:true,deepToolsOptIn:true,qualityFeedsVisualQc:true,localLibraryReuseSupported:true,qualityDoesNotGrantRights:true,qualityDoesNotProveEventIdentity:true,remotionSyntheticExplainers:false},
-  assets:[],deep:null
-};
+const report={version:3,projectId,generatedAt:new Date().toISOString(),policy:{defaultPassIsLightweight:true,deepToolsOptIn:true,qualityFeedsVisualQc:true,localLibraryReuseSupported:true,qualityDoesNotGrantRights:true,qualityDoesNotProveEventIdentity:true,remotionSyntheticExplainers:false},assets:[],deep:null};
 
 for(const [index,item] of unique.entries()){
   console.log(`[${index+1}/${unique.length}] ${item.relativeFile}`);
@@ -56,23 +50,14 @@ if(args.deep==='true'){
   report.deep=deep;
 }
 
-report.summary={
-  readyAssets:unique.length,
-  downloadedAssets:unique.filter((item)=>item.sourceStatus==='downloaded').length,
-  reusedLocalAssets:unique.filter((item)=>item.sourceStatus==='local-existing').length,
-  imageAssets:unique.filter((item)=>isImage(item.file)).length,
-  videoAssets:unique.filter((item)=>isVideo(item.file)).length,
-  scoredAssets:report.assets.filter((item)=>Number.isFinite(item.qualityScore)).length,
-  averageQualityScore:average(report.assets.map((item)=>item.qualityScore).filter(Number.isFinite)),
-  deepMode:args.deep==='true'
-};
+report.summary={readyAssets:unique.length,downloadedAssets:unique.filter((item)=>item.sourceStatus==='downloaded').length,reusedLocalAssets:unique.filter((item)=>item.sourceStatus==='local-existing').length,imageAssets:unique.filter((item)=>isImage(item.file)).length,videoAssets:unique.filter((item)=>isVideo(item.file)).length,scoredAssets:report.assets.filter((item)=>Number.isFinite(item.qualityScore)).length,averageQualityScore:average(report.assets.map((item)=>item.qualityScore).filter(Number.isFinite)),deepMode:args.deep==='true'};
 const output=path.resolve(args.output||path.join(projectDir,'phase1-quality.json'));
 fs.mkdirSync(path.dirname(output),{recursive:true});
 fs.writeFileSync(output,`${JSON.stringify(report,null,2)}\n`);
 console.log(`Phase-1-Quality: ${relative(output)}`);
 console.log('Der Quality-Score ist nur ein Bild-/Techniksignal. Rechte und Ereignisidentität bleiben separate Gates.');
 
-function technicalScore(payload){if(!payload||payload.error)return null;const streams=payload.media?.track||payload.streams||[];const video=Array.isArray(streams)?streams.find((item)=>item['@type']==='Video'||item.codec_type==='video'):null;const width=Number(video?.Width||video?.width||0),height=Number(video?.Height||video?.height||0),longest=Math.max(width,height);if(!longest)return55;if(longest>=3840)return100;if(longest>=1920)return92;if(longest>=1280)return80;if(longest>=960)return65;if(longest>=720)return52;return30}
+function technicalScore(payload){if(!payload||payload.error)return null;const streams=payload.media?.track||payload.streams||[];const video=Array.isArray(streams)?streams.find((item)=>item['@type']==='Video'||item.codec_type==='video'):null;const width=Number(video?.Width||video?.width||0),height=Number(video?.Height||video?.height||0),longest=Math.max(width,height);if(!longest)return 55;if(longest>=3840)return 100;if(longest>=1920)return 92;if(longest>=1280)return 80;if(longest>=960)return 65;if(longest>=720)return 52;return 30}
 function imageQualityScore(payload){const scores=payload?.scores||{},values=[];if(Number.isFinite(scores.brisque))values.push(clamp(100-scores.brisque,0,100));if(Number.isFinite(scores.niqe))values.push(clamp(105-scores.niqe*9,0,100));if(Number.isFinite(scores.musiq))values.push(clamp(scores.musiq,0,100));return values.length?Math.round(average(values)):null}
 function combinedQuality(technical,imageQuality){if(Number.isFinite(technical)&&Number.isFinite(imageQuality))return Math.round(technical*.45+imageQuality*.55);if(Number.isFinite(imageQuality))return Math.round(imageQuality);if(Number.isFinite(technical))return Math.round(technical);return null}
 function toolboxJson(values){const result=spawnSync(process.execPath,['scripts/open-source-toolchain.mjs',...values],{cwd:root,encoding:'utf8',stdio:['ignore','pipe','pipe']});if(result.status!==0)return{error:clean(result.stderr||result.stdout||'Tool fehlgeschlagen.')};try{return JSON.parse(result.stdout)}catch{return{output:clean(result.stdout)}}}
