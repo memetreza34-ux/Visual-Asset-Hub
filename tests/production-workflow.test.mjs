@@ -11,21 +11,22 @@ const check=(file)=>spawnSync(process.execPath,['--check',file],{cwd:root,encodi
 
 test('production JavaScript entrypoints parse',()=>{
   for(const file of [
-    'scripts/analyze-media.mjs','scripts/add-asset.mjs','scripts/source-search.mjs','scripts/source-grab.mjs','scripts/documentary-research.mjs','scripts/research-discover.mjs','scripts/article-capture.mjs','scripts/reference-style.mjs','scripts/visual-qc.mjs','scripts/clip-find.mjs','scripts/beat-planner.mjs','scripts/phase1-materialize.mjs','scripts/phase1-bind.mjs','scripts/phase1-quality-pass.mjs','scripts/rights-evidence.mjs','scripts/phase3-prepare.mjs','scripts/video-project.mjs','scripts/youtube-workflow-v3.mjs','scripts/align-voiceover.mjs','scripts/open-source-toolchain.mjs','scripts/serve.mjs','scripts/lib/providers/index.mjs','scripts/lib/providers/nasa.mjs','scripts/lib/providers/noaa.mjs','scripts/lib/providers/usgs.mjs','scripts/lib/providers/nara.mjs','scripts/lib/providers/smithsonian.mjs','scripts/lib/providers/europeana.mjs'
+    'scripts/analyze-media.mjs','scripts/add-asset.mjs','scripts/source-search.mjs','scripts/source-grab.mjs','scripts/documentary-research.mjs','scripts/research-discover.mjs','scripts/article-capture.mjs','scripts/reference-style.mjs','scripts/visual-qc.mjs','scripts/clip-find.mjs','scripts/beat-planner.mjs','scripts/phase1-materialize.mjs','scripts/phase1-bind.mjs','scripts/phase1-quality-pass.mjs','scripts/rights-evidence.mjs','scripts/phase3-prepare.mjs','scripts/video-project.mjs','scripts/youtube-workflow-v3.mjs','scripts/align-voiceover.mjs','scripts/open-source-toolchain.mjs','scripts/iiif-resolve.mjs','scripts/serve.mjs','scripts/lib/providers/index.mjs','scripts/lib/providers/nasa.mjs','scripts/lib/providers/nasa-svs.mjs','scripts/lib/providers/noaa.mjs','scripts/lib/providers/usgs.mjs','scripts/lib/providers/nps.mjs','scripts/lib/providers/dvids.mjs','scripts/lib/providers/nara.mjs','scripts/lib/providers/smithsonian.mjs','scripts/lib/providers/met.mjs','scripts/lib/providers/europeana.mjs'
   ]){
     const result=check(file);
     assert.equal(result.status,0,`${file}\n${result.stderr||result.stdout}`);
   }
 });
 
-test('package exposes production workflow v0.18',()=>{
+test('package exposes production workflow v0.19',()=>{
   const pkg=JSON.parse(read('package.json'));
-  assert.equal(pkg.version,'0.18.0');
+  assert.equal(pkg.version,'0.19.0');
   assert.equal(pkg.scripts['youtube:workflow'],'node scripts/youtube-workflow-v3.mjs');
   assert.equal(pkg.scripts['phase3:prepare'],'node scripts/phase3-prepare.mjs');
   assert.equal(pkg.scripts['rights:evidence'],'node scripts/rights-evidence.mjs');
   assert.equal(pkg.scripts['phase1:materialize'],'node scripts/phase1-materialize.mjs');
   assert.equal(pkg.scripts['phase1:quality'],'node scripts/phase1-quality-pass.mjs');
+  assert.equal(pkg.scripts['iiif:resolve'],'node scripts/iiif-resolve.mjs');
 });
 
 test('workflow v3 blocks phase 2 until local assets, QC, bindings and rights evidence are ready',()=>{
@@ -112,11 +113,20 @@ test('renderer follows focus/motion and rejects v3 remote runtime sources',()=>{
   assert.doesNotMatch(renderer,/hash\(scene\.id\)/);
 });
 
-test('official provider layer remains archive-first',()=>{
+test('official provider layer remains archive-first and includes v0.19 sources',()=>{
   const providers=read('scripts/lib/providers/index.mjs');
-  for(const name of ['nasa','noaa','usgs','nara','smithsonian','library-of-congress','europeana','wikimedia','internet-archive','openverse','pexels','pixabay'])assert.match(providers,new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+  for(const name of ['nasa','nasa-svs','noaa','usgs','nps','dvids','nara','smithsonian','library-of-congress','met','europeana','wikimedia','internet-archive','openverse','pexels','pixabay'])assert.match(providers,new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
   assert.match(providers,/tier: 'official-archive'/);
   assert.match(providers,/tier: 'stock-fallback'/);
+  const materializer=read('scripts/phase1-materialize.mjs');
+  assert.match(materializer,/officialProviderOrder:\['nasa','nasa-svs','noaa','usgs','nps','dvids'/);
+});
+
+test('IIIF resolver treats delivery as separate from rights',()=>{
+  const source=read('scripts/iiif-resolve.mjs');
+  assert.match(source,/iiifDoesNotGrantReuseRights:true/);
+  assert.match(source,/license_status:'unknown'/);
+  assert.match(source,/\/full\/max\/0\/default\.jpg/);
 });
 
 test('open-source quality toolbox remains optional and real-media-first',()=>{
