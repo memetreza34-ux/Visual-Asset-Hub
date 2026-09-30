@@ -59,7 +59,7 @@ for (const provider of providers) {
 const results = [...resultsByKey.values()];
 results.sort((a, b) => b.researchScore - a.researchScore || String(a.title).localeCompare(String(b.title)));
 const report = {
-  version: 5,
+  version: 6,
   generatedAt: new Date().toISOString(),
   query,
   queryVariants,
@@ -68,11 +68,12 @@ const report = {
   policy: {
     order: ['official-archive', 'archive', 'open-media', 'stock-fallback'],
     stockIncluded: includeStock,
-    optionalKeyProviders: ['nara', 'smithsonian', 'europeana'],
+    optionalKeyProviders: ['nps','dvids','nara','smithsonian','europeana'],
+    keylessNewProviders: ['nasa-svs','met'],
     autoApproveUnknownRights: false,
     visualMatchRecommended: true,
     entityExpansionEnabled: args.expandEntities !== 'false',
-    note: 'Score ist nur Research-Heuristik. Vor Phase-1-Freigabe müssen Ereignisidentität, Rechte und visuelle Relevanz geprüft werden. Fehlende kostenlose API-Keys überspringen NARA, Smithsonian und Europeana automatisch; die keylosen Quellen laufen weiter.'
+    note: 'Score ist nur Research-Heuristik. Vor Phase-1-Freigabe müssen Ereignisidentität, Rechte und visuelle Relevanz geprüft werden. Kostenlose Key-Provider werden bei fehlendem Schlüssel übersprungen; keylose Quellen laufen weiter.'
   },
   providers,
   candidates: results.slice(0, integer(args.limit || '40', 1, 100, 'limit'))
@@ -100,7 +101,7 @@ function rankCandidate(asset, provider, queryText, config, searchQuery) {
   const exactness = words.length ? matched / words.length : 0;
   let score = tierScore(config.tier);
   score += Math.round(exactness * 30);
-  if (asset.rights?.license_status === 'public-domain') score += 15;
+  if (['public-domain','cc0'].includes(asset.rights?.license_status)) score += 15;
   else if (asset.rights?.license_status === 'licensed') score += 10;
   else if (asset.rights?.license_status === 'restricted') score -= 20;
   else score -= 8;
@@ -131,8 +132,8 @@ function tierScore(tier) {
 }
 function defaultProviders(type, stock) {
   const base = type === 'image'
-    ? ['nasa', 'noaa', 'usgs', 'nara', 'smithsonian', 'library-of-congress', 'europeana', 'wikimedia', 'internet-archive', 'openverse']
-    : ['nasa', 'noaa', 'usgs', 'nara', 'library-of-congress', 'europeana', 'wikimedia', 'internet-archive'];
+    ? ['nasa','nasa-svs','noaa','usgs','nps','dvids','nara','smithsonian','library-of-congress','met','europeana','wikimedia','internet-archive','openverse']
+    : ['nasa','nasa-svs','noaa','usgs','nps','dvids','nara','library-of-congress','europeana','wikimedia','internet-archive'];
   if (stock) base.push('pexels', 'pixabay');
   return base;
 }
@@ -143,4 +144,4 @@ function relative(file) { return path.relative(root, file).split(path.sep).join(
 function integer(value, min, max, label) { const n = Number(value); if (!Number.isInteger(n) || n < min || n > max) fail(`${label} muss zwischen ${min} und ${max} liegen.`); return n; }
 function parseArgs(values) { const result = { _: [] }; for (let i = 0; i < values.length; i++) { const token = values[i]; if (!token.startsWith('--')) { result._.push(token); continue; } const key = token.slice(2).replace(/-([a-z])/g, (_, c) => c.toUpperCase()); if (key === 'help') { result.help = true; continue; } const next = values[i + 1]; if (!next || next.startsWith('--')) fail(`Wert für ${token} fehlt.`); result[key] = next; i++; } return result; }
 function fail(message) { console.error(message); process.exit(1); }
-function help() { console.log(`Documentary Research – archive-first\n\nBeispiele:\n  npm run documentary:research -- "Kilauea eruption" --type video\n  npm run documentary:research -- "Hurricane Katrina NOAA" --type image\n  npm run documentary:research -- "warehouse accident" --type video --include-stock true\n\nKeylos immer aktiv:\n  NASA + NOAA + USGS + Library of Congress + Wikimedia Commons + Internet Archive (+ Openverse bei Bildern)\n\nOptional mit kostenlosen Keys:\n  NARA_API_KEY          National Archives Catalog (Bild + Video)\n  SMITHSONIAN_API_KEY   Smithsonian Open Access (Bilder)\n  EUROPEANA_API_KEY     Europeana (Bild + Video)\n\nWikidata erweitert den Suchbegriff standardmäßig um maximal zwei passende Aliase/Labels. Abschalten mit:\n  --expand-entities false\n\nPriorität:\n  official-archive > archive > open-media > stock-fallback\n\nStock ist standardmäßig AUS. Mit --include-stock true werden Pexels/Pixabay nur als nachrangige Fallbacks ergänzt.`); }
+function help() { console.log(`Documentary Research – archive-first\n\nBeispiele:\n  npm run documentary:research -- "Kilauea eruption" --type video\n  npm run documentary:research -- "Hurricane Katrina NOAA" --type image\n  npm run documentary:research -- "Apollo Earth visualization" --type video --providers nasa-svs\n\nKeylos immer aktiv:\n  NASA + NASA SVS + NOAA + USGS + Library of Congress + The Met (Bilder) + Wikimedia Commons + Internet Archive (+ Openverse bei Bildern)\n\nOptional mit kostenlosen Keys:\n  NPS_API_KEY           National Park Service (Bild + Video)\n  DVIDS_API_KEY         DVIDS (Bild + Video)\n  NARA_API_KEY          National Archives Catalog (Bild + Video)\n  SMITHSONIAN_API_KEY   Smithsonian Open Access (Bilder)\n  EUROPEANA_API_KEY     Europeana (Bild + Video)\n\nWikidata erweitert den Suchbegriff standardmäßig um maximal zwei passende Aliase/Labels. Abschalten mit:\n  --expand-entities false\n\nPriorität:\n  official-archive > archive > open-media > stock-fallback\n\nStock ist standardmäßig AUS. Mit --include-stock true werden Pexels/Pixabay nur als nachrangige Fallbacks ergänzt.`); }
