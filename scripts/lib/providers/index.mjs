@@ -4,20 +4,28 @@ import { searchOpenverse } from './openverse.mjs';
 import { searchWikimedia } from './wikimedia.mjs';
 import { searchInternetArchive } from './internet-archive.mjs';
 import { searchNasa } from './nasa.mjs';
+import { searchNasaSvs } from './nasa-svs.mjs';
 import { searchLibraryOfCongress } from './library-of-congress.mjs';
 import { searchNoaa } from './noaa.mjs';
 import { searchUsgs } from './usgs.mjs';
 import { searchSmithsonian } from './smithsonian.mjs';
 import { searchEuropeana } from './europeana.mjs';
 import { searchNara } from './nara.mjs';
+import { searchNps } from './nps.mjs';
+import { searchDvids } from './dvids.mjs';
+import { searchMet } from './met.mjs';
 
 export const PROVIDERS = Object.freeze({
   nasa: { types: ['video', 'image'], requiresKey: null, tier: 'official-archive', downloadable: true },
+  'nasa-svs': { types: ['video', 'image'], requiresKey: null, tier: 'official-archive', downloadable: true },
   noaa: { types: ['video', 'image'], requiresKey: null, tier: 'official-archive', downloadable: true },
   usgs: { types: ['video', 'image'], requiresKey: null, tier: 'official-archive', downloadable: true },
+  nps: { types: ['video', 'image'], requiresKey: 'NPS_API_KEY', tier: 'official-archive', downloadable: true },
+  dvids: { types: ['video', 'image'], requiresKey: 'DVIDS_API_KEY', tier: 'official-archive', downloadable: true },
   nara: { types: ['video', 'image'], requiresKey: 'NARA_API_KEY', tier: 'official-archive', downloadable: true },
   smithsonian: { types: ['image'], requiresKey: 'SMITHSONIAN_API_KEY', tier: 'official-archive', downloadable: true },
   'library-of-congress': { types: ['video', 'image'], requiresKey: null, tier: 'official-archive', downloadable: true },
+  met: { types: ['image'], requiresKey: null, tier: 'official-archive', downloadable: true },
   europeana: { types: ['video', 'image'], requiresKey: 'EUROPEANA_API_KEY', tier: 'archive', downloadable: true },
   wikimedia: { types: ['video', 'image'], requiresKey: null, tier: 'archive', downloadable: true },
   'internet-archive': { types: ['video', 'image'], requiresKey: null, tier: 'archive', downloadable: true },
@@ -35,11 +43,20 @@ export async function searchProvider({ provider, type = 'video', env = process.e
   if (name === 'nasa') {
     return searchNasa({ query: options.query, type, page: options.page, perPage: options.perPage, fetchImpl: options.fetchImpl });
   }
+  if (name === 'nasa-svs') {
+    return searchNasaSvs({ query: options.query, type, page: options.page, perPage: options.perPage, fetchImpl: options.fetchImpl });
+  }
   if (name === 'noaa') {
     return searchNoaa({ query: options.query, type, page: options.page, perPage: options.perPage, fetchImpl: options.fetchImpl });
   }
   if (name === 'usgs') {
     return searchUsgs({ query: options.query, type, page: options.page, perPage: options.perPage, fetchImpl: options.fetchImpl });
+  }
+  if (name === 'nps') {
+    return searchNps({ apiKey: env.NPS_API_KEY, query: options.query, type, page: options.page, perPage: options.perPage, fetchImpl: options.fetchImpl });
+  }
+  if (name === 'dvids') {
+    return searchDvids({ apiKey: env.DVIDS_API_KEY, query: options.query, type, page: options.page, perPage: options.perPage, fetchImpl: options.fetchImpl });
   }
   if (name === 'nara') {
     return searchNara({ apiKey: env.NARA_API_KEY, query: options.query, type, page: options.page, perPage: options.perPage, fetchImpl: options.fetchImpl });
@@ -49,6 +66,9 @@ export async function searchProvider({ provider, type = 'video', env = process.e
   }
   if (name === 'library-of-congress') {
     return searchLibraryOfCongress({ query: options.query, type, page: options.page, perPage: options.perPage, fetchImpl: options.fetchImpl });
+  }
+  if (name === 'met') {
+    return searchMet({ query: options.query, type, page: options.page, perPage: options.perPage, fetchImpl: options.fetchImpl });
   }
   if (name === 'europeana') {
     return searchEuropeana({ apiKey: env.EUROPEANA_API_KEY, query: options.query, type, page: options.page, perPage: options.perPage, fetchImpl: options.fetchImpl });
