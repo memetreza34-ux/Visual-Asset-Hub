@@ -1,6 +1,6 @@
 {
   "name": "visual-asset-hub",
-  "version": "0.18.0",
+  "version": "0.19.0",
   "private": true,
   "type": "module",
   "engines": { "node": ">=22" },
@@ -29,6 +29,7 @@
     "phase3:prepare": "node scripts/phase3-prepare.mjs",
     "map:render": "node scripts/map-render.mjs",
     "frame:extract": "node scripts/frame-extract.mjs",
+    "iiif:resolve": "node scripts/iiif-resolve.mjs",
     "image:prepare": "node scripts/open-source-toolchain.mjs image-prepare",
     "audio:prepare": "node scripts/open-source-toolchain.mjs audio-prepare",
     "final:qc": "node scripts/open-source-toolchain.mjs final-qc",
