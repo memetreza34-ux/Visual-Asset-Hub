@@ -1,0 +1,44 @@
+name: Render 2-Minute Demo Video
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: false
+          persist-credentials: false
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install renderer dependencies
+        working-directory: renderer
+        run: npm install --no-audit --no-fund
+
+      - name: Typecheck renderer
+        working-directory: renderer
+        run: npm run check
+
+      - name: Render 120-second MP4
+        working-directory: renderer
+        run: npm run render:demo
+
+      - name: Verify output
+        run: |
+          test -s renderer/out/visual-asset-hub-demo-2min.mp4
+          ls -lh renderer/out/visual-asset-hub-demo-2min.mp4
+
+# Legacy technical demo only. Real YouTube workflow v2 renders from the user's
+# voiceover and the Phase-1-approved project visuals. Trigger this job manually
+# only when the old renderer demo itself needs regression testing.

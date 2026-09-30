@@ -1,0 +1,187 @@
+{
+  "version": 1,
+  "projectId": "4-fehler-millionen-2min",
+  "researchPolicy": {
+    "factsRequirePrimaryOrHighAuthoritySource": true,
+    "visualsChosenBeforeVoiceover": true,
+    "preferOriginalEventMedia": true,
+    "copyrightedNewsFootageRequired": false,
+    "stockRequired": false
+  },
+  "cases": [
+    {
+      "id": "noaa-n-prime",
+      "headline": "24 fehlende Schrauben: Wetter-Satellit fällt auf den Boden",
+      "facts": [
+        "Am 6. September 2003 fiel NOAA N-Prime beim Kippen von einem Turn-Over Cart auf den Boden.",
+        "Der Untersuchungsbericht nennt als direkte Ursache, dass die Adapterplatte nicht mit den erforderlichen 24 Schrauben befestigt war.",
+        "NOAA nennt später 135 Millionen US-Dollar Korrekturkosten für die Fertigungspanne."
+      ],
+      "factSources": [
+        {
+          "name": "NASA NOAA N-PRIME Mishap Investigation Final Report",
+          "url": "https://www.nasa.gov/wp-content/uploads/2015/01/65776main_noaa_np_mishap.pdf",
+          "supports": ["fall", "24 missing bolts", "investigation findings"]
+        },
+        {
+          "name": "NOAA History of NOAA Satellites",
+          "url": "https://www.nesdis.noaa.gov/our-satellites/related-information/history-of-noaa-satellites",
+          "supports": ["NOAA-19 was NOAA-N-Prime", "$135 million correction cost"]
+        }
+      ],
+      "selectedVisualSources": [
+        {
+          "kind": "official-document-still",
+          "source": "NASA mishap report",
+          "url": "https://www.nasa.gov/wp-content/uploads/2015/01/65776main_noaa_np_mishap.pdf",
+          "use": "Figures showing the damaged satellite and the turnover cart / missing bolts",
+          "rights": "US government/NASA document; verify each embedded credit before publication",
+          "relevanceScore": 10
+        },
+        {
+          "kind": "internal-motion-graphic",
+          "use": "Simple 24-bolt ring graphic: 24 required -> 0 installed -> satellite tips",
+          "rights": "owned",
+          "relevanceScore": 10
+        }
+      ]
+    },
+    {
+      "id": "mars-climate-orbiter",
+      "headline": "Englische statt metrische Einheiten: Mars-Sonde verloren",
+      "facts": [
+        "NASA/JPL nennt einen Fehler bei der Umrechnung englischer in metrische Einheiten als Ursache für den Navigationsfehler.",
+        "Die Sonde kam dadurch zu nah an Mars und ging am 23. September 1999 verloren.",
+        "Der US-Rechnungshof beziffert die Entwicklungskosten des Mars Climate Orbiter auf 75 Millionen US-Dollar."
+      ],
+      "factSources": [
+        {
+          "name": "NASA Science – Mars Climate Orbiter",
+          "url": "https://science.nasa.gov/mission/mars-climate-orbiter/",
+          "supports": ["unit conversion failure", "loss at Mars"]
+        },
+        {
+          "name": "GAO-02-195 NASA: Better Mechanisms Needed for Sharing Lessons Learned",
+          "url": "https://www.gao.gov/assets/gao-02-195.pdf",
+          "supports": ["$75 million development cost", "English vs metric navigation error"]
+        }
+      ],
+      "selectedVisualSources": [
+        {
+          "kind": "archive-image",
+          "source": "Wikimedia Commons / NASA-JPL",
+          "url": "https://commons.wikimedia.org/wiki/File:Mars_Climate_Orbiter_1.jpg",
+          "use": "Actual Mars Climate Orbiter during assembly",
+          "rights": "Public domain – NASA/JPL",
+          "relevanceScore": 10
+        },
+        {
+          "kind": "archive-image",
+          "source": "Wikimedia Commons / NASA-JPL",
+          "url": "https://commons.wikimedia.org/wiki/File:Mars_Climate_Orbiter_-_interplanetary_trajectory.png",
+          "use": "Actual mission trajectory graphic",
+          "rights": "Public domain – NASA/JPL",
+          "relevanceScore": 10
+        },
+        {
+          "kind": "internal-motion-graphic",
+          "use": "lb-force seconds vs newton-seconds labels feed into diverging trajectory lines",
+          "rights": "owned",
+          "relevanceScore": 10
+        }
+      ]
+    },
+    {
+      "id": "sncf-wide-trains",
+      "headline": "Neue Züge – aber manche alten Bahnsteige waren zu eng",
+      "facts": [
+        "2014 bestätigten SNCF und Réseau ferré de France, dass für neue breitere Regionalzüge rund 1.300 Bahnsteige angepasst werden mussten.",
+        "Als Kosten wurden 50 Millionen Euro genannt.",
+        "Eine französische Parlamentsvorlage dokumentiert die bestätigte Zahl von 1.300 Bahnsteigen und die von SNCF/RFF genannten 50 Millionen Euro."
+      ],
+      "factSources": [
+        {
+          "name": "Assemblée nationale – Proposition de résolution n°1968",
+          "url": "https://www.assemblee-nationale.fr/14/propositions/pion1968.asp",
+          "supports": ["1,300 platforms", "50 million euro stated by RFF/SNCF", "width incompatibility"]
+        },
+        {
+          "name": "World Bank – Managing Risks, Box 7.4",
+          "url": "https://documents1.worldbank.org/curated/en/583011538651181032/pdf/130474-PUB-PUBLIC-document-date-9-20-18.pdf",
+          "supports": ["interface/coordination problem", "over 50 million euro additional cost"]
+        }
+      ],
+      "selectedVisualSources": [
+        {
+          "kind": "archive-image",
+          "source": "Wikimedia Commons",
+          "url": "https://commons.wikimedia.org/wiki/File:R%C3%A9giolis_Alstom.jpg",
+          "use": "Actual Alstom Régiolis train family involved in the new regional fleet",
+          "rights": "Creative Commons – verify attribution/license on file page",
+          "relevanceScore": 9
+        },
+        {
+          "kind": "archive-image",
+          "source": "Wikimedia Commons",
+          "url": "https://commons.wikimedia.org/wiki/File:Lille_-_Pr%C3%A9sentation_du_Regio_2N_de_Bombardier_le_22_septembre_2014_en_gare_de_Lille-Flandres_(039).JPG",
+          "use": "Bombardier Regio 2N at a station platform",
+          "rights": "Creative Commons – verify attribution/license on file page",
+          "relevanceScore": 9
+        },
+        {
+          "kind": "internal-motion-graphic",
+          "use": "Top view: train width versus old platform clearance; platform edge is trimmed back",
+          "rights": "owned",
+          "relevanceScore": 10
+        }
+      ]
+    },
+    {
+      "id": "hubble-mirror",
+      "headline": "1,3 Millimeter im Prüfgerät – Hubble sieht unscharf",
+      "facts": [
+        "NASA stellte nach dem Start 1990 eine sphärische Aberration des Hauptspiegels fest.",
+        "Die Untersuchung führte den Fehler auf ein falsch eingerichtetes Prüfgerät zurück; der Linsenabstand im Nullkorrektor war um 1,3 Millimeter falsch.",
+        "NASA-Historien nennen rund 500 Millionen US-Dollar als typische Schätzung für die Reparaturmission; die Mission beinhaltete neben der optischen Korrektur auch geplante Wartung und weitere Upgrades."
+      ],
+      "factSources": [
+        {
+          "name": "NASA Science – Hubble's Mirror Flaw",
+          "url": "https://science.nasa.gov/mission/hubble/observatory/design/optics/hubbles-mirror-flaw/",
+          "supports": ["1.3 mm null-corrector lens spacing error", "spherical aberration", "1993 correction"]
+        },
+        {
+          "name": "NASA History – The Hubble Space Telescope Servicing Mission",
+          "url": "https://www.nasa.gov/history/SP-4219/Chapter16.html",
+          "supports": ["typical repair mission estimate about $500 million", "initial telescope construction estimate"]
+        }
+      ],
+      "selectedVisualSources": [
+        {
+          "kind": "archive-image",
+          "source": "Wikimedia Commons / NASA",
+          "url": "https://commons.wikimedia.org/wiki/File:Working_on_Hubble%27s_Main_Mirror_in_1990_22_lg_web.jpg",
+          "use": "Real Hubble primary mirror work",
+          "rights": "Public domain – NASA",
+          "relevanceScore": 10
+        },
+        {
+          "kind": "archive-image",
+          "source": "Wikimedia Commons / NASA-ESA",
+          "url": "https://commons.wikimedia.org/wiki/File:Hubble_Images_of_M100_Before_and_After_Mirror_Repair_-_GPN-2002-000064.jpg",
+          "use": "Before/after optical correction comparison",
+          "rights": "Public-domain/credit conditions as described on Commons file page",
+          "relevanceScore": 10
+        },
+        {
+          "kind": "archive-video",
+          "source": "Wikimedia Commons / NASA SVS",
+          "url": "https://commons.wikimedia.org/wiki/File:The_Big_Fix_%E2%80%93_Hubble%E2%80%99s_Servicing_Mission_1_(David_Leckrone)_(SVS14467_DAVE_WIDE_MP4).webm",
+          "use": "Real servicing-mission footage for short inserts",
+          "rights": "Public domain in US per Commons file page; verify NASA logo/third-party caveats",
+          "relevanceScore": 10
+        }
+      ]
+    }
+  ]
+}

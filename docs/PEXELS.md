@@ -1,61 +1,64 @@
 # Pexels einrichten
 
-Die Pexels-Integration durchsucht kostenlose Fotos und Videos. Sie lädt standardmäßig **keine Originaldateien** herunter. Dadurch bleiben GitHub-Repository und Speicher klein.
+Visual Asset Hub kann Pexels nach kostenlosen Fotos und Videos durchsuchen und **gezielt einzelne Assets** in die lokale Inbox laden.
 
-## 1. Schlüssel lokal eintragen
+## 1. API-Key lokal eintragen
 
-Kopiere `.env.example` zu `.env` und trage deinen Schlüssel ein:
+Kopiere `.env.example` zu `.env` und trage deinen Pexels-Key ein:
 
 ```env
 PEXELS_API_KEY=DEIN_PEXELS_SCHLUESSEL
 ```
 
-Die Datei `.env` wird durch `.gitignore` ausgeschlossen. Den Schlüssel niemals in `README.md`, Quellcode, Issues, Commits oder Chat-Nachrichten einfügen.
+`.env` ist über `.gitignore` ausgeschlossen. Den Schlüssel nicht in Quellcode, README, Issues oder Commits speichern.
 
-## 2. Suche starten
-
-Video im Hochformat:
+## 2. Nur suchen
 
 ```bash
 npm run pexels:search -- "Person arbeitet am Laptop" --type video --orientation vertical --per-page 20
 ```
 
-Foto im Querformat:
-
-```bash
-npm run pexels:search -- "moderne Fabrik" --type photo --orientation horizontal --per-page 20
-```
-
-Hilfe:
-
-```bash
-npm run pexels:search -- --help
-```
-
-## 3. Ergebnis
-
-Die Suchantwort wird lokal gespeichert:
+Die Suchantwort landet unter:
 
 ```text
 .local-storage/pexels-search/
 ```
 
-Enthalten sind unter anderem:
+## 3. Ein Asset direkt in die Inbox laden
 
-- Pexels-ID
-- Vorschau-URL
-- verfügbare Auflösungen
-- Urhebername und Profil
-- Pexels-Quellseite
-- Ausrichtung und Dauer
-- notwendige Attribution
+Erstes passendes vertikales Video:
 
-Diese Dateien werden nicht committed.
+```bash
+npm run pexels:grab -- "office worker laptop" --orientation vertical
+```
 
-## Regeln
+Drittes Suchergebnis:
 
-- In der Oberfläche muss ein gut sichtbarer Hinweis auf Pexels erscheinen.
-- Urheber sollen nach Möglichkeit genannt und verlinkt werden.
-- Medien dürfen nicht als eigene Stock-Bibliothek weiterverkauft werden.
-- Vor der Aufnahme in den Hauptkatalog müssen Quelle und Nutzungsstatus geprüft werden.
-- Originaldateien werden erst später gezielt und einzeln heruntergeladen.
+```bash
+npm run pexels:grab -- "office worker laptop" --orientation vertical --pick 3
+```
+
+Foto:
+
+```bash
+npm run pexels:grab -- "Berlin skyline" --type photo --pick 2
+```
+
+Der Downloader bevorzugt für Videos eine sinnvolle HD/Full-HD-Variante statt automatisch die größte 4K-Datei zu laden. Die Maximalgröße kann angepasst werden:
+
+```bash
+npm run pexels:grab -- "factory machines" --max-dimension 2160
+```
+
+Nach dem Download liegen:
+
+- das Medium unter `inbox/`
+- Provider-/Creator-/Lizenzdaten lokal unter `.local-storage/inbox-source/`
+
+Danach im Browser **Inbox neu scannen**. Die Providerdaten werden in den Review-Datensatz übernommen und beim Import serverseitig geschützt, damit Pexels-Medien nicht versehentlich als eigene Produktion gespeichert werden.
+
+## Rechte und API-Regeln
+
+Pexels-Inhalte bleiben Pexels-/Creator-Inhalte. Visual Asset Hub speichert deshalb Quelle und Provider-ID mit. Die Integration ist für das gezielte Finden von Produktionsassets gedacht, nicht für massenhaftes Spiegeln der Pexels-Bibliothek.
+
+Vor produktiver Veröffentlichung gelten immer die aktuellen Pexels-Lizenz- und API-Bedingungen.

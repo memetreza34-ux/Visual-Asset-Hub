@@ -1,0 +1,149 @@
+{
+  "version": 2,
+  "projectId": "5-naturphaenomene-wie-cgi-2min",
+  "researchedAt": "2026-09-29",
+  "policy": {
+    "factsFromPrimaryOrHighAuthoritySources": true,
+    "visualsFromOfficialOrReviewableSources": true,
+    "noReferenceVideoReuse": true,
+    "noUnreviewedCopyrightedSocialClips": true,
+    "noPartialUseWhenSourceTermsRequireWholeWork": true
+  },
+  "cases": [
+    {
+      "id": "volcanic-lightning",
+      "facts": [
+        "USGS states that lightning discharges are often observed during explosive volcanic eruptions and are commonly associated with ash plumes.",
+        "USGS describes particle clustering, magma fragmentation, convection and hydrometeors as mechanisms that can contribute to charge generation and plume electrification.",
+        "USGS hosts imagery of plume lightning during the 2008 Chaitén eruption in Chile."
+      ],
+      "factSources": [
+        "https://volcanoes.usgs.gov/volcanic_ash/lightning.html",
+        "https://www.usgs.gov/media/images/chait-n-plume-lightning"
+      ],
+      "primaryVisual": {
+        "sourceUrl": "https://www.usgs.gov/media/images/chait-n-plume-lightning",
+        "directMediaUrl": "https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/vhp_img1416.jpg",
+        "provider": "USGS",
+        "credit": "U.S. Geological Survey / Volcano Hazards Program",
+        "rightsStatus": "editorial-pass-with-credit",
+        "rightsNote": "USGS says its Multimedia Gallery is public domain unless otherwise noted. The selected item is an official Volcano Hazards Program image and no third-party copyright notice was found in the item page review. Credit USGS."
+      },
+      "fallbackVisualSources": [
+        "https://www.usgs.gov/media/images/eyjafjallajokull-plume-lightning",
+        "https://www.usgs.gov/media/images/ash-and-lightning-above-eyjafjallajokull-volcano-2010"
+      ]
+    },
+    {
+      "id": "bioluminescence",
+      "facts": [
+        "NOAA defines bioluminescence as light produced by an organism through a chemical reaction.",
+        "NOAA notes that bioluminescence is especially common in the ocean and is usually blue or blue-green because those wavelengths travel well through seawater.",
+        "NOAA Ocean Exploration publishes downloadable expedition videos and states that its video portal footage is public domain; individual multimedia pages carry the required credit."
+      ],
+      "factSources": [
+        "https://oceanexplorer.noaa.gov/ocean-fact/bioluminescence/",
+        "https://oceanservice.noaa.gov/facts/biolum.html",
+        "https://oceanexplorer.noaa.gov/about/media-kit/"
+      ],
+      "primaryVisuals": [
+        {
+          "sourceUrl": "https://oceanexplorer.noaa.gov/multimedia/okeanos-explorations-ex1907-dailyupdates-nov4-media-dive04-dragonfish/",
+          "directMediaUrl": "https://oceanexplorer.noaa.gov/wp-content/uploads/2019/11/dive04-dragonfish-1280x720-1.mp4",
+          "provider": "NOAA Ocean Exploration",
+          "credit": "NOAA Ocean Exploration, 2019 Southeastern U.S. Deep-sea Exploration",
+          "rightsStatus": "editorial-pass-with-credit",
+          "rightsNote": "The NOAA Ocean Exploration item page marks this as NOAA Ocean Exploration media, offers direct SD/HD downloads, and contains no copyright notice. NOAA Ocean Exploration states portal footage is public domain and asks that the listed credit be included."
+        },
+        {
+          "sourceUrl": "https://oceanexplorer.noaa.gov/multimedia/video-shorts-ex1705-squid/",
+          "directMediaUrl": "https://oceanexplorer.noaa.gov/wp-content/uploads/2021/02/ex1705-squid.mp4",
+          "provider": "NOAA Ocean Exploration",
+          "credit": "NOAA Ocean Exploration, Mountains in the Deep: Exploring the Central Pacific Basin",
+          "rightsStatus": "editorial-pass-with-credit",
+          "rightsNote": "The item page identifies NOAA Ocean Exploration as the credit source, offers a direct MP4 download, and shows no copyright notice. Use the exact credit."
+        }
+      ],
+      "blockedVisual": {
+        "sourceUrl": "https://oceantoday.noaa.gov/bioluminescentocean/",
+        "reason": "Ocean Today permits sharing/embedding and use of nearly all videos in their entirety, but its FAQ says not to alter, transform, build upon, or extract footage. Therefore this produced video must not be cut into B-roll for this project."
+      }
+    },
+    {
+      "id": "lenticular-clouds",
+      "facts": [
+        "NASA explains that lenticular clouds can form when prevailing winds encounter mountains, creating atmospheric waves.",
+        "Rising air cools at the wave crest and water vapor condenses, while descending air warms and the cloud evaporates.",
+        "The result can appear almost stationary even while strong winds flow through it."
+      ],
+      "factSources": [
+        "https://science.nasa.gov/earth/earth-observatory/marvelous-lenticularis-153312/",
+        "https://science.nasa.gov/earth/earth-observatory/curious-clouds-in-the-transantarctic-mountains-147772/"
+      ],
+      "primaryVisual": {
+        "sourceUrl": "https://science.nasa.gov/earth/earth-observatory/marvelous-lenticularis-153312/",
+        "directMediaUrl": "https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/imagerecords/153000/153312/nzcloud_oli_20240907_lrg.jpg?crop=faces%2Cfocalpoint&fit=clip&h=6406&w=6589",
+        "provider": "NASA Earth Observatory",
+        "credit": "NASA Earth Observatory / Lauren Dauphin; Landsat data from USGS",
+        "rightsStatus": "editorial-pass-with-credit",
+        "rightsNote": "NASA media are generally available for factual informational/editorial use with source acknowledgement, subject to third-party exceptions. This image is NASA Earth Observatory using USGS Landsat data."
+      },
+      "fallbackVisualSources": [
+        "https://www.nasa.gov/image-article/a-particular-lenticular-cloud/",
+        "https://espo.nasa.gov/image/Lenticular_clouds"
+      ]
+    },
+    {
+      "id": "red-sprites",
+      "facts": [
+        "NASA describes red sprites as short-lived electrical discharges that occur high above thunderstorms rather than as ordinary lightning near the ground.",
+        "NASA imagery shows sprite tendrils reaching as high as about 100 kilometers above Earth's surface.",
+        "ISS astronauts have photographed red sprites from orbit."
+      ],
+      "factSources": [
+        "https://science.nasa.gov/earth/earth-observatory/red-sprites-above-the-us-and-central-america-86463/",
+        "https://science.nasa.gov/earth/earth-observatory/elusive-sprite-captured-from-the-international-space-station-78487/"
+      ],
+      "primaryVisual": {
+        "sourceUrl": "https://science.nasa.gov/earth/earth-observatory/red-sprites-above-the-us-and-central-america-86463/",
+        "directMediaUrl": "https://svs.gsfc.nasa.gov/vis/a010000/a014200/a014206/iss044e045576_lrg_2015.jpeg",
+        "provider": "NASA Earth Observatory / ISS Crew Earth Observations",
+        "credit": "NASA / ISS Crew Earth Observations",
+        "rightsStatus": "editorial-pass-with-credit",
+        "rightsNote": "NASA Earth Observatory identifies these as astronaut photographs and states they are made freely available on the Internet. Use only the NASA/ISS stills from this page."
+      },
+      "blockedSources": [
+        {
+          "url": "https://svs.gsfc.nasa.gov/14206",
+          "scope": "Chasing Sprites/TLE Chasers footage except specifically identified NASA ISS still",
+          "reason": "The NASA SVS package explicitly states that much of the ground sprite imagery is copyrighted and used with permission. Reference-only unless separately cleared."
+        }
+      ]
+    },
+    {
+      "id": "noctilucent-clouds",
+      "facts": [
+        "NASA reports that noctilucent or night-shining clouds form roughly 80 kilometers above Earth in the mesosphere.",
+        "They contain tiny ice crystals and can remain illuminated by sunlight after observers on the ground are already in darkness.",
+        "NASA's AIM mission imaged these clouds from orbit."
+      ],
+      "factSources": [
+        "https://science.nasa.gov/missions/aim/nasa-noctilucent-clouds/",
+        "https://science.nasa.gov/earth/earth-observatory/noctilucent-clouds-8366/",
+        "https://www.nasa.gov/image-article/noctilucent-clouds-as-seen-from-iss/"
+      ],
+      "primaryVisual": {
+        "sourceUrl": "https://science.nasa.gov/earth/earth-observatory/noctilucent-clouds-8366/",
+        "directMediaUrl": "https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/imagerecords/8000/8366/npnoctilucent_aim_2007162_lrg.jpg?crop=faces%2Cfocalpoint&fit=clip&h=765&w=800",
+        "provider": "NASA Earth Observatory / AIM",
+        "credit": "NASA Earth Observatory; Cloud Imaging and Particle Size Experiment team, University of Colorado LASP",
+        "rightsStatus": "editorial-pass-with-attribution-review",
+        "rightsNote": "NASA informational/editorial media guidance applies, but retain the University of Colorado LASP data-processing credit shown by NASA."
+      },
+      "fallbackVisualSources": [
+        "https://www.nasa.gov/image-article/noctilucent-clouds-as-seen-from-iss/",
+        "https://science.nasa.gov/earth/earth-observatory/polar-mesospheric-clouds-south-pacific-ocean-80217/"
+      ]
+    }
+  ]
+}

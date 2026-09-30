@@ -1,0 +1,11 @@
+Vier Fehler, die so banal klingen, dass man kaum glauben kann, wie teuer sie wurden.
+
+Nummer vier: ein Satellit und 24 fehlende Schrauben. 2003 sollte der Wettersatellit NOAA N-Prime in einer Fabrik nur vorsichtig von der senkrechten in die waagerechte Position gedreht werden. Doch die Adapterplatte des Wagens war nicht mit den vorgeschriebenen 24 Schrauben befestigt. Der Satellit rutschte ab und fiel auf den Boden. Niemand wurde verletzt – aber NOAA bezifferte die Kosten zur Behebung des Schadens später auf rund 135 Millionen Dollar.
+
+Nummer drei: Englisch gegen Metrisch. Beim Mars Climate Orbiter lieferte eine Software Daten in englischen Einheiten, während ein anderes Team mit metrischen Einheiten rechnete. Der Fehler blieb unbemerkt. Die berechnete Flugbahn war falsch, die Sonde kam dem Mars viel zu nahe und ging 1999 verloren. Allein die Entwicklung des Orbiters hatte laut US-Rechnungshof rund 75 Millionen Dollar gekostet.
+
+Nummer zwei: Züge, die nicht zu allen Bahnsteigen passten. Frankreich bestellte neue, breitere Regionalzüge. Erst später wurde klar, dass zahlreiche ältere Bahnsteige angepasst werden mussten. SNCF und Réseau ferré de France bestätigten Arbeiten an rund 1.300 Bahnsteigen. Genannter Preis: etwa 50 Millionen Euro. Das Problem entstand nicht einfach, weil jemand einen Zug falsch gemessen hatte, sondern durch schlechte Abstimmung zwischen Fahrzeugen und Infrastruktur.
+
+Und Nummer eins: Hubbles unscharfer Blick. Nach dem Start des Weltraumteleskops 1990 waren die Bilder schlechter als erwartet. Die Untersuchung fand einen winzigen Fehler im Prüfaufbau für den Hauptspiegel: Der Abstand einer Linse im Messgerät war um nur 1,3 Millimeter falsch. Dadurch wurde der Spiegel in die falsche Form poliert. 1993 mussten Astronauten Hubble mit Korrekturoptik praktisch eine Brille verpassen. Historische NASA-Unterlagen nennen für die Reparaturmission eine typische Schätzung von rund 500 Millionen Dollar – wobei dabei auch geplante Wartung und weitere Upgrades durchgeführt wurden.
+
+Manchmal braucht es also keinen spektakulären Defekt. Ein paar fehlende Schrauben, zwei unterschiedliche Einheitensysteme oder wenige Millimeter reichen völlig aus.

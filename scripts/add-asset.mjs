@@ -1,280 +1,104 @@
-import { createHash, randomBytes } from 'node:crypto';
+import {randomBytes} from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
-import { spawnSync } from 'node:child_process';
+import {spawnSync} from 'node:child_process';
 
-const root = process.cwd();
-const args = parseArgs(process.argv.slice(2));
-const taxonomyPath = path.join(root, 'catalog/taxonomy.json');
-const catalogPath = path.join(root, 'catalog/assets.json');
-const taxonomy = JSON.parse(fs.readFileSync(taxonomyPath, 'utf8'));
-const catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
+const root=process.cwd();
+const args=parseArgs(process.argv.slice(2));
+const taxonomyPath=path.join(root,'catalog/taxonomy.json');
+const catalogPath=path.join(root,'catalog/assets.json');
+const taxonomy=JSON.parse(fs.readFileSync(taxonomyPath,'utf8'));
+const catalog=JSON.parse(fs.readFileSync(catalogPath,'utf8'));
+if(args.help){printHelp();process.exit(0);}
 
-if (args.help) {
-  printHelp();
-  process.exit(0);
+const required=['type','category','subject','action','shot','title','description','tags','style','movement','license','source','scopes'];
+const missing=required.filter((key)=>!args[key]);
+if(missing.length)fail(`Fehlende Argumente: ${missing.join(', ')}`);
+for(const [value,options,label] of [[args.type,taxonomy.assetTypes,'type'],[args.category,taxonomy.categories,'category'],[args.shot,taxonomy.shotTypes,'shot'],[args.style,taxonomy.styles,'style'],[args.movement,taxonomy.cameraMovements,'movement'],[args.license,taxonomy.licenseStatuses,'license']])assertMember(value,options,label);
+
+const storageKind=args.storage||(args.externalUrl?'external':'git-lfs');
+assertMember(storageKind,['repository','git-lfs','external'],'storage');
+let sourceFile,extension,analysis;
+if(storageKind==='external'){
+  if(!args.externalUrl)fail('Externer Speicher benötigt --external-url.');
+  extension=slugExtension(args.extension||'mp4');
+}else{
+  if(!args.file)fail('Lokaler Import benötigt --file.');
+  sourceFile=path.resolve(args.file);
+  if(!fs.existsSync(sourceFile)||!fs.statSync(sourceFile).isFile())fail('Quelldatei wurde nicht gefunden.');
+  extension=slugExtension(path.extname(sourceFile).slice(1));
+  analysis=analyze(sourceFile);
 }
+const orientation=args.orientation||analysis?.orientation;
+if(!orientation)fail('Ausrichtung konnte nicht automatisch erkannt werden. Nutze --orientation.');
+assertMember(orientation,taxonomy.orientations,'orientation');
+const subject=slug(args.subject),action=slug(args.action),tags=uniqueList(args.tags).map(slug),aliases=uniqueList(args.aliases||''),secondaryCategories=uniqueList(args.secondaryCategories||''),usageScopes=uniqueList(args.scopes);
+if(tags.length<2)fail('Mindestens zwei Tags sind erforderlich.');
+for(const c of secondaryCategories)assertMember(c,taxonomy.categories,'secondary-categories');
+for(const s of usageScopes)assertMember(s,taxonomy.usageScopes,'scopes');
+if(analysis?.sha256&&catalog.assets.some((a)=>a.sha256===analysis.sha256))fail('Dieses Asset ist bereits im Katalog vorhanden (identischer SHA-256).');
 
-const required = ['type', 'category', 'subject', 'action', 'shot', 'orientation', 'title', 'description', 'tags', 'style', 'movement', 'license', 'source', 'scopes'];
-const missing = required.filter((key) => !args[key]);
-if (missing.length) fail(`Fehlende Argumente: ${missing.join(', ')}`);
+const prefix=taxonomy.typePrefixes[args.type];
+const base=`${prefix}-${args.category}-${subject}-${action}-${args.shot}-${orientation}`;
+const sequence=nextSequence(catalog.assets,base);
+const filename=`${base}-${String(sequence).padStart(4,'0')}.${extension}`;
+const id=createAssetId(new Set(catalog.assets.map((a)=>a.id)));
+const assetPath=`assets/${args.type}/${args.category}/${filename}`;
+const now=new Date().toISOString();
+const status=args.status||(args.license==='unknown'?'inbox':'review');
+assertMember(status,taxonomy.lifecycleStatuses,'status');
+const technical=analysis?.technical||{};
+const rightsCheckedAt=args.rightsCheckedAt||(status==='approved'?now:undefined);
+const evidencePath=args.evidencePath||(status==='approved'?`catalog/rights-evidence/${id}.json`:undefined);
+const asset=compact({
+  id,filename,title:args.title.trim(),description:args.description.trim(),type:args.type,category:args.category,secondaryCategories,tags,searchAliases:aliases,subject,action,orientation,shotType:args.shot,cameraMovement:args.movement,style:args.style,status,
+  qualityRating:numberBetween(args.quality||'3',1,5,'quality'),
+  technical:compact({width:technical.width,height:technical.height,durationSeconds:technical.durationSeconds,fps:technical.fps,codec:technical.codec,hasAudio:technical.hasAudio,alphaChannel:technical.alphaChannel}),
+  storage:storageKind==='external'?compact({kind:storageKind,externalUrl:args.externalUrl,previewPath:args.preview}):compact({kind:storageKind,path:assetPath,previewPath:analysis?.previewPath||args.preview}),
+  rights:compact({licenseStatus:args.license,licenseCode:args.licenseCode,licenseVersion:args.licenseVersion,sourceName:args.source.trim(),sourceUrl:args.sourceUrl,licenseUrl:args.licenseUrl,usageScopes,commercialUse:optionalBoolean(args.commercialUse,'commercial-use'),derivativesAllowed:optionalBoolean(args.derivativesAllowed,'derivatives-allowed'),shareAlike:optionalBoolean(args.shareAlike,'share-alike'),attributionRequired:args.attributionRequired==='true',attributionText:args.attributionText,checkedAt:rightsCheckedAt,evidencePath,expiresAt:args.expires,notes:args.rightsNotes}),
+  createdAt:args.createdAt||now,importedAt:now,createdBy:args.createdBy,sha256:analysis?.sha256,notes:args.notes
+});
+const previousCatalog=fs.readFileSync(catalogPath,'utf8');
+const nextCatalog={...catalog,updatedAt:now,assets:[...catalog.assets,asset].sort((a,b)=>a.id.localeCompare(b.id))};
+console.log(JSON.stringify({id,filename,target:storageKind==='external'?args.externalUrl:assetPath,status,autoAnalyzed:Boolean(analysis),rightsEvidence:evidencePath||null},null,2));
+if(args.dryRun==='true'){console.log('Dry-Run: keine Dateien verändert.');process.exit(0);}
 
-assertMember(args.type, taxonomy.assetTypes, 'type');
-assertMember(args.category, taxonomy.categories, 'category');
-assertMember(args.shot, taxonomy.shotTypes, 'shot');
-assertMember(args.orientation, taxonomy.orientations, 'orientation');
-assertMember(args.style, taxonomy.styles, 'style');
-assertMember(args.movement, taxonomy.cameraMovements, 'movement');
-assertMember(args.license, taxonomy.licenseStatuses, 'license');
-
-const storageKind = args.storage || (args.externalUrl ? 'external' : 'git-lfs');
-assertMember(storageKind, ['repository', 'git-lfs', 'external'], 'storage');
-
-const subject = slug(args.subject);
-const action = slug(args.action);
-const tags = uniqueList(args.tags).map(slug);
-const aliases = uniqueList(args.aliases || '');
-const secondaryCategories = uniqueList(args.secondaryCategories || '');
-const usageScopes = uniqueList(args.scopes);
-for (const category of secondaryCategories) assertMember(category, taxonomy.categories, 'secondary-categories');
-for (const scope of usageScopes) assertMember(scope, taxonomy.usageScopes, 'scopes');
-if (tags.length < 2) fail('Mindestens zwei Tags sind erforderlich.');
-
-let sourceFile;
-let extension;
-if (storageKind === 'external') {
-  if (!args.externalUrl) fail('Externer Speicher benötigt --external-url.');
-  extension = slugExtension(args.extension || 'mp4');
-} else {
-  if (!args.file) fail('Repository- oder LFS-Speicher benötigt --file.');
-  sourceFile = path.resolve(args.file);
-  if (!fs.existsSync(sourceFile) || !fs.statSync(sourceFile).isFile()) fail('Quelldatei wurde nicht gefunden.');
-  extension = slugExtension(path.extname(sourceFile).slice(1));
-}
-
-const prefix = taxonomy.typePrefixes[args.type];
-const base = `${prefix}-${args.category}-${subject}-${action}-${args.shot}-${args.orientation}`;
-const sequence = nextSequence(catalog.assets, base);
-const filename = `${base}-${String(sequence).padStart(4, '0')}.${extension}`;
-const id = createAssetId(new Set(catalog.assets.map((asset) => asset.id)));
-const assetPath = `assets/${args.type}/${args.category}/${filename}`;
-const now = new Date().toISOString();
-const status = args.status || (args.license === 'unknown' ? 'inbox' : 'review');
-assertMember(status, taxonomy.lifecycleStatuses, 'status');
-
-const asset = {
-  id,
-  filename,
-  title: args.title.trim(),
-  description: args.description.trim(),
-  type: args.type,
-  category: args.category,
-  secondaryCategories,
-  tags,
-  searchAliases: aliases,
-  subject,
-  action,
-  orientation: args.orientation,
-  shotType: args.shot,
-  cameraMovement: args.movement,
-  style: args.style,
-  status,
-  qualityRating: numberBetween(args.quality || '3', 1, 5, 'quality'),
-  technical: compact({
-    width: optionalNumber(args.width),
-    height: optionalNumber(args.height),
-    durationSeconds: optionalNumber(args.duration),
-    fps: optionalNumber(args.fps),
-    codec: args.codec,
-    hasAudio: optionalBoolean(args.hasAudio),
-    alphaChannel: optionalBoolean(args.alpha)
-  }),
-  storage: storageKind === 'external'
-    ? compact({ kind: storageKind, externalUrl: args.externalUrl, previewPath: args.preview })
-    : compact({ kind: storageKind, path: assetPath, previewPath: args.preview }),
-  rights: compact({
-    licenseStatus: args.license,
-    sourceName: args.source.trim(),
-    sourceUrl: args.sourceUrl,
-    licenseUrl: args.licenseUrl,
-    usageScopes,
-    attributionRequired: args.attributionRequired === 'true',
-    attributionText: args.attributionText,
-    expiresAt: args.expires,
-    notes: args.rightsNotes
-  }),
-  createdAt: args.createdAt || now,
-  importedAt: now,
-  createdBy: args.createdBy,
-  sha256: sourceFile ? sha256(sourceFile) : undefined,
-  notes: args.notes
-};
-
-const cleanAsset = compact(asset);
-const previousCatalog = fs.readFileSync(catalogPath, 'utf8');
-const nextCatalog = {
-  ...catalog,
-  updatedAt: now,
-  assets: [...catalog.assets, cleanAsset].sort((a, b) => a.id.localeCompare(b.id))
-};
-
-console.log(JSON.stringify({ id, filename, target: storageKind === 'external' ? args.externalUrl : assetPath, status }, null, 2));
-if (args.dryRun === 'true') {
-  console.log('Dry-Run: keine Dateien verändert.');
-  process.exit(0);
-}
-
-let copiedPath;
-let copiedByScript = false;
-try {
-  if (sourceFile) {
-    copiedPath = path.join(root, ...assetPath.split('/'));
-    fs.mkdirSync(path.dirname(copiedPath), { recursive: true });
-    if (path.resolve(sourceFile) !== path.resolve(copiedPath)) {
-      fs.copyFileSync(sourceFile, copiedPath, fs.constants.COPYFILE_EXCL);
-      copiedByScript = true;
-    }
+let copiedPath,copied=false,evidenceFileCreated=null;
+try{
+  if(sourceFile){copiedPath=path.join(root,...assetPath.split('/'));fs.mkdirSync(path.dirname(copiedPath),{recursive:true});if(path.resolve(sourceFile)!==path.resolve(copiedPath)){fs.copyFileSync(sourceFile,copiedPath,fs.constants.COPYFILE_EXCL);copied=true;}}
+  fs.writeFileSync(catalogPath,`${JSON.stringify(nextCatalog,null,2)}\n`);
+  runNodeRequired('scripts/validate-catalog.mjs',[]);
+  runNodeRequired('scripts/build-index.mjs',[]);
+  if(status==='approved'){
+    const evidenceArgs=['snapshot','--asset',id];
+    if(args.captureRights==='true')evidenceArgs.push('--capture','true');
+    runNodeRequired('scripts/rights-evidence.mjs',evidenceArgs);
+    evidenceFileCreated=path.join(root,evidencePath);
+    tryMemoryIndex(asset,copiedPath||sourceFile);
   }
-  fs.writeFileSync(catalogPath, `${JSON.stringify(nextCatalog, null, 2)}\n`);
-
-  const validation = spawnSync(process.execPath, ['scripts/validate-catalog.mjs'], {
-    cwd: root,
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'pipe']
-  });
-  if (validation.status !== 0) {
-    throw new Error(validation.stderr || validation.stdout || 'Katalogprüfung fehlgeschlagen.');
-  }
-  const index = spawnSync(process.execPath, ['scripts/build-index.mjs'], {
-    cwd: root,
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'pipe']
-  });
-  if (index.status !== 0) throw new Error(index.stderr || index.stdout || 'Indexerstellung fehlgeschlagen.');
-
-  console.log(`Asset ${id} wurde sicher aufgenommen.`);
-} catch (error) {
-  fs.writeFileSync(catalogPath, previousCatalog);
-  if (copiedByScript && copiedPath && fs.existsSync(copiedPath)) fs.rmSync(copiedPath, { force: true });
-  fail(`Import wurde zurückgerollt: ${error instanceof Error ? error.message : String(error)}`);
+  console.log(`Asset ${id} wurde analysiert und sicher aufgenommen.`);
+}catch(error){
+  fs.writeFileSync(catalogPath,previousCatalog);
+  if(copied&&copiedPath&&fs.existsSync(copiedPath))fs.rmSync(copiedPath,{force:true});
+  if(evidenceFileCreated&&fs.existsSync(evidenceFileCreated))fs.rmSync(evidenceFileCreated,{force:true});
+  fail(`Import wurde zurückgerollt: ${error.message||String(error)}`);
 }
 
-function parseArgs(values) {
-  const result = {};
-  for (let index = 0; index < values.length; index += 1) {
-    const entry = values[index];
-    if (!entry.startsWith('--')) fail(`Unbekanntes Argument: ${entry}`);
-    const key = camel(entry.slice(2));
-    if (key === 'help') {
-      result.help = true;
-      continue;
-    }
-    const value = values[index + 1];
-    if (!value || value.startsWith('--')) fail(`Wert für ${entry} fehlt.`);
-    result[key] = value;
-    index += 1;
-  }
-  return result;
-}
-
-function nextSequence(assets, base) {
-  const pattern = new RegExp(`^${escapeRegExp(base)}-(\\d{4})\\.`);
-  const used = assets
-    .map((asset) => asset.filename.match(pattern)?.[1])
-    .filter(Boolean)
-    .map(Number);
-  return used.length ? Math.max(...used) + 1 : 1;
-}
-
-function createAssetId(existing) {
-  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  for (let attempt = 0; attempt < 100; attempt += 1) {
-    const bytes = randomBytes(8);
-    let suffix = '';
-    for (let index = 0; index < 8; index += 1) suffix += alphabet[bytes[index] % alphabet.length];
-    const id = `VAH-${suffix}`;
-    if (!existing.has(id)) return id;
-  }
-  fail('Es konnte keine eindeutige Asset-ID erzeugt werden.');
-}
-
-function slug(value) {
-  const result = value
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-  if (!result) fail(`Ungültiger Slug-Wert: ${value}`);
-  return result;
-}
-
-function uniqueList(value) {
-  return [...new Set(value.split(',').map((entry) => entry.trim()).filter(Boolean))];
-}
-
-function slugExtension(value) {
-  const extension = value.toLowerCase().replace(/[^a-z0-9]/g, '');
-  if (!extension) fail('Ungültige Dateiendung.');
-  return extension;
-}
-
-function sha256(file) {
-  const hash = createHash('sha256');
-  const descriptor = fs.openSync(file, 'r');
-  const buffer = Buffer.allocUnsafe(1024 * 1024);
-  try {
-    let bytesRead;
-    while ((bytesRead = fs.readSync(descriptor, buffer, 0, buffer.length, null)) > 0) {
-      hash.update(buffer.subarray(0, bytesRead));
-    }
-    return hash.digest('hex');
-  } finally {
-    fs.closeSync(descriptor);
-  }
-}
-
-function compact(value) {
-  return Object.fromEntries(Object.entries(value).filter(([, entry]) => entry !== undefined && entry !== ''));
-}
-
-function optionalNumber(value) {
-  if (value === undefined) return undefined;
-  const number = Number(value);
-  if (!Number.isFinite(number) || number < 0) fail(`Ungültige Zahl: ${value}`);
-  return number;
-}
-
-function numberBetween(value, min, max, label) {
-  const number = Number(value);
-  if (!Number.isInteger(number) || number < min || number > max) fail(`${label} muss zwischen ${min} und ${max} liegen.`);
-  return number;
-}
-
-function optionalBoolean(value) {
-  if (value === undefined) return undefined;
-  if (!['true', 'false'].includes(value)) fail(`Boolean muss true oder false sein: ${value}`);
-  return value === 'true';
-}
-
-function assertMember(value, options, label) {
-  if (!options.includes(value)) fail(`${label} ist ungültig: ${value}`);
-}
-
-function camel(value) {
-  return value.replace(/-([a-z])/g, (_, character) => character.toUpperCase());
-}
-
-function escapeRegExp(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-function fail(message) {
-  console.error(message);
-  process.exit(1);
-}
-
-function printHelp() {
-  console.log(`Visual Asset Hub Import\n\nBeispiel:\n  npm run asset:add -- \\\n    --file ./inbox/clip.mp4 \\\n    --type video --category technology-ai \\\n    --subject smartphone --action scrolling \\\n    --shot cu --orientation vertical \\\n    --title "Person scrollt am Smartphone" \\\n    --description "Nahaufnahme einer Hand beim Scrollen durch eine App." \\\n    --tags smartphone,scrolling,social-media \\\n    --style realistic --movement handheld \\\n    --license owned --source "Eigene Produktion" \\\n    --scopes organic-social,youtube,website\n\nMit --dry-run true werden nur ID, Name und Ziel berechnet.`);
-}
+function tryMemoryIndex(assetValue,localOriginal){if(assetValue.storage?.kind==='external')return;let file=localOriginal;if(assetValue.type!=='image'){const preview=assetValue.storage?.previewPath;file=preview?path.join(root,preview):null;}if(!file||!fs.existsSync(file))return;const result=spawnSync(process.execPath,['scripts/open-source-toolchain.mjs','asset-memory-index','--file',file,'--id',assetValue.id,'--title',assetValue.title],{cwd:root,encoding:'utf8',stdio:['ignore','pipe','pipe']});if(result.status!==0)console.warn('Asset-Memory optional übersprungen (OpenCLIP/sqlite-vec nicht verfügbar oder Indexierung fehlgeschlagen).');else console.log(`Asset-Memory indexiert: ${assetValue.id}`);}
+function analyze(file){const r=spawnSync(process.execPath,['scripts/analyze-media.mjs','--file',file],{cwd:root,encoding:'utf8',stdio:['ignore','pipe','pipe']});if(r.status!==0)fail(`Automatische Medienanalyse fehlgeschlagen: ${(r.stderr||r.stdout).trim()}`);try{return JSON.parse(r.stdout)}catch{fail('Medienanalyse lieferte ungültige Daten.')}}
+function runNodeRequired(script,values){const r=spawnSync(process.execPath,[script,...values],{cwd:root,encoding:'utf8',stdio:['ignore','pipe','pipe']});if(r.status!==0)throw new Error(r.stderr||r.stdout||`${script} fehlgeschlagen`);if(r.stdout?.trim())console.log(r.stdout.trim());}
+function parseArgs(v){const r={};for(let i=0;i<v.length;i++){const e=v[i];if(!e.startsWith('--'))fail(`Unbekanntes Argument: ${e}`);const k=camel(e.slice(2));if(k==='help'){r.help=true;continue}const val=v[i+1];if(!val||val.startsWith('--'))fail(`Wert für ${e} fehlt.`);r[k]=val;i++}return r}
+function nextSequence(a,b){const p=new RegExp(`^${escapeRegExp(b)}-(\\d{4})\\.`),u=a.map((x)=>x.filename.match(p)?.[1]).filter(Boolean).map(Number);return u.length?Math.max(...u)+1:1}
+function createAssetId(e){const a='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';for(let n=0;n<100;n++){const b=randomBytes(8);let s='';for(let i=0;i<8;i++)s+=a[b[i]%a.length];const id=`VAH-${s}`;if(!e.has(id))return id}fail('Keine eindeutige Asset-ID erzeugbar.')}
+function slug(v){const r=v.normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');if(!r)fail(`Ungültiger Slug: ${v}`);return r}
+function uniqueList(v){return[...new Set(v.split(',').map((x)=>x.trim()).filter(Boolean))]}
+function slugExtension(v){const e=v.toLowerCase().replace(/[^a-z0-9]/g,'');if(!e)fail('Ungültige Dateiendung.');return e}
+function compact(v){return Object.fromEntries(Object.entries(v).filter(([,e])=>e!==undefined&&e!==''))}
+function numberBetween(v,min,max,l){const n=Number(v);if(!Number.isInteger(n)||n<min||n>max)fail(`${l} muss zwischen ${min} und ${max} liegen.`);return n}
+function optionalBoolean(value,label){if(value===undefined)return undefined;if(value==='true')return true;if(value==='false')return false;fail(`${label} muss true oder false sein.`)}
+function assertMember(v,o,l){if(!o.includes(v))fail(`${l} ist ungültig: ${v}`)}
+function camel(v){return v.replace(/-([a-z])/g,(_,c)=>c.toUpperCase())}
+function escapeRegExp(v){return v.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
+function fail(m){console.error(m);process.exit(1)}
+function printHelp(){console.log(`Visual Asset Hub Import v0.18\n\nApproved Assets erzeugen automatisch catalog/rights-evidence/<ASSET-ID>.json. Große optionale Quellseiten-Captures bleiben lokal. Optionales Asset-Memory wird best-effort indexiert.\n\nNeue Rights-Felder:\n --license-code cc-by-sa-4.0\n --license-version 4.0\n --commercial-use true|false\n --derivatives-allowed true|false\n --share-alike true|false\n --rights-checked-at <ISO>\n --capture-rights true`)}

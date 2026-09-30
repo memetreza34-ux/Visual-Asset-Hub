@@ -3,92 +3,114 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Durchsuchbare Bibliothek für B-Rolls, Bilder, Animationen und weitere visuelle Assets." />
+  <meta name="description" content="Archive-first Recherche, Review und Bibliothek für faceless YouTube-Dokumentationen." />
   <title>Visual Asset Hub</title>
   <link rel="stylesheet" href="./styles.css" />
   <script type="module" src="./app.js"></script>
+  <script type="module" src="./archive-first.js"></script>
 </head>
 <body>
   <header class="hero">
     <div>
-      <span class="eyebrow">Universelle Medienbibliothek</span>
+      <span class="eyebrow">Faceless Documentary Workspace</span>
       <h1>Visual Asset Hub</h1>
-      <p>B-Rolls, Bilder, Animationen und Grafiken schnell finden, sicher prüfen und in jedem Content-Projekt wiederverwenden.</p>
+      <p>Originalmaterial, Archivbilder/-videos, Dokumente und passende B-Rolls recherchieren, Rechte prüfen und für YouTube-Projekte vorbereiten.</p>
     </div>
-    <div class="hero-stat">
-      <strong id="asset-count">0</strong>
-      <span>katalogisierte Assets</span>
+    <div class="hero-stats">
+      <div class="hero-stat"><strong id="asset-count">0</strong><span>katalogisierte Assets</span></div>
+      <div class="hero-stat"><strong id="inbox-count">0</strong><span>Inbox wartet</span></div>
     </div>
   </header>
 
   <main>
+    <section class="source-panel" aria-labelledby="source-title">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">NASA · NOAA · USGS · NARA · Smithsonian · Europeana · Wikimedia + mehr</span>
+          <h2 id="source-title">Doku-Material finden</h2>
+          <p>Suche zuerst nach echtem Ereignis- und Archivmaterial. Pexels/Pixabay sind nur Fallbacks. Jeder Treffer wird mit Quellen- und Lizenzmetadaten in die Inbox geladen und vor Nutzung geprüft.</p>
+        </div>
+      </div>
+      <form id="source-form" class="source-toolbar">
+        <label class="source-query"><span>Suchbegriff</span><input id="source-query" required placeholder="z. B. Concorde crash, company scandal, historic accident …" autocomplete="off" /></label>
+        <label><span>Quelle</span><select id="source-provider"></select></label>
+        <label><span>Typ</span><select id="source-type"></select></label>
+        <label><span>Ausrichtung</span><select id="source-orientation"><option value="">Alle</option><option value="vertical">Vertikal</option><option value="horizontal">Horizontal</option><option value="square">Quadratisch</option></select></label>
+        <button id="source-search" class="primary-button" type="submit">Suchen</button>
+      </form>
+      <div id="source-status" class="review-status" aria-live="polite"></div>
+      <div id="source-results" class="source-grid"></div>
+    </section>
+
+    <section class="review-panel" aria-labelledby="review-title">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">Inbox → Review → Library</span>
+          <h2 id="review-title">Neue Assets prüfen</h2>
+          <p>Neue Medien werden technisch analysiert. Unklare oder restriktive Rechte bleiben automatisch im Review und können nicht stillschweigend als YouTube-freigegeben gelten.</p>
+        </div>
+        <button id="scan-inbox" class="primary-button" type="button">Inbox neu scannen</button>
+      </div>
+      <div id="review-status" class="review-status" aria-live="polite"></div>
+      <div id="review-grid" class="review-grid"></div>
+      <div id="review-empty" class="compact-empty" hidden>
+        <strong>Inbox ist leer.</strong>
+        <span>Neue Videos/Bilder unter <code>inbox/</code> ablegen oder oben aus einer Quelle laden.</span>
+      </div>
+    </section>
+
+    <section class="library-heading"><div><span class="eyebrow">Approved Library</span><h2>Asset-Katalog</h2></div></section>
+
     <section class="toolbar" aria-label="Asset-Suche und Filter">
-      <label class="search-field">
-        <span>Suche</span>
-        <input id="search" type="search" placeholder="z. B. Smartphone, Geld, Handwerk, close-up …" autocomplete="off" />
-      </label>
-      <label>
-        <span>Typ</span>
-        <select id="type-filter"><option value="">Alle Typen</option></select>
-      </label>
-      <label>
-        <span>Kategorie</span>
-        <select id="category-filter"><option value="">Alle Kategorien</option></select>
-      </label>
-      <label>
-        <span>Ausrichtung</span>
-        <select id="orientation-filter"><option value="">Alle Ausrichtungen</option></select>
-      </label>
-      <label>
-        <span>Status</span>
-        <select id="status-filter"><option value="">Alle Status</option></select>
-      </label>
-      <label>
-        <span>Lizenz</span>
-        <select id="license-filter"><option value="">Alle Lizenzen</option></select>
-      </label>
-      <label>
-        <span>Sortierung</span>
-        <select id="sort-filter">
-          <option value="quality">Beste Qualität</option>
-          <option value="title">Titel A–Z</option>
-          <option value="category">Kategorie</option>
-        </select>
-      </label>
+      <label class="search-field"><span>Suche</span><input id="search" type="search" placeholder="z. B. Smartphone, Geld, Handwerk, close-up …" autocomplete="off" /></label>
+      <label><span>Typ</span><select id="type-filter"><option value="">Alle Typen</option></select></label>
+      <label><span>Kategorie</span><select id="category-filter"><option value="">Alle Kategorien</option></select></label>
+      <label><span>Ausrichtung</span><select id="orientation-filter"><option value="">Alle Ausrichtungen</option></select></label>
+      <label><span>Status</span><select id="status-filter"><option value="">Alle Status</option></select></label>
+      <label><span>Lizenz</span><select id="license-filter"><option value="">Alle Lizenzen</option></select></label>
+      <label><span>Sortierung</span><select id="sort-filter"><option value="quality">Beste Qualität</option><option value="title">Titel A–Z</option><option value="category">Kategorie</option></select></label>
       <button id="reset" type="button">Filter zurücksetzen</button>
     </section>
 
-    <section class="result-bar" aria-live="polite">
-      <strong id="result-count">0 Assets</strong>
-      <span id="catalog-date"></span>
-    </section>
-
+    <section class="result-bar" aria-live="polite"><strong id="result-count">0 Assets</strong><span id="catalog-date"></span></section>
     <section id="asset-grid" class="asset-grid" aria-label="Gefundene Assets"></section>
-    <section id="empty-state" class="empty-state" hidden>
-      <h2>Keine Assets gefunden</h2>
-      <p>Filter ändern oder neue Dateien über den Importbefehl katalogisieren.</p>
-      <code>npm run asset:add -- --help</code>
-    </section>
+    <section id="empty-state" class="empty-state" hidden><h2>Keine Assets gefunden</h2><p>Filter ändern oder neue Dateien über die Inbox aufnehmen.</p></section>
   </main>
 
-  <dialog id="asset-dialog">
-    <button class="dialog-close" type="button" aria-label="Detailansicht schließen">×</button>
-    <div id="dialog-content"></div>
+  <dialog id="asset-dialog"><button class="dialog-close" type="button" aria-label="Detailansicht schließen">×</button><div id="dialog-content"></div></dialog>
+
+  <dialog id="review-dialog">
+    <button class="dialog-close review-dialog-close" type="button" aria-label="Review schließen">×</button>
+    <form id="review-form" class="review-form">
+      <div id="review-media" class="review-media"></div>
+      <div class="review-fields">
+        <span class="eyebrow">Asset Review</span>
+        <h2 id="review-file-title">Asset prüfen</h2>
+        <p id="review-tech" class="technical-line"></p>
+        <div id="review-source-note" class="source-note" hidden></div>
+        <input id="review-file" name="file" type="hidden" />
+        <div class="form-grid">
+          <label class="wide"><span>Titel</span><input name="title" required minlength="3" maxlength="160" /></label>
+          <label class="wide"><span>Beschreibung</span><textarea name="description" required minlength="10" maxlength="1500" rows="3"></textarea></label>
+          <label><span>Typ</span><select name="type" id="review-type" required></select></label>
+          <label><span>Kategorie</span><select name="category" id="review-category" required></select></label>
+          <label><span>Motiv</span><input name="subject" required placeholder="z. B. smartphone" /></label>
+          <label><span>Handlung</span><input name="action" required placeholder="z. B. scrolling" /></label>
+          <label><span>Kamera</span><select name="shot" id="review-shot" required></select></label>
+          <label><span>Bewegung</span><select name="movement" id="review-movement" required></select></label>
+          <label><span>Stil</span><select name="style" id="review-style" required></select></label>
+          <label><span>Qualität</span><select name="quality"><option value="5">5 – sehr gut</option><option value="4">4 – gut</option><option value="3" selected>3 – brauchbar</option><option value="2">2</option><option value="1">1</option></select></label>
+          <label class="wide"><span>Tags, Komma-getrennt</span><input name="tags" required placeholder="smartphone, scrolling, social-media" /></label>
+          <label><span>Lizenz</span><select name="license" id="review-license" required></select></label>
+          <label><span>Quelle</span><input name="source" required value="Eigene Produktion" /></label>
+          <label class="wide"><span>Nutzungsbereiche</span><select name="scopes" id="review-scopes" multiple required></select><small>Mehrfachauswahl mit Strg/Cmd. Externe Quellen werden serverseitig mit ihren tatsächlichen Rechteangaben gespeichert.</small></label>
+        </div>
+        <div id="import-error" class="form-error" hidden></div>
+        <div class="review-actions"><button type="button" id="cancel-review" class="secondary-button">Abbrechen</button><button type="submit" id="approve-import" class="primary-button">Approve & in Bibliothek aufnehmen</button></div>
+      </div>
+    </form>
   </dialog>
 
-  <template id="asset-card-template">
-    <article class="asset-card">
-      <button class="asset-open" type="button">
-        <div class="preview"><span class="preview-type"></span></div>
-        <div class="asset-body">
-          <div class="asset-topline"><span class="type-badge"></span><span class="quality"></span></div>
-          <h2></h2>
-          <p class="description"></p>
-          <div class="tags"></div>
-          <div class="asset-meta"><span class="category"></span><span class="orientation"></span><span class="license"></span></div>
-        </div>
-      </button>
-    </article>
-  </template>
+  <template id="asset-card-template"><article class="asset-card"><button class="asset-open" type="button"><div class="preview"><span class="preview-type"></span></div><div class="asset-body"><div class="asset-topline"><span class="type-badge"></span><span class="quality"></span></div><h2></h2><p class="description"></p><div class="tags"></div><div class="asset-meta"><span class="category"></span><span class="orientation"></span><span class="license"></span></div></div></button></article></template>
 </body>
 </html>

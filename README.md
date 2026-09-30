@@ -1,185 +1,320 @@
 # Visual Asset Hub
 
-Visual Asset Hub ist eine universelle Medienbibliothek für **B-Rolls, Bilder, Animationen, Overlays, Screen-Recordings und Grafiken**. Die Assets sind nicht an einen einzelnen Kanal oder Content-Typ gebunden, sondern können für Reels, Shorts, YouTube, Werbung, Webseiten, Apps, Präsentationen und Kundenprojekte wiederverwendet werden.
+Lokaler Produktions-Hub für **faceless YouTube-Dokumentationen/Listicles** mit echten Visuals, nachvollziehbarer Rechteprüfung und einer vom Nutzer gelieferten Voiceover-Datei als Master-Audio.
 
-## Ziele
+**Aktueller Stand: Production Workflow v0.19.0 / Workflow v3.1**
 
-- Assets in Sekunden finden statt Ordner manuell zu durchsuchen
-- einheitliche Namen, Kategorien und Tags verwenden
-- Nutzungsrechte und Quellen nachvollziehbar speichern
-- Dubletten vermeiden
-- Hochformat, Querformat und Quadrat gezielt filtern
-- Assets lokal, über Git LFS oder in externem Object Storage verwalten
-- einen automatisch erzeugten Suchindex für eine Weboberfläche bereitstellen
+## Kernprinzip
+
+Der Hub ist **real-media-first, local-library-first, archive-first und local-before-phase2**.
+
+Priorität:
+
+1. bereits freigegebene passende Assets aus der eigenen Bibliothek
+2. exaktes Ereignis-/Originalmaterial
+3. offizielle Archive, Behörden, Wissenschafts- und Museumsquellen
+4. Archivmaterial
+5. echte Dokumente, Screenshots und offizielle Diagramme/Karten
+6. sehr spezifische reale B-Roll
+7. Stock nur als Fallback
+
+Keine automatisch erfundenen Remotion-Erklärgrafiken. Keine Elektronen-/Partikelanimationen, generischen Pfeile/Kreise/Callouts oder mittigen Infokarten als Standard. Wenn ein Beat visuell erklärt werden muss, sucht Phase 1 reales Material oder eine echte offizielle Abbildung.
+
+## Drei Phasen
+
+```text
+PHASE 1 — ChatGPT / Recherche
+Thema
+→ Fakten + Quellen
+→ finales Skript
+→ visual-plan.json
+→ Multi-Shot shot-plan.json
+→ eigene approved Bibliothek prüfen
+→ nur falls nötig externe Quellen suchen
+→ reale Medien lokal materialisieren
+→ phase1-quality.json
+→ visual-qc.json
+→ Rechte/Katalog + Rights-Evidence
+→ beat-bindings.json
+→ STRICT LOCK
+
+PHASE 2 — Nutzer
+finales Skript → eigene Voiceover-Datei
+
+PHASE 3 — Antigravity / Assembly
+Voiceover-Timings
+→ phase3-handoff.json
+→ nur lokale Phase-1-Assets
+→ Trim/Crop/Cut + geplante subtile Bewegung
+→ Render
+```
+
+**Phase 3 hat keinen Netzwerkzugriff auf Medien.** Fehlt ein Asset, geht der Shot zurück in Phase 1.
 
 ## Schnellstart
 
-Benötigt wird Node.js 22 oder neuer.
+Voraussetzungen:
+
+- Node.js 22+
+- FFmpeg inklusive `ffprobe`
 
 ```bash
 npm run check
+npm run tools:doctor
 npm run serve
 ```
 
-Danach ist die Bibliothek lokal unter `http://127.0.0.1:4173` erreichbar.
-
-Neue Assets werden nicht manuell umbenannt oder in den Katalog geschrieben. Der Importbefehl erzeugt ID, Dateinamen, Sequenz, Hash, Zielordner und Metadaten automatisch:
+## Recherche
 
 ```bash
-npm run asset:add -- --help
+npm run research:discover -- "Mars Climate Orbiter unit conversion failure"
+npm run documentary:research -- "Kilauea eruption" --type video
+npm run research:extract -- --url "https://example.org/article"
+npm run tools -- archive --url "https://example.org/source"
+npm run entity:expand -- "Mars Climate Orbiter"
 ```
 
-Beispiel:
+GDELT funktioniert ohne Key. Optional kann eine eigene SearXNG-Instanz über `SEARXNG_URL` genutzt werden.
+
+## Medienquellen v0.19
+
+### Automatisch, ohne API-Key
+
+- NASA Image & Video Library
+- **NASA Scientific Visualization Studio (SVS)**
+- NOAA
+- USGS
+- Library of Congress
+- **The Met Open Access** — nur API-Objekte mit `isPublicDomain=true`
+- Wikimedia Commons
+- Internet Archive
+- Openverse für Bilder
+
+### Automatisch, mit kostenlosen Keys
+
+- **National Park Service** — `NPS_API_KEY`
+- **DVIDS** — `DVIDS_API_KEY`
+- NARA / National Archives — `NARA_API_KEY`
+- Smithsonian Open Access — `SMITHSONIAN_API_KEY`
+- Europeana — `EUROPEANA_API_KEY`
+
+Fehlt ein optionaler Key, wird nur dieser Provider übersprungen. Die restliche Pipeline läuft weiter.
+
+### Stock nur als Fallback
+
+- Pexels
+- Pixabay
+
+Weitere Spezialportale und ihre Automatisierungsstufe stehen in `docs/SOURCE-COVERAGE.md`.
+
+## IIIF für Museen und Archive
+
+Viele Museen und Bibliotheken nutzen IIIF. Ein generischer Resolver kann aus einem Manifest oder `info.json` hochauflösende Bild-URLs extrahieren:
 
 ```bash
-npm run asset:add -- \
-  --file ./inbox/smartphone-scroll.mp4 \
-  --type video \
-  --category technology-ai \
-  --subject smartphone \
-  --action scrolling \
-  --shot cu \
-  --orientation vertical \
-  --title "Person scrollt am Smartphone" \
-  --description "Nahaufnahme einer Hand beim Scrollen durch eine Social-Media-App." \
-  --tags smartphone,scrolling,social-media \
-  --style realistic \
-  --movement handheld \
-  --license owned \
-  --source "Eigene Produktion" \
-  --scopes organic-social,youtube,website
+npm run iiif:resolve -- --url <manifest-oder-info.json>
 ```
 
-Mit `--dry-run true` werden ID, Name und Ziel berechnet, ohne Dateien zu verändern.
+Wichtig: **IIIF ist keine Lizenz.** Alle IIIF-Treffer bleiben im Rights-Review.
 
-## Kostenlose Pexels-Suche
-
-1. `.env.example` als `.env` kopieren.
-2. Den Schlüssel ausschließlich lokal eintragen:
-
-```env
-PEXELS_API_KEY=DEIN_PEXELS_SCHLUESSEL
-```
-
-3. Nach B-Rolls oder Bildern suchen:
+## Multi-Shot-Plan
 
 ```bash
-npm run pexels:search -- "Person arbeitet am Laptop" --type video --orientation vertical --per-page 20
-npm run pexels:search -- "moderne Fabrik" --type photo --orientation horizontal --per-page 20
+npm run beat:plan -- --plan projects/<id>/visual-plan.json
 ```
 
-Die Ergebnisse werden unter `.local-storage/pexels-search/` gespeichert. Der Schlüssel, die Suchdateien und große Medien werden nicht in GitHub veröffentlicht. Die Suche lädt zunächst nur Metadaten und Vorschaulinks, keine Originaldateien. Weitere Hinweise stehen in [`docs/PEXELS.md`](docs/PEXELS.md).
+Ein Sprecher-Beat darf mehrere echte Visual-Shots besitzen. Jeder Shot hat eine eigene Shot-ID und verweist mit `beatId` auf den Sprecher-Beat.
 
-## Grundstruktur
+## Phase 1 — Materialisierung
+
+```bash
+npm run phase1:materialize -- --project <id> --download-top 1
+```
+
+Der Materializer prüft zuerst `catalog/assets.json` auf bereits lokale, `approved` und für YouTube freigegebene Assets. Nur wenn kein starker lokaler Treffer reicht, werden externe Quellen durchsucht.
+
+Vollständige externe Suche erzwingen:
+
+```bash
+npm run phase1:materialize -- --project <id> --download-top 1 --always-search true
+```
+
+Danach:
+
+```bash
+npm run phase1:quality -- --project <id>
+npm run visual:qc -- --project <id>
+# Inbox/Downloads prüfen und Rechte bestätigen
+npm run phase1:bind -- auto --project <id>
+npm run youtube:workflow -- phase1-check --project <id>
+```
+
+## Quality + Visual-QC
+
+`phase1-quality.json` nutzt technische QC und optional pyiqa. `visual-qc.json` kombiniert unter anderem:
+
+- redaktionelle Relevanz
+- Technik/Auflösung
+- Bildqualität
+- Rechte-Status
+- Provider-Tier
+- Wiederholungs-/Diversitätssignale
+- optional OpenCLIP
+
+Deep Mode:
+
+```bash
+npm run phase1:quality -- --project <id> --deep true
+```
+
+Deep Mode ergänzt OpenCLIP/sqlite-vec Asset-Memory und DINOv2-Dublettenprüfung. Schwere Modelle bleiben optional.
+
+## Rechte + Evidence
+
+Unterstützt werden unter anderem:
 
 ```text
-assets/
-  video/
-  image/
-  animation/
-  overlay/
-  screen-recording/
-  graphic/
-previews/
-inbox/
-archive/
-catalog/
-docs/
-scripts/
-web/
+public-domain
+cc0
+cc-by
+cc-by-sa
+cc-by-nd
+cc-by-nc / cc-by-nc-sa / cc-by-nc-nd
+editorial-only
+restricted
+unknown
 ```
 
-`inbox/` ist der lokale Eingang für neue Dateien und wird nicht veröffentlicht. Erst nach Benennung, Rechteprüfung und Katalogisierung werden Assets nach `assets/` übernommen.
+Zusätzliche Rights-Felder können `licenseCode`, `licenseVersion`, `commercialUse`, `derivativesAllowed`, `shareAlike`, `checkedAt` und `evidencePath` speichern.
 
-## Dateinamen
+Approved Assets erhalten eine dauerhafte Audit-Akte:
 
 ```text
-{type}-{category}-{subject}-{action}-{shot}-{orientation}-{sequence}.{ext}
+catalog/rights-evidence/<ASSET-ID>.json
 ```
 
-Beispiele:
-
-```text
-brl-technology-ai-smartphone-scrolling-cu-vertical-0001.mp4
-img-money-finance-cash-growing-not-applicable-square-0001.png
-ovl-social-media-creator-notification-pop-up-transparent-0001.webm
-```
-
-Die vollständigen Regeln stehen in [`docs/NAMING.md`](docs/NAMING.md).
-
-## Katalog
-
-Alle durchsuchbaren Informationen liegen in [`catalog/assets.json`](catalog/assets.json). Jedes Asset besitzt unter anderem:
-
-- stabile Asset-ID
-- Titel und Beschreibung
-- Typ und Hauptkategorie
-- kontrollierte Tags und Such-Aliasse
-- Motiv, Handlung und Kameraeinstellung
-- Ausrichtung, Auflösung und Dauer
-- Speicherpfad oder externe Storage-URL
-- Quelle, Lizenzstatus und erlaubte Einsatzzwecke
-- Erstellungs- und Importdatum
-- optionalen SHA-256-Hash zur Dublettenprüfung
-
-Das genaue Datenmodell steht in [`catalog/schema.json`](catalog/schema.json). Die kontrollierten Werte liegen in [`catalog/taxonomy.json`](catalog/taxonomy.json).
-
-## Befehle
+Manuell:
 
 ```bash
-npm run asset:add -- --help
-npm run pexels:search -- --help
-npm run validate
-npm run index
-npm run test
-npm run check
-npm run serve
+npm run rights:evidence -- snapshot --asset VAH-XXXXXXXX
+npm run rights:evidence -- check --asset VAH-XXXXXXXX
 ```
 
-- `asset:add`: nimmt eine neue Datei sicher auf und rollt bei Fehlern zurück
-- `pexels:search`: sucht kostenlose Pexels-Fotos oder -Videos und speichert Quellenangaben lokal
-- `validate`: prüft IDs, Dateinamen, Kategorien, Pfade, Rechte, Laufzeiten und Dubletten
-- `index`: erzeugt `catalog/search-index.json` für die Websuche
-- `test`: prüft Taxonomie, Katalogvertrag, Pexels-Client und deterministische Indexierung
-- `check`: führt Validierung, Indexierung und Tests aus
-- `serve`: startet die lokale Suchoberfläche
+Optional kann die Quellseite lokal mitgesichert werden:
 
-## Speicher
+```bash
+npm run rights:evidence -- snapshot --asset VAH-XXXXXXXX --capture true
+```
 
-- Kleine Textdateien, SVGs und Vorschauen können direkt im Repository liegen.
-- Große Originalbilder und Videos unter `assets/` werden über Git LFS verwaltet.
-- Für eine sehr große Bibliothek ist externer S3-kompatibler Object Storage vorgesehen.
-- Temporäre Signed URLs und private Zugriffstokens dürfen nicht im Katalog gespeichert werden.
+Evidence/Screenshot ist eine Audit-Hilfe und **keine automatische Rechtsmeinung**. Ereignisidentität und Nutzungsrechte bleiben getrennte Gates.
 
-Details stehen in [`docs/STORAGE-AND-RIGHTS.md`](docs/STORAGE-AND-RIGHTS.md).
+## Phase 1 ist erst fertig, wenn
 
-## Rechte und Sicherheit
+- jeder geplante Shot einen Kandidaten besitzt,
+- jedes Produktionsasset lokal vorliegt,
+- jedes Asset im Katalog `approved` ist,
+- YouTube im Usage Scope steht,
+- Visual-QC bestanden ist,
+- jeder Shot gebunden ist,
+- `rights.checkedAt` vorhanden ist,
+- die zugehörige Rights-Evidence existiert und zum Katalog passt.
 
-Nur Assets speichern, für die eine nachvollziehbare Nutzungserlaubnis besteht. Dateien mit unbekanntem Rechtezustand bleiben in `inbox/` und erhalten nicht den Status `approved`. Quellen, Lizenz und erlaubte Nutzungsbereiche werden pro Asset dokumentiert.
+Erst dann akzeptiert Workflow v3 die Nutzer-Voiceover.
 
-Die automatische Prüfung blockiert unter anderem:
+## Phase 2 — Nutzer-Voiceover
 
-- doppelte IDs, Dateinamen oder SHA-256-Hashes
-- falsche Kategorien, Typen oder Dateiendungen
-- unvollständige Rechteangaben
-- freigegebene Assets mit unbekannter oder abgelaufener Lizenz
-- editorial-only Assets mit kommerziellen Nutzungsbereichen
-- unsichere Pfade
-- URLs mit erkennbaren Token-, Signatur- oder API-Key-Parametern
+```bash
+npm run youtube:workflow -- voiceover-attach --project <id> --file ./voiceover.wav
+```
 
-## Aktueller Ausbau
+Die Pipeline erzeugt oder ersetzt die Stimme nicht.
 
-Die erste funktionsfähige Stufe enthält:
+Optional:
 
-- universelle Taxonomie
-- verbindlichen Benennungsstandard
-- strukturiertes Metadatenschema
-- sicheren Asset-Import
-- kostenlose Pexels-Foto- und Videosuche
-- Rechte- und Dublettenprüfung
-- deterministischen Suchindex
-- responsive Websuche mit Filtern und Detailansicht
-- Git-LFS-Regeln
-- automatischen GitHub-Workflow
+```bash
+npm run audio:prepare -- --file ./voiceover.wav --output ./voiceover-normalized.wav
+```
 
-Spätere Ausbaustufen: gezielter Originaldownload, automatische Vorschauerzeugung, Metadatenanalyse über FFmpeg, KI-Tagging, Cloud-Storage-Synchronisierung, Nutzungshistorie und visuelle Ähnlichkeitssuche.
+## Voiceover → Timings
+
+```bash
+npm run voiceover:align -- --project <id> --model ./models/ggml-small.bin
+```
+
+Optionaler Precision-Modus:
+
+```bash
+npm run tools -- voiceover-precision --file ./voiceover.wav
+```
+
+## Phase 3 — Antigravity-Handoff
+
+```bash
+npm run phase3:prepare -- --project <id>
+npm run youtube:workflow -- phase3-check --project <id>
+```
+
+Erzeugt unter anderem:
+
+- `phase3-handoff.json`
+- `project.scenes`
+- `render-manifest.json`
+
+Erlaubt sind Trims, Crops/Reframing, harte Schnitte, Freeze-Frames aus freigegebenem Material, Vertical-Blur-Sidefill und subtile geplante Push-ins/Pans.
+
+Nicht erlaubt sind Runtime-Webdownloads, zufällige Ersatz-B-Roll oder künstliche Erklärgrafiken als Lückenfüller.
+
+## Focal Point und Motion
+
+`focus` und `motion` werden bis ins Render-Manifest durchgereicht. Unterstützt werden unter anderem:
+
+```text
+static
+push
+pull
+pan-left / pan-right
+pan-up / pan-down
+```
+
+Der Renderer entscheidet die Bewegungsrichtung nicht zufällig.
+
+## Open-Source Toolbox
+
+```bash
+npm run tools -- doctor
+npm run tools -- help
+```
+
+Modular integriert sind unter anderem Trafilatura, ArchiveBox, MediaInfo, Sharp/libvips, sqlite-vec + OpenCLIP, pyiqa, WhisperX, ffmpeg-normalize, VMAF, gallery-dl, yt-dlp, DINOv2, GroundingDINO, Segment Anything und Real-ESRGAN.
+
+Schwere Tools sind standardmäßig AUS und blockieren den normalen Workflow nicht.
+
+## Final-QC
+
+```bash
+npm run final:qc -- --file ./final.mp4
+```
+
+Optional mit Referenz:
+
+```bash
+npm run final:qc -- --file ./final-encode.mp4 --reference ./master.mp4
+```
+
+## Tests
+
+Die Pipeline besitzt Syntax-/Vertrags-/Provider-Tests und einen Offline-End-to-End-Test für:
+
+```text
+lokales approved Asset
+→ Rights-Evidence
+→ Multi-Shot Phase 1
+→ phase1-check
+→ Nutzer-Voiceover-Timing-Fixture
+→ phase3:prepare
+→ lokales Render-Manifest
+```
+
+## Sicherheit
+
+Technische Downloadbarkeit bedeutet nicht Nutzungsrecht. Externe Medien bleiben im Rechte-/Event-Review. Die Nutzer-Voiceover, Quellen-Provenance, lokale Phase-1-Materialisierung, Rights-Evidence und Real-Media-First-Regel sind feste Bestandteile von Workflow v3.1.

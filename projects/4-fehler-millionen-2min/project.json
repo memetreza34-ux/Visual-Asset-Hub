@@ -1,0 +1,45 @@
+{
+  "version": 2,
+  "workflowVersion": 2,
+  "id": "4-fehler-millionen-2min",
+  "title": "4 Fehler, die unfassbar teuer wurden",
+  "format": "horizontal",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "language": "de",
+  "genre": "faceless-listicle-documentary",
+  "referenceStyle": "fast real-media documentary/listicle similar in structure to the supplied Wissenswert reference; do not copy branding, script or copyrighted clips",
+  "targetDurationSeconds": 120,
+  "requireUserVoiceover": true,
+  "status": "awaiting-voiceover",
+  "workflow": {
+    "phase1Research": "complete",
+    "phase1Script": "complete",
+    "phase1Visuals": "complete-selected-sources",
+    "phase2Voiceover": "pending-user",
+    "phase3TimingAndAssembly": "blocked-until-voiceover",
+    "phase4Render": "pending"
+  },
+  "editingRules": {
+    "normalVisualSeconds": "4-7",
+    "insertSeconds": "1.5-4",
+    "useMultipleVisualsPerNarrationBlock": true,
+    "preferRealMedia": true,
+    "genericStockIsFallbackOnly": true,
+    "verticalFootageSidefill": "blurred-background",
+    "longDashboardScenes": false,
+    "referenceVideoReuse": false
+  },
+  "phase1Artifacts": [
+    "research.json",
+    "voiceover-script.txt",
+    "visual-plan.json"
+  ],
+  "cases": [
+    "noaa-n-prime",
+    "mars-climate-orbiter",
+    "sncf-wide-trains",
+    "hubble-mirror"
+  ]
+}

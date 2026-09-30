@@ -1,0 +1,9 @@
+# Heavy optional tools. Do NOT install by default on every machine.
+# They improve special cases but never block the normal real-media workflow.
+torch>=2.2
+torchvision>=0.17
+transformers>=4.40
+whisperx>=3.1
+
+# Segment Anything is only used when --sam is explicitly requested.
+segment-anything @ git+https://github.com/facebookresearch/segment-anything.git

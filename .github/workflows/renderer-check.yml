@@ -1,0 +1,42 @@
+name: Renderer Check
+
+on:
+  pull_request:
+    paths:
+      - "renderer/**"
+      - ".github/workflows/renderer-check.yml"
+  push:
+    branches: [main]
+    paths:
+      - "renderer/**"
+      - ".github/workflows/renderer-check.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: visual-asset-hub-renderer-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install renderer dependencies
+        working-directory: renderer
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      - name: Typecheck Remotion renderer
+        working-directory: renderer
+        run: npm run check
