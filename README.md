@@ -1,9 +1,10 @@
 # Visual Asset Hub
 
-Visual Asset Hub ist eine universelle Medienbibliothek für **B-Rolls, Bilder, Animationen, Overlays, Screen-Recordings und Grafiken**. Die Assets sind nicht an einen einzelnen Kanal oder Content-Typ gebunden, sondern können für Reels, Shorts, YouTube, Werbung, Webseiten, Apps, Präsentationen und Kundenprojekte wiederverwendet werden.
+Visual Asset Hub ist eine universelle Medienbibliothek und Discovery-Pipeline für **B-Rolls, Bilder, Animationen, Overlays, Screen-Recordings und Grafiken**. Die Assets sind nicht an einen einzelnen Kanal oder Content-Typ gebunden, sondern können für Reels, Shorts, YouTube, Werbung, Webseiten, Apps, Präsentationen und Kundenprojekte wiederverwendet werden.
 
 ## Ziele
 
+- aus einem Thema automatisch viele unterschiedliche Bilder und B-Rolls finden
 - Assets in Sekunden finden statt Ordner manuell zu durchsuchen
 - einheitliche Namen, Kategorien und Tags verwenden
 - Nutzungsrechte und Quellen nachvollziehbar speichern
@@ -23,7 +24,67 @@ npm run serve
 
 Danach ist die Bibliothek lokal unter `http://127.0.0.1:4173` erreichbar.
 
-Neue Assets werden nicht manuell umbenannt oder in den Katalog geschrieben. Der Importbefehl erzeugt ID, Dateinamen, Sequenz, Hash, Zielordner und Metadaten automatisch:
+## Smart Asset Discovery
+
+Für viele Bilder und B-Rolls aus nur einem Thema:
+
+```bash
+npm run discover -- "KI ersetzt Büro-Jobs" --orientation vertical
+```
+
+Ein Standardlauf erzeugt automatisch mehrere visuelle Suchrichtungen, durchsucht **Videos und Fotos**, lädt mehrere Pexels-Ergebnisseiten, entfernt Provider-Dubletten und rankt die Kandidaten nach Relevanz, technischer Nutzbarkeit und Vielfalt.
+
+Standard:
+
+- 8 Suchrichtungen
+- Video + Foto
+- 2 Seiten pro Suchrichtung und Medientyp
+- 30 Treffer pro API-Anfrage
+- bis zu 80 finale Kandidaten
+- `en-US` als Stock-Suchsprache
+
+Damit können theoretisch bis zu 960 Rohresultate geprüft werden:
+
+```text
+8 Queries × 2 Medientypen × 2 Seiten × 30 Treffer
+```
+
+Größerer Lauf:
+
+```bash
+npm run discover -- \
+  "industrial electrician maintenance" \
+  --orientation horizontal \
+  --queries 12 \
+  --pages 3 \
+  --per-page 40 \
+  --top 100
+```
+
+Die Resultate werden unter `.local-storage/discovery/` gespeichert. Details: [`docs/DISCOVERY.md`](docs/DISCOVERY.md).
+
+Die Discovery kann auch unter **GitHub Actions → Smart Asset Discovery** gestartet werden.
+
+## Pexels einrichten
+
+`.env.example` als `.env` kopieren und den Schlüssel ausschließlich lokal eintragen:
+
+```env
+PEXELS_API_KEY=DEIN_PEXELS_SCHLUESSEL
+```
+
+Die klassische Einzelsuche bleibt verfügbar:
+
+```bash
+npm run pexels:search -- "Person arbeitet am Laptop" --type video --orientation vertical --per-page 20
+npm run pexels:search -- "moderne Fabrik" --type photo --orientation horizontal --per-page 20
+```
+
+Die Einzelsuche speichert Resultate unter `.local-storage/pexels-search/`. Die Discovery speichert unter `.local-storage/discovery/`. Es werden zunächst nur Metadaten und Vorschaulinks geladen, keine Originaldateien. Weitere Hinweise: [`docs/PEXELS.md`](docs/PEXELS.md).
+
+## Asset-Import
+
+Neue Assets werden nicht manuell umbenannt oder direkt in den Katalog geschrieben. Der Importbefehl erzeugt ID, Dateinamen, Sequenz, Hash, Zielordner und Metadaten automatisch:
 
 ```bash
 npm run asset:add -- --help
@@ -51,24 +112,6 @@ npm run asset:add -- \
 ```
 
 Mit `--dry-run true` werden ID, Name und Ziel berechnet, ohne Dateien zu verändern.
-
-## Kostenlose Pexels-Suche
-
-1. `.env.example` als `.env` kopieren.
-2. Den Schlüssel ausschließlich lokal eintragen:
-
-```env
-PEXELS_API_KEY=DEIN_PEXELS_SCHLUESSEL
-```
-
-3. Nach B-Rolls oder Bildern suchen:
-
-```bash
-npm run pexels:search -- "Person arbeitet am Laptop" --type video --orientation vertical --per-page 20
-npm run pexels:search -- "moderne Fabrik" --type photo --orientation horizontal --per-page 20
-```
-
-Die Ergebnisse werden unter `.local-storage/pexels-search/` gespeichert. Der Schlüssel, die Suchdateien und große Medien werden nicht in GitHub veröffentlicht. Die Suche lädt zunächst nur Metadaten und Vorschaulinks, keine Originaldateien. Weitere Hinweise stehen in [`docs/PEXELS.md`](docs/PEXELS.md).
 
 ## Grundstruktur
 
@@ -122,13 +165,15 @@ Alle durchsuchbaren Informationen liegen in [`catalog/assets.json`](catalog/asse
 - Erstellungs- und Importdatum
 - optionalen SHA-256-Hash zur Dublettenprüfung
 
-Das genaue Datenmodell steht in [`catalog/schema.json`](catalog/schema.json). Die kontrollierten Werte liegen in [`catalog/taxonomy.json`](catalog/taxonomy.json).
+Das Datenmodell steht in [`catalog/schema.json`](catalog/schema.json), die kontrollierten Werte in [`catalog/taxonomy.json`](catalog/taxonomy.json).
 
 ## Befehle
 
 ```bash
-npm run asset:add -- --help
+npm run discover -- --help
 npm run pexels:search -- --help
+npm run asset:add -- --help
+npm run media:analyze -- --help
 npm run validate
 npm run index
 npm run test
@@ -136,11 +181,13 @@ npm run check
 npm run serve
 ```
 
+- `discover`: erzeugt mehrere Suchrichtungen und findet/rankt viele Bilder + B-Rolls
+- `pexels:search`: führt eine einzelne Pexels-Suche aus
 - `asset:add`: nimmt eine neue Datei sicher auf und rollt bei Fehlern zurück
-- `pexels:search`: sucht kostenlose Pexels-Fotos oder -Videos und speichert Quellenangaben lokal
+- `media:analyze`: analysiert lokale Medien mit FFmpeg und erzeugt eine Vorschau
 - `validate`: prüft IDs, Dateinamen, Kategorien, Pfade, Rechte, Laufzeiten und Dubletten
 - `index`: erzeugt `catalog/search-index.json` für die Websuche
-- `test`: prüft Taxonomie, Katalogvertrag, Pexels-Client und deterministische Indexierung
+- `test`: prüft Taxonomie, Katalogvertrag, Pexels-Client, Search Planner und Indexierung
 - `check`: führt Validierung, Indexierung und Tests aus
 - `serve`: startet die lokale Suchoberfläche
 
@@ -151,11 +198,11 @@ npm run serve
 - Für eine sehr große Bibliothek ist externer S3-kompatibler Object Storage vorgesehen.
 - Temporäre Signed URLs und private Zugriffstokens dürfen nicht im Katalog gespeichert werden.
 
-Details stehen in [`docs/STORAGE-AND-RIGHTS.md`](docs/STORAGE-AND-RIGHTS.md).
+Details: [`docs/STORAGE-AND-RIGHTS.md`](docs/STORAGE-AND-RIGHTS.md).
 
 ## Rechte und Sicherheit
 
-Nur Assets speichern, für die eine nachvollziehbare Nutzungserlaubnis besteht. Dateien mit unbekanntem Rechtezustand bleiben in `inbox/` und erhalten nicht den Status `approved`. Quellen, Lizenz und erlaubte Nutzungsbereiche werden pro Asset dokumentiert.
+Nur Assets speichern, für die eine nachvollziehbare Nutzungserlaubnis besteht. Dateien mit unbekanntem Rechtezustand bleiben in `inbox/` und erhalten nicht den Status `approved`.
 
 Die automatische Prüfung blockiert unter anderem:
 
@@ -169,17 +216,19 @@ Die automatische Prüfung blockiert unter anderem:
 
 ## Aktueller Ausbau
 
-Die erste funktionsfähige Stufe enthält:
+Enthalten sind jetzt:
 
 - universelle Taxonomie
-- verbindlichen Benennungsstandard
+- verbindlicher Benennungsstandard
 - strukturiertes Metadatenschema
-- sicheren Asset-Import
-- kostenlose Pexels-Foto- und Videosuche
+- sicherer Asset-Import
+- klassische Pexels-Foto-/Videosuche
+- **Smart Asset Discovery mit Multi-Query, Foto+Video, Pagination, Deduplication, Ranking und Diversity-Auswahl**
+- automatische Medienanalyse über FFmpeg
 - Rechte- und Dublettenprüfung
-- deterministischen Suchindex
+- deterministischer Suchindex
 - responsive Websuche mit Filtern und Detailansicht
 - Git-LFS-Regeln
-- automatischen GitHub-Workflow
+- GitHub-Workflows für Suche und Discovery
 
-Spätere Ausbaustufen: gezielter Originaldownload, automatische Vorschauerzeugung, Metadatenanalyse über FFmpeg, KI-Tagging, Cloud-Storage-Synchronisierung, Nutzungshistorie und visuelle Ähnlichkeitssuche.
+Nächste Ausbaustufen: kontrollierter Originaldownload, automatische Übergabe in FFmpeg-Analyse und Asset-Import, zusätzliche Provider, KI-Tagging, Cloud-Storage-Synchronisierung, Nutzungshistorie und visuelle Ähnlichkeitssuche.
