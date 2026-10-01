@@ -1,0 +1,224 @@
+const MANUAL_SOURCE_REASONS = new Set([
+  'original-interface-or-document',
+  'real-event-authenticity',
+  'exact-brand-or-product',
+  'historical-evidence'
+]);
+
+export function realMediaPolicy(item) {
+  const reason = String(item?.reason ?? '');
+  if (MANUAL_SOURCE_REASONS.has(reason)) {
+    return {
+      auto_search: false,
+      auto_download: false,
+      requires_exact_source: true,
+      review_required: true,
+      reason
+    };
+  }
+
+  return {
+    auto_search: true,
+    auto_download: true,
+    requires_exact_source: false,
+    review_required: reason === 'identifiable-real-location',
+    reason
+  };
+}
+
+export function mergeRealCandidate(map, asset, query, page = 1) {
+  const key = `${asset.provider ?? 'unknown'}:${asset.type}:${asset.provider_id}`;
+  const existing = map.get(key);
+  if (!existing) {
+    map.set(key, {
+      ...asset,
+      matched_queries: [query],
+      occurrences: 1,
+      first_seen_page: page
+    });
+    return;
+  }
+  existing.occurrences += 1;
+  existing.first_seen_page = Math.min(existing.first_seen_page, page);
+  if (!existing.matched_queries.includes(query)) existing.matched_queries.push(query);
+}
+
+export function scoreRealCandidate(asset, { orientation, assetType } = {}) {
+  const resolution = bestResolution(asset);
+  let score = 30;
+  score += Math.min(Number(asset.matched_queries?.length ?? 0), 4) * 10;
+  score += Math.min(Number(asset.occurrences ?? 1), 6) * 2;
+  score += Math.max(0, 8 - Number(asset.first_seen_page ?? 1) * 2);
+
+  if (orientation && asset.orientation === orientation) score += 14;
+  if (assetType && normalizedAssetType(asset.type) === normalizedAssetType(assetType)) score += 10;
+
+  const pixels = resolution.width * resolution.height;
+  if (pixels >= 3840 * 2160) score += 12;
+  else if (pixels >= 1920 * 1080) score += 10;
+  else if (pixels >= 1280 * 720) score += 7;
+  else if (pixels > 0) score += 2;
+
+  if (asset.type === 'video') {
+    const duration = Number(asset.duration_seconds ?? 0);
+    if (duration >= 4 && duration <= 40) score += 12;
+    else if (duration > 40 && duration <= 90) score += 6;
+    else if (duration > 0 && duration < 2) score -= 12;
+    else if (duration > 120) score -= 5;
+  }
+
+  return Math.max(0, Math.min(100, Math.round(score)));
+}
+
+export function rankRealCandidates(candidates, options = {}) {
+  return candidates
+    .map((asset) => ({
+      ...asset,
+      real_media_score: scoreRealCandidate(asset, options)
+    }))
+    .sort((a, b) => b.real_media_score - a.real_media_score
+      || (b.matched_queries?.length ?? 0) - (a.matched_queries?.length ?? 0)
+      || String(a.provider_id).localeCompare(String(b.provider_id)));
+}
+
+export function choosePexelsDownload(asset, { maxDimension = 1920 } = {}) {
+  if (!asset) return null;
+  if (asset.type === 'image') {
+    const files = asset.files ?? {};
+    const options = [
+      ['large2x', files.large2x],
+      ['large', files.large],
+      ['original', files.original],
+      ['medium', files.medium]
+    ].filter(([, url]) => Boolean(url));
+    if (!options.length) return null;
+    const [quality, url] = options[0];
+    return {
+      url,
+      quality,
+      file_type: 'image/jpeg',
+      width: asset.width ?? null,
+      height: asset.height ?? null
+    };
+  }
+
+  const files = Array.isArray(asset.files) ? asset.files : [];
+  const mp4 = files.filter((file) => file?.url && String(file.file_type ?? '').includes('mp4'));
+  if (!mp4.length) return null;
+  const fitting = mp4.filter((file) => {
+    const longest = Math.max(Number(file.width ?? 0), Number(file.height ?? 0));
+    return longest >= 720 && longest <= maxDimension;
+  });
+  const pool = fitting.length ? fitting : mp4;
+  return [...pool].sort((a, b) => downloadScore(b, maxDimension) - downloadScore(a, maxDimension))[0];
+}
+
+export function buildTimelineBinding({ item, selected, localFile = null, timing = null, defaultDuration = 4, technical = null }) {
+  const requestedDuration = positiveNumber(timing?.duration_seconds) ?? defaultDuration;
+  const availableDuration = selected?.type === 'video'
+    ? positiveNumber(technical?.durationSeconds ?? selected?.duration_seconds)
+    : null;
+  const duration = availableDuration ? Math.min(requestedDuration, availableDuration) : requestedDuration;
+  const start = positiveNumber(timing?.start_seconds);
+
+  return {
+    id: item.id,
+    beat_id: item.beat_id,
+    status: selected && localFile ? 'ready' : 'unresolved',
+    source_mode: 'real-media',
+    reason: item.reason ?? null,
+    asset_type: selected?.type ?? item.asset_type,
+    provider: selected?.provider ?? null,
+    provider_id: selected?.provider_id ?? null,
+    local_file: localFile,
+    source_url: selected?.source_url ?? null,
+    creator: selected?.creator ?? null,
+    orientation: selected?.orientation ?? item.orientation ?? null,
+    placement: {
+      start_seconds: start ?? null,
+      duration_seconds: round(duration, 3),
+      trim_start_seconds: 0,
+      fit: 'cover',
+      mute: selected?.type === 'video'
+    },
+    needs_additional_fill: Boolean(availableDuration && availableDuration < requestedDuration),
+    attribution: selected?.attribution ?? null
+  };
+}
+
+export function timingMapFromPayload(payload) {
+  const map = new Map();
+  for (const entry of payload?.beats ?? []) {
+    const id = String(entry.beat_id ?? entry.id ?? '').trim();
+    if (!id) continue;
+    const start = positiveNumber(entry.start_seconds ?? entry.start);
+    const duration = positiveNumber(entry.duration_seconds ?? entry.duration);
+    map.set(id, {
+      start_seconds: start ?? null,
+      duration_seconds: duration ?? null
+    });
+  }
+  return map;
+}
+
+export function extensionForDownload(url, fileType, type) {
+  const mime = String(fileType ?? '').toLowerCase();
+  if (mime.includes('mp4')) return 'mp4';
+  if (mime.includes('webm')) return 'webm';
+  if (mime.includes('png')) return 'png';
+  if (mime.includes('webp')) return 'webp';
+  if (mime.includes('jpeg') || mime.includes('jpg')) return 'jpg';
+  try {
+    const ext = new URL(url).pathname.split('.').pop()?.toLowerCase();
+    if (ext && /^[a-z0-9]{2,5}$/.test(ext)) return ext === 'jpeg' ? 'jpg' : ext;
+  } catch {}
+  return type === 'video' ? 'mp4' : 'jpg';
+}
+
+export function safeMediaName(value) {
+  return String(value ?? 'asset')
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 70) || 'asset';
+}
+
+function bestResolution(asset) {
+  if (asset.type === 'image') {
+    return { width: Number(asset.width ?? 0), height: Number(asset.height ?? 0) };
+  }
+  const files = Array.isArray(asset.files) ? asset.files : [];
+  return files.reduce((best, file) => {
+    const current = { width: Number(file.width ?? 0), height: Number(file.height ?? 0) };
+    return current.width * current.height > best.width * best.height ? current : best;
+  }, { width: Number(asset.width ?? 0), height: Number(asset.height ?? 0) });
+}
+
+function downloadScore(file, maxDimension) {
+  const width = Number(file.width ?? 0);
+  const height = Number(file.height ?? 0);
+  const longest = Math.max(width, height);
+  const area = width * height;
+  const withinTarget = longest > 0 && longest <= maxDimension ? 2_000_000_000 : 0;
+  const hdBonus = file.quality === 'hd' ? 1_000_000_000 : 0;
+  const oversizePenalty = longest > maxDimension ? (longest - maxDimension) * 1_000_000 : 0;
+  return withinTarget + hdBonus + area - oversizePenalty;
+}
+
+function normalizedAssetType(value) {
+  return value === 'photo' ? 'image' : value;
+}
+
+function positiveNumber(value) {
+  const number = Number(value);
+  return Number.isFinite(number) && number >= 0 ? number : null;
+}
+
+function round(value, digits) {
+  const factor = 10 ** digits;
+  return Math.round(value * factor) / factor;
+}
+
+export const realMediaConstants = { MANUAL_SOURCE_REASONS };
