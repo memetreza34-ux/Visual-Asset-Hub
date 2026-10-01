@@ -65,6 +65,12 @@ jobs:
     timeout-minutes: 20
     env:
       PEXELS_API_KEY: ${{ secrets.PEXELS_API }}
+      NARRATION: ${{ inputs.narration }}
+      TARGET_ORIENTATION: ${{ inputs.orientation }}
+      IMAGES_PER_BEAT: ${{ inputs.images_per_beat }}
+      REAL_QUERIES: ${{ inputs.real_queries }}
+      SEARCH_PAGES: ${{ inputs.pages }}
+      SEARCH_PER_PAGE: ${{ inputs.per_page }}
 
     steps:
       - name: Repository laden
@@ -88,9 +94,9 @@ jobs:
         run: |
           mkdir -p .local-storage/pipeline
           npm run visual:plan -- \
-            --text "${{ inputs.narration }}" \
-            --orientation "${{ inputs.orientation }}" \
-            --images-per-beat "${{ inputs.images_per_beat }}" \
+            --text "$NARRATION" \
+            --orientation "$TARGET_ORIENTATION" \
+            --images-per-beat "$IMAGES_PER_BEAT" \
             --output .local-storage/pipeline/visual-plan.json
 
       - name: Echte Bilder und B-Rolls suchen und herunterladen
@@ -99,9 +105,9 @@ jobs:
           npm run real:integrate -- \
             --queue .local-storage/pipeline/real-material-queue.json \
             --output-dir .local-storage/pipeline/real-media \
-            --queries "${{ inputs.real_queries }}" \
-            --pages "${{ inputs.pages }}" \
-            --per-page "${{ inputs.per_page }}"
+            --queries "$REAL_QUERIES" \
+            --pages "$SEARCH_PAGES" \
+            --per-page "$SEARCH_PER_PAGE"
 
       - name: Pipeline-Ergebnis bereitstellen
         uses: actions/upload-artifact@v4
