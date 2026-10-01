@@ -1,10 +1,13 @@
 # Visual Asset Hub
 
-Visual Asset Hub ist eine universelle Medienbibliothek und Discovery-Pipeline für **B-Rolls, Bilder, Animationen, Overlays, Screen-Recordings und Grafiken**. Die Assets sind nicht an einen einzelnen Kanal oder Content-Typ gebunden, sondern können für Reels, Shorts, YouTube, Werbung, Webseiten, Apps, Präsentationen und Kundenprojekte wiederverwendet werden.
+Visual Asset Hub ist eine universelle Medienbibliothek und Visual-Discovery-Pipeline für **KI-Bilder, B-Rolls, Bilder, Animationen, Overlays, Screen-Recordings und Grafiken**. Die Assets sind nicht an einen einzelnen Kanal oder Content-Typ gebunden, sondern können für Reels, Shorts, YouTube, Werbung, Webseiten, Apps, Präsentationen und Kundenprojekte wiederverwendet werden.
 
 ## Ziele
 
-- aus einem Thema automatisch viele unterschiedliche Bilder und B-Rolls finden
+- **AI-first:** möglichst viele passende realistische KI-Bilder planen
+- echtes Bild-/B-Roll-Material nur verwenden, wenn Authentizität oder Bewegung einen klaren Vorteil hat
+- aus Sprechertext automatisch mehrere Visual Beats und Shot-Varianten erzeugen
+- aus einem Thema automatisch viele unterschiedliche echte Bilder und B-Rolls finden
 - Assets in Sekunden finden statt Ordner manuell zu durchsuchen
 - einheitliche Namen, Kategorien und Tags verwenden
 - Nutzungsrechte und Quellen nachvollziehbar speichern
@@ -24,9 +27,55 @@ npm run serve
 
 Danach ist die Bibliothek lokal unter `http://127.0.0.1:4173` erreichbar.
 
+## AI-first Visual Engine
+
+Die Standardstrategie lautet **Generate first, search second**.
+
+```bash
+npm run visual:plan -- "Immer mehr Unternehmen automatisieren Büroarbeit mit künstlicher Intelligenz."
+```
+
+Für ein ganzes Skript:
+
+```bash
+npm run visual:plan -- \
+  --file ./script.txt \
+  --orientation horizontal \
+  --images-per-beat 5
+```
+
+Der Planer:
+
+- zerlegt Sprechertext in Visual Beats
+- plant standardmäßig mehrere KI-Bilder pro generierbarem Beat
+- erzeugt unterschiedliche Wide-, Medium-, Close-up-, Detail-, POV- und Over-the-Shoulder-Shots
+- schreibt realistische englische Dokumentar-Prompts
+- vermeidet typische KI-Optik wie Plastikhaut, unnötige Hologramme, falsche Anatomie und Fake-Text
+- fordert echtes Material nur an, wenn es inhaltlich sinnvoller ist
+
+Echtes Material hat insbesondere Vorrang bei:
+
+- echten Screenshots, Webseiten und Dokumenten
+- konkreten Nachrichtenereignissen und Originalaufnahmen
+- exakten Marken, Produkten und Interfaces
+- identifizierbaren realen Orten, wenn deren Echtheit Teil der Aussage ist
+- starker Bewegung, die als echte B-Roll deutlich besser funktioniert
+
+Jeder Lauf erzeugt:
+
+```text
+visual-plan.json
+ai-generation-queue.json
+real-material-queue.json
+```
+
+Es gibt **keine starre KI-/Stock-Quote**. Wenn ein Video glaubwürdig zu 95 % aus KI-Bildern bestehen kann, darf der Plan 95 % KI enthalten. Details: [`docs/AI-FIRST-VISUALS.md`](docs/AI-FIRST-VISUALS.md).
+
+Der Plan kann auch unter **GitHub Actions → AI-first Visual Plan** erzeugt werden.
+
 ## Smart Asset Discovery
 
-Für viele Bilder und B-Rolls aus nur einem Thema:
+Für die Beats, bei denen echtes Material sinnvoller ist, kann die vorhandene Discovery viele Bilder und B-Rolls suchen:
 
 ```bash
 npm run discover -- "KI ersetzt Büro-Jobs" --orientation vertical
@@ -170,6 +219,7 @@ Das Datenmodell steht in [`catalog/schema.json`](catalog/schema.json), die kontr
 ## Befehle
 
 ```bash
+npm run visual:plan -- --help
 npm run discover -- --help
 npm run pexels:search -- --help
 npm run asset:add -- --help
@@ -181,13 +231,14 @@ npm run check
 npm run serve
 ```
 
+- `visual:plan`: erzeugt AI-first Visual Beats, KI-Prompts und Real-/Stock-Fallbacks
 - `discover`: erzeugt mehrere Suchrichtungen und findet/rankt viele Bilder + B-Rolls
 - `pexels:search`: führt eine einzelne Pexels-Suche aus
 - `asset:add`: nimmt eine neue Datei sicher auf und rollt bei Fehlern zurück
 - `media:analyze`: analysiert lokale Medien mit FFmpeg und erzeugt eine Vorschau
 - `validate`: prüft IDs, Dateinamen, Kategorien, Pfade, Rechte, Laufzeiten und Dubletten
 - `index`: erzeugt `catalog/search-index.json` für die Websuche
-- `test`: prüft Taxonomie, Katalogvertrag, Pexels-Client, Search Planner und Indexierung
+- `test`: prüft Taxonomie, Katalogvertrag, Pexels-Client, Search Planner, AI-first Visual Planner und Indexierung
 - `check`: führt Validierung, Indexierung und Tests aus
 - `serve`: startet die lokale Suchoberfläche
 
@@ -218,17 +269,19 @@ Die automatische Prüfung blockiert unter anderem:
 
 Enthalten sind jetzt:
 
+- **AI-first Visual Engine mit Visual Beats, Multi-Shot-Prompts und Real-Material-Entscheidung**
+- separate `ai-generation-queue` und `real-material-queue`
 - universelle Taxonomie
 - verbindlicher Benennungsstandard
 - strukturiertes Metadatenschema
 - sicherer Asset-Import
 - klassische Pexels-Foto-/Videosuche
-- **Smart Asset Discovery mit Multi-Query, Foto+Video, Pagination, Deduplication, Ranking und Diversity-Auswahl**
+- Smart Asset Discovery mit Multi-Query, Foto+Video, Pagination, Deduplication, Ranking und Diversity-Auswahl
 - automatische Medienanalyse über FFmpeg
 - Rechte- und Dublettenprüfung
 - deterministischer Suchindex
 - responsive Websuche mit Filtern und Detailansicht
 - Git-LFS-Regeln
-- GitHub-Workflows für Suche und Discovery
+- GitHub-Workflows für AI-first Planung, Suche und Discovery
 
-Nächste Ausbaustufen: kontrollierter Originaldownload, automatische Übergabe in FFmpeg-Analyse und Asset-Import, zusätzliche Provider, KI-Tagging, Cloud-Storage-Synchronisierung, Nutzungshistorie und visuelle Ähnlichkeitssuche.
+Nächste Ausbaustufen: Generator-Adapter für die automatische Abarbeitung der KI-Queue, kontrollierter Originaldownload der Real-Queue, automatische Übergabe in FFmpeg-Analyse und Asset-Import, zusätzliche Stock-Provider, Cloud-Storage-Synchronisierung, Nutzungshistorie und visuelle Ähnlichkeitssuche.
