@@ -1,0 +1,81 @@
+name: AI-first Visual Plan
+
+on:
+  workflow_dispatch:
+    inputs:
+      narration:
+        description: "Sprechertext oder Szenentext"
+        required: true
+        type: string
+      orientation:
+        description: "Zielformat"
+        required: true
+        default: horizontal
+        type: choice
+        options:
+          - horizontal
+          - vertical
+          - square
+      images_per_beat:
+        description: "KI-Bildvarianten je Visual Beat"
+        required: true
+        default: "4"
+        type: choice
+        options:
+          - "3"
+          - "4"
+          - "5"
+          - "6"
+      max_words_per_beat:
+        description: "Maximale Wörter je Visual Beat"
+        required: true
+        default: "24"
+        type: choice
+        options:
+          - "16"
+          - "18"
+          - "20"
+          - "24"
+          - "30"
+      motion_broll:
+        description: "Bei starker Bewegung echte B-Roll bevorzugen"
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Repository laden
+        uses: actions/checkout@v4
+
+      - name: Node.js 22 verwenden
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: AI-first Visual Plan erstellen
+        shell: bash
+        run: |
+          mkdir -p .local-storage/visual-plan-action
+          npm run visual:plan -- \
+            --text "${{ inputs.narration }}" \
+            --orientation "${{ inputs.orientation }}" \
+            --images-per-beat "${{ inputs.images_per_beat }}" \
+            --max-words-per-beat "${{ inputs.max_words_per_beat }}" \
+            --motion-broll "${{ inputs.motion_broll }}" \
+            --output .local-storage/visual-plan-action/visual-plan.json
+
+      - name: Visual-Plan bereitstellen
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-first-visual-plan
+          path: .local-storage/visual-plan-action/
+          if-no-files-found: error
+          retention-days: 14
