@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import {
   buildTimelineBinding,
   choosePexelsDownload,
@@ -79,4 +80,14 @@ test('Timeline-Binding übernimmt Beat-Timing und begrenzt zu kurzes Video', () 
 test('Timing-Payload wird über beat_id gemappt', () => {
   const map = timingMapFromPayload({ beats: [{ beat_id: 'beat-003', start_seconds: 9, duration_seconds: 4.5 }] });
   assert.deepEqual(map.get('beat-003'), { start_seconds: 9, duration_seconds: 4.5 });
+});
+
+test('Real-Media-CLI kann ohne Netzwerk die Hilfe laden', () => {
+  const result = spawnSync(process.execPath, ['scripts/real-media-integrate.mjs', '--help'], {
+    cwd: process.cwd(),
+    encoding: 'utf8'
+  });
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /Real Media Integration/);
+  assert.match(result.stdout, /remotion-real-media\.json/);
 });
