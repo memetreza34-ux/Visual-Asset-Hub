@@ -7,6 +7,14 @@ on:
         description: "Sprechertext oder Szenentext"
         required: true
         type: string
+      title:
+        description: "Videotitel für den Flow-Master-Prompt"
+        required: true
+        type: string
+      cover_text:
+        description: "Exakter deutscher Cover-Text für Bild 01"
+        required: true
+        type: string
       orientation:
         description: "Zielformat"
         required: true
@@ -16,16 +24,17 @@ on:
           - horizontal
           - vertical
           - square
-      images_per_beat:
-        description: "KI-Bildvarianten je generierbarem Beat"
+      max_words_per_beat:
+        description: "Bilddichte: kleinere Zahl = mehr echte Story-Bilder"
         required: true
-        default: "4"
+        default: "16"
         type: choice
         options:
-          - "3"
-          - "4"
-          - "5"
-          - "6"
+          - "10"
+          - "12"
+          - "14"
+          - "16"
+          - "20"
       pages:
         description: "Pexels-Seiten je Real-Media-Suchrichtung"
         required: true
@@ -66,8 +75,10 @@ jobs:
     env:
       PEXELS_API_KEY: ${{ secrets.PEXELS_API }}
       NARRATION: ${{ inputs.narration }}
+      VIDEO_TITLE: ${{ inputs.title }}
+      COVER_TEXT: ${{ inputs.cover_text }}
       TARGET_ORIENTATION: ${{ inputs.orientation }}
-      IMAGES_PER_BEAT: ${{ inputs.images_per_beat }}
+      MAX_WORDS_PER_BEAT: ${{ inputs.max_words_per_beat }}
       REAL_QUERIES: ${{ inputs.real_queries }}
       SEARCH_PAGES: ${{ inputs.pages }}
       SEARCH_PER_PAGE: ${{ inputs.per_page }}
@@ -89,15 +100,25 @@ jobs:
             exit 1
           fi
 
-      - name: AI-first Visual Plan erstellen
+      - name: AI-first Visual Plan V2 erstellen
         shell: bash
         run: |
           mkdir -p .local-storage/pipeline
           npm run visual:plan -- \
             --text "$NARRATION" \
             --orientation "$TARGET_ORIENTATION" \
-            --images-per-beat "$IMAGES_PER_BEAT" \
+            --max-words-per-beat "$MAX_WORDS_PER_BEAT" \
             --output .local-storage/pipeline/visual-plan.json
+
+      - name: Google Flow Production Prompt kompilieren
+        shell: bash
+        run: |
+          npm run flow:compile -- \
+            --plan .local-storage/pipeline/visual-plan.json \
+            --title "$VIDEO_TITLE" \
+            --cover-text "$COVER_TEXT" \
+            --block-size 5 \
+            --output-dir .local-storage/pipeline/flow
 
       - name: Echte Bilder und B-Rolls suchen und herunterladen
         shell: bash

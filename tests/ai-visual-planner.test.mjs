@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import {
   buildAiImagePrompt,
   classifyVisualSource,
+  createSceneCard,
+  inferVisualForm,
   planAiFirstVisuals,
   splitIntoVisualBeats
 } from '../scripts/lib/ai-visual-planner.mjs';
@@ -27,49 +29,70 @@ test('starke reale Bewegung bevorzugt B-Roll und erlaubt KI-Fallback', () => {
   assert.equal(decision.aiAllowed, true);
 });
 
-test('erzeugt mehrere unterschiedliche KI-Shots pro Visual Beat', () => {
+test('Bild 01 ist Cover und normale Beats bekommen keine unnötigen Mehrfachvarianten', () => {
   const plan = planAiFirstVisuals({
-    text: 'Immer mehr Unternehmen automatisieren Büroarbeit mit künstlicher Intelligenz.',
+    text: 'Unternehmen automatisieren Büroarbeit. Mitarbeiter lernen neue Fähigkeiten. Neue Berufe entstehen.',
     orientation: 'vertical',
-    imagesPerBeat: 4
+    maxWordsPerBeat: 10
   });
-  assert.equal(plan.summary.beats, 1);
-  assert.equal(plan.summary.ai_images, 4);
-  assert.equal(plan.summary.real_or_stock_assets, 0);
-  assert.equal(plan.summary.ai_share_percent, 100);
-  assert.deepEqual(plan.assets.map((asset) => asset.shot), ['wide', 'medium', 'close-up', 'detail']);
-  assert.ok(plan.assets.every((asset) => asset.orientation === 'vertical'));
+  const primaryAi = plan.assets.filter((asset) => asset.source_mode === 'ai-generated' && asset.priority !== 'fallback');
+  assert.ok(primaryAi.length >= 3);
+  assert.equal(primaryAi[0].priority, 'cover');
+  assert.equal(primaryAi[0].production_role, 'cover-and-opening-scene');
+  assert.equal(primaryAi.filter((asset) => asset.beat_id === plan.beats[1].id).length, 1);
+  assert.ok(primaryAi.every((asset) => asset.scene_card.prompt_qc_score >= 8));
 });
 
-test('Prompt erzwingt natürlichen dokumentarischen Look statt typischer KI-Optik', () => {
+test('Prompt nutzt konkrete dokumentarische Regeln statt generischer Hype-Wörter', () => {
   const prompt = buildAiImagePrompt({
     beatText: 'Ein Mitarbeiter sitzt allein in einem modernen Büro.',
     shot: 'medium',
     orientation: 'horizontal'
   });
-  assert.match(prompt, /photorealistic documentary photography/i);
-  assert.match(prompt, /natural practical lighting/i);
-  assert.match(prompt, /no text/i);
-  assert.match(prompt, /no sci-fi holograms/i);
-  assert.match(prompt, /high-quality factual documentary/i);
+  assert.match(prompt, /factual documentary/i);
+  assert.match(prompt, /natural practical light/i);
+  assert.match(prompt, /no visible text/i);
+  assert.doesNotMatch(prompt, /ultra detailed|masterpiece|8k|bokeh/i);
 });
 
-test('längere Sprechertexte werden in mehrere visuelle Beats zerlegt', () => {
+test('längere Sprechertexte werden dicht in mehrere visuelle Beats zerlegt', () => {
   const beats = splitIntoVisualBeats(
     'Viele Unternehmen automatisieren heute einfache Aufgaben. Gleichzeitig verändern sich ganze Berufsbilder. Arbeitnehmer müssen neue Fähigkeiten lernen.',
-    { maxWordsPerBeat: 12 }
+    { maxWordsPerBeat: 10 }
   );
   assert.ok(beats.length >= 3);
   assert.equal(new Set(beats.map((beat) => beat.id)).size, beats.length);
+  assert.ok(beats.every((beat) => beat.estimated_hold_seconds >= 3.5 && beat.estimated_hold_seconds <= 9));
 });
 
-test('reale Belege bleiben in der Real-Queue statt künstlich nachgebaut zu werden', () => {
+test('reale Belege bleiben Real-Media und werden nicht als Story-KI-Bild nachgebaut', () => {
   const plan = planAiFirstVisuals({
     text: 'Zeige einen Screenshot der echten YouTube-Webseite.',
-    imagesPerBeat: 5
+    maxWordsPerBeat: 16
   });
-  assert.equal(plan.summary.ai_images, 0);
-  assert.equal(plan.summary.real_or_stock_assets, 1);
-  assert.equal(plan.assets[0].source_mode, 'stock-or-real');
-  assert.equal(plan.assets[0].asset_type, 'image');
+  const real = plan.assets.filter((asset) => asset.source_mode === 'stock-or-real');
+  const storyAi = plan.assets.filter((asset) => asset.production_role === 'story-image');
+  assert.equal(real.length, 1);
+  assert.equal(real[0].asset_type, 'image');
+  assert.equal(storyAi.length, 0);
+  assert.equal(plan.assets[0].production_role, 'cover-and-opening-scene');
+});
+
+test('Visual Form wird aus der Aussage gewählt', () => {
+  assert.equal(inferVisualForm('Im Vergleich ist Lösung A schneller als Lösung B.'), 'comparison');
+  assert.equal(inferVisualForm('Dadurch führt der Fehler zu einem Ausfall.'), 'cause-effect');
+  assert.equal(inferVisualForm('Zuerst startet die Pumpe, danach öffnet das Ventil.'), 'process-sequence');
+});
+
+test('Scene Card enthält Narration-first Felder und einen QC-Score', () => {
+  const card = createSceneCard({
+    beat: { text: 'Ein Techniker prüft eine Maschine.', estimated_hold_seconds: 4 },
+    index: 1,
+    orientation: 'horizontal',
+    context: 'Industrie und Wartung'
+  });
+  assert.match(card.viewer_takeaway, /Techniker/);
+  assert.ok(card.visual_purpose.length > 20);
+  assert.ok(card.topic_anchor.length > 0);
+  assert.ok(card.prompt_qc_score >= 8);
 });
