@@ -1,0 +1,112 @@
+name: AI-first Asset Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      narration:
+        description: "Sprechertext oder Szenentext"
+        required: true
+        type: string
+      orientation:
+        description: "Zielformat"
+        required: true
+        default: horizontal
+        type: choice
+        options:
+          - horizontal
+          - vertical
+          - square
+      images_per_beat:
+        description: "KI-Bildvarianten je generierbarem Beat"
+        required: true
+        default: "4"
+        type: choice
+        options:
+          - "3"
+          - "4"
+          - "5"
+          - "6"
+      pages:
+        description: "Pexels-Seiten je Real-Media-Suchrichtung"
+        required: true
+        default: "2"
+        type: choice
+        options:
+          - "1"
+          - "2"
+          - "3"
+      per_page:
+        description: "Pexels-Treffer je Anfrage"
+        required: true
+        default: "30"
+        type: choice
+        options:
+          - "20"
+          - "30"
+          - "40"
+          - "60"
+      real_queries:
+        description: "Suchrichtungen je Real-Beat"
+        required: true
+        default: "3"
+        type: choice
+        options:
+          - "2"
+          - "3"
+          - "4"
+          - "5"
+
+permissions:
+  contents: read
+
+jobs:
+  assets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PEXELS_API_KEY: ${{ secrets.PEXELS_API }}
+
+    steps:
+      - name: Repository laden
+        uses: actions/checkout@v4
+
+      - name: Node.js 22 verwenden
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Pexels-Key prüfen
+        shell: bash
+        run: |
+          if [ -z "$PEXELS_API_KEY" ]; then
+            echo "GitHub Secret PEXELS_API fehlt."
+            exit 1
+          fi
+
+      - name: AI-first Visual Plan erstellen
+        shell: bash
+        run: |
+          mkdir -p .local-storage/pipeline
+          npm run visual:plan -- \
+            --text "${{ inputs.narration }}" \
+            --orientation "${{ inputs.orientation }}" \
+            --images-per-beat "${{ inputs.images_per_beat }}" \
+            --output .local-storage/pipeline/visual-plan.json
+
+      - name: Echte Bilder und B-Rolls suchen und herunterladen
+        shell: bash
+        run: |
+          npm run real:integrate -- \
+            --queue .local-storage/pipeline/real-material-queue.json \
+            --output-dir .local-storage/pipeline/real-media \
+            --queries "${{ inputs.real_queries }}" \
+            --pages "${{ inputs.pages }}" \
+            --per-page "${{ inputs.per_page }}"
+
+      - name: Pipeline-Ergebnis bereitstellen
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-first-video-assets
+          path: .local-storage/pipeline/
+          if-no-files-found: error
+          retention-days: 14
