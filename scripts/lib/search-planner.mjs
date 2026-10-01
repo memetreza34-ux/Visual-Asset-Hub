@@ -17,6 +17,15 @@ const CATEGORY_ALIASES = {
   'science-engineering': ['science', 'physics', 'chemistry', 'biology', 'engineering', 'wissenschaft', 'physik', 'chemie', 'biologie', 'technik']
 };
 
+const STRONG_CATEGORY_TERMS = {
+  'technology-ai': ['artificial intelligence', 'ai', 'ki', 'robotics', 'machine learning', 'cybersecurity'],
+  'money-finance': ['stock market', 'stocks', 'investing', 'banking', 'finanzen', 'aktien'],
+  'industry-trades': ['electrician', 'elektriker', 'industrial maintenance', 'instandhaltung'],
+  'health-fitness': ['doctor', 'hospital', 'mental health', 'arzt', 'krankenhaus'],
+  'science-engineering': ['physics', 'chemistry', 'biology', 'physik', 'chemie', 'biologie'],
+  'social-media-creator': ['youtube', 'tiktok', 'instagram', 'content creator']
+};
+
 const PHRASE_TRANSLATIONS = [
   [/künstliche intelligenz|kuenstliche intelligenz|\bki\b/gi, 'artificial intelligence'],
   [/arbeitsplätze|arbeitsplaetze/gi, 'workplaces'],
@@ -91,8 +100,12 @@ export function detectCategory(topic, suggestions = {}) {
 
   for (const [category, aliases] of Object.entries(CATEGORY_ALIASES)) {
     const topicAliases = suggestions[category] ?? [];
-    const candidates = [...aliases, ...topicAliases.map((value) => value.replaceAll('-', ' '))];
-    const score = candidates.reduce((total, candidate) => total + (containsTerm(normalized, normalize(candidate)) ? 1 : 0), 0);
+    const strongTerms = STRONG_CATEGORY_TERMS[category] ?? [];
+    const aliasScore = aliases.reduce((total, candidate) => total + (containsTerm(normalized, normalize(candidate)) ? 1 : 0), 0);
+    const suggestionScore = topicAliases.reduce((total, candidate) => total + (containsTerm(normalized, normalize(candidate.replaceAll('-', ' '))) ? 1 : 0), 0);
+    const strongScore = strongTerms.reduce((total, candidate) => total + (containsTerm(normalized, normalize(candidate)) ? 4 : 0), 0);
+    const score = aliasScore + suggestionScore + strongScore;
+
     if (score > bestScore) {
       bestScore = score;
       bestCategory = category;
