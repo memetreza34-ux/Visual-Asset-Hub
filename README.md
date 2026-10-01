@@ -6,6 +6,7 @@ Visual Asset Hub ist eine universelle Medienbibliothek und Visual-Discovery-Pipe
 
 - **AI-first:** möglichst viele passende realistische KI-Bilder planen
 - echtes Bild-/B-Roll-Material nur verwenden, wenn Authentizität oder Bewegung einen klaren Vorteil hat
+- echte B-Rolls/Fotos automatisch suchen, auswählen, herunterladen und an Visual Beats binden
 - aus Sprechertext automatisch mehrere Visual Beats und Shot-Varianten erzeugen
 - aus einem Thema automatisch viele unterschiedliche echte Bilder und B-Rolls finden
 - Assets in Sekunden finden statt Ordner manuell zu durchsuchen
@@ -73,6 +74,51 @@ Es gibt **keine starre KI-/Stock-Quote**. Wenn ein Video glaubwürdig zu 95 % au
 
 Der Plan kann auch unter **GitHub Actions → AI-first Visual Plan** erzeugt werden.
 
+## Echte B-Rolls und Fotos automatisch integrieren
+
+Die `real-material-queue.json` kann jetzt automatisch aufgelöst werden:
+
+```bash
+npm run real:integrate -- \
+  --queue .local-storage/visual-plans/SESSION/real-material-queue.json
+```
+
+Der Resolver:
+
+- erzeugt mehrere Suchrichtungen pro Real-Beat
+- durchsucht mehrere Pexels-Seiten
+- rankt und dedupliziert Kandidaten
+- bevorzugt passende Auflösung, Format und brauchbare Videolänge
+- lädt die beste Originaldatei herunter
+- analysiert heruntergeladene Videos mit FFmpeg
+- speichert Quellen- und Lizenzmetadaten
+- bindet die Datei an die richtige `beat_id`
+- erzeugt ein **Remotion-ready Manifest**
+
+Ausgabe:
+
+```text
+real-media/
+  real-media-resolution.json
+  remotion-real-media.json
+  files/
+  metadata/
+```
+
+Wenn echte Beat-Zeiten aus Voiceover/Transkript vorliegen, können sie direkt übergeben werden:
+
+```bash
+npm run real:integrate -- \
+  --queue ./real-material-queue.json \
+  --timings ./beat-timings.json
+```
+
+Dann enthält `remotion-real-media.json` bereits Startzeit, Dauer, Trim-Start, `fit: cover` und Mute-Status pro Beat.
+
+Wichtig: Die Pipeline ersetzt **keine exakten Belege** durch generischen Stock. Echte Screenshots, Originaldokumente, konkrete News-Ereignisse, historische Originalbelege und exakte Marken-/Produktdarstellungen werden als `manual-required` markiert. Details: [`docs/REAL-MEDIA-INTEGRATION.md`](docs/REAL-MEDIA-INTEGRATION.md).
+
+Der kombinierte Lauf ist auch unter **GitHub Actions → AI-first Asset Pipeline** verfügbar. Dieser erstellt den Visual Plan und lädt die automatisch lösbaren echten B-Rolls/Fotos in einem Lauf.
+
 ## Smart Asset Discovery
 
 Für die Beats, bei denen echtes Material sinnvoller ist, kann die vorhandene Discovery viele Bilder und B-Rolls suchen:
@@ -129,7 +175,7 @@ npm run pexels:search -- "Person arbeitet am Laptop" --type video --orientation 
 npm run pexels:search -- "moderne Fabrik" --type photo --orientation horizontal --per-page 20
 ```
 
-Die Einzelsuche speichert Resultate unter `.local-storage/pexels-search/`. Die Discovery speichert unter `.local-storage/discovery/`. Es werden zunächst nur Metadaten und Vorschaulinks geladen, keine Originaldateien. Weitere Hinweise: [`docs/PEXELS.md`](docs/PEXELS.md).
+Die Einzelsuche speichert Resultate unter `.local-storage/pexels-search/`. Die Discovery speichert unter `.local-storage/discovery/`. Weitere Hinweise: [`docs/PEXELS.md`](docs/PEXELS.md).
 
 ## Asset-Import
 
@@ -220,6 +266,7 @@ Das Datenmodell steht in [`catalog/schema.json`](catalog/schema.json), die kontr
 
 ```bash
 npm run visual:plan -- --help
+npm run real:integrate -- --help
 npm run discover -- --help
 npm run pexels:search -- --help
 npm run asset:add -- --help
@@ -232,13 +279,14 @@ npm run serve
 ```
 
 - `visual:plan`: erzeugt AI-first Visual Beats, KI-Prompts und Real-/Stock-Fallbacks
+- `real:integrate`: sucht, lädt und bindet echte B-Rolls/Fotos an die Real-Beat-Queue
 - `discover`: erzeugt mehrere Suchrichtungen und findet/rankt viele Bilder + B-Rolls
 - `pexels:search`: führt eine einzelne Pexels-Suche aus
 - `asset:add`: nimmt eine neue Datei sicher auf und rollt bei Fehlern zurück
 - `media:analyze`: analysiert lokale Medien mit FFmpeg und erzeugt eine Vorschau
 - `validate`: prüft IDs, Dateinamen, Kategorien, Pfade, Rechte, Laufzeiten und Dubletten
 - `index`: erzeugt `catalog/search-index.json` für die Websuche
-- `test`: prüft Taxonomie, Katalogvertrag, Pexels-Client, Search Planner, AI-first Visual Planner und Indexierung
+- `test`: prüft Taxonomie, Katalogvertrag, Pexels-Client, Search Planner, AI-first Visual Planner, Real-Media-Bindings und Indexierung
 - `check`: führt Validierung, Indexierung und Tests aus
 - `serve`: startet die lokale Suchoberfläche
 
@@ -271,6 +319,8 @@ Enthalten sind jetzt:
 
 - **AI-first Visual Engine mit Visual Beats, Multi-Shot-Prompts und Real-Material-Entscheidung**
 - separate `ai-generation-queue` und `real-material-queue`
+- **automatischer Real-Media-Resolver mit Download, FFmpeg-Analyse und Remotion-Beat-Binding**
+- Schutz vor generischem Stock als falschem Originalbeleg
 - universelle Taxonomie
 - verbindlicher Benennungsstandard
 - strukturiertes Metadatenschema
@@ -282,6 +332,6 @@ Enthalten sind jetzt:
 - deterministischer Suchindex
 - responsive Websuche mit Filtern und Detailansicht
 - Git-LFS-Regeln
-- GitHub-Workflows für AI-first Planung, Suche und Discovery
+- GitHub-Workflows für AI-first Planung, echte Medien, Suche und Discovery
 
-Nächste Ausbaustufen: Generator-Adapter für die automatische Abarbeitung der KI-Queue, kontrollierter Originaldownload der Real-Queue, automatische Übergabe in FFmpeg-Analyse und Asset-Import, zusätzliche Stock-Provider, Cloud-Storage-Synchronisierung, Nutzungshistorie und visuelle Ähnlichkeitssuche.
+Nächste Ausbaustufen: Generator-Adapter für die automatische Abarbeitung der KI-Queue, automatisches Zusammenführen von KI- und Real-Media-Bindings in ein finales Video-Manifest, zusätzliche reale/archivarische Provider, automatische Katalogübernahme, Cloud-Storage-Synchronisierung, Nutzungshistorie und visuelle Ähnlichkeitssuche.
