@@ -1,82 +1,173 @@
 # Visual Asset Hub
 
-Visual Asset Hub ist eine universelle Medienbibliothek und Visual-Discovery-Pipeline für **KI-Bilder, B-Rolls, Bilder, Animationen, Overlays, Screen-Recordings und Grafiken**. Die Assets sind nicht an einen einzelnen Kanal oder Content-Typ gebunden, sondern können für Reels, Shorts, YouTube, Werbung, Webseiten, Apps, Präsentationen und Kundenprojekte wiederverwendet werden.
+Visual Asset Hub ist die universelle Visual-Pipeline für **KI-Bilder, echte B-Rolls, Fotos, Screenshots, Archivmaterial und wiederverwendbare Medien**.
 
-## Ziele
+Die aktuelle Standardstrategie lautet:
 
-- **AI-first:** möglichst viele passende realistische KI-Bilder planen
-- echtes Bild-/B-Roll-Material nur verwenden, wenn Authentizität oder Bewegung einen klaren Vorteil hat
-- echte B-Rolls/Fotos automatisch suchen, auswählen, herunterladen und an Visual Beats binden
-- aus Sprechertext automatisch mehrere Visual Beats und Shot-Varianten erzeugen
-- aus einem Thema automatisch viele unterschiedliche echte Bilder und B-Rolls finden
-- Assets in Sekunden finden statt Ordner manuell zu durchsuchen
-- einheitliche Namen, Kategorien und Tags verwenden
-- Nutzungsrechte und Quellen nachvollziehbar speichern
-- Dubletten vermeiden
-- Hochformat, Querformat und Quadrat gezielt filtern
-- Assets lokal, über Git LFS oder in externem Object Storage verwalten
-- einen automatisch erzeugten Suchindex für eine Weboberfläche bereitstellen
+> **Generate first, search second — aber nur mit verwendbaren Story-Visuals, nicht mit künstlicher Prompt-Masse.**
 
-## Schnellstart
+## Kernpipeline
 
-Benötigt wird Node.js 22 oder neuer.
-
-```bash
-npm run check
-npm run serve
+```text
+Skript / Sprechertext
+        ↓
+Content-driven Visual Beats
+        ↓
+Bestes visuelles Mittel pro Beat
+   ┌───────────────┴───────────────┐
+   ↓                               ↓
+KI-Bild                        echtes Material
+   ↓                               ↓
+Scene Card                    Real-Media Queue
+   ↓                               ↓
+Prompt QC                     Suche / Ranking
+   ↓                               ↓
+Style + World Lock            Download / FFmpeg
+   ↓                               ↓
+Google Flow Compiler          Beat Binding
+   └───────────────┬───────────────┘
+                   ↓
+            finale Video-Timeline
 ```
 
-Danach ist die Bibliothek lokal unter `http://127.0.0.1:4173` erreichbar.
-
-## AI-first Visual Engine
-
-Die Standardstrategie lautet **Generate first, search second**.
-
-```bash
-npm run visual:plan -- "Immer mehr Unternehmen automatisieren Büroarbeit mit künstlicher Intelligenz."
-```
-
-Für ein ganzes Skript:
+## 1. AI-first Visual Plan V2
 
 ```bash
 npm run visual:plan -- \
   --file ./script.txt \
   --orientation horizontal \
-  --images-per-beat 5
+  --max-words-per-beat 14
 ```
 
 Der Planer:
 
-- zerlegt Sprechertext in Visual Beats
-- plant standardmäßig mehrere KI-Bilder pro generierbarem Beat
-- erzeugt unterschiedliche Wide-, Medium-, Close-up-, Detail-, POV- und Over-the-Shoulder-Shots
-- schreibt realistische englische Dokumentar-Prompts
-- vermeidet typische KI-Optik wie Plastikhaut, unnötige Hologramme, falsche Anatomie und Fake-Text
-- fordert echtes Material nur an, wenn es inhaltlich sinnvoller ist
+- zerlegt Narration in echte Story-Beats
+- erzeugt **ein Hauptvisual pro inhaltlichem Beat**
+- erhöht Bildmenge durch sinnvolle Beat-Splits statt 4–6 ungenutzter Kamera-Alternativen
+- plant `Bild 01` als Cover + Opening
+- erstellt strukturierte Scene Cards
+- wählt Visual Forms wie Comparison, Cause/Effect, Process, Character Scene, Environment, Object Focus oder Cutaway
+- bevorzugt KI-Bilder, solange keine echte Authentizität oder echte Bewegung nötig ist
+- markiert reale Belege und echte B-Rolls separat
+- hält KI-Fallbacks getrennt von Primärvisuals
 
-Echtes Material hat insbesondere Vorrang bei:
+Standardmäßig sind maximal 16 Wörter pro Beat vorgesehen. Kleinere Werte erhöhen die Bilddichte.
 
-- echten Screenshots, Webseiten und Dokumenten
-- konkreten Nachrichtenereignissen und Originalaufnahmen
-- exakten Marken, Produkten und Interfaces
-- identifizierbaren realen Orten, wenn deren Echtheit Teil der Aussage ist
-- starker Bewegung, die als echte B-Roll deutlich besser funktioniert
-
-Jeder Lauf erzeugt:
+Ausgabe:
 
 ```text
 visual-plan.json
+scene-cards.json
 ai-generation-queue.json
 real-material-queue.json
 ```
 
-Es gibt **keine starre KI-/Stock-Quote**. Wenn ein Video glaubwürdig zu 95 % aus KI-Bildern bestehen kann, darf der Plan 95 % KI enthalten. Details: [`docs/AI-FIRST-VISUALS.md`](docs/AI-FIRST-VISUALS.md).
+Details: [`docs/AI-FIRST-VISUALS.md`](docs/AI-FIRST-VISUALS.md)
 
-Der Plan kann auch unter **GitHub Actions → AI-first Visual Plan** erzeugt werden.
+## 2. Google Flow Production V2
 
-## Echte B-Rolls und Fotos automatisch integrieren
+```bash
+npm run flow:compile -- \
+  --plan .local-storage/visual-plans/SESSION/visual-plan.json \
+  --title "Wie KI Büroarbeit verändert" \
+  --cover-text "KI ERSETZT BÜROJOBS?"
+```
 
-Die `real-material-queue.json` kann jetzt automatisch aufgelöst werden:
+Der Compiler erzeugt:
+
+```text
+flow/
+  google-flow-master-prompt.txt
+  flow-production-plan.json
+  flow-generation-queue.json
+```
+
+### Cover Gate
+
+`Bild 01` ist Cover + Opening.
+
+```text
+Kandidat A → warten → QC
+Kandidat B → warten → QC
+Kandidat C → warten → QC
+STOP
+Nutzer wählt Gewinner
+Gewinner = Bild 01.png
+```
+
+Vor der expliziten Auswahl darf Bild 02 nicht produziert werden.
+
+### Danach: streng sequenziell
+
+```text
+aktuelles Bild lesen
+→ genau EIN Bild erzeugen
+→ vollständig warten
+→ QC
+→ bei FAIL gleiche Nummer wiederholen
+→ bei PASS exakt umbenennen
+→ erst dann nächstes Bild
+```
+
+Die folgenden Bilder werden in **5er-QC-Blöcke** gruppiert, aber niemals parallel erzeugt.
+
+Beispiel:
+
+```text
+Block 1: Bild 02–06
+Block 2: Bild 07–11
+Block 3: Bild 12–16
+```
+
+Details: [`docs/FLOW-PRODUCTION.md`](docs/FLOW-PRODUCTION.md)
+
+## Scene Cards
+
+Vor jedem Flow-Prompt steht eine strukturierte Regieentscheidung:
+
+- Viewer Takeaway
+- Visual Purpose
+- Topic Anchor
+- Visual Form
+- Visual Concept
+- Dominant Subject
+- Action / State
+- Composition
+- Camera
+- Depth Plan
+- Lighting / Mood
+- Supporting Elements
+- Continuity Note
+- Accuracy Note
+- Planned Hold
+- Prompt QC Score
+
+Nur vollständige Cards mit QC >= 8/10 werden kompiliert.
+
+## Style Lock und World Lock
+
+Der Hub übernimmt **keine Bildwelt aus einem anderen Kanal automatisch**.
+
+Default ist:
+
+```text
+photoreal-documentary-natural-v2
+```
+
+Ein Kanal kann einen eigenen Style Lock einspielen. Der World Lock hält wiederkehrende Figuren, Orte, Kleidung, Props und räumliche Logik innerhalb eines Videos konsistent, ohne jede Szene gleich aussehen zu lassen.
+
+## Was bewusst entfernt wurde
+
+- automatische 4–6 Shot-Varianten für jeden normalen Beat
+- parallele Google-Flow-Batches
+- `Bild 00` im YouTube-Longform-System
+- Menschen als Standard-Füllmotiv
+- generische Prompt-Hypewörter wie `epic`, `ultra detailed`, `masterpiece`, `8k`, `bokeh`
+- blindes Kopieren einer Stickman-, Finanz- oder anderen Kanal-Bildwelt
+- automatische Cover-Auswahl ohne Nutzer
+- generisches Stockmaterial als angeblicher Originalbeleg
+
+## 3. Echte B-Rolls und Fotos
 
 ```bash
 npm run real:integrate -- \
@@ -85,27 +176,17 @@ npm run real:integrate -- \
 
 Der Resolver:
 
-- erzeugt mehrere Suchrichtungen pro Real-Beat
-- durchsucht mehrere Pexels-Seiten
-- rankt und dedupliziert Kandidaten
-- bevorzugt passende Auflösung, Format und brauchbare Videolänge
-- lädt die beste Originaldatei herunter
-- analysiert heruntergeladene Videos mit FFmpeg
-- speichert Quellen- und Lizenzmetadaten
-- bindet die Datei an die richtige `beat_id`
-- erzeugt ein **Remotion-ready Manifest**
+- erzeugt mehrere Suchrichtungen
+- durchsucht Pexels über mehrere Seiten
+- dedupliziert und rankt Kandidaten
+- bevorzugt passendes Format, Auflösung und Videolänge
+- lädt die beste Originaldatei
+- analysiert Videos mit FFmpeg
+- speichert Quelle und Lizenz
+- bindet das Asset an `beat_id`
+- erzeugt `remotion-real-media.json`
 
-Ausgabe:
-
-```text
-real-media/
-  real-media-resolution.json
-  remotion-real-media.json
-  files/
-  metadata/
-```
-
-Wenn echte Beat-Zeiten aus Voiceover/Transkript vorliegen, können sie direkt übergeben werden:
+Mit echten Beat-Timings:
 
 ```bash
 npm run real:integrate -- \
@@ -113,102 +194,48 @@ npm run real:integrate -- \
   --timings ./beat-timings.json
 ```
 
-Dann enthält `remotion-real-media.json` bereits Startzeit, Dauer, Trim-Start, `fit: cover` und Mute-Status pro Beat.
+### Kein falscher Beleg
 
-Wichtig: Die Pipeline ersetzt **keine exakten Belege** durch generischen Stock. Echte Screenshots, Originaldokumente, konkrete News-Ereignisse, historische Originalbelege und exakte Marken-/Produktdarstellungen werden als `manual-required` markiert. Details: [`docs/REAL-MEDIA-INTEGRATION.md`](docs/REAL-MEDIA-INTEGRATION.md).
+Echte Screenshots, Originaldokumente, konkrete News-Ereignisse, historische Originalaufnahmen und exakte Marken-/Produktdarstellungen werden nicht durch irgendeinen Stockclip ersetzt. Sie bleiben `manual-required`, bis eine passende Originalquelle vorliegt.
 
-Der kombinierte Lauf ist auch unter **GitHub Actions → AI-first Asset Pipeline** verfügbar. Dieser erstellt den Visual Plan und lädt die automatisch lösbaren echten B-Rolls/Fotos in einem Lauf.
+Details: [`docs/REAL-MEDIA-INTEGRATION.md`](docs/REAL-MEDIA-INTEGRATION.md)
 
-## Smart Asset Discovery
-
-Für die Beats, bei denen echtes Material sinnvoller ist, kann die vorhandene Discovery viele Bilder und B-Rolls suchen:
+## 4. Smart Discovery
 
 ```bash
-npm run discover -- "KI ersetzt Büro-Jobs" --orientation vertical
+npm run discover -- "industrial electrician maintenance" --orientation horizontal
 ```
 
-Ein Standardlauf erzeugt automatisch mehrere visuelle Suchrichtungen, durchsucht **Videos und Fotos**, lädt mehrere Pexels-Ergebnisseiten, entfernt Provider-Dubletten und rankt die Kandidaten nach Relevanz, technischer Nutzbarkeit und Vielfalt.
+Die Discovery unterstützt:
 
-Standard:
-
-- 8 Suchrichtungen
+- Multi-Query
 - Video + Foto
-- 2 Seiten pro Suchrichtung und Medientyp
-- 30 Treffer pro API-Anfrage
-- bis zu 80 finale Kandidaten
-- `en-US` als Stock-Suchsprache
+- Pagination
+- Deduplizierung
+- Relevanz-Ranking
+- Diversity-Auswahl
 
-Damit können theoretisch bis zu 960 Rohresultate geprüft werden:
+Standardmäßig können bei 8 Queries × 2 Medientypen × 2 Seiten × 30 Treffern theoretisch bis zu 960 Rohkandidaten geprüft werden.
 
-```text
-8 Queries × 2 Medientypen × 2 Seiten × 30 Treffer
-```
+Details: [`docs/DISCOVERY.md`](docs/DISCOVERY.md)
 
-Größerer Lauf:
+## Pexels
 
-```bash
-npm run discover -- \
-  "industrial electrician maintenance" \
-  --orientation horizontal \
-  --queries 12 \
-  --pages 3 \
-  --per-page 40 \
-  --top 100
-```
-
-Die Resultate werden unter `.local-storage/discovery/` gespeichert. Details: [`docs/DISCOVERY.md`](docs/DISCOVERY.md).
-
-Die Discovery kann auch unter **GitHub Actions → Smart Asset Discovery** gestartet werden.
-
-## Pexels einrichten
-
-`.env.example` als `.env` kopieren und den Schlüssel ausschließlich lokal eintragen:
+`.env.example` als `.env` kopieren:
 
 ```env
 PEXELS_API_KEY=DEIN_PEXELS_SCHLUESSEL
 ```
 
-Die klassische Einzelsuche bleibt verfügbar:
+Einzelsuche:
 
 ```bash
-npm run pexels:search -- "Person arbeitet am Laptop" --type video --orientation vertical --per-page 20
-npm run pexels:search -- "moderne Fabrik" --type photo --orientation horizontal --per-page 20
+npm run pexels:search -- "modern factory" --type video --orientation horizontal --per-page 20
 ```
 
-Die Einzelsuche speichert Resultate unter `.local-storage/pexels-search/`. Die Discovery speichert unter `.local-storage/discovery/`. Weitere Hinweise: [`docs/PEXELS.md`](docs/PEXELS.md).
+## Asset Library
 
-## Asset-Import
-
-Neue Assets werden nicht manuell umbenannt oder direkt in den Katalog geschrieben. Der Importbefehl erzeugt ID, Dateinamen, Sequenz, Hash, Zielordner und Metadaten automatisch:
-
-```bash
-npm run asset:add -- --help
-```
-
-Beispiel:
-
-```bash
-npm run asset:add -- \
-  --file ./inbox/smartphone-scroll.mp4 \
-  --type video \
-  --category technology-ai \
-  --subject smartphone \
-  --action scrolling \
-  --shot cu \
-  --orientation vertical \
-  --title "Person scrollt am Smartphone" \
-  --description "Nahaufnahme einer Hand beim Scrollen durch eine Social-Media-App." \
-  --tags smartphone,scrolling,social-media \
-  --style realistic \
-  --movement handheld \
-  --license owned \
-  --source "Eigene Produktion" \
-  --scopes organic-social,youtube,website
-```
-
-Mit `--dry-run true` werden ID, Name und Ziel berechnet, ohne Dateien zu verändern.
-
-## Grundstruktur
+Der Hub bleibt gleichzeitig eine wiederverwendbare Medienbibliothek.
 
 ```text
 assets/
@@ -220,52 +247,31 @@ assets/
   graphic/
 previews/
 inbox/
-archive/
 catalog/
 docs/
 scripts/
 web/
 ```
 
-`inbox/` ist der lokale Eingang für neue Dateien und wird nicht veröffentlicht. Erst nach Benennung, Rechteprüfung und Katalogisierung werden Assets nach `assets/` übernommen.
+Neue Dateien werden über `asset:add` aufgenommen:
 
-## Dateinamen
-
-```text
-{type}-{category}-{subject}-{action}-{shot}-{orientation}-{sequence}.{ext}
+```bash
+npm run asset:add -- --help
 ```
 
-Beispiele:
+Medienanalyse:
 
-```text
-brl-technology-ai-smartphone-scrolling-cu-vertical-0001.mp4
-img-money-finance-cash-growing-not-applicable-square-0001.png
-ovl-social-media-creator-notification-pop-up-transparent-0001.webm
+```bash
+npm run media:analyze -- --help
 ```
 
-Die vollständigen Regeln stehen in [`docs/NAMING.md`](docs/NAMING.md).
+Der Katalog in `catalog/assets.json` speichert u. a. ID, Typ, Kategorie, Tags, Motiv, Aktion, Kameraeinstellung, technische Daten, Speicherpfad, Quelle, Lizenzstatus und Hash.
 
-## Katalog
-
-Alle durchsuchbaren Informationen liegen in [`catalog/assets.json`](catalog/assets.json). Jedes Asset besitzt unter anderem:
-
-- stabile Asset-ID
-- Titel und Beschreibung
-- Typ und Hauptkategorie
-- kontrollierte Tags und Such-Aliasse
-- Motiv, Handlung und Kameraeinstellung
-- Ausrichtung, Auflösung und Dauer
-- Speicherpfad oder externe Storage-URL
-- Quelle, Lizenzstatus und erlaubte Einsatzzwecke
-- Erstellungs- und Importdatum
-- optionalen SHA-256-Hash zur Dublettenprüfung
-
-Das Datenmodell steht in [`catalog/schema.json`](catalog/schema.json), die kontrollierten Werte in [`catalog/taxonomy.json`](catalog/taxonomy.json).
-
-## Befehle
+## Wichtige Befehle
 
 ```bash
 npm run visual:plan -- --help
+npm run flow:compile -- --help
 npm run real:integrate -- --help
 npm run discover -- --help
 npm run pexels:search -- --help
@@ -278,60 +284,41 @@ npm run check
 npm run serve
 ```
 
-- `visual:plan`: erzeugt AI-first Visual Beats, KI-Prompts und Real-/Stock-Fallbacks
-- `real:integrate`: sucht, lädt und bindet echte B-Rolls/Fotos an die Real-Beat-Queue
-- `discover`: erzeugt mehrere Suchrichtungen und findet/rankt viele Bilder + B-Rolls
-- `pexels:search`: führt eine einzelne Pexels-Suche aus
-- `asset:add`: nimmt eine neue Datei sicher auf und rollt bei Fehlern zurück
-- `media:analyze`: analysiert lokale Medien mit FFmpeg und erzeugt eine Vorschau
-- `validate`: prüft IDs, Dateinamen, Kategorien, Pfade, Rechte, Laufzeiten und Dubletten
-- `index`: erzeugt `catalog/search-index.json` für die Websuche
-- `test`: prüft Taxonomie, Katalogvertrag, Pexels-Client, Search Planner, AI-first Visual Planner, Real-Media-Bindings und Indexierung
-- `check`: führt Validierung, Indexierung und Tests aus
-- `serve`: startet die lokale Suchoberfläche
+## GitHub Actions
 
-## Speicher
+`AI-first Asset Pipeline` führt in einem Lauf aus:
 
-- Kleine Textdateien, SVGs und Vorschauen können direkt im Repository liegen.
-- Große Originalbilder und Videos unter `assets/` werden über Git LFS verwaltet.
-- Für eine sehr große Bibliothek ist externer S3-kompatibler Object Storage vorgesehen.
-- Temporäre Signed URLs und private Zugriffstokens dürfen nicht im Katalog gespeichert werden.
+```text
+Narration
+→ Visual Plan V2
+→ Google Flow Master Prompt
+→ Real-Media Resolution
+→ gemeinsames Pipeline-Artefakt
+```
 
-Details: [`docs/STORAGE-AND-RIGHTS.md`](docs/STORAGE-AND-RIGHTS.md).
+Dafür werden Videotitel, Cover-Text, Zielformat und Bilddichte als Inputs übergeben.
 
 ## Rechte und Sicherheit
 
-Nur Assets speichern, für die eine nachvollziehbare Nutzungserlaubnis besteht. Dateien mit unbekanntem Rechtezustand bleiben in `inbox/` und erhalten nicht den Status `approved`.
+Nur Assets speichern, für die eine nachvollziehbare Nutzungserlaubnis besteht. Unbekannte oder problematische Rechte bleiben im Review. Der Hub blockiert u. a. Dubletten, unsichere Pfade, unvollständige Rechteangaben und erkennbare Token-/API-Key-URLs.
 
-Die automatische Prüfung blockiert unter anderem:
-
-- doppelte IDs, Dateinamen oder SHA-256-Hashes
-- falsche Kategorien, Typen oder Dateiendungen
-- unvollständige Rechteangaben
-- freigegebene Assets mit unbekannter oder abgelaufener Lizenz
-- editorial-only Assets mit kommerziellen Nutzungsbereichen
-- unsichere Pfade
-- URLs mit erkennbaren Token-, Signatur- oder API-Key-Parametern
-
-## Aktueller Ausbau
+## Aktueller Stand
 
 Enthalten sind jetzt:
 
-- **AI-first Visual Engine mit Visual Beats, Multi-Shot-Prompts und Real-Material-Entscheidung**
-- separate `ai-generation-queue` und `real-material-queue`
-- **automatischer Real-Media-Resolver mit Download, FFmpeg-Analyse und Remotion-Beat-Binding**
-- Schutz vor generischem Stock als falschem Originalbeleg
-- universelle Taxonomie
-- verbindlicher Benennungsstandard
-- strukturiertes Metadatenschema
-- sicherer Asset-Import
-- klassische Pexels-Foto-/Videosuche
-- Smart Asset Discovery mit Multi-Query, Foto+Video, Pagination, Deduplication, Ranking und Diversity-Auswahl
-- automatische Medienanalyse über FFmpeg
-- Rechte- und Dublettenprüfung
-- deterministischer Suchindex
-- responsive Websuche mit Filtern und Detailansicht
-- Git-LFS-Regeln
-- GitHub-Workflows für AI-first Planung, echte Medien, Suche und Discovery
+- AI-first Content-Density Planner V2
+- Scene Cards + Prompt QC
+- Bild-01-Cover-Gate mit 3 Kandidaten
+- universeller Google Flow Compiler
+- Style Lock + World Lock
+- strikte Einzelgenerierungs-Queue
+- 5er-QC-Blöcke
+- getrennte AI- und Real-Media-Queues
+- automatischer Real-Media-Resolver
+- Pexels Download + FFmpeg-Analyse
+- Remotion-ready Real-Media-Bindings
+- Smart Asset Discovery
+- Katalog, Rechte- und Dublettenprüfung
+- Websuche und Git-LFS-Struktur
 
-Nächste Ausbaustufen: Generator-Adapter für die automatische Abarbeitung der KI-Queue, automatisches Zusammenführen von KI- und Real-Media-Bindings in ein finales Video-Manifest, zusätzliche reale/archivarische Provider, automatische Katalogübernahme, Cloud-Storage-Synchronisierung, Nutzungshistorie und visuelle Ähnlichkeitssuche.
+Nächster große Integrationsschritt: **Flow-Ergebnisse automatisch zurück in den Hub importieren und AI- + Real-Media-Bindings zu einem finalen Remotion-Video-Manifest zusammenführen.**

@@ -1,222 +1,186 @@
-# AI-first Visual Engine
+# AI-first Visual Engine V2
 
 ## Ziel
 
-Visual Asset Hub soll **so viele passende KI-Bilder wie sinnvoll möglich** erzeugen. Stockmaterial ist nicht mehr der Standard. Es wird nur dann bevorzugt, wenn echtes Material einen klaren inhaltlichen Vorteil besitzt.
+Visual Asset Hub plant **so viele verwendbare KI-Bilder wie sinnvoll**, ohne künstlich mehrere ungenutzte Varianten derselben Szene zu erzeugen.
 
-Grundregel:
+Die Grundregel bleibt:
 
 ```text
-Sprechertext / Szene
-        ↓
-Visual Beats
-        ↓
-Kann die Aussage glaubwürdig als realistisches Standbild erzeugt werden?
-        ├─ Ja  → mehrere KI-Bild-Shots planen
-        └─ Nein → echtes Bild / echte B-Roll suchen
+Sprechertext
+  ↓
+inhaltliche Story-Beats
+  ↓
+pro Beat bestes visuelles Mittel
+  ├─ glaubwürdig als KI-Standbild → KI-Bild
+  └─ echte Authentizität / echte Bewegung nötig → Real Media
 ```
 
-Der Planer arbeitet damit nach **Generate first, search second**.
+## Was gegenüber V1 geändert wurde
 
-## Was standardmäßig als KI-Bild geplant wird
+Entfernt wurde die alte Regel "4–6 Kamera-Varianten pro Beat". Sie erzeugte viele Prompts, aber nicht automatisch viele nutzbare Timeline-Bilder.
 
-Typische Beispiele:
+V2 arbeitet stattdessen mit **Content Density**:
 
-- Menschen im Alltag
-- Büros und Arbeitsplätze
-- Psychologie- und Emotionsszenen
-- Finanzen und abstrakte wirtschaftliche Situationen
-- Wissenschaft und Bildung
+- ein Bild = ein klarer visueller Zweck
+- neue Kernidee = neuer Beat
+- neue Ursache/Folge = neuer Beat
+- neuer Ort / Zeitraum / Akteur / Beispiel = neuer Beat
+- Standard: maximal 16 Wörter pro Beat
+- kleinere `--max-words-per-beat`-Werte erzeugen mehr echte Story-Bilder
+- geschätzte Hold-Zeit wird pro Beat mitgeführt
+
+Damit entstehen mehr Bilder, die tatsächlich in der Timeline verwendet werden können.
+
+## Bild 01 = Cover + Opening
+
+Der erste AI-Visual ist verbindlich:
+
+```text
+Bild 01 = Cover + Opening Image
+```
+
+Der Flow-Compiler erzeugt daraus später **genau drei Cover-Kandidaten**. Erst nach expliziter Nutzerauswahl wird mit Bild 02 weitergemacht.
+
+Es gibt für YouTube-Longform in diesem System **kein Bild 00**.
+
+## Scene Cards
+
+Jedes primäre KI-Bild bekommt eine strukturierte Scene Card:
+
+- Viewer Takeaway
+- Visual Purpose
+- Topic Anchor
+- Visual Form
+- Visual Concept
+- Dominant Subject
+- Action / State
+- Composition
+- Camera
+- Depth Plan
+- Lighting / Mood
+- Supporting Elements
+- Continuity Note
+- Accuracy Note
+- Planned Hold
+- Prompt QC Score
+
+Der Bildprompt wird erst aus dieser Karte kompiliert. Flow soll nicht selbst entscheiden müssen, was eine Szene eigentlich erklären soll.
+
+## Visual Forms
+
+Der Planer wählt abhängig von der Aussage u. a.:
+
+- `comparison`
+- `cause-effect`
+- `process-sequence`
+- `system-hierarchy`
+- `cutaway-section`
+- `character-scene`
+- `environment-overview`
+- `object-focus`
+
+Menschen sind **kein automatischer Fallback**. Eine Umgebung, ein Objekt, ein Vergleich oder ein Prozess darf die Szene tragen, wenn das die Aussage besser erklärt.
+
+## KI-Standard
+
+Normale generierbare Szenen werden als KI-Bild geplant, z. B.:
+
+- Alltag und Arbeit
+- Büros
+- Psychologie / Emotionen
+- Finanzen
+- Wissenschaft / Bildung
 - Zukunftsszenarien
-- historische Rekonstruktionen, solange kein Originalbeleg benötigt wird
-- symbolische Visualisierungen
-- neutrale Orte und Umgebungen
-- Close-ups und Detailbilder
-- Establishing Shots
-- Übergangsbilder
+- Rekonstruktionen ohne Beweisfunktion
+- Symbolbilder
+- neutrale Orte
+- Close-ups / Details / Establishing Views
 
-Für jeden Visual Beat werden standardmäßig **vier unterschiedliche Shot-Varianten** geplant:
+Der Default Style Lock ist realistisch-dokumentarisch:
 
-1. Wide / Establishing
-2. Medium
-3. Close-up
-4. Detail
-
-Optional sind bis zu sechs Varianten möglich, zusätzlich POV und Over-the-Shoulder.
+- glaubwürdige reale Umgebung
+- natürliche praktische Lichtquellen
+- realistische Anatomie
+- echte Materialien und Abnutzung
+- physikalisch plausible Perspektive
+- zurückhaltender Kontrast
+- kein Werbe-Glanz
+- keine unnötigen Sci-Fi-Hologramme
+- keine Plastikhaut
+- keine deformierten Hände
+- keine duplizierten Personen
+- keine erfundenen Logos / Fake-UIs
+- kein Pseudo-Text
 
 ## Wann echtes Material Vorrang hat
 
-### 1. Originalbelege
+### Exakte Belege
 
-Beispiele:
+- echte Screenshots
+- Webseiten / Interfaces
+- Originaldokumente
+- echte Charts mit Quellenbezug
+- historische Originalfotos
 
-- Screenshot einer echten Webseite
-- Originaldokument
-- Zeitungsseite
-- echter Chart mit Quellenbezug
-- Archivfoto als Beweis
+### Konkrete reale Ereignisse
 
-Diese Inhalte dürfen nicht durch ein erfundenes KI-Bild ersetzt werden.
+- Pressekonferenzen
+- Demonstrationen
+- Wahlen
+- konkrete Sportereignisse
+- aktuelle Nachrichtenszenen
 
-### 2. Konkrete reale Ereignisse
+### Exakte Marken / Produkte / Orte
 
-Beispiele:
+Wenn die reale Identität Teil der Aussage ist, darf kein erfundenes KI-Ersatzbild als Original ausgegeben werden.
 
-- Pressekonferenz
-- Demonstration
-- Wahlereignis
-- Sportspiel
-- aktuelle Nachrichtenszene
+### Authentische Bewegung
 
-Wenn die reale Aufnahme selbst Teil der Aussage ist, wird echtes Material geplant.
-
-### 3. Exakte Marken, Produkte oder Oberflächen
-
-Beispiele:
-
-- konkretes iPhone-Modell
-- echte YouTube-Oberfläche
-- Firmenlogo
-- bestimmtes Fahrzeugmodell
-- reale Produktdarstellung
-
-Die Pipeline soll keine erfundenen Logos oder falschen Interfaces als echten Beleg darstellen.
-
-### 4. Authentische Bewegung
-
-Bestimmte Vorgänge wirken als echte B-Roll deutlich besser:
-
-- fahrende Fahrzeuge
-- laufende Produktionsanlagen
-- Menschenmengen in Bewegung
-- Sportaktionen
+- fahrende Züge / Autos
+- Produktionsanlagen
+- Menschenmengen
+- Sportbewegung
 - Verkehr
-- Fließbandproduktion
 - starke Naturbewegung
 
-Hier wird echte B-Roll als Primärmaterial geplant. Ein KI-Standbild kann zusätzlich als Fallback bestehen bleiben.
+Hier wird echte B-Roll bevorzugt. Ein KI-Fallback darf zusätzlich existieren, wenn die Szene ohne Täuschung als Standbild darstellbar ist.
 
-## Realistischer Bildstil
-
-KI-Prompts enthalten automatisch einen gemeinsamen Dokumentar-Look:
-
-- photorealistic documentary photography
-- believable present-day environment
-- natural practical lighting
-- realistic human anatomy and proportions
-- authentic materials and textures
-- candid unstaged moment
-- subtle cinematic depth
-- physically plausible scene
-
-Zusätzlich werden typische KI-Artefakte explizit vermieden:
-
-- keine unnötigen Sci-Fi-Hologramme
-- keine Plastikhaut
-- keine übertriebenen Gesichtsausdrücke
-- keine zusätzlichen Finger oder Gliedmaßen
-- keine duplizierten Personen
-- keine unlesbaren Fake-UIs
-- kein Text oder Wasserzeichen im Bild
-- keine unmögliche Beleuchtung
-
-Ziel ist nicht "AI Art", sondern ein Bild, das wie ein Frame aus einer hochwertigen sachlichen Dokumentation wirkt.
-
-## Visual-Dichte
-
-Ein längerer Sprechertext soll nicht automatisch ein einziges Bild erhalten.
-
-Der Planer teilt den Text in **Visual Beats**. Standardmäßig darf ein Beat bis zu 24 Wörter enthalten. Ein längerer Abschnitt erzeugt dadurch mehrere visuelle Einheiten.
-
-Beispiel:
-
-```text
-15 Sekunden Sprechertext
-↓
-3 Visual Beats
-↓
-4 KI-Shots pro Beat
-↓
-12 mögliche KI-Bilder
-```
-
-Die spätere Timeline kann daraus die stärksten Bilder auswählen und schneller wechseln, statt ein einzelnes Bild lange stehen zu lassen.
-
-## Befehl
-
-Kurzer Sprechertext:
-
-```bash
-npm run visual:plan -- "Immer mehr Unternehmen automatisieren Büroarbeit mit künstlicher Intelligenz."
-```
-
-Ganzes Skript:
+## Befehle
 
 ```bash
 npm run visual:plan -- \
   --file ./script.txt \
   --orientation horizontal \
-  --images-per-beat 5
+  --max-words-per-beat 14
 ```
 
-Shorts / Reels:
+Mehr Bilddichte:
 
 ```bash
 npm run visual:plan -- \
   --file ./script.txt \
-  --orientation vertical \
-  --images-per-beat 5 \
-  --max-words-per-beat 18
+  --max-words-per-beat 10
 ```
 
 ## Ausgaben
 
-Jeder Lauf erzeugt drei maschinenlesbare Dateien:
-
 ```text
 visual-plan.json
+scene-cards.json
 ai-generation-queue.json
 real-material-queue.json
 ```
 
-### `visual-plan.json`
+`ai-generation-queue.json` enthält primäre KI-Bilder plus klar markierte Fallbacks. `real-material-queue.json` enthält echte Bilder/B-Rolls. `scene-cards.json` ist die strukturierte Grundlage für Google Flow.
 
-Enthält die gesamte Entscheidung pro Visual Beat.
+## Nächster Schritt: Flow Compiler
 
-### `ai-generation-queue.json`
+```bash
+npm run flow:compile -- \
+  --plan ./visual-plan.json \
+  --title "Videotitel" \
+  --cover-text "EXAKTER COVER TEXT"
+```
 
-Enthält ausschließlich die zu generierenden KI-Bilder mit:
-
-- Beat-ID
-- Shot-Typ
-- Ausrichtung
-- Priorität
-- vollständigem englischen Bildprompt
-- Negativ-/Qualitätsregeln
-
-Diese Queue ist dafür gedacht, von einem Bildgenerator oder einer externen Produktionspipeline abgearbeitet zu werden.
-
-### `real-material-queue.json`
-
-Enthält ausschließlich Szenen, die besser mit echtem Material dargestellt werden:
-
-- gewünschter Medientyp
-- Grund für echtes Material
-- Stock-Suchbegriff
-- Information, ob ein KI-Fallback erlaubt ist
-
-Die vorhandene Smart Asset Discovery kann diese Suchbegriffe anschließend über Pexels und spätere Provider auflösen.
-
-## Verhältnis KI zu Stock
-
-Es gibt **keine starre Prozentquote**.
-
-Ein Video kann beispielsweise 95 % KI-Bilder enthalten, wenn alle Szenen glaubwürdig generierbar sind. Ein Nachrichten- oder Produktvideo kann deutlich mehr echtes Material benötigen.
-
-Entscheidend ist:
-
-> KI ist Standard. Echtes Material muss einen konkreten Mehrwert oder eine Authentizitätsanforderung haben.
-
-## Nächste Integrationsstufe
-
-Der Visual Planner erstellt bereits eine vollständige Generation Queue. Der nächste technische Schritt ist ein Generator-Adapter, der diese Queue automatisch an den gewünschten Bilddienst übergibt und die fertigen Dateien anschließend mit Metadaten in den Asset Hub importiert.
+Der Compiler erzeugt Cover-Gate, Master-Prompt, Bildnummerierung, World/Style Lock, Einzelgenerierung und 5er-QC-Blöcke. Details: `docs/FLOW-PRODUCTION.md`.

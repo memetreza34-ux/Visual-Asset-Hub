@@ -1,6 +1,6 @@
 {
   "name": "visual-asset-hub",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -12,6 +12,7 @@
     "pexels:search": "node scripts/pexels-search.mjs",
     "discover": "node scripts/asset-discover.mjs",
     "visual:plan": "node scripts/visual-plan.mjs",
+    "flow:compile": "node scripts/flow-compile.mjs",
     "real:integrate": "node scripts/real-media-integrate.mjs",
     "validate": "node scripts/validate-catalog.mjs",
     "index": "node scripts/build-index.mjs",
