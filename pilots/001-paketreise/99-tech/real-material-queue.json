@@ -1,0 +1,51 @@
+{
+  "version": 2,
+  "strategy": "real-only-when-needed",
+  "count": 4,
+  "assets": [
+    {
+      "id": "beat-012-real-01",
+      "beat_id": "beat-012",
+      "source_mode": "stock-or-real",
+      "asset_type": "video",
+      "orientation": "horizontal",
+      "priority": "primary",
+      "reason": "authentic-motion-broll",
+      "stock_query": "fließband bringt sendungen zu nachsten sortierpunkten",
+      "ai_fallback_allowed": true
+    },
+    {
+      "id": "beat-018-real-01",
+      "beat_id": "beat-018",
+      "source_mode": "stock-or-real",
+      "asset_type": "video",
+      "orientation": "horizontal",
+      "priority": "primary",
+      "reason": "authentic-motion-broll",
+      "stock_query": "lastwagen fahrt zum regionalen paketzentrum",
+      "ai_fallback_allowed": true
+    },
+    {
+      "id": "beat-028-real-01",
+      "beat_id": "beat-028",
+      "source_mode": "stock-or-real",
+      "asset_type": "video",
+      "orientation": "horizontal",
+      "priority": "primary",
+      "reason": "authentic-motion-broll",
+      "stock_query": "zustellfahrzeug fahrt von straße zu straße",
+      "ai_fallback_allowed": true
+    },
+    {
+      "id": "beat-030-real-01",
+      "beat_id": "beat-030",
+      "source_mode": "stock-or-real",
+      "asset_type": "video",
+      "orientation": "horizontal",
+      "priority": "primary",
+      "reason": "authentic-motion-broll",
+      "stock_query": "verkehr baustellen viele sendungen konnen sie verandern",
+      "ai_fallback_allowed": true
+    }
+  ]
+}
