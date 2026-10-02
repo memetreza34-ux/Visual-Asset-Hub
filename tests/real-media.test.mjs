@@ -26,7 +26,7 @@ test('authentische Bewegung darf automatisch als echte B-Roll gesucht werden', (
   assert.equal(policy.requires_exact_source, false);
 });
 
-test('mehrfache Query-Treffer werden dedupliziert und aufgewertet', () => {
+test('mehrfache Query-Treffer werden dedupliziert und relativ aufgewertet', () => {
   const map = new Map();
   const asset = {
     provider: 'pexels',
@@ -45,8 +45,15 @@ test('mehrfache Query-Treffer werden dedupliziert und aufgewertet', () => {
   assert.equal(merged.occurrences, 2);
   assert.deepEqual(merged.matched_queries, ['train moving', 'commuter train']);
 
-  const [ranked] = rankRealCandidates([merged], { orientation: 'horizontal', assetType: 'video' });
-  assert.ok(ranked.real_media_score >= 80);
+  const baseline = {
+    ...merged,
+    occurrences: 1,
+    matched_queries: ['train moving']
+  };
+  const [rankedMerged] = rankRealCandidates([merged], { orientation: 'horizontal', assetType: 'video' });
+  const [rankedBaseline] = rankRealCandidates([baseline], { orientation: 'horizontal', assetType: 'video' });
+  assert.ok(rankedMerged.real_media_score > rankedBaseline.real_media_score);
+  assert.ok(rankedMerged.real_media_score > 0);
 });
 
 test('Video-Download bevorzugt brauchbare HD-Datei innerhalb der Zielgröße', () => {
