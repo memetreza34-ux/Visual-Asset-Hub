@@ -15,6 +15,16 @@ on:
         description: "Exakter deutscher Cover-Text für Bild 01"
         required: true
         type: string
+      target_duration:
+        description: "Zieldauer in Sekunden für Pilot-Pacing"
+        required: true
+        default: "120"
+        type: string
+      pilot_strict:
+        description: "2-Minuten-Pilot-Gate als harter Check"
+        required: true
+        default: true
+        type: boolean
       orientation:
         description: "Zielformat"
         required: true
@@ -27,9 +37,10 @@ on:
       max_words_per_beat:
         description: "Bilddichte: kleinere Zahl = mehr echte Story-Bilder"
         required: true
-        default: "16"
+        default: "10"
         type: choice
         options:
+          - "8"
           - "10"
           - "12"
           - "14"
@@ -77,6 +88,8 @@ jobs:
       NARRATION: ${{ inputs.narration }}
       VIDEO_TITLE: ${{ inputs.title }}
       COVER_TEXT: ${{ inputs.cover_text }}
+      TARGET_DURATION: ${{ inputs.target_duration }}
+      PILOT_STRICT: ${{ inputs.pilot_strict }}
       TARGET_ORIENTATION: ${{ inputs.orientation }}
       MAX_WORDS_PER_BEAT: ${{ inputs.max_words_per_beat }}
       REAL_QUERIES: ${{ inputs.real_queries }}
@@ -110,13 +123,15 @@ jobs:
             --max-words-per-beat "$MAX_WORDS_PER_BEAT" \
             --output .local-storage/pipeline/visual-plan.json
 
-      - name: Google Flow Production Prompt kompilieren
+      - name: Google Flow Production V3 + Pilot-Gate kompilieren
         shell: bash
         run: |
           npm run flow:compile -- \
             --plan .local-storage/pipeline/visual-plan.json \
             --title "$VIDEO_TITLE" \
             --cover-text "$COVER_TEXT" \
+            --target-duration "$TARGET_DURATION" \
+            --pilot-strict "$PILOT_STRICT" \
             --block-size 5 \
             --output-dir .local-storage/pipeline/flow
 

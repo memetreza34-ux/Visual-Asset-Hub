@@ -2,9 +2,9 @@
 
 Visual Asset Hub ist die universelle Visual-Pipeline für **KI-Bilder, echte B-Rolls, Fotos, Screenshots, Archivmaterial und wiederverwendbare Medien**.
 
-Die aktuelle Standardstrategie lautet:
+Standardstrategie:
 
-> **Generate first, search second — aber nur mit verwendbaren Story-Visuals, nicht mit künstlicher Prompt-Masse.**
+> **Generate first, search second — aber nur mit verwendbaren Story-Visuals, nicht mit Prompt-Masse.**
 
 ## Kernpipeline
 
@@ -13,45 +13,55 @@ Skript / Sprechertext
         ↓
 Content-driven Visual Beats
         ↓
-Bestes visuelles Mittel pro Beat
+AI oder echtes Material?
    ┌───────────────┴───────────────┐
    ↓                               ↓
-KI-Bild                        echtes Material
+KI-Bild                        Real Media
    ↓                               ↓
-Scene Card                    Real-Media Queue
+Scene Card                    Suche / Ranking
    ↓                               ↓
-Prompt QC                     Suche / Ranking
+Prompt QC                     Download / FFmpeg
    ↓                               ↓
-Style + World Lock            Download / FFmpeg
+Flow Production V3            Beat Binding
    ↓                               ↓
-Google Flow Compiler          Beat Binding
+3 Cover → Nutzer wählt            │
+   ↓                               │
+Cover als Referenz                 │
+   ↓                               │
+Bild 02–NN                         │
+   ↓                               │
+Safe Flow Import                   │
    └───────────────┬───────────────┘
                    ↓
-            finale Video-Timeline
+        Unified Video Manifest
+                   ↓
+          Voiceover-Timings
+                   ↓
+          Render-Handoff
 ```
 
-## 1. AI-first Visual Plan V2
+## 2-Minuten-Pilot
+
+Für den ersten Realtest ist ein eigener Pilot-Standard eingebaut. Details: [`docs/2-MINUTE-PILOT.md`](docs/2-MINUTE-PILOT.md).
+
+Empfohlen:
+
+- ca. 90–150 Sekunden
+- bei ~2 Minuten ca. 260–300 Wörter
+- `--max-words-per-beat 10`
+- mindestens 24 primäre Visuals pro 100 Sekunden
+- Ziel 28–42 Visuals pro 100 Sekunden
+- mindestens 4 Visual-Starts in den ersten ~10 Sekunden
+- Cover maximal 2,2 Sekunden
+
+## 1. Visual Plan
 
 ```bash
 npm run visual:plan -- \
   --file ./script.txt \
   --orientation horizontal \
-  --max-words-per-beat 14
+  --max-words-per-beat 10
 ```
-
-Der Planer:
-
-- zerlegt Narration in echte Story-Beats
-- erzeugt **ein Hauptvisual pro inhaltlichem Beat**
-- erhöht Bildmenge durch sinnvolle Beat-Splits statt 4–6 ungenutzter Kamera-Alternativen
-- plant `Bild 01` als Cover + Opening
-- erstellt strukturierte Scene Cards
-- wählt Visual Forms wie Comparison, Cause/Effect, Process, Character Scene, Environment, Object Focus oder Cutaway
-- bevorzugt KI-Bilder, solange keine echte Authentizität oder echte Bewegung nötig ist
-- markiert reale Belege und echte B-Rolls separat
-- hält KI-Fallbacks getrennt von Primärvisuals
-
-Standardmäßig sind maximal 16 Wörter pro Beat vorgesehen. Kleinere Werte erhöhen die Bilddichte.
 
 Ausgabe:
 
@@ -62,68 +72,9 @@ ai-generation-queue.json
 real-material-queue.json
 ```
 
-Details: [`docs/AI-FIRST-VISUALS.md`](docs/AI-FIRST-VISUALS.md)
+Der Planer erzeugt ein Hauptvisual pro sinnvoller Story-Einheit. Mehr Bilddichte entsteht durch echte Beat-Splits, nicht durch vier bis sechs ungenutzte Kamera-Alternativen derselben Szene.
 
-## 2. Google Flow Production V2
-
-```bash
-npm run flow:compile -- \
-  --plan .local-storage/visual-plans/SESSION/visual-plan.json \
-  --title "Wie KI Büroarbeit verändert" \
-  --cover-text "KI ERSETZT BÜROJOBS?"
-```
-
-Der Compiler erzeugt:
-
-```text
-flow/
-  google-flow-master-prompt.txt
-  flow-production-plan.json
-  flow-generation-queue.json
-```
-
-### Cover Gate
-
-`Bild 01` ist Cover + Opening.
-
-```text
-Kandidat A → warten → QC
-Kandidat B → warten → QC
-Kandidat C → warten → QC
-STOP
-Nutzer wählt Gewinner
-Gewinner = Bild 01.png
-```
-
-Vor der expliziten Auswahl darf Bild 02 nicht produziert werden.
-
-### Danach: streng sequenziell
-
-```text
-aktuelles Bild lesen
-→ genau EIN Bild erzeugen
-→ vollständig warten
-→ QC
-→ bei FAIL gleiche Nummer wiederholen
-→ bei PASS exakt umbenennen
-→ erst dann nächstes Bild
-```
-
-Die folgenden Bilder werden in **5er-QC-Blöcke** gruppiert, aber niemals parallel erzeugt.
-
-Beispiel:
-
-```text
-Block 1: Bild 02–06
-Block 2: Bild 07–11
-Block 3: Bild 12–16
-```
-
-Details: [`docs/FLOW-PRODUCTION.md`](docs/FLOW-PRODUCTION.md)
-
-## Scene Cards
-
-Vor jedem Flow-Prompt steht eine strukturierte Regieentscheidung:
+Scene Cards enthalten u. a.:
 
 - Viewer Takeaway
 - Visual Purpose
@@ -136,42 +87,113 @@ Vor jedem Flow-Prompt steht eine strukturierte Regieentscheidung:
 - Camera
 - Depth Plan
 - Lighting / Mood
-- Supporting Elements
-- Continuity Note
-- Accuracy Note
+- Continuity
+- Accuracy
+- Text Policy
 - Planned Hold
-- Prompt QC Score
+- Prompt QC
 
-Nur vollständige Cards mit QC >= 8/10 werden kompiliert.
+Nur vollständige Scene Cards mit QC >= 8/10 werden kompiliert.
 
-## Style Lock und World Lock
+## 2. Google Flow Production V3
 
-Der Hub übernimmt **keine Bildwelt aus einem anderen Kanal automatisch**.
-
-Default ist:
-
-```text
-photoreal-documentary-natural-v2
+```bash
+npm run flow:compile -- \
+  --plan .local-storage/visual-plans/SESSION/visual-plan.json \
+  --title "Wie KI Büroarbeit verändert" \
+  --cover-text "KI ERSETZT BÜROJOBS?" \
+  --target-duration 120 \
+  --pilot-strict true
 ```
 
-Ein Kanal kann einen eigenen Style Lock einspielen. Der World Lock hält wiederkehrende Figuren, Orte, Kleidung, Props und räumliche Logik innerhalb eines Videos konsistent, ohne jede Szene gleich aussehen zu lassen.
+Ausgabe:
 
-## Was bewusst entfernt wurde
+```text
+flow/
+  google-flow-master-prompt.txt
+  flow-production-plan.json
+  flow-generation-queue.json
+  pilot-readiness.json
+```
 
-- automatische 4–6 Shot-Varianten für jeden normalen Beat
-- parallele Google-Flow-Batches
-- `Bild 00` im YouTube-Longform-System
-- Menschen als Standard-Füllmotiv
-- generische Prompt-Hypewörter wie `epic`, `ultra detailed`, `masterpiece`, `8k`, `bokeh`
-- blindes Kopieren einer Stickman-, Finanz- oder anderen Kanal-Bildwelt
-- automatische Cover-Auswahl ohne Nutzer
-- generisches Stockmaterial als angeblicher Originalbeleg
+### Cover-Strategie
 
-## 3. Echte B-Rolls und Fotos
+`Bild 01` ist Cover + Opening. Flow erzeugt zuerst exakt drei verwandte Kandidaten A/B/C.
+
+Alle drei teilen:
+
+- denselben exakten Cover-Text
+- dieselbe Kernidee
+- denselben Style Lock
+- dieselbe Farb-/Lichtwelt
+- dieselbe wiederkehrende Identität, falls relevant
+
+Sie variieren nur sinnvoll in Framing, Kameraabstand, Negativraum und räumlicher Anordnung.
+
+Wichtig: Der Cover-Brief entsteht aus **Videotitel + Cover-Text + Story-Spine des ganzen Videos**, nicht nur aus dem ersten Sprecher-Satz.
+
+Nach drei akzeptablen Kandidaten:
+
+```text
+STOP
+→ Nutzer wählt A, B oder C
+→ Gewinner = Bild 01.png
+```
+
+## 3. Cover auswählen und Stage 2 entsperren
+
+```bash
+npm run flow:select-cover -- \
+  --production-plan ./flow/flow-production-plan.json \
+  --candidate B \
+  --reference "Bild 01.png"
+```
+
+Das gewählte Cover wird weiche Stil-/World-/Qualitätsreferenz. Beibehalten werden z. B. Rendering-Niveau, Grundfarbfamilie, Texturbehandlung und wiederkehrende Identitäten. Variieren dürfen Szene, Kamera, Komposition, Handlung und lokale Stimmung.
+
+Folgebilder müssen zusammengehören, dürfen aber **keine Cover-Klone** sein.
+
+Text ist außerhalb des Covers standardmäßig aus. Kurzer exakter Text ist nur erlaubt, wenn er im Sprechertext wirklich vorkommt und die Scene Card ihn als wichtig markiert.
+
+## 4. Flow-Bilder sicher importieren
+
+Nach der Flow-Produktion:
+
+```bash
+npm run flow:import -- \
+  --production-plan ./flow/flow-production-plan.json \
+  --cover ./downloads/selected-cover.png \
+  --source ./downloads/stage2 \
+  --order auto
+```
+
+Der Import prüft:
+
+- exakt erwartete Bildanzahl
+- sichere Reihenfolge
+- Mindestdateigröße
+- exakte SHA-256-Duplikate
+- saubere Namen `Bild 01.png ... Bild NN.png`
+
+Bei Unsicherheit wird abgebrochen statt falsch zuzuordnen.
+
+## 5. Pilot-Pacing prüfen
+
+```bash
+npm run pilot:check -- \
+  --visual-plan ./visual-plan.json \
+  --production-plan ./flow/flow-production-plan.json \
+  --target-duration 120 \
+  --strict true
+```
+
+Der Check bewertet u. a. Cover-Hold, Intro-Dichte, Visuals pro 100 Sekunden und überlange geplante Beats.
+
+## 6. Echte B-Rolls und Fotos
 
 ```bash
 npm run real:integrate -- \
-  --queue .local-storage/visual-plans/SESSION/real-material-queue.json
+  --queue ./real-material-queue.json
 ```
 
 Der Resolver:
@@ -180,58 +202,55 @@ Der Resolver:
 - durchsucht Pexels über mehrere Seiten
 - dedupliziert und rankt Kandidaten
 - bevorzugt passendes Format, Auflösung und Videolänge
-- lädt die beste Originaldatei
+- lädt das beste Original herunter
 - analysiert Videos mit FFmpeg
 - speichert Quelle und Lizenz
 - bindet das Asset an `beat_id`
 - erzeugt `remotion-real-media.json`
 
-Mit echten Beat-Timings:
+Echte Screenshots, Originaldokumente, konkrete News-Ereignisse, historische Originalaufnahmen und exakte Marken-/Produktdarstellungen werden **nicht** durch generischen Stock ersetzt. Sie bleiben `manual-required`.
+
+## 7. AI + Real zusammenführen
 
 ```bash
-npm run real:integrate -- \
-  --queue ./real-material-queue.json \
+npm run video:manifest -- \
+  --visual-plan ./visual-plan.json \
+  --production-plan ./flow/flow-production-plan.json \
+  --flow-import-report ./flow/final-images/flow-import-report.json \
+  --real-manifest ./real-media/remotion-real-media.json
+```
+
+Ohne Voiceover-Timings:
+
+```text
+assets-ready-awaiting-voice-timings
+```
+
+Mit vollständigen Beat-Timings:
+
+```bash
+npm run video:manifest -- \
+  ... \
   --timings ./beat-timings.json
 ```
 
-### Kein falscher Beleg
+Dann kann der Status werden:
 
-Echte Screenshots, Originaldokumente, konkrete News-Ereignisse, historische Originalaufnahmen und exakte Marken-/Produktdarstellungen werden nicht durch irgendeinen Stockclip ersetzt. Sie bleiben `manual-required`, bis eine passende Originalquelle vorliegt.
+```text
+render-handoff-ready
+```
 
-Details: [`docs/REAL-MEDIA-INTEGRATION.md`](docs/REAL-MEDIA-INTEGRATION.md)
+Wenn ein Real-Media-Beat ungelöst ist, markiert das Manifest ihn transparent als `manual-required`, `fallback-generation-required` oder `unresolved` statt einen falschen Ersatz zu verwenden.
 
-## 4. Smart Discovery
+## Smart Asset Discovery
+
+Für zusätzliche echte Medien:
 
 ```bash
 npm run discover -- "industrial electrician maintenance" --orientation horizontal
 ```
 
-Die Discovery unterstützt:
-
-- Multi-Query
-- Video + Foto
-- Pagination
-- Deduplizierung
-- Relevanz-Ranking
-- Diversity-Auswahl
-
-Standardmäßig können bei 8 Queries × 2 Medientypen × 2 Seiten × 30 Treffern theoretisch bis zu 960 Rohkandidaten geprüft werden.
-
-Details: [`docs/DISCOVERY.md`](docs/DISCOVERY.md)
-
-## Pexels
-
-`.env.example` als `.env` kopieren:
-
-```env
-PEXELS_API_KEY=DEIN_PEXELS_SCHLUESSEL
-```
-
-Einzelsuche:
-
-```bash
-npm run pexels:search -- "modern factory" --type video --orientation horizontal --per-page 20
-```
+Die Discovery unterstützt Multi-Query, Video + Foto, Pagination, Deduplizierung, Relevanz-Ranking und Diversity-Auswahl.
 
 ## Asset Library
 
@@ -253,72 +272,67 @@ scripts/
 web/
 ```
 
-Neue Dateien werden über `asset:add` aufgenommen:
+Neue Assets:
 
 ```bash
 npm run asset:add -- --help
-```
-
-Medienanalyse:
-
-```bash
 npm run media:analyze -- --help
 ```
 
-Der Katalog in `catalog/assets.json` speichert u. a. ID, Typ, Kategorie, Tags, Motiv, Aktion, Kameraeinstellung, technische Daten, Speicherpfad, Quelle, Lizenzstatus und Hash.
+Katalog und Rechteprüfung bleiben unter `catalog/` erhalten.
 
 ## Wichtige Befehle
 
 ```bash
 npm run visual:plan -- --help
 npm run flow:compile -- --help
+npm run flow:select-cover -- --help
+npm run flow:import -- --help
+npm run pilot:check -- --help
 npm run real:integrate -- --help
+npm run video:manifest -- --help
 npm run discover -- --help
 npm run pexels:search -- --help
 npm run asset:add -- --help
 npm run media:analyze -- --help
-npm run validate
-npm run index
-npm run test
 npm run check
 npm run serve
 ```
 
 ## GitHub Actions
 
-`AI-first Asset Pipeline` führt in einem Lauf aus:
+`AI-first Asset Pipeline` verwendet für den 2-Minuten-Pilot standardmäßig:
 
-```text
-Narration
-→ Visual Plan V2
-→ Google Flow Master Prompt
-→ Real-Media Resolution
-→ gemeinsames Pipeline-Artefakt
-```
+- `target_duration = 120`
+- `max_words_per_beat = 10`
+- optionales striktes Pilot-Gate
+- Flow Production V3
+- automatischen Real-Media-Resolver
 
-Dafür werden Videotitel, Cover-Text, Zielformat und Bilddichte als Inputs übergeben.
+Die Cover-Auswahl und die danach entsperrte Stage 2 bleiben bewusst nutzergesteuert.
 
-## Rechte und Sicherheit
+## Rechte und Quellen
 
-Nur Assets speichern, für die eine nachvollziehbare Nutzungserlaubnis besteht. Unbekannte oder problematische Rechte bleiben im Review. Der Hub blockiert u. a. Dubletten, unsichere Pfade, unvollständige Rechteangaben und erkennbare Token-/API-Key-URLs.
+Nur Assets mit nachvollziehbarer Nutzungserlaubnis speichern. Unbekannte oder problematische Rechte bleiben im Review. Der Hub blockiert u. a. Dubletten, unsichere Pfade, unvollständige Rechteangaben und erkennbare Token-/API-Key-URLs.
+
+Der ältere offene `production-v1`-Branch enthält eine deutlich größere Quellenabdeckung (u. a. NASA, NOAA, USGS, NARA, Smithsonian, Library of Congress, Europeana, Wikimedia). Diese Architektur wird **nicht blind zurückgemergt**. Nach dem Pilot werden bewährte Provider gezielt in den aktuellen AI-first-Stand übernommen.
 
 ## Aktueller Stand
 
-Enthalten sind jetzt:
+Für einen kontrollierten 2-Minuten-Visual-Pilot vorhanden:
 
-- AI-first Content-Density Planner V2
+- AI-first Content-Density Planner
 - Scene Cards + Prompt QC
-- Bild-01-Cover-Gate mit 3 Kandidaten
-- universeller Google Flow Compiler
-- Style Lock + World Lock
-- strikte Einzelgenerierungs-Queue
-- 5er-QC-Blöcke
-- getrennte AI- und Real-Media-Queues
-- automatischer Real-Media-Resolver
+- Flow Production V3
+- Cover-Brief aus Gesamtthema
+- 3-Cover-Gate + Nutzerauswahl
+- ausgewähltes Cover als weiche Referenz
+- Text-Policy
+- Pilot-Pacing-Gate
+- sicherer Flow-Bildimport
+- Real-Media-Resolver
 - Pexels Download + FFmpeg-Analyse
-- Remotion-ready Real-Media-Bindings
-- Smart Asset Discovery
-- Katalog, Rechte- und Dublettenprüfung
-- Websuche und Git-LFS-Struktur
+- Unified AI/Real Video Manifest
+- Übergabestatus für spätere Voiceover-Timings und Remotion
 
-Nächster große Integrationsschritt: **Flow-Ergebnisse automatisch zurück in den Hub importieren und AI- + Real-Media-Bindings zu einem finalen Remotion-Video-Manifest zusammenführen.**
+Noch kein vollautomatischer End-to-End-Render in diesem Repo: echte Voiceover-Ausrichtung, finale Timeline und Render-QC bleiben die nächste Stufe nach dem Realtest.
