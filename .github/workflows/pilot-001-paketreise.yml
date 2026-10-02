@@ -1,0 +1,110 @@
+name: Pilot 001 - Paketreise
+
+on:
+  push:
+    branches:
+      - pilot/001-paketreise
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      PEXELS_API_KEY: ${{ secrets.PEXELS_API }}
+      PILOT_DIR: pilots/001-paketreise
+      OUTPUT_DIR: .local-storage/pilot-001
+      VIDEO_TITLE: Was passiert mit deinem Paket nach dem Klick auf Bestellen?
+      COVER_TEXT: SO REIST DEIN PAKET
+
+    steps:
+      - name: Repository laden
+        uses: actions/checkout@v4
+
+      - name: Node.js 22 verwenden
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: FFmpeg bereitstellen
+        shell: bash
+        run: |
+          if ! command -v ffmpeg >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+          fi
+          ffmpeg -version | head -1
+
+      - name: Visual Plan erstellen
+        shell: bash
+        run: |
+          mkdir -p "$OUTPUT_DIR"
+          npm run visual:plan -- \
+            --file "$PILOT_DIR/script.txt" \
+            --orientation horizontal \
+            --max-words-per-beat 10 \
+            --output "$OUTPUT_DIR/visual-plan.json"
+
+      - name: Flow Prompt + striktes Pilot-Gate
+        shell: bash
+        run: |
+          npm run flow:compile -- \
+            --plan "$OUTPUT_DIR/visual-plan.json" \
+            --title "$VIDEO_TITLE" \
+            --cover-text "$COVER_TEXT" \
+            --target-duration 120 \
+            --pilot-strict true \
+            --block-size 5 \
+            --output-dir "$OUTPUT_DIR/flow"
+
+      - name: Echte Bewegungs-B-Rolls auflösen
+        shell: bash
+        run: |
+          if [ -z "$PEXELS_API_KEY" ]; then
+            echo "PEXELS_API Secret fehlt; Real-Media-Auflösung wird transparent als nicht ausgeführt markiert."
+            mkdir -p "$OUTPUT_DIR/real-media"
+            printf '%s\n' '{"status":"not-run","reason":"PEXELS_API secret missing"}' > "$OUTPUT_DIR/real-media/pilot-real-media-status.json"
+          else
+            npm run real:integrate -- \
+              --queue "$OUTPUT_DIR/real-material-queue.json" \
+              --output-dir "$OUTPUT_DIR/real-media" \
+              --queries 3 \
+              --pages 2 \
+              --per-page 30 \
+              --max-dimension 1920
+          fi
+
+      - name: Pilot-Zusammenfassung
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const base = '.local-storage/pilot-001';
+          const plan = JSON.parse(fs.readFileSync(`${base}/visual-plan.json`, 'utf8'));
+          const ready = JSON.parse(fs.readFileSync(`${base}/flow/pilot-readiness.json`, 'utf8'));
+          const realPath = `${base}/real-media/real-media-resolution.json`;
+          const real = fs.existsSync(realPath) ? JSON.parse(fs.readFileSync(realPath, 'utf8')) : null;
+          const summary = {
+            pilot: '001-paketreise',
+            title: 'Was passiert mit deinem Paket nach dem Klick auf Bestellen?',
+            cover_text: 'SO REIST DEIN PAKET',
+            readiness: ready.status,
+            metrics: ready.metrics,
+            visual_summary: plan.summary,
+            real_media_summary: real?.summary ?? null,
+            next_gate: 'Google Flow: generate exactly 3 cover candidates, user selects one, then Stage 2.'
+          };
+          fs.writeFileSync(`${base}/pilot-run-summary.json`, JSON.stringify(summary, null, 2) + '\n');
+          console.log(JSON.stringify(summary, null, 2));
+          NODE
+
+      - name: Pilot-Artefakte hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: pilot-001-paketreise-assets
+          path: .local-storage/pilot-001/
+          if-no-files-found: error
+          retention-days: 14
