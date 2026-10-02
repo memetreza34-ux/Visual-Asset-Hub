@@ -5,6 +5,33 @@ const MANUAL_SOURCE_REASONS = new Set([
   'historical-evidence'
 ]);
 
+const RELEVANCE_STOPWORDS = new Set([
+  'the','and','with','from','into','onto','this','that','these','those','for','to','of','in','on','at','by','a','an',
+  'realistic','b','roll','close','detail','wide','establishing','shot','person','using','regional','next',
+  'der','die','das','den','dem','des','ein','eine','einer','einem','einen','und','oder','aber','mit','von','zu','im','in','am','an','auf','fur','fuer','bei','durch'
+]);
+
+const RELEVANCE_SYNONYMS = {
+  package: ['parcel','shipment','box'],
+  packages: ['parcel','parcels','shipment','shipments','box','boxes'],
+  parcel: ['package','shipment','box'],
+  parcels: ['package','packages','shipment','shipments','boxes'],
+  truck: ['lorry','freight','semi','tractor','delivery'],
+  delivery: ['courier','shipping','shipment','truck','van'],
+  van: ['delivery','courier','vehicle'],
+  vehicle: ['car','van','truck','lorry'],
+  conveyor: ['belt','sorting','lane'],
+  belt: ['conveyor','sorting','lane'],
+  sorting: ['sort','parcel','package','conveyor','lane'],
+  warehouse: ['depot','distribution','fulfillment','logistics'],
+  traffic: ['street','road','highway','cars','vehicles'],
+  street: ['road','traffic','highway'],
+  road: ['street','traffic','highway'],
+  driving: ['moving','road','street','highway'],
+  loading: ['dock','warehouse','freight'],
+  dock: ['loading','warehouse','freight']
+};
+
 export function realMediaPolicy(item) {
   const reason = String(item?.reason ?? '');
   if (MANUAL_SOURCE_REASONS.has(reason)) {
@@ -45,38 +72,62 @@ export function mergeRealCandidate(map, asset, query, page = 1) {
 
 export function scoreRealCandidate(asset, { orientation, assetType } = {}) {
   const resolution = bestResolution(asset);
-  let score = 30;
-  score += Math.min(Number(asset.matched_queries?.length ?? 0), 4) * 10;
-  score += Math.min(Number(asset.occurrences ?? 1), 6) * 2;
-  score += Math.max(0, 8 - Number(asset.first_seen_page ?? 1) * 2);
+  const queryRelevance = scoreQueryRelevance(asset);
+  let score = 8;
+  score += Math.min(Number(asset.matched_queries?.length ?? 0), 3) * 4;
+  score += Math.min(Number(asset.occurrences ?? 1), 4) * 1.5;
+  score += Math.max(0, 6 - Number(asset.first_seen_page ?? 1));
 
-  if (orientation && asset.orientation === orientation) score += 14;
-  if (assetType && normalizedAssetType(asset.type) === normalizedAssetType(assetType)) score += 10;
+  if (orientation && asset.orientation === orientation) score += 10;
+  if (assetType && normalizedAssetType(asset.type) === normalizedAssetType(assetType)) score += 8;
 
   const pixels = resolution.width * resolution.height;
-  if (pixels >= 3840 * 2160) score += 12;
-  else if (pixels >= 1920 * 1080) score += 10;
+  if (pixels >= 3840 * 2160) score += 10;
+  else if (pixels >= 1920 * 1080) score += 9;
   else if (pixels >= 1280 * 720) score += 7;
   else if (pixels > 0) score += 2;
 
   if (asset.type === 'video') {
     const duration = Number(asset.duration_seconds ?? 0);
-    if (duration >= 4 && duration <= 40) score += 12;
-    else if (duration > 40 && duration <= 90) score += 6;
-    else if (duration > 0 && duration < 2) score -= 12;
-    else if (duration > 120) score -= 5;
+    if (duration >= 4 && duration <= 40) score += 10;
+    else if (duration > 40 && duration <= 90) score += 5;
+    else if (duration > 0 && duration < 2) score -= 10;
+    else if (duration > 120) score -= 4;
   }
 
+  score += queryRelevance;
+  if (queryRelevance === 0) score -= 10;
+
   return Math.max(0, Math.min(100, Math.round(score)));
+}
+
+export function scoreQueryRelevance(asset) {
+  const haystack = normalizeForRelevance(`${asset?.title ?? ''} ${asset?.source_url ?? ''}`);
+  if (!haystack) return 0;
+  let best = 0;
+  for (const query of asset?.matched_queries ?? []) {
+    const tokens = tokenizeQuery(query);
+    if (!tokens.length) continue;
+    let matched = 0;
+    for (const token of tokens) {
+      if (matchesTokenOrSynonym(haystack, token)) matched += 1;
+    }
+    if (!matched) continue;
+    const score = Math.min(24, 8 + matched * 5);
+    best = Math.max(best, score);
+  }
+  return best;
 }
 
 export function rankRealCandidates(candidates, options = {}) {
   return candidates
     .map((asset) => ({
       ...asset,
+      query_relevance_score: scoreQueryRelevance(asset),
       real_media_score: scoreRealCandidate(asset, options)
     }))
     .sort((a, b) => b.real_media_score - a.real_media_score
+      || b.query_relevance_score - a.query_relevance_score
       || (b.matched_queries?.length ?? 0) - (a.matched_queries?.length ?? 0)
       || String(a.provider_id).localeCompare(String(b.provider_id)));
 }
@@ -196,6 +247,29 @@ function bestResolution(asset) {
   }, { width: Number(asset.width ?? 0), height: Number(asset.height ?? 0) });
 }
 
+function tokenizeQuery(value) {
+  return [...new Set(normalizeForRelevance(value)
+    .split(' ')
+    .filter((token) => token.length >= 4 && !RELEVANCE_STOPWORDS.has(token)))];
+}
+
+function normalizeForRelevance(value) {
+  return String(value ?? '')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/https?:\/\//g, ' ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function matchesTokenOrSynonym(haystack, token) {
+  if (` ${haystack} `.includes(` ${token} `)) return true;
+  const synonyms = RELEVANCE_SYNONYMS[token] ?? [];
+  return synonyms.some((candidate) => ` ${haystack} `.includes(` ${candidate} `));
+}
+
 function downloadScore(file, maxDimension) {
   const width = Number(file.width ?? 0);
   const height = Number(file.height ?? 0);
@@ -221,4 +295,4 @@ function round(value, digits) {
   return Math.round(value * factor) / factor;
 }
 
-export const realMediaConstants = { MANUAL_SOURCE_REASONS };
+export const realMediaConstants = { MANUAL_SOURCE_REASONS, RELEVANCE_STOPWORDS, RELEVANCE_SYNONYMS };

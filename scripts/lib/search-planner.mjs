@@ -9,7 +9,8 @@ const CATEGORY_ALIASES = {
   'travel-places': ['travel', 'trip', 'city', 'hotel', 'airport', 'reise', 'reisen', 'stadt', 'urlaub', 'flughafen'],
   'nature-environment': ['nature', 'environment', 'forest', 'ocean', 'climate', 'natur', 'umwelt', 'wald', 'meer', 'klima'],
   'industry-trades': ['industry', 'factory', 'electrician', 'technician', 'maintenance', 'industrie', 'fabrik', 'elektriker', 'techniker', 'instandhaltung'],
-  'vehicles-transport': ['car', 'train', 'vehicle', 'transport', 'traffic', 'auto', 'zug', 'fahrzeug', 'verkehr'],
+  'logistics-delivery': ['logistics', 'delivery', 'parcel', 'package', 'shipment', 'shipping', 'warehouse', 'sorting center', 'conveyor', 'courier', 'truck', 'van', 'paket', 'sendung', 'lager', 'paketzentrum', 'fließband', 'fliessband', 'zustellfahrzeug', 'lastwagen'],
+  'vehicles-transport': ['car', 'train', 'vehicle', 'transport', 'traffic', 'truck', 'van', 'auto', 'zug', 'fahrzeug', 'verkehr', 'lastwagen'],
   'home-architecture': ['home', 'house', 'apartment', 'architecture', 'property', 'haus', 'wohnung', 'architektur', 'immobilie'],
   'social-media-creator': ['social media', 'youtube', 'tiktok', 'instagram', 'creator', 'influencer', 'content'],
   'news-events': ['news', 'event', 'reporter', 'press', 'interview', 'nachrichten', 'ereignis', 'presse'],
@@ -21,6 +22,7 @@ const STRONG_CATEGORY_TERMS = {
   'technology-ai': ['artificial intelligence', 'ai', 'ki', 'robotics', 'machine learning', 'cybersecurity'],
   'money-finance': ['stock market', 'stocks', 'investing', 'banking', 'finanzen', 'aktien'],
   'industry-trades': ['electrician', 'elektriker', 'industrial maintenance', 'instandhaltung'],
+  'logistics-delivery': ['parcel sorting', 'package delivery', 'delivery truck', 'delivery van', 'warehouse logistics', 'conveyor belt'],
   'health-fitness': ['doctor', 'hospital', 'mental health', 'arzt', 'krankenhaus'],
   'science-engineering': ['physics', 'chemistry', 'biology', 'physik', 'chemie', 'biologie'],
   'social-media-creator': ['youtube', 'tiktok', 'instagram', 'content creator']
@@ -53,6 +55,22 @@ const PHRASE_TRANSLATIONS = [
   [/\belektriker\b/gi, 'electrician'],
   [/\btechniker\b/gi, 'technician'],
   [/\bfabrik\b/gi, 'factory'],
+  [/\bfließband\b|\bfliessband\b/gi, 'conveyor belt'],
+  [/\bsortierpunkten\b|\bsortierpunkt\b/gi, 'sorting station'],
+  [/\bsortierung\b|\bsortieren\b|\bsortiert\b/gi, 'sorting'],
+  [/\bpaketzentrum\b|\bpaketzentren\b/gi, 'parcel sorting center'],
+  [/\bpakete\b|\bpaket\b/gi, 'packages'],
+  [/\bsendungen\b|\bsendung\b/gi, 'parcels'],
+  [/\bzustellfahrzeug\b|\bzustellfahrzeuge\b/gi, 'delivery van'],
+  [/\blastwagen\b|\blkw\b/gi, 'delivery truck'],
+  [/\bfahrzeug\b|\bfahrzeuge\b/gi, 'vehicle'],
+  [/\bverkehr\b/gi, 'traffic'],
+  [/\bbaustellen\b|\bbaustelle\b/gi, 'road construction'],
+  [/\bstraße\b|\bstrasse\b|\bstraßen\b|\bstrassen\b/gi, 'street'],
+  [/\bfährt\b|\bfaehrt\b|\bfahrt\b/gi, 'driving'],
+  [/\blager\b/gi, 'warehouse'],
+  [/\bverladebereich\b|\bverladebereiche\b/gi, 'loading dock'],
+  [/\bscanner\b|\bscannern\b/gi, 'scanner'],
   [/\bzug\b/gi, 'train'],
   [/\bauto\b/gi, 'car'],
   [/\bhaus\b/gi, 'house'],
@@ -77,6 +95,7 @@ const CATEGORY_ANGLES = {
   'travel-places': ['city establishing shot', 'traveler walking', 'airport terminal', 'street b roll', 'landmark wide shot'],
   'nature-environment': ['nature wide shot', 'environment close up', 'forest aerial', 'water detail', 'climate landscape'],
   'industry-trades': ['technician working', 'industrial machine close up', 'factory wide shot', 'tools close up', 'maintenance inspection'],
+  'logistics-delivery': ['parcel sorting conveyor', 'warehouse loading dock', 'delivery truck driving', 'delivery van street', 'package scanning close up'],
   'vehicles-transport': ['vehicle moving', 'transport station', 'driving close up', 'traffic wide shot', 'vehicle detail'],
   'home-architecture': ['modern interior', 'building exterior', 'home detail', 'architecture wide shot', 'property walkthrough'],
   'social-media-creator': ['creator filming', 'smartphone social media', 'camera close up', 'editing workstation', 'content studio'],
@@ -85,7 +104,7 @@ const CATEGORY_ANGLES = {
   'science-engineering': ['laboratory experiment', 'scientist close up', 'technical equipment', 'engineering workstation', 'science macro']
 };
 
-const GENERIC_ANGLES = ['person using', 'close up detail', 'wide establishing shot', 'hands working with', 'realistic b roll'];
+const GENERIC_ANGLES = ['close up detail', 'wide establishing shot', 'hands working with', 'realistic b roll'];
 
 export function translateSearchPhrase(value) {
   let output = String(value ?? '').trim();
