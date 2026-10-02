@@ -32,6 +32,8 @@ const RELEVANCE_SYNONYMS = {
   dock: ['loading','warehouse','freight']
 };
 
+const SYNTHETIC_MEDIA_PATTERN = /\b(animation|animated|cgi|3d render|3d animation|rendered|motion graphics|cartoon)\b/i;
+
 export function realMediaPolicy(item) {
   const reason = String(item?.reason ?? '');
   if (MANUAL_SOURCE_REASONS.has(reason)) {
@@ -70,6 +72,10 @@ export function mergeRealCandidate(map, asset, query, page = 1) {
   if (!existing.matched_queries.includes(query)) existing.matched_queries.push(query);
 }
 
+export function isSyntheticMediaCandidate(asset) {
+  return SYNTHETIC_MEDIA_PATTERN.test(`${asset?.title ?? ''} ${asset?.source_url ?? ''}`);
+}
+
 export function scoreRealCandidate(asset, { orientation, assetType } = {}) {
   const resolution = bestResolution(asset);
   const queryRelevance = scoreQueryRelevance(asset);
@@ -97,6 +103,7 @@ export function scoreRealCandidate(asset, { orientation, assetType } = {}) {
 
   score += queryRelevance;
   if (queryRelevance === 0) score -= 10;
+  if (isSyntheticMediaCandidate(asset)) score -= 35;
 
   return Math.max(0, Math.min(100, Math.round(score)));
 }
@@ -124,10 +131,12 @@ export function rankRealCandidates(candidates, options = {}) {
     .map((asset) => ({
       ...asset,
       query_relevance_score: scoreQueryRelevance(asset),
+      synthetic_media_risk: isSyntheticMediaCandidate(asset),
       real_media_score: scoreRealCandidate(asset, options)
     }))
     .sort((a, b) => b.real_media_score - a.real_media_score
       || b.query_relevance_score - a.query_relevance_score
+      || Number(a.synthetic_media_risk) - Number(b.synthetic_media_risk)
       || (b.matched_queries?.length ?? 0) - (a.matched_queries?.length ?? 0)
       || String(a.provider_id).localeCompare(String(b.provider_id)));
 }
@@ -295,4 +304,4 @@ function round(value, digits) {
   return Math.round(value * factor) / factor;
 }
 
-export const realMediaConstants = { MANUAL_SOURCE_REASONS, RELEVANCE_STOPWORDS, RELEVANCE_SYNONYMS };
+export const realMediaConstants = { MANUAL_SOURCE_REASONS, RELEVANCE_STOPWORDS, RELEVANCE_SYNONYMS, SYNTHETIC_MEDIA_PATTERN };

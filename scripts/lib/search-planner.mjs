@@ -112,6 +112,18 @@ export function translateSearchPhrase(value) {
   return output.replace(/\s+/g, ' ').trim();
 }
 
+export function canonicalSearchPhrase(original, translated, category) {
+  if (category !== 'logistics-delivery') return translated;
+  const value = normalize(`${original} ${translated}`);
+  if (/\b(fliessband|conveyor|sortierpunkt|sorting station)\b/.test(value)) return 'parcel sorting conveyor belt warehouse';
+  if (/\b(lastwagen|delivery truck|truck|lkw)\b/.test(value) && /\b(paketzentrum|sorting center|warehouse|center)\b/.test(value)) return 'delivery truck driving logistics distribution center';
+  if (/\b(zustellfahrzeug|delivery van|courier van)\b/.test(value)) return 'delivery van driving residential street';
+  if (/\b(verkehr|traffic|baustelle|road construction)\b/.test(value)) return 'city traffic road construction delivery route';
+  if (/\b(scanner|barcode|etikett|label)\b/.test(value)) return 'package barcode scanning warehouse';
+  if (/\b(verladebereich|loading dock|loading)\b/.test(value)) return 'packages loading delivery truck warehouse';
+  return 'warehouse package delivery logistics';
+}
+
 export function detectCategory(topic, suggestions = {}) {
   const normalized = normalize(topic);
   let bestCategory = null;
@@ -141,25 +153,28 @@ export function planSearchQueries({ topic, topicSuggestions = {}, maxQueries = 1
   const original = String(topic).trim().replace(/\s+/g, ' ');
   const translated = translateSearchPhrase(original);
   const category = detectCategory(`${original} ${translated}`, topicSuggestions);
+  const canonical = canonicalSearchPhrase(original, translated, category);
   const angles = CATEGORY_ANGLES[category] ?? GENERIC_ANGLES;
   const categoryTopics = (topicSuggestions[category] ?? []).slice(0, 8).map((value) => value.replaceAll('-', ' '));
   const intents = [];
 
-  addIntent(intents, translated, 'translated-base');
+  addIntent(intents, canonical, 'canonical-base');
+  if (normalize(translated) !== normalize(canonical)) addIntent(intents, translated, 'translated-base');
   if (normalize(original) !== normalize(translated)) addIntent(intents, original, 'original-language');
 
-  for (const angle of angles) addIntent(intents, `${translated} ${angle}`, 'visual-angle');
+  for (const angle of angles) addIntent(intents, `${canonical} ${angle}`, 'visual-angle');
   for (const related of categoryTopics) {
-    if (!containsTerm(normalize(translated), normalize(related))) addIntent(intents, `${translated} ${related}`, 'category-expansion');
+    if (!containsTerm(normalize(canonical), normalize(related))) addIntent(intents, `${canonical} ${related}`, 'category-expansion');
   }
 
   if (intents.length < maxQueries) {
-    for (const angle of GENERIC_ANGLES) addIntent(intents, `${translated} ${angle}`, 'generic-angle');
+    for (const angle of GENERIC_ANGLES) addIntent(intents, `${canonical} ${angle}`, 'generic-angle');
   }
 
   return {
     topic: original,
     translated_topic: translated,
+    canonical_topic: canonical,
     category,
     queries: intents.slice(0, maxQueries)
   };
