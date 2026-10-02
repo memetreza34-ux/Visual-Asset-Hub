@@ -1,0 +1,33 @@
+Du klickst auf „Bestellen“; wenige Sekunden später beginnt eine Reise, die du kaum siehst.
+
+Zuerst landet dein Auftrag im System des Händlers; dort wird geprüft, welche Artikel tatsächlich verfügbar sind.
+
+Das System wählt ein passendes Lager für den Versand; dabei zählen Bestand, Zielort und geplante Transportwege.
+
+Im Lager erhält dein Auftrag eine digitale Kennung; Mitarbeiter oder automatische Systeme suchen die richtigen Produkte.
+
+Die Artikel werden kontrolliert und sicher verpackt; anschließend bekommt das Paket sein Versandetikett mit Code.
+
+Ab jetzt beginnt die physische Reise durch das Lager; das Fließband bringt Sendungen zu den nächsten Sortierpunkten.
+
+Scanner lesen dort den Code auf dem Etikett; das System entscheidet innerhalb von Sekunden über die Richtung.
+
+Viele Pakete werden anschließend gemeinsam für Transporte gebündelt; Rollcontainer und Verladebereiche sammeln Sendungen für ähnliche Ziele.
+
+Dann verlässt dein Paket das erste Lager; ein Lastwagen fährt zum regionalen Paketzentrum.
+
+Dort wird wieder gescannt, sortiert und neu verteilt; jetzt zählen Zielregion, Zustellgebiet und die geplante Tour.
+
+Besonders nachts läuft die Sortierung mit hohem Tempo; Pakete wechseln zwischen Fördertechnik, Scannern und Verladebereichen.
+
+Am Morgen liegt deine Sendung näher am Ziel; sie erreicht schließlich einen lokalen Zustellstützpunkt.
+
+Dort wird das Paket einer konkreten Tour zugeordnet; zusammen mit vielen Sendungen kommt es ins Zustellfahrzeug.
+
+Jetzt beginnt der Teil, den du draußen bemerkst; das Fahrzeug fährt von Straße zu Straße.
+
+Die Reihenfolge der Stopps wird vorher möglichst sinnvoll geplant; Verkehr, Baustellen oder viele Sendungen können sie verändern.
+
+Kurz vor deiner Haustür folgt meist ein weiterer Scan; dadurch aktualisiert sich der Status in der Sendungsverfolgung.
+
+Dann klingelt es und die Reise endet bei dir; hinter dem Paket liegen Sortierungen, Scanner, Fahrzeuge und Übergaben.

@@ -1,0 +1,23 @@
+{
+  "pilot_id": "001-paketreise",
+  "title": "Was passiert mit deinem Paket nach dem Klick auf Bestellen?",
+  "cover_text": "SO REIST DEIN PAKET",
+  "target_duration_seconds": 120,
+  "orientation": "horizontal",
+  "max_words_per_beat": 10,
+  "strategy": "ai-first-with-real-motion-broll",
+  "expected_real_motion_beats": [
+    "Fließband / Sortierung",
+    "Lastwagen zum Paketzentrum",
+    "Zustellfahrzeug fährt durch Straßen",
+    "Verkehr / Baustellen"
+  ],
+  "success_criteria": [
+    "pilot-readiness status is ready-for-asset-pilot",
+    "exactly three related cover candidates are planned",
+    "cover uses whole-video story spine",
+    "AI images dominate, real motion B-roll is used where clearly superior",
+    "real-media resolver returns usable files or explicit unresolved states",
+    "no invented exact evidence is substituted with generic stock"
+  ]
+}
