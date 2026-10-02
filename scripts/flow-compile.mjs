@@ -6,6 +6,10 @@ import {
   defaultStyleLock,
   defaultWorldLock
 } from './lib/flow-production.mjs';
+import {
+  analyzePilotReadiness,
+  applyPilotCoverEnhancements
+} from './lib/pilot-readiness.mjs';
 
 const args = parseArgs(process.argv.slice(2));
 if (args.help === 'true') {
@@ -27,23 +31,37 @@ try {
   const worldLock = args['world-lock'] ? readJson(path.resolve(args['world-lock'])) : defaultWorldLock(plan);
   const outputDir = path.resolve(args['output-dir'] ?? path.join(path.dirname(planFile), 'flow'));
 
-  const result = buildFlowProduction(plan, { title, coverText, styleLock, worldLock, blockSize });
-  fs.mkdirSync(outputDir, { recursive: true });
+  let result = buildFlowProduction(plan, { title, coverText, styleLock, worldLock, blockSize });
+  result = applyPilotCoverEnhancements(result, plan, { title, coverText });
+  const targetDurationSeconds = args['target-duration'] ? Number(args['target-duration']) : undefined;
+  const readiness = analyzePilotReadiness({
+    visualPlan: plan,
+    productionPlan: result.production_plan,
+    targetDurationSeconds
+  });
 
+  fs.mkdirSync(outputDir, { recursive: true });
   const promptFile = path.join(outputDir, 'google-flow-master-prompt.txt');
   const productionFile = path.join(outputDir, 'flow-production-plan.json');
   const queueFile = path.join(outputDir, 'flow-generation-queue.json');
+  const readinessFile = path.join(outputDir, 'pilot-readiness.json');
   fs.writeFileSync(promptFile, `${result.master_prompt.trim()}\n`, 'utf8');
   fs.writeFileSync(productionFile, `${JSON.stringify(result.production_plan, null, 2)}\n`, 'utf8');
   fs.writeFileSync(queueFile, `${JSON.stringify(result.generation_queue, null, 2)}\n`, 'utf8');
+  fs.writeFileSync(readinessFile, `${JSON.stringify(readiness, null, 2)}\n`, 'utf8');
 
   console.log(`Flow Production V3: ${result.production_plan.image_count} finale KI-Bilder geplant.`);
   console.log('Cover: Bild 01, exakt 3 verwandte Kandidaten, danach STOP bis Nutzerauswahl.');
-  console.log('Nach der Auswahl: flow:select-cover aktiviert Bild 01.png als Referenz für Stage 2.');
+  console.log('Cover-Strategie: Titel + Cover-Text + gesamte Story-Spine, nicht nur Satz 1.');
   console.log(`Stage 2: Einzelgenerierung mit ${blockSize}er-QC-Blöcken.`);
+  console.log(`Pilot-Readiness: ${readiness.status}.`);
+  for (const warning of readiness.warnings) console.log(`WARNUNG: ${warning}`);
+  for (const error of readiness.errors) console.error(`PILOT-GATE: ${error}`);
   console.log(`Master Prompt: ${relative(promptFile)}`);
   console.log(`Production Plan: ${relative(productionFile)}`);
   console.log(`Generation Queue: ${relative(queueFile)}`);
+  console.log(`Pilot Report: ${relative(readinessFile)}`);
+  if (args['pilot-strict'] === 'true' && readiness.status !== 'ready-for-asset-pilot') process.exitCode = 1;
 } catch (error) {
   console.error(error instanceof Error ? error.message : String(error));
   process.exitCode = 1;
@@ -76,5 +94,5 @@ function relative(file) {
 }
 
 function help() {
-  console.log(`\nGoogle Flow Production Compiler V3\n\nKompiliert einen AI-first Visual Plan in einen verbindlichen Google-Flow-Produktionsprompt.\n\nBeispiel:\n  npm run flow:compile -- \\\n    --plan .local-storage/visual-plans/SESSION/visual-plan.json \\\n    --title "Wie KI Büroarbeit verändert" \\\n    --cover-text "KI ERSETZT BÜROJOBS?"\n\nOptionen:\n  --plan <pfad>          visual-plan.json aus npm run visual:plan\n  --title <text>         Videotitel\n  --cover-text <text>    exakter deutscher Cover-Text; Pflicht\n  --style-lock <json>    optionaler projektspezifischer Style Lock\n  --world-lock <json>    optionaler videospezifischer World Lock\n  --block-size <1-10>    QC-Blockgröße nach dem Cover; Standard: 5\n  --output-dir <pfad>    Ausgabeordner; Standard: FLOW-Unterordner beim Plan\n  --help                 Hilfe anzeigen\n\nDanach zwingend Cover auswählen:\n  npm run flow:select-cover -- --production-plan <flow-production-plan.json> --candidate <A|B|C> --reference "Bild 01.png"\n`);
+  console.log(`\nGoogle Flow Production Compiler V3\n\nKompiliert Visual Plan, Gesamtthema-Cover-Brief und Pilot-Pacing-Gate für Google Flow.\n\nBeispiel:\n  npm run flow:compile -- \\\n    --plan .local-storage/visual-plans/SESSION/visual-plan.json \\\n    --title "Wie KI Büroarbeit verändert" \\\n    --cover-text "KI ERSETZT BÜROJOBS?" \\\n    --target-duration 120 \\\n    --pilot-strict true\n\nOptionen:\n  --plan <pfad>              visual-plan.json\n  --title <text>             Videotitel\n  --cover-text <text>        exakter Cover-Text; Pflicht\n  --target-duration <sek>    Ziel-/echte Videodauer für Pilot-Pacing-Check\n  --pilot-strict <bool>      bei nicht bestandenem Pilot-Gate Exit-Code 1\n  --style-lock <json>        optionaler projektspezifischer Style Lock\n  --world-lock <json>        optionaler videospezifischer World Lock\n  --block-size <1-10>        QC-Blockgröße nach dem Cover; Standard: 5\n  --output-dir <pfad>        Ausgabeordner\n\nAusgabe:\n  google-flow-master-prompt.txt\n  flow-production-plan.json\n  flow-generation-queue.json\n  pilot-readiness.json\n`);
 }
