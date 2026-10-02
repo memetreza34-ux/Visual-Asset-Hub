@@ -76,6 +76,28 @@ export function isSyntheticMediaCandidate(asset) {
   return SYNTHETIC_MEDIA_PATTERN.test(`${asset?.title ?? ''} ${asset?.source_url ?? ''}`);
 }
 
+export function requiredConceptGroups(asset) {
+  const queryText = normalizeForRelevance((asset?.matched_queries ?? []).join(' '));
+  const groups = [];
+  if (queryText.includes('zustellfahrzeug') || queryText.includes('delivery van')) {
+    groups.push([' van ', ' courier van ', ' delivery van ', ' delivery vehicle ']);
+  }
+  if (queryText.includes('lastwagen') || queryText.includes('delivery truck')) {
+    groups.push([' truck ', ' lorry ', ' semi truck ', ' freight truck ', ' tractor trailer ']);
+  }
+  if (queryText.includes('fliessband') || queryText.includes('conveyor belt')) {
+    groups.push([' conveyor ', ' conveyor belt ', ' sorting lane ', ' sorting conveyor ']);
+  }
+  return groups;
+}
+
+export function passesRequiredConcepts(asset) {
+  const groups = requiredConceptGroups(asset);
+  if (!groups.length) return true;
+  const haystack = ` ${normalizeForRelevance(`${asset?.title ?? ''} ${asset?.source_url ?? ''}`)} `;
+  return groups.every((group) => group.some((needle) => haystack.includes(needle)));
+}
+
 export function scoreRealCandidate(asset, { orientation, assetType } = {}) {
   const resolution = bestResolution(asset);
   const queryRelevance = scoreQueryRelevance(asset);
@@ -104,6 +126,7 @@ export function scoreRealCandidate(asset, { orientation, assetType } = {}) {
   score += queryRelevance;
   if (queryRelevance === 0) score -= 10;
   if (isSyntheticMediaCandidate(asset)) score -= 35;
+  if (!passesRequiredConcepts(asset)) score -= 50;
 
   return Math.max(0, Math.min(100, Math.round(score)));
 }
@@ -127,18 +150,20 @@ export function scoreQueryRelevance(asset) {
 }
 
 export function rankRealCandidates(candidates, options = {}) {
-  return candidates
-    .map((asset) => ({
-      ...asset,
-      query_relevance_score: scoreQueryRelevance(asset),
-      synthetic_media_risk: isSyntheticMediaCandidate(asset),
-      real_media_score: scoreRealCandidate(asset, options)
-    }))
-    .sort((a, b) => b.real_media_score - a.real_media_score
-      || b.query_relevance_score - a.query_relevance_score
-      || Number(a.synthetic_media_risk) - Number(b.synthetic_media_risk)
-      || (b.matched_queries?.length ?? 0) - (a.matched_queries?.length ?? 0)
-      || String(a.provider_id).localeCompare(String(b.provider_id)));
+  const scored = candidates.map((asset) => ({
+    ...asset,
+    query_relevance_score: scoreQueryRelevance(asset),
+    synthetic_media_risk: isSyntheticMediaCandidate(asset),
+    hard_relevance_pass: passesRequiredConcepts(asset),
+    real_media_score: scoreRealCandidate(asset, options)
+  }));
+  const hasHardRequirements = scored.some((asset) => requiredConceptGroups(asset).length > 0);
+  const eligible = hasHardRequirements ? scored.filter((asset) => asset.hard_relevance_pass) : scored;
+  return eligible.sort((a, b) => b.real_media_score - a.real_media_score
+    || b.query_relevance_score - a.query_relevance_score
+    || Number(a.synthetic_media_risk) - Number(b.synthetic_media_risk)
+    || (b.matched_queries?.length ?? 0) - (a.matched_queries?.length ?? 0)
+    || String(a.provider_id).localeCompare(String(b.provider_id)));
 }
 
 export function choosePexelsDownload(asset, { maxDimension = 1920 } = {}) {

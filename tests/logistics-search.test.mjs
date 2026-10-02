@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { canonicalSearchPhrase, planSearchQueries, translateSearchPhrase } from '../scripts/lib/search-planner.mjs';
-import { isSyntheticMediaCandidate, rankRealCandidates, scoreQueryRelevance } from '../scripts/lib/real-media.mjs';
+import { isSyntheticMediaCandidate, passesRequiredConcepts, rankRealCandidates, scoreQueryRelevance } from '../scripts/lib/real-media.mjs';
 
 test('deutsche Logistikbegriffe werden in brauchbare englische Stock-Queries übersetzt', () => {
   const translated = translateSearchPhrase('lastwagen fährt zum paketzentrum');
@@ -54,7 +54,7 @@ test('semantisch passendes B-Roll schlägt technisch gleichwertigen generischen 
   assert.ok(scoreQueryRelevance(exact) > scoreQueryRelevance(generic));
   const ranked = rankRealCandidates([generic, exact], { orientation: 'horizontal', assetType: 'video' });
   assert.equal(ranked[0].provider_id, '2');
-  assert.ok(ranked[0].query_relevance_score > ranked[1].query_relevance_score);
+  assert.equal(ranked.length, 1);
 });
 
 test('Animation und CGI werden in einer Real-B-Roll-Suche stark abgewertet', () => {
@@ -86,5 +86,25 @@ test('Animation und CGI werden in einer Real-B-Roll-Suche stark abgewertet', () 
   assert.equal(isSyntheticMediaCandidate(real), false);
   const ranked = rankRealCandidates([animated, real], { orientation: 'horizontal', assetType: 'video' });
   assert.equal(ranked[0].provider_id, '10');
-  assert.equal(ranked[1].synthetic_media_risk, true);
+});
+
+test('harte Kernmotive verwerfen falsche Delivery-Van Treffer vollständig', () => {
+  const correct = {
+    provider: 'pexels', provider_id: '20', type: 'video', width: 1920, height: 1080,
+    orientation: 'horizontal', duration_seconds: 10, occurrences: 1, first_seen_page: 1,
+    matched_queries: ['delivery van driving residential street'],
+    title: 'White delivery van driving on residential street',
+    source_url: 'https://www.pexels.com/video/delivery-van-residential-street-20/'
+  };
+  const wrong = {
+    ...correct,
+    provider_id: '21',
+    title: 'Highway traffic on cloudy day',
+    source_url: 'https://www.pexels.com/video/highway-traffic-21/'
+  };
+
+  assert.equal(passesRequiredConcepts(correct), true);
+  assert.equal(passesRequiredConcepts(wrong), false);
+  const ranked = rankRealCandidates([wrong, correct], { orientation: 'horizontal', assetType: 'video' });
+  assert.deepEqual(ranked.map((item) => item.provider_id), ['20']);
 });
