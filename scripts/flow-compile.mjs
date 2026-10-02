@@ -37,8 +37,9 @@ try {
   fs.writeFileSync(productionFile, `${JSON.stringify(result.production_plan, null, 2)}\n`, 'utf8');
   fs.writeFileSync(queueFile, `${JSON.stringify(result.generation_queue, null, 2)}\n`, 'utf8');
 
-  console.log(`Flow Production V2: ${result.production_plan.image_count} finale KI-Bilder geplant.`);
-  console.log('Cover: Bild 01, exakt 3 Kandidaten, danach STOP bis Nutzerauswahl.');
+  console.log(`Flow Production V3: ${result.production_plan.image_count} finale KI-Bilder geplant.`);
+  console.log('Cover: Bild 01, exakt 3 verwandte Kandidaten, danach STOP bis Nutzerauswahl.');
+  console.log('Nach der Auswahl: flow:select-cover aktiviert Bild 01.png als Referenz für Stage 2.');
   console.log(`Stage 2: Einzelgenerierung mit ${blockSize}er-QC-Blöcken.`);
   console.log(`Master Prompt: ${relative(promptFile)}`);
   console.log(`Production Plan: ${relative(productionFile)}`);
@@ -75,35 +76,5 @@ function relative(file) {
 }
 
 function help() {
-  console.log(`
-Google Flow Production Compiler V2
-
-Kompiliert einen AI-first Visual Plan in einen verbindlichen Google-Flow-Produktionsprompt.
-
-Beispiel:
-  npm run flow:compile -- \\
-    --plan .local-storage/visual-plans/SESSION/visual-plan.json \\
-    --title "Wie KI Büroarbeit verändert" \\
-    --cover-text "KI ERSETZT BÜROJOBS?"
-
-Optionen:
-  --plan <pfad>          visual-plan.json aus npm run visual:plan
-  --title <text>         Videotitel
-  --cover-text <text>    exakter deutscher Cover-Text; Pflicht
-  --style-lock <json>    optionaler projektspezifischer Style Lock
-  --world-lock <json>    optionaler videospezifischer World Lock
-  --block-size <1-10>    QC-Blockgröße nach dem Cover; Standard: 5
-  --output-dir <pfad>    Ausgabeordner; Standard: FLOW-Unterordner beim Plan
-  --help                 Hilfe anzeigen
-
-Ausgabe:
-  google-flow-master-prompt.txt
-  flow-production-plan.json
-  flow-generation-queue.json
-
-Verbindliche Produktionslogik:
-  Stage 1: genau drei Bild-01-Coverkandidaten, danach STOP und Nutzerauswahl.
-  Stage 2: Bild 02–NN strikt einzeln generieren, warten, QC, umbenennen, dann weiter.
-  5er-Blöcke sind nur QC-Checkpoints, niemals parallele Generationen.
-`);
+  console.log(`\nGoogle Flow Production Compiler V3\n\nKompiliert einen AI-first Visual Plan in einen verbindlichen Google-Flow-Produktionsprompt.\n\nBeispiel:\n  npm run flow:compile -- \\\n    --plan .local-storage/visual-plans/SESSION/visual-plan.json \\\n    --title "Wie KI Büroarbeit verändert" \\\n    --cover-text "KI ERSETZT BÜROJOBS?"\n\nOptionen:\n  --plan <pfad>          visual-plan.json aus npm run visual:plan\n  --title <text>         Videotitel\n  --cover-text <text>    exakter deutscher Cover-Text; Pflicht\n  --style-lock <json>    optionaler projektspezifischer Style Lock\n  --world-lock <json>    optionaler videospezifischer World Lock\n  --block-size <1-10>    QC-Blockgröße nach dem Cover; Standard: 5\n  --output-dir <pfad>    Ausgabeordner; Standard: FLOW-Unterordner beim Plan\n  --help                 Hilfe anzeigen\n\nDanach zwingend Cover auswählen:\n  npm run flow:select-cover -- --production-plan <flow-production-plan.json> --candidate <A|B|C> --reference "Bild 01.png"\n`);
 }
