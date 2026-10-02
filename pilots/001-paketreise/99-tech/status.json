@@ -1,0 +1,37 @@
+{
+  "project": "001-paketreise",
+  "status": "READY_FOR_GOOGLE_FLOW_COVER_TEST",
+  "flow_stage": "stage-1-cover-selection",
+  "cover_candidates_required": 3,
+  "selected_cover": null,
+  "ai_images_planned": 30,
+  "real_broll_planned": 4,
+  "real_broll_ready": 4,
+  "real_broll_sources": [
+    {
+      "beat_id": "beat-012",
+      "provider": "pexels",
+      "provider_id": "10472351",
+      "description": "Parcels on sorting lane"
+    },
+    {
+      "beat_id": "beat-018",
+      "provider": "pexels",
+      "provider_id": "29623784",
+      "description": "Truck driving"
+    },
+    {
+      "beat_id": "beat-028",
+      "provider": "pexels",
+      "provider_id": "5043937",
+      "description": "Delivery worker at panel van"
+    },
+    {
+      "beat_id": "beat-030",
+      "provider": "pexels",
+      "provider_id": "8597290",
+      "description": "Moving vehicles on highway"
+    }
+  ],
+  "next_action": "Generate Cover A, B and C from 00-bildprompts/cover, then wait for explicit user selection."
+}

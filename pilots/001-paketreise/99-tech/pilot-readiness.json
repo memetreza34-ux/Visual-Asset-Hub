@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "policy": {
+    "id": "youtube-2min-pilot-v1",
+    "target_duration_seconds": [90, 150],
+    "cover_max_seconds": 2.2,
+    "cover_target_seconds": 2,
+    "intro_window_seconds": 10,
+    "intro_minimum_visual_starts": 4,
+    "minimum_primary_visuals_per_100_seconds": 24,
+    "target_primary_visuals_per_100_seconds": [28, 42],
+    "review_hold_above_seconds": 5.8,
+    "hard_maximum_hold_seconds": 8,
+    "recommended_max_words_per_beat": 10
+  },
+  "status": "ready-for-asset-pilot",
+  "metrics": {
+    "words": 268,
+    "estimated_duration_seconds": 120,
+    "primary_visuals": 34,
+    "primary_visuals_per_100_seconds": 28.3,
+    "estimated_intro_visual_starts": 4,
+    "cover_hold_seconds": 2,
+    "max_estimated_beat_hold_seconds": 4.3
+  },
+  "errors": [],
+  "warnings": []
+}

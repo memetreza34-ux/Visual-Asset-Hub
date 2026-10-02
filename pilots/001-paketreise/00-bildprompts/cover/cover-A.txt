@@ -1,0 +1,19 @@
+GOOGLE FLOW — COVER A
+
+Format: 16:9.
+Exact visible text: "SO REIST DEIN PAKET"
+
+Create a believable factual documentary cover about the hidden journey of a parcel after an online order. One ordinary cardboard parcel is the dominant subject in the foreground. Behind it, show a real modern parcel-sorting environment with conveyor belts, scanners and a distant delivery/logistics context, but keep all background elements secondary and readable. The image should instantly communicate: this one package is about to travel through a large hidden logistics system.
+
+Use realistic materials, natural practical warehouse lighting, physically plausible perspective, restrained contrast and a candid documentary feel. The parcel must remain the clear visual anchor. Leave one calm high-contrast text zone for the exact German cover text. Integrate the text exactly once, large and immediately readable, without covering the package.
+
+COVER FAMILY LOCK:
+This is candidate A of three versions of the SAME cover idea. Keep the same parcel identity, same logistics world, same realism level, same palette family and same overall mood across A/B/C. Do not invent three different art directions.
+
+VARIATION A:
+Use the clearest subject-forward composition. The parcel is prominent and instantly readable, with the sorting environment creating depth behind it.
+
+NEGATIVE RULES:
+No collage, no split screen, no tiny secondary scenes, no glossy advertising look, no cartoon/CGI aesthetic, no sci-fi holograms, no invented logos, no watermark, no second headline, no image number, no pseudo-text.
+
+Generate exactly ONE image. Wait for completion, QC it, then stop before Cover B.

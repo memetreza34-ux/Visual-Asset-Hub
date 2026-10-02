@@ -1,0 +1,186 @@
+GOOGLE FLOW — PILOT 001 PAKETREISE
+
+GLOBAL LOCK FÜR BILD 02–30
+- Format immer 16:9.
+- Gewähltes `Bild 01.png` bei jedem KI-Bild als weiche visuelle Referenz verwenden.
+- Beibehalten: dokumentarischer Realismus, Grundfarbfamilie, Kontrastverhalten, Material-/Texturqualität, allgemeine Lichtlogik und wiederkehrende Personen/Orte/Props.
+- Bewusst variieren: Szene, Kameradistanz, Perspektive, Handlung, Pose und Komposition.
+- Cover-Layout NICHT kopieren.
+- Natürliche praktische Lichtquellen, plausible Perspektive, echte Materialien, glaubwürdige Anatomie.
+- Kein Cartoon, kein CGI-Look, keine Hochglanzwerbung, keine Sci-Fi-Hologramme, keine erfundenen Logos, keine Wasserzeichen, keine Pseudo-Schrift.
+- Story-Bilder grundsätzlich ohne sichtbaren Text.
+- Immer genau EIN Bild erzeugen → vollständig warten → QC → exakt umbenennen → erst dann nächstes Bild.
+
+STAGE 1
+Die drei Cover stehen separat unter `cover/cover-A.txt`, `cover-B.txt`, `cover-C.txt`. Nach Cover C zwingend STOP. Nutzer wählt einen Gewinner. Gewinner wird `Bild 01.png`.
+
+STAGE 2
+
+=== BILD 02 — beat-002 ===
+Audio: wenige Sekunden später beginnt eine Reise, die du kaum siehst.
+Prompt: Use selected Bild 01.png as a soft visual reference. Show one ordinary parcel just beginning an unseen logistics journey, leaving the simple ordering moment behind and entering a believable warehouse/logistics world. Medium eye-level documentary framing, clear foreground-to-background depth, realistic cardboard and warehouse materials, natural practical lighting. No visible text.
+Dateiname: Bild 02.png
+
+=== BILD 03 — beat-003 ===
+Audio: Zuerst landet dein Auftrag im System des Händlers.
+Prompt: Use selected Bild 01.png as a soft visual reference. Visualize the order entering the retailer's operational system without fake futuristic UI: an over-the-shoulder or close documentary view connecting a real workstation/order-processing environment to the physical parcel workflow. One dominant process state, no infographic grid, no invented interface text. No visible text.
+Dateiname: Bild 03.png
+
+=== BILD 04 — beat-004 ===
+Audio: dort wird geprüft, welche Artikel tatsächlich verfügbar sind.
+Prompt: Use selected Bild 01.png as a soft visual reference. Tight factual warehouse detail showing availability checking through real shelves, bins or inventory handling rather than floating graphics. One clear object relationship, tactile materials, believable working environment, natural light. No visible text.
+Dateiname: Bild 04.png
+
+=== BILD 05 — beat-005 ===
+Audio: Das System wählt ein passendes Lager für den Versand.
+Prompt: Use selected Bild 01.png as a soft visual reference. Show a believable logistics decision through physical spatial relationships: several warehouse routes or zones with one clearly favored path, seen over the shoulder of a worker or from a realistic operations perspective. No corporate diagram boxes, no holograms, no visible text.
+Dateiname: Bild 05.png
+
+=== BILD 06 — beat-006 ===
+Audio: dabei zählen Bestand, Zielort und geplante Transportwege.
+Prompt: Use selected Bild 01.png as a soft visual reference. POV-style factual documentary scene connecting stocked goods, destination handling and transport routing through real warehouse cues and physical movement paths. Keep it readable as one idea, not a collage. No visible text.
+Dateiname: Bild 06.png
+
+=== BILD 07 — beat-007 ===
+Audio: Im Lager erhält dein Auftrag eine digitale Kennung.
+Prompt: Use selected Bild 01.png as a soft visual reference. Wide documentary view inside a real warehouse where a parcel/order is being assigned a machine-readable identity through normal scanning/label workflow. Do not invent a readable branded interface. No visible text.
+Dateiname: Bild 07.png
+
+=== BILD 08 — beat-008 ===
+Audio: Mitarbeiter oder automatische Systeme suchen die richtigen Produkte.
+Prompt: Use selected Bild 01.png as a soft visual reference. Medium documentary scene of a warehouse worker and/or realistic picking automation locating the correct products on shelving. Natural body language, authentic warehouse geometry, no staged advertising pose. No visible text.
+Dateiname: Bild 08.png
+
+=== BILD 09 — beat-009 ===
+Audio: Die Artikel werden kontrolliert und sicher verpackt.
+Prompt: Use selected Bild 01.png as a soft visual reference. Close documentary framing of products being checked and packed securely into a cardboard parcel, hands and materials physically plausible, packing bench visible but secondary. No visible text.
+Dateiname: Bild 09.png
+
+=== BILD 10 — beat-010 ===
+Audio: anschließend bekommt das Paket sein Versandetikett mit Code.
+Prompt: Use selected Bild 01.png as a soft visual reference. Tight factual detail of a shipping label being applied to the parcel in a real packing station. The label may show a plausible machine-readable code shape but no legible invented personal data, brand names or fake words. Keep one dominant process state.
+Dateiname: Bild 10.png
+
+=== BILD 11 — beat-011 ===
+Audio: Ab jetzt beginnt die physische Reise durch das Lager.
+Prompt: Use selected Bild 01.png as a soft visual reference. Show the same parcel transitioning from packing into the physical warehouse movement system, with a conveyor or handling lane pulling into depth. Over-the-shoulder documentary feel, believable scale and machinery. No visible text.
+Dateiname: Bild 11.png
+
+--- REAL B-ROLL — beat-012 ---
+Audio: das Fließband bringt Sendungen zu den nächsten Sortierpunkten.
+Kein Flow-Bild. Verwende den echten B-Roll-Clip aus `03-bilder/real-broll/`.
+
+=== BILD 12 — beat-013 ===
+Audio: Scanner lesen dort den Code auf dem Etikett.
+Prompt: Use selected Bild 01.png as a soft visual reference. Factual close/medium documentary shot of a parcel passing beneath or beside a real industrial scanner, with the scan point visually obvious through hardware and parcel position, not through sci-fi effects. No visible text.
+Dateiname: Bild 12.png
+
+=== BILD 13 — beat-014 ===
+Audio: das System entscheidet innerhalb von Sekunden über die Richtung.
+Prompt: Use selected Bild 01.png as a soft visual reference. Show a real sorting junction where one parcel route physically branches and the package is directed toward one path. Make the cause-and-route relationship immediately readable through machinery and space, not floating arrows or UI. No visible text.
+Dateiname: Bild 13.png
+
+=== BILD 14 — beat-015 ===
+Audio: Viele Pakete werden anschließend gemeinsam für Transporte gebündelt.
+Prompt: Use selected Bild 01.png as a soft visual reference. Documentary scene of many parcels being consolidated for transport into one clearly organized handling group, cage or roll container. One dominant grouping action, realistic warehouse density, no visual clutter. No visible text.
+Dateiname: Bild 14.png
+
+=== BILD 15 — beat-016 ===
+Audio: Rollcontainer und Verladebereiche sammeln Sendungen für ähnliche Ziele.
+Prompt: Use selected Bild 01.png as a soft visual reference. Tight-to-medium factual view of roll containers and loading zones holding parcels grouped for similar destinations. Real industrial surfaces, practical lighting, readable spatial organization. No visible text.
+Dateiname: Bild 15.png
+
+=== BILD 16 — beat-017 ===
+Audio: Dann verlässt dein Paket das erste Lager.
+Prompt: Use selected Bild 01.png as a soft visual reference. Documentary transition shot of the parcel moving toward a loading dock and leaving the warehouse environment, with open dock/loading context ahead. Do not make it a generic hero shot. No visible text.
+Dateiname: Bild 16.png
+
+--- REAL B-ROLL — beat-018 ---
+Audio: ein Lastwagen fährt zum regionalen Paketzentrum.
+Kein Flow-Bild. Verwende den echten Truck-B-Roll-Clip aus `03-bilder/real-broll/`.
+
+=== BILD 17 — beat-019 ===
+Audio: Dort wird wieder gescannt, sortiert und neu verteilt.
+Prompt: Use selected Bild 01.png as a soft visual reference. Wide factual documentary view inside a regional parcel center where incoming parcels are scanned, sorted and redistributed across lanes. Keep one dominant sorting state, realistic machinery, no fake digital overlays. No visible text.
+Dateiname: Bild 17.png
+
+=== BILD 18 — beat-020 ===
+Audio: jetzt zählen Zielregion, Zustellgebiet und die geplante Tour.
+Prompt: Use selected Bild 01.png as a soft visual reference. Medium documentary operations scene connecting parcels to local route organization through real cages, lanes, vehicle bays or worker handling. Show physical organization rather than an invented map interface. No visible text.
+Dateiname: Bild 18.png
+
+=== BILD 19 — beat-021 ===
+Audio: Besonders nachts läuft die Sortierung mit hohem Tempo.
+Prompt: Use selected Bild 01.png as a soft visual reference. Night-shift parcel sorting center with believable artificial warehouse lighting, active machinery and visible workload. Close/medium documentary framing, energetic but physically realistic, no motion fantasy. No visible text.
+Dateiname: Bild 19.png
+
+=== BILD 20 — beat-022 ===
+Audio: Pakete wechseln zwischen Fördertechnik, Scannern und Verladebereichen.
+Prompt: Use selected Bild 01.png as a soft visual reference. Tight factual view linking conveyor hardware, scanner hardware and a loading area within one coherent real logistics environment. One parcel remains the visual anchor through the transition. No visible text.
+Dateiname: Bild 20.png
+
+=== BILD 21 — beat-023 ===
+Audio: Am Morgen liegt deine Sendung näher am Ziel.
+Prompt: Use selected Bild 01.png as a soft visual reference. Early-morning documentary scene showing the parcel now in a smaller, more local delivery environment, with dawn practical light and reduced scale compared with the regional center. No visible text.
+Dateiname: Bild 21.png
+
+=== BILD 22 — beat-024 ===
+Audio: sie erreicht schließlich einen lokalen Zustellstützpunkt.
+Prompt: Use selected Bild 01.png as a soft visual reference. Believable POV or establishing view of a local delivery depot/staging area receiving parcels for final-mile delivery. Ordinary vans, cages and loading space may appear but remain secondary. No logos, no visible text.
+Dateiname: Bild 22.png
+
+=== BILD 23 — beat-025 ===
+Audio: Dort wird das Paket einer konkreten Tour zugeordnet.
+Prompt: Use selected Bild 01.png as a soft visual reference. Wide documentary view of parcels being assigned to a specific delivery route through real physical staging: grouped stops, cages or van-loading positions. Avoid fake maps and infographic arrows. No visible text.
+Dateiname: Bild 23.png
+
+=== BILD 24 — beat-026 ===
+Audio: zusammen mit vielen Sendungen kommt es ins Zustellfahrzeug.
+Prompt: Use selected Bild 01.png as a soft visual reference. Medium factual documentary shot of the parcel being loaded with many other parcels into an ordinary panel delivery van. Real cargo-space geometry, natural worker posture, no brand markings. No visible text.
+Dateiname: Bild 24.png
+
+=== BILD 25 — beat-027 ===
+Audio: Jetzt beginnt der Teil, den du draußen bemerkst.
+Prompt: Use selected Bild 01.png as a soft visual reference. Close documentary transition from depot interior to the outside world: parcel/van context approaching public streets, natural daylight replacing warehouse light. Keep one clear visual idea. No visible text.
+Dateiname: Bild 25.png
+
+--- REAL B-ROLL — beat-028 ---
+Audio: das Zustellfahrzeug fährt von Straße zu Straße.
+Kein Flow-Bild. Verwende den echten Delivery-Van-B-Roll-Clip aus `03-bilder/real-broll/`.
+
+=== BILD 26 — beat-029 ===
+Audio: Die Reihenfolge der Stopps wird vorher möglichst sinnvoll geplant.
+Prompt: Use selected Bild 01.png as a soft visual reference. Over-the-shoulder documentary scene of a delivery route being organized using believable real-world navigation/stop-planning context, but do not reproduce a real branded interface and do not invent readable UI text. Focus on the planning action. No visible text.
+Dateiname: Bild 26.png
+
+--- REAL B-ROLL — beat-030 ---
+Audio: Verkehr, Baustellen oder viele Sendungen können sie verändern.
+Kein Flow-Bild. Verwende den echten Traffic-B-Roll-Clip aus `03-bilder/real-broll/`.
+
+=== BILD 27 — beat-031 ===
+Audio: Kurz vor deiner Haustür folgt meist ein weiterer Scan.
+Prompt: Use selected Bild 01.png as a soft visual reference. Factual documentary scene near a residential doorway where the parcel receives a final handheld scan before delivery. Scanner hardware and parcel relationship should be clear, no readable private data or branded UI. No visible text.
+Dateiname: Bild 27.png
+
+=== BILD 28 — beat-032 ===
+Audio: dadurch aktualisiert sich der Status in der Sendungsverfolgung.
+Prompt: Use selected Bild 01.png as a soft visual reference. Show cause and consequence in one believable scene: handheld parcel scan in the foreground and a generic phone notification/tracking state suggested in context without recreating a real service or using readable fake text. No invented branding or labels.
+Dateiname: Bild 28.png
+
+=== BILD 29 — beat-033 ===
+Audio: Dann klingelt es und die Reise endet bei dir.
+Prompt: Use selected Bild 01.png as a soft visual reference. Close factual documentary moment at a normal residential front door as the parcel reaches the recipient. Candid handoff/end-of-journey feeling, natural daylight, no exaggerated emotion, no visible text.
+Dateiname: Bild 29.png
+
+=== BILD 30 — beat-034 ===
+Audio: hinter dem Paket liegen Sortierungen, Scanner, Fahrzeuge und Übergaben.
+Prompt: Use selected Bild 01.png as a soft visual reference. Final documentary detail of the delivered parcel with subtle physical signs of travel—label, cardboard wear and handling marks—while background depth quietly echoes logistics elements from earlier scenes without forming a collage. Calm ending frame, no visible text.
+Dateiname: Bild 30.png
+
+END-QC
+- Bild 01–30 vollständig und eindeutig benannt.
+- Die vier REAL-B-ROLL-Beats sind nicht als KI-Bilder dupliziert.
+- Kein auffälliger Style Drift.
+- Keine fast identischen benachbarten Kompositionen.
+- Wiederkehrendes Paket/Umfeld wirkt wie dieselbe Welt.
+- Kein unnötiger Text oder Pseudo-Text.

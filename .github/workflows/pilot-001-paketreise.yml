@@ -17,6 +17,7 @@ jobs:
       PEXELS_API_KEY: ${{ secrets.PEXELS_API }}
       PILOT_DIR: pilots/001-paketreise
       OUTPUT_DIR: .local-storage/pilot-001
+      PROJECT_OUT: .local-storage/pilot-001/project/001-paketreise
       VIDEO_TITLE: Was passiert mit deinem Paket nach dem Klick auf Bestellen?
       COVER_TEXT: SO REIST DEIN PAKET
 
@@ -43,7 +44,7 @@ jobs:
         run: |
           mkdir -p "$OUTPUT_DIR"
           npm run visual:plan -- \
-            --file "$PILOT_DIR/script.txt" \
+            --file "$PILOT_DIR/01-script/voice-script.txt" \
             --orientation horizontal \
             --max-words-per-beat 10 \
             --output "$OUTPUT_DIR/visual-plan.json"
@@ -101,10 +102,65 @@ jobs:
           console.log(JSON.stringify(summary, null, 2));
           NODE
 
+      - name: Kanalartige Projektstruktur materialisieren
+        shell: bash
+        run: |
+          rm -rf "$PROJECT_OUT"
+          mkdir -p \
+            "$PROJECT_OUT/00-bildprompts/cover" \
+            "$PROJECT_OUT/00-bildprompts/images" \
+            "$PROJECT_OUT/01-script" \
+            "$PROJECT_OUT/02-audio" \
+            "$PROJECT_OUT/03-bilder/ki" \
+            "$PROJECT_OUT/03-bilder/real-broll" \
+            "$PROJECT_OUT/04-export" \
+            "$PROJECT_OUT/99-tech"
+
+          cp "$PILOT_DIR/README.md" "$PROJECT_OUT/README.md"
+          cp "$PILOT_DIR/01-script/voice-script.txt" "$PROJECT_OUT/01-script/voice-script.txt"
+          cp "$PILOT_DIR/00-bildprompts/99-alle-bildprompts.txt" "$PROJECT_OUT/00-bildprompts/99-alle-bildprompts.txt"
+          cp "$PILOT_DIR/00-bildprompts/cover/cover-A.txt" "$PROJECT_OUT/00-bildprompts/cover/cover-A.txt"
+          cp "$PILOT_DIR/00-bildprompts/cover/cover-B.txt" "$PROJECT_OUT/00-bildprompts/cover/cover-B.txt"
+          cp "$PILOT_DIR/00-bildprompts/cover/cover-C.txt" "$PROJECT_OUT/00-bildprompts/cover/cover-C.txt"
+          cp "$OUTPUT_DIR/flow/google-flow-master-prompt.txt" "$PROJECT_OUT/00-bildprompts/google-flow-master-prompt.txt"
+
+          cp "$OUTPUT_DIR/visual-plan.json" "$PROJECT_OUT/99-tech/visual-plan.json"
+          cp "$OUTPUT_DIR/scene-cards.json" "$PROJECT_OUT/99-tech/scene-cards.json"
+          cp "$OUTPUT_DIR/ai-generation-queue.json" "$PROJECT_OUT/99-tech/ai-generation-queue.json"
+          cp "$OUTPUT_DIR/real-material-queue.json" "$PROJECT_OUT/99-tech/real-material-queue.json"
+          cp "$OUTPUT_DIR/flow/flow-production-plan.json" "$PROJECT_OUT/99-tech/flow-production-plan.json"
+          cp "$OUTPUT_DIR/flow/flow-generation-queue.json" "$PROJECT_OUT/99-tech/flow-generation-queue.json"
+          cp "$OUTPUT_DIR/flow/pilot-readiness.json" "$PROJECT_OUT/99-tech/pilot-readiness.json"
+          cp "$OUTPUT_DIR/pilot-run-summary.json" "$PROJECT_OUT/99-tech/pilot-run-summary.json"
+          cp "$PILOT_DIR/99-tech/pilot.json" "$PROJECT_OUT/99-tech/pilot.json"
+
+          if [ -f "$OUTPUT_DIR/real-media/real-media-resolution.json" ]; then
+            cp "$OUTPUT_DIR/real-media/real-media-resolution.json" "$PROJECT_OUT/99-tech/real-media-resolution.json"
+          fi
+          if [ -f "$OUTPUT_DIR/real-media/remotion-real-media.json" ]; then
+            cp "$OUTPUT_DIR/real-media/remotion-real-media.json" "$PROJECT_OUT/99-tech/remotion-real-media.json"
+          fi
+          if compgen -G "$OUTPUT_DIR/real-media/files/*" > /dev/null; then
+            cp "$OUTPUT_DIR"/real-media/files/* "$PROJECT_OUT/03-bilder/real-broll/"
+          fi
+
+          printf '%s\n' '{"status":"READY_FOR_GOOGLE_FLOW_COVER_TEST","next_action":"Generate cover A/B/C and wait for user selection"}' > "$PROJECT_OUT/99-tech/status.json"
+
+      - name: Struktur prüfen
+        shell: bash
+        run: |
+          test -f "$PROJECT_OUT/00-bildprompts/cover/cover-A.txt"
+          test -f "$PROJECT_OUT/00-bildprompts/cover/cover-B.txt"
+          test -f "$PROJECT_OUT/00-bildprompts/cover/cover-C.txt"
+          test -f "$PROJECT_OUT/00-bildprompts/99-alle-bildprompts.txt"
+          test -f "$PROJECT_OUT/01-script/voice-script.txt"
+          test -f "$PROJECT_OUT/99-tech/pilot-readiness.json"
+          echo "Projektstruktur vollständig."
+
       - name: Pilot-Artefakte hochladen
         uses: actions/upload-artifact@v4
         with:
-          name: pilot-001-paketreise-assets
-          path: .local-storage/pilot-001/
+          name: pilot-001-paketreise-project
+          path: .local-storage/pilot-001/project/001-paketreise/
           if-no-files-found: error
           retention-days: 14
