@@ -1,0 +1,32 @@
+{
+  "pilot": "001-paketreise",
+  "title": "Was passiert mit deinem Paket nach dem Klick auf Bestellen?",
+  "cover_text": "SO REIST DEIN PAKET",
+  "readiness": "ready-for-asset-pilot",
+  "metrics": {
+    "words": 268,
+    "estimated_duration_seconds": 120,
+    "primary_visuals": 34,
+    "primary_visuals_per_100_seconds": 28.3,
+    "estimated_intro_visual_starts": 4,
+    "cover_hold_seconds": 2,
+    "max_estimated_beat_hold_seconds": 4.3
+  },
+  "visual_summary": {
+    "beats": 34,
+    "planned_assets": 38,
+    "ai_images": 30,
+    "ai_fallbacks": 4,
+    "real_or_stock_assets": 4,
+    "ai_share_percent": 88
+  },
+  "real_media_summary": {
+    "total": 4,
+    "ready": 4,
+    "selected_not_downloaded": 0,
+    "download_failed": 0,
+    "manual_required": 0,
+    "unresolved": 0
+  },
+  "next_gate": "Google Flow: generate exactly 3 cover candidates, user selects one, then Stage 2."
+}
