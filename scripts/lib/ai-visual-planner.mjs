@@ -27,7 +27,7 @@ const PHOTOREAL_BASE = [
   'authentic materials, wear and textures',
   'physically plausible perspective and object placement',
   'restrained contrast, not glossy advertising',
-  'no text unless the cover compiler explicitly supplies exact text',
+  'no invented text; visible text only when an explicit exact-text policy allows it',
   'no watermark or invented logos',
   'no gratuitous sci-fi holograms',
   'no plastic skin, extra fingers, malformed hands, duplicated people or impossible objects'
@@ -75,9 +75,7 @@ export function estimateHoldSeconds(text, wordsPerSecond = 2.35) {
 export function classifyVisualSource(text, { preferMotionBroll = true } = {}) {
   const value = String(text ?? '').trim();
   for (const rule of REAL_EVIDENCE_PATTERNS) {
-    if (rule.regex.test(value)) {
-      return { mode: 'real-first', preferredAsset: rule.type, reason: rule.reason, aiAllowed: false };
-    }
+    if (rule.regex.test(value)) return { mode: 'real-first', preferredAsset: rule.type, reason: rule.reason, aiAllowed: false };
   }
   if (preferMotionBroll && MOTION_PATTERNS.some((pattern) => pattern.test(value))) {
     return { mode: 'real-first', preferredAsset: 'real-video', reason: 'authentic-motion-broll', aiAllowed: true };
@@ -97,11 +95,36 @@ export function inferVisualForm(text) {
   return 'object-focus';
 }
 
+export function inferEssentialVisibleText(text) {
+  const source = String(text ?? '').trim();
+  if (!source) return [];
+  const found = [];
+  const add = (value) => {
+    const clean = String(value ?? '').trim().replace(/^[„“"']+|[„“"']+$/g, '');
+    if (!clean || clean.length > 40 || found.includes(clean)) return;
+    found.push(clean);
+  };
+
+  for (const match of source.matchAll(/\b(?:18|19|20)\d{2}\b/g)) add(match[0]);
+  for (const match of source.matchAll(/\b\d+(?:[.,]\d+)?\s?%/g)) add(match[0].replace(/\s+/g, ''));
+  for (const match of source.matchAll(/(?:€|\$|£)\s?\d+(?:[.,]\d+)?|\b\d+(?:[.,]\d+)?\s?(?:Euro|EUR|Dollar|USD|Pfund|GBP)\b/gi)) add(match[0].replace(/\s+/g, ' '));
+  for (const match of source.matchAll(/[„"]([^„“"]{1,40})[“"]/g)) add(match[1]);
+
+  return found.slice(0, 2);
+}
+
 export function createSceneCard({ beat, index = 0, orientation = 'horizontal', context = '', cover = false }) {
   const visualForm = inferVisualForm(beat.text);
   const shot = cover ? SHOTS[0] : SHOTS[index % SHOTS.length];
   const topicAnchor = extractTopicAnchor(beat.text);
   const composition = compositionFor(visualForm, orientation, cover);
+  const essentialText = cover ? [] : inferEssentialVisibleText(beat.text);
+  const textPolicy = cover
+    ? { mode: 'cover-controlled', exact_text: [], reason: 'Cover text is injected later by the Flow compiler.' }
+    : essentialText.length
+      ? { mode: 'essential-only', exact_text: essentialText, reason: 'Use only literal short factual text already present in the narration when it materially improves understanding.' }
+      : { mode: 'none', exact_text: [], reason: 'No visible text is needed for this beat.' };
+
   const card = {
     viewer_takeaway: `Immediately understand this spoken idea: ${beat.text}`,
     visual_purpose: cover
@@ -113,7 +136,7 @@ export function createSceneCard({ beat, index = 0, orientation = 'horizontal', c
       ? `A high-impact factual documentary cover built around the concrete subject of this beat: ${beat.text}`
       : `A factual documentary visualization of this exact beat: ${beat.text}`,
     dominant_subject: `The single person, object, place or relationship that most directly represents: ${topicAnchor}`,
-    action_state: `Show the exact action, condition or relationship implied by the narration instead of a generic pose.` ,
+    action_state: 'Show the exact action, condition or relationship implied by the narration instead of a generic pose.',
     composition,
     camera: shot.phrase,
     depth_plan: 'Keep one dominant foreground or midground subject, a readable environment, and only necessary background context; avoid collage-like clutter.',
@@ -121,6 +144,7 @@ export function createSceneCard({ beat, index = 0, orientation = 'horizontal', c
     supporting_elements: [],
     continuity_note: 'Preserve recurring people, locations, props, clothing and base colors whenever they reappear; vary camera and composition when the story benefit is clear.',
     accuracy_note: 'Do not invent factual evidence, exact interfaces, logos, documents or event footage. Keep uncertain or generic details visually generic.',
+    text_policy: textPolicy,
     orientation,
     planned_hold_seconds: beat.estimated_hold_seconds ?? estimateHoldSeconds(beat.text),
     prompt_qc_score: 0
@@ -145,6 +169,11 @@ export function compileSceneCardPrompt(card, { context = '', cover = false } = {
     : card.orientation === 'square'
       ? 'Square 1:1 frame with balanced readable spacing.'
       : 'Horizontal 16:9 frame with clear documentary staging.';
+  const textInstruction = cover
+    ? 'Reserve one calm high-contrast area for the exact cover text that will be inserted by the Flow compiler; do not invent any text now.'
+    : card.text_policy?.mode === 'essential-only'
+      ? `Visible text is permitted only for these exact literal items from the narration: ${(card.text_policy.exact_text ?? []).map((value) => `"${value}"`).join(', ')}. Do not invent any other text or pseudo-writing.`
+      : 'No visible text, labels, letters, numbers, logos, watermarks or pseudo-writing anywhere in the image.';
   return [
     PHOTOREAL_BASE + '.',
     context ? `Broader video context: "${String(context).trim()}".` : '',
@@ -159,9 +188,7 @@ export function compileSceneCardPrompt(card, { context = '', cover = false } = {
     `Continuity: ${card.continuity_note}`,
     `Accuracy: ${card.accuracy_note}`,
     framing,
-    cover
-      ? 'Reserve one calm high-contrast area for the exact cover text that will be inserted by the Flow compiler; do not invent any text now.'
-      : 'No visible text, labels, letters, numbers, logos, watermarks or pseudo-writing anywhere in the image.'
+    textInstruction
   ].filter(Boolean).join(' ');
 }
 
@@ -210,7 +237,7 @@ export function planAiFirstVisuals({ text, orientation = 'horizontal', maxWordsP
     beat.source_decision = decision;
 
     if (decision.mode === 'ai-first') {
-      if (index === 0) continue; // Bild 01 / Cover already carries the first AI story beat.
+      if (index === 0) continue;
       const card = createSceneCard({ beat, index, orientation, context: text });
       assets.push({
         id: `${beat.id}-ai-01`,
@@ -222,7 +249,9 @@ export function planAiFirstVisuals({ text, orientation = 'horizontal', maxWordsP
         production_role: 'story-image',
         scene_card: card,
         prompt: card.prompt,
-        negative_guidance: 'No text overlays, watermarks, malformed anatomy, duplicated subjects, fake UI gibberish, impossible lighting or gratuitous futuristic elements.'
+        negative_guidance: card.text_policy.mode === 'essential-only'
+          ? 'Only exact text allowed by text_policy may appear. No watermarks, malformed anatomy, duplicated subjects, fake UI gibberish or impossible lighting.'
+          : 'No text overlays, watermarks, malformed anatomy, duplicated subjects, fake UI gibberish, impossible lighting or gratuitous futuristic elements.'
       });
       continue;
     }
@@ -251,7 +280,7 @@ export function planAiFirstVisuals({ text, orientation = 'horizontal', maxWordsP
         production_role: 'real-media-fallback',
         scene_card: card,
         prompt: card.prompt,
-        negative_guidance: 'Fallback only. No text, watermarks, malformed anatomy, duplicated subjects or impossible motion.'
+        negative_guidance: 'Fallback only. Respect text_policy exactly. No watermarks, malformed anatomy, duplicated subjects or impossible motion.'
       });
     }
   }
@@ -262,11 +291,13 @@ export function planAiFirstVisuals({ text, orientation = 'horizontal', maxWordsP
   const primaryTotal = aiPrimary + realCount;
 
   return {
-    version: 2,
-    strategy: 'ai-first-content-density',
+    version: 3,
+    strategy: 'ai-first-content-density-selected-cover-reference',
     rules: {
       default: 'Generate one purposeful AI image per AI-generatable story beat; create more beats when the narration changes idea instead of producing unused shot variants.',
-      cover: 'Bild 01 is the cover and opening image. Flow must create exactly three cover candidates and stop for user selection before continuing.',
+      cover: 'Bild 01 is the cover and opening image. Flow creates exactly three related cover candidates and stops for explicit user selection before continuing.',
+      cover_reference: 'The selected cover becomes the soft style/world/quality reference for every later AI image. Preserve visual identity without cloning composition.',
+      text: 'Story images are text-free by default. Short exact text may appear only when it already exists literally in the narration and materially improves understanding.',
       real_material_only_when: ['authentic real-world evidence is required', 'exact interfaces/documents/brands/locations are required', 'real motion B-roll is clearly superior'],
       generation: 'Generate one image at a time, wait for completion, QC it, rename it, then continue. Group later images into five-image QC blocks without parallel generation.'
     },
