@@ -1,71 +1,122 @@
 # Pilot 001 — Paketreise
 
-## Thema
-
 **Titel:** Was passiert mit deinem Paket nach dem Klick auf Bestellen?  
 **Cover-Text:** `SO REIST DEIN PAKET`  
-**Ziel:** maximal ca. 2 Minuten  
+**Ziel:** ca. 2 Minuten  
 **Format:** 16:9  
-**Bilddichte:** `maxWordsPerBeat = 10`
+**Status:** `READY_FOR_GOOGLE_FLOW_COVER_TEST`
 
-## Warum dieses Thema?
-
-Der Pilot testet die aktuelle AI-first-Pipeline mit einer sinnvollen Mischung aus:
-
-- individuellen KI-Bildern für digitale Auftragsverarbeitung, Lagerlogik, Verpackung, Scanner-Entscheidungen und Zustellablauf
-- echten Bewegungs-B-Rolls für Fließband, Lastwagen, Zustellfahrzeug und Verkehr
-- keinem Bedarf an historischen Spezialarchiven oder markenspezifischen Originalbelegen
-
-## Produktionsziel
+## Projektstruktur
 
 ```text
-script.txt
-→ visual:plan
-→ pilot-readiness
-→ Flow Production V3
-→ 3 Cover A/B/C
-→ STOP + Nutzerauswahl
-→ gewähltes Cover als Referenz
-→ Bild 02–NN
-→ real:integrate
-→ flow:import
-→ video:manifest
+001-paketreise/
+├── 00-bildprompts/
+│   ├── README.md
+│   ├── cover/
+│   │   ├── cover-A.txt
+│   │   ├── cover-B.txt
+│   │   └── cover-C.txt
+│   ├── 99-alle-bildprompts.txt
+│   └── images/
+├── 01-script/
+│   └── voice-script.txt
+├── 02-audio/
+├── 03-bilder/
+│   ├── ki/
+│   └── real-broll/
+├── 04-export/
+└── 99-tech/
+    ├── pilot.json
+    ├── pilot-readiness.json
+    ├── pilot-run-summary.json
+    ├── real-material-queue.json
+    └── status.json
 ```
 
-## Cover-Richtung
+Diese Struktur folgt dem bewährten Produktionsmuster der anderen YouTube-Kanal-Repositories: Prompts → Script → Audio → Bilder/Assets → Export → technische Pläne/QC.
 
-Alle drei Cover müssen dieselbe Kernidee zeigen: **ein einzelnes Paket auf seiner unsichtbaren Reise durch Sortierung und Zustellung**.
+## 00 — Bildprompts
 
-Beibehalten:
+Hier liegt alles, was direkt für Google Flow gebraucht wird.
 
-- gleiche dokumentarisch-realistische Bildwelt
-- gleiche Grundfarbfamilie
-- glaubwürdiges Lager-/Logistikumfeld
-- ein dominantes Paket als Hauptmotiv
-- exakter Text `SO REIST DEIN PAKET`
+### Cover zuerst
 
-Variieren:
+1. `cover-A.txt`
+2. `cover-B.txt`
+3. `cover-C.txt`
+4. **STOP**
+5. Nutzer wählt A, B oder C
+6. Gewinner wird `Bild 01.png`
 
-- Kameraabstand
-- Position des Pakets
-- Anteil von Sortieranlage / Zustellfahrzeug im Hintergrund
-- Negativraum für den Cover-Text
+Alle drei Cover verwenden exakt:
 
-Keine drei völlig unterschiedlichen Art Directions.
+`SO REIST DEIN PAKET`
 
-## Automatischer Testlauf
+Sie gehören zur gleichen Bildwelt und variieren nur sinnvoll in Komposition, Framing und Textzone.
 
-Der Branch `pilot/001-paketreise` besitzt einen eigenen Push-Workflow. Er erzeugt:
+### Danach Stage 2
 
-- `visual-plan.json`
-- `scene-cards.json`
-- `ai-generation-queue.json`
-- `real-material-queue.json`
-- `flow/google-flow-master-prompt.txt`
-- `flow/flow-production-plan.json`
-- `flow/flow-generation-queue.json`
-- `flow/pilot-readiness.json`
-- nach Möglichkeit echte Pexels-B-Rolls + `remotion-real-media.json`
-- `pilot-run-summary.json`
+`99-alle-bildprompts.txt` enthält die geordnete Produktionsliste für die restlichen KI-Bilder und markiert gleichzeitig die vier Beats, die echte B-Roll verwenden.
 
-Erst wenn das Pilot-Gate grün ist, gehen wir in Google Flow.
+Das gewählte `Bild 01.png` ist für spätere KI-Bilder eine **weiche Style-/World-/Qualitätsreferenz**. Die Szenen bleiben individuell und dürfen das Cover nicht einfach kopieren.
+
+## 01 — Script
+
+`01-script/voice-script.txt` ist der endgültige Sprechertext für diesen Pilot.
+
+## 02 — Audio
+
+Hier kommen später Voiceover, optimierte Audiodatei und Timing-/Alignment-Dateien hinein.
+
+## 03 — Bilder
+
+- `ki/` → akzeptierte Flow-Bilder `Bild 01.png` bis `Bild 30.png`
+- `real-broll/` → echte Bewegungsclips für Förderband, Truck, Zustellfahrzeug und Verkehr
+
+Die 4 Real-B-Roll-Beats ersetzen keine KI-Bilder zufällig, sondern sind bewusst als echte Bewegung geplant.
+
+## 04 — Export
+
+Hier landet später der finale Render.
+
+## 99 — Tech
+
+Nur technische Produktionsdaten:
+
+- Pilot-Konfiguration
+- Readiness/QC
+- Run-Zusammenfassung
+- Real-Media-Queue
+- aktueller Produktionsstatus
+
+## Gemessener Pilotstand
+
+- 268 Wörter
+- Ziel: 120 s
+- 34 primäre Visual-Beats
+- 30 KI-Bilder
+- 4 echte Motion-B-Rolls
+- 88 % AI / 12 % Real
+- 28,3 Visuals pro 100 s
+- 4 Visual-Starts in den ersten ~10 s
+- Cover-Hold: 2,0 s
+- längster Beat: 4,3 s
+- Pilot-Gate: `ready-for-asset-pilot`
+- 4/4 Real-B-Roll-Beats aufgelöst
+
+## Nächster Schritt
+
+Direkt in Google Flow:
+
+```text
+cover-A.txt
+→ Cover A erzeugen
+→ cover-B.txt
+→ Cover B erzeugen
+→ cover-C.txt
+→ Cover C erzeugen
+→ STOP
+→ Nutzer wählt ein Cover
+```
+
+Erst danach beginnt die Produktion aus `99-alle-bildprompts.txt`.
