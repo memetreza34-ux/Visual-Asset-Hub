@@ -1,0 +1,99 @@
+GOOGLE FLOW AI AGENT MASTER PROMPT — MERCEDES UNTER DRUCK
+
+PROJECT
+- Video title: Warum Mercedes plötzlich unter Druck steht
+- Language: German
+- Final format: 16:9
+- Final image slots: Bild 01.png through Bild 30.png
+- This prompt controls ONLY Google Flow image generation. Real source assets and verified data graphics are supplied by the production pipeline and must NOT be invented in Flow.
+
+PRIMARY FILES
+1. `00-bildprompts/cover/cover-A.txt`
+2. `00-bildprompts/cover/cover-B.txt`
+3. `00-bildprompts/cover/cover-C.txt`
+4. `00-bildprompts/99-alle-bildprompts.txt`
+5. `01-script/voice-script.txt`
+
+GLOBAL VISUAL RULES
+- Serious premium business-documentary look, believable contemporary environments, editorial rather than advertising.
+- Photorealistic documentary frame, natural practical light, realistic materials, physically plausible scale and anatomy.
+- Restrained contrast, sophisticated neutral color palette, subtle cinematic depth.
+- No glossy car-ad look, no cyberpunk, no sci-fi holograms, no fantasy, no plastic skin, no fake UI, no watermarks, no pseudo-writing.
+- Do not invent a Mercedes logo, Mercedes grille, Mercedes vehicle model, MB.OS interface, executive face, factory identity or exact corporate document.
+- When a genuine approved Mercedes reference is supplied, preserve its exact brand/product identity; do not redesign it.
+- For generated explanatory scenes, use no real logos unless they are present in an approved supplied reference.
+- Visible text is OFF unless a prompt explicitly provides exact text.
+
+STAGE 1 — COVER GATE
+Generate exactly THREE temporary cover candidates, one at a time:
+1. Read and execute `cover/cover-A.txt`.
+2. Wait until generation is complete. Inspect it. Do not generate B yet while A is still running.
+3. Read and execute `cover/cover-B.txt`.
+4. Wait and inspect.
+5. Read and execute `cover/cover-C.txt`.
+6. Wait and inspect.
+
+All three must:
+- use the exact visible German text `MERCEDES UNTER DRUCK`
+- belong to the same visual world
+- use the same approved Mercedes reference if one is supplied
+- differ meaningfully in framing/composition, not in art direction
+- remain readable at YouTube thumbnail size
+
+After all three acceptable covers exist: STOP COMPLETELY.
+Do NOT choose the winner yourself.
+Do NOT continue to Stage 2.
+Wait for the user to choose A, B or C.
+
+STAGE 2 — AFTER USER SELECTION ONLY
+After the user explicitly selects one cover:
+- rename/copy the winner exactly to `Bild 01.png`
+- treat `Bild 01.png` as a SOFT STYLE REFERENCE for every later generated image
+- keep its overall documentary realism, contrast discipline, material quality, color family and visual polish
+- DO NOT clone its composition, text placement or subject arrangement
+- every later image must be individually composed for its own narration beat
+
+Generate ONLY the Flow image jobs listed in `99-alle-bildprompts.txt`.
+The non-Flow slots are filled later with real source media or verified graphics. Never create substitutes for those missing numbers.
+
+GENERATION PROCEDURE FOR EVERY FLOW IMAGE
+1. Read the exact image block in `99-alle-bildprompts.txt`.
+2. Load `Bild 01.png` as the style/continuity reference.
+3. Generate EXACTLY ONE image for that block.
+4. Wait until the generation is fully finished.
+5. QC before accepting:
+   - immediately communicates the narration idea
+   - clearly different composition from the previous image
+   - consistent visual world with Bild 01
+   - no invented brand identity
+   - no unwanted visible text
+   - no malformed hands/people/vehicles
+   - no duplicated people or impossible geometry
+   - no stock-photo posing or glossy advertisement look
+6. If it fails, regenerate that SAME image only.
+7. When accepted, save/rename it exactly to the filename stated in the block.
+8. Only then continue to the next image.
+
+QC BLOCK RULE
+After five accepted Flow generations, pause briefly and compare them together for:
+- repetition
+- visual drift
+- too-similar camera angles
+- excessive blue/teal corporate AI look
+- loss of documentary realism
+Correct failed images before continuing.
+
+DO NOT
+- generate all images in one collage
+- generate several numbered scenes inside one image
+- place image numbers visibly inside the picture
+- generate the REAL/GRAPHIC slots
+- invent exact statistics as image text
+- invent company documents
+- invent recognizable Mercedes vehicle details
+- automatically choose the cover
+- continue before the user selects the cover
+
+SUCCESS CONDITION
+Stage 1 success = exactly three strong related cover candidates and then STOP.
+Stage 2 success = every Flow-only image listed in `99-alle-bildprompts.txt` exists under its exact `Bild NN.png` filename, visually coherent with the selected cover but individually composed.

@@ -1,21 +1,59 @@
 # Bildproduktion — Mercedes unter Druck
 
-## Cover Gate
+## Was der KI-Agent verwenden soll
 
-Zuerst nur `cover-A.txt`, `cover-B.txt`, `cover-C.txt` erzeugen.
+Der eigentliche Prompt für den Google-Flow-KI-Agenten ist:
 
-Alle drei:
+`google-flow-agent-prompt.txt`
 
-- exakter Text `MERCEDES UNTER DRUCK`
-- dieselbe echte Mercedes-Referenz als Ingredient
+Diesen Prompt vollständig an den Agenten geben. Er steuert Cover-Gate, Referenznutzung, Reihenfolge, QC, Dateinamen und Stage 2.
+
+## Stage 1 — Cover
+
+Der Agent liest nacheinander:
+
+- `cover/cover-A.txt`
+- `cover/cover-B.txt`
+- `cover/cover-C.txt`
+
+Jede Datei enthält einen vollständigen Google-Flow-Bildprompt.
+
+Alle drei Cover:
+
+- exakter sichtbarer Text `MERCEDES UNTER DRUCK`
+- gleiche zugelassene Mercedes-Referenz als Ingredient, wenn vorhanden
 - gleiche seriöse Wirtschafts-Doku-Bildwelt
 - keine erfundenen Mercedes-Modelle oder Logos
 - unterschiedliche Komposition, Fokus und Negativraum
 
-Danach STOP. Nutzer wählt einen Gewinner.
+Danach MUSS der Agent stoppen. Der Nutzer wählt A, B oder C. Gewinner = `Bild 01.png`.
 
-## Stage 2
+## Stage 2 — echte Flow-Bildprompts
 
-`99-alle-bildprompts.txt` ist die Produktionsliste. Einträge mit `REAL` oder `GRAPHIC` werden **nicht** als freie KI-Szene erzeugt. Nur `AI`-Einträge gehen an Flow.
+`99-alle-bildprompts.txt` enthält jetzt **keine Produktions-Stichpunkte mehr**, sondern ausschließlich vollständige, direkt ausführbare `BILDPROMPT:`-Blöcke für die Bilder, die Google Flow wirklich erzeugen soll.
 
-Reihenfolge pro KI-Bild: erzeugen → warten → QC → umbenennen → speichern → nächstes Bild.
+Jeder Block enthält:
+
+- exakten Audio Anchor
+- Visual Purpose
+- Visual Form
+- vollständigen englischen Google-Flow-Prompt
+- exakten Ziel-Dateinamen `Bild NN.png`
+
+Das ausgewählte `Bild 01.png` wird bei jedem Stage-2-Prompt als **weiche Style-Referenz** verwendet. Stil, Farbwelt und Qualitätsniveau bleiben zusammenhängend; Komposition, Handlung, Kamera und Motiv müssen pro Bild individuell sein.
+
+## Was NICHT in Flow erzeugt wird
+
+Konkrete Mercedes-Produkte, Logos, Werke, offizielle Dokumente, echte Interfaces und exakte Geschäftszahlen werden nicht frei erfunden. Diese Slots kommen aus echten Quellen oder werden als verifizierte Grafik erzeugt. Die Zuordnung steht in:
+
+`99-tech/REAL_MEDIA_PLAN.json`
+
+Der Flow-Agent darf diese Nummern nicht durch generische KI-Bilder ersetzen.
+
+## Produktionsregel
+
+Für jedes KI-Bild:
+
+`Prompt lesen → Bild 01 als Style-Referenz laden → genau 1 Bild erzeugen → vollständig warten → QC → korrekt als Bild NN.png speichern → nächstes Bild`
+
+Keine Collagen, keine parallelen Szenen in einem Bild, keine sichtbaren Bildnummern, keine automatisch erfundenen Zusatztexte.
