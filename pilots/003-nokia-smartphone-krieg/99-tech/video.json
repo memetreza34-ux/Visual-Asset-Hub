@@ -1,0 +1,31 @@
+{
+  "id": "003-nokia-smartphone-krieg",
+  "title": "Wie Nokia den Smartphone-Krieg verlor",
+  "cover_text": "SO VERLOR NOKIA",
+  "language": "de",
+  "format": "16:9",
+  "target_duration_seconds": 120,
+  "script_word_count": 257,
+  "profile": "company-documentary-v2",
+  "visuals": {
+    "total_slots": 30,
+    "cover_slot": 1,
+    "flow_ai_slots": [3, 6, 9, 12, 15, 18, 21, 24, 27, 29],
+    "real_source_slots": [2, 4, 5, 7, 8, 10, 11, 13, 14, 16, 17, 19, 20, 22, 23, 25, 26, 28, 30],
+    "final_primary_visual_types": ["real-image", "real-video", "ai-image"],
+    "placeholder_frames_allowed": false,
+    "technical_cards_allowed": false,
+    "missing_asset_behavior": "BLOCK_RENDER",
+    "data_display_mode": "overlay-on-valid-visual-only"
+  },
+  "flow": {
+    "master_prompt": "00-bildprompts/google-flow-agent-prompt.txt",
+    "cover_candidates": 3,
+    "user_selects_cover": true,
+    "batch_size": 5,
+    "stage2_blocks": [
+      [3, 6, 9, 12, 15],
+      [18, 21, 24, 27, 29]
+    ]
+  }
+}

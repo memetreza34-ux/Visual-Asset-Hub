@@ -1,0 +1,132 @@
+GOOGLE FLOW AGENT — VIDEO 003: NOKIA
+
+IMPORTANT
+You have everything required in this single prompt. Do NOT ask for repository files, local paths, cover files, scripts or additional prompts. Do NOT summarize the plan first. Start producing the requested images.
+
+VIDEO
+Title: Wie Nokia den Smartphone-Krieg verlor
+Format: 16:9
+Exact cover text: SO VERLOR NOKIA
+Visual world: serious photorealistic business-documentary, late-2000s to early-2010s technology atmosphere, believable materials, restrained editorial lighting, no cartoon, no glossy ad look, no sci-fi holograms.
+
+GLOBAL RULES
+- Generate ONE image at a time.
+- Wait until an image is fully complete before starting the next.
+- Every accepted image must be renamed exactly as specified.
+- Never create technical cards, source-needed cards, slot cards, debug frames or placeholders.
+- Never invent a Nokia, Apple, Microsoft, Symbian, Windows Phone or Android logo/product identity in the AI scenes below.
+- Exact branded products and historic source visuals are handled separately and must NOT be generated here.
+- Follow-up images should feel like the same documentary, but each composition must be individual.
+- After the user selects a cover, use Bild 01.png only as a SOFT STYLE REFERENCE: quality, tonal family, contrast, material realism and overall documentary mood. Do not copy its composition.
+- No visible text in Stage 2 unless explicitly requested. For this video, all Stage-2 AI images are text-free.
+
+============================================================
+STAGE 1 — THREE COVER DESIGNS
+============================================================
+
+Create exactly three separate temporary cover candidates: Cover A, Cover B and Cover C.
+All three must contain the exact visible text:
+SO VERLOR NOKIA
+
+Use the text exactly once, correctly spelled, large, high-contrast and readable at thumbnail size. Do not show any other readable words.
+
+The cover may use generic late-2000s mobile-phone shapes and generic modern touchscreen silhouettes, but MUST NOT fake a Nokia logo, exact Nokia model, iPhone model or other protected product identity. The word NOKIA appears only as part of the cover text.
+
+COVER A — OLD KING, NEW WORLD
+Create a dramatic but factual editorial composition. A generic late-2000s premium keypad smartphone dominates the foreground, large and sharply lit. Behind it, a wave of clean modern touchscreen-phone silhouettes and app-like colored squares advances into the scene. The old phone should still look high-quality, not broken or ridiculous. The message is: a strong market leader facing a new set of rules. Reserve strong negative space for the exact cover text. Photorealistic, restrained blue/gray technology palette, realistic studio materials, strong thumbnail readability, no logos, no fake UI, no cracks, no explosion, 16:9.
+
+COVER B — MARKET SHIFT
+Create a wider business-documentary cover showing a crowded late-2000s electronics retail environment. In the foreground, a generic classic smartphone form is still prominent; deeper in the scene, consumers increasingly interact with large touchscreen devices. Use depth and directional movement to suggest that attention is shifting away from the old category. No identifiable brands or exact products. Strong editorial realism, natural retail lighting, clear subject separation, exact cover text with high contrast, 16:9.
+
+COVER C — STRATEGIC CROSSROADS
+Create a symbolic but physically believable technology-development scene. In the center, a generic established mobile-phone prototype sits at a visual crossroads. One side suggests traditional hardware engineering: physical buttons, camera modules, battery components. The other side suggests the emerging software ecosystem: touchscreens, generic app tiles without readable labels, developers working on laptops. Same serious documentary world as A/B, but different camera angle and spatial arrangement. Exact cover text clearly readable, no logos, no fake branded UI, 16:9.
+
+After Cover A, Cover B and Cover C are fully generated, STOP COMPLETELY.
+Do not choose a winner.
+Wait for the user to answer A, B or C.
+
+AFTER USER SELECTION
+- Selected winner becomes Bild 01.png.
+- Delete/discard the other two cover candidates.
+- Use Bild 01.png as a soft style reference for all following AI images.
+- Then continue with Production Block 1.
+
+============================================================
+PRODUCTION BLOCK 1 — FIVE REQUIRED AI IMAGES
+============================================================
+Expected files:
+Bild 03.png
+Bild 06.png
+Bild 09.png
+Bild 12.png
+Bild 15.png
+
+BILD 03.png — MARKET LEADER UNDER PRESSURE
+Create a photorealistic business-documentary scene inside a large late-2000s mobile-device strategy room. A generic successful handset portfolio is visible on a physical product table, while surrounding walls show abstract unreadable market charts and new touchscreen prototypes appearing in the distance. The established company still looks strong, but several competitive pressures are clearly converging. Anonymous executives in natural discussion, believable office furniture, realistic devices with no brand identity, no readable text, no logos, no holograms. Wide 35mm editorial framing, natural daylight plus practical office lighting, 16:9.
+
+BILD 06.png — HARDWARE TO ECOSYSTEM
+Create a coherent photorealistic comparison scene, not a collage. On the left, show traditional phone engineering: camera modules, battery tests, antennas, physical keypads and industrial designers around a prototype. On the right, show the new smartphone value system: software developers, touchscreen interaction testing, generic app-grid prototypes and service integration. The visual message must be immediate: competition is shifting from hardware alone toward hardware plus software plus apps. No brands, no readable code, no fake UI labels, realistic lab environment, medium-wide framing, 16:9.
+
+BILD 09.png — DEVELOPERS MOVE TOWARD PLATFORMS
+Create a realistic software-development conference/workspace in the early smartphone era. Several independent developers naturally choose between multiple generic mobile development stations. One older platform station is technically capable but receives less attention; two newer touchscreen-oriented development stations attract more developers and activity. Show this only through people, equipment and spatial emphasis, not through logos or labels. Candid body language, laptops, test phones, cables, notebooks, realistic early-2010s office, no text, no branding, 16:9.
+
+BILD 12.png — STRATEGIC DECISION
+Create a serious executive strategy-room scene in early 2011. A boardroom table contains three generic mobile-platform prototype paths represented by different unbranded devices and engineering folders. Senior anonymous executives are making a difficult platform decision while engineers present realistic hardware and software prototypes. The atmosphere should communicate urgency and strategic choice, not panic. No company logos, no readable documents, no text, no branded phones, natural corporate lighting, editorial documentary composition, 16:9.
+
+BILD 15.png — TRANSITION WHILE THE MARKET MOVES
+Create a photorealistic dual-depth scene in a mobile-device development campus. In the foreground, engineers are carefully transitioning a mature product line to a new generic operating platform. In the deeper background, a faster market moves ahead: developers rapidly test touchscreen devices, consumers interact with app-based phones, and retail displays change. Use subtle motion cues in background people while foreground work remains deliberate. No logos, no readable text, no fake interfaces, realistic early-2010s technology, 16:9.
+
+BLOCK 1 QC
+Before continuing, verify all five files exist with exact names. Reject/regenerate only slots with malformed devices/hands, visible fake text, duplicate compositions, style drift or weak connection to the intended idea. Then continue to Block 2.
+
+============================================================
+PRODUCTION BLOCK 2 — FIVE REQUIRED AI IMAGES
+============================================================
+Expected files:
+Bild 18.png
+Bild 21.png
+Bild 24.png
+Bild 27.png
+Bild 29.png
+
+BILD 18.png — ONE GOOD DEVICE IS NOT ENOUGH
+Create a photorealistic editorial scene centered on one beautifully designed but generic premium smartphone on a test stand. Around it, the larger ecosystem is visibly more important: developers, cloud/service diagrams represented only by abstract shapes, app testing stations, accessory integration and multiple connected user devices. The phone itself is excellent, but compositionally it is only one part of a much larger system. No brands, no readable text, no holograms, realistic studio/lab environment, 16:9.
+
+BILD 21.png — SHRINKING PLATFORM ISLAND
+Create a realistic large technology workspace seen from a slightly elevated angle. One smaller cluster of developers works around a capable but isolated generic mobile platform, while two much larger active clusters across the room have more developers, test devices, partner meetings and app-testing activity. Do not use logos or written labels. The metaphor must come entirely from scale, participation and network effects. Photorealistic office, natural people, no sci-fi styling, 16:9.
+
+BILD 24.png — CORPORATE TRANSITION
+Create a restrained business-documentary scene representing a major technology-business handover without depicting the actual historic deal. In a modern conference environment, two anonymous corporate teams transfer boxes of unbranded device prototypes, engineering documentation and product roadmaps across a central table. The feeling is consequential and operational rather than celebratory. No logos, no fake contracts, no readable text, no handshaking cliché as the sole focus, realistic people and materials, 16:9.
+
+BILD 27.png — PHONE DOMINANCE ENDS, COMPANY CONTINUES
+Create a thoughtful documentary scene showing a generic technology company moving away from a consumer-phone era toward infrastructure and network technology. In the foreground, older generic handsets sit in an archive/display area; through glass in the background, engineers work with telecom-network racks, radio equipment and enterprise infrastructure. The mood is transition, not death or bankruptcy. No logos, no text, no fake brand identity, believable industrial technology, 16:9.
+
+BILD 29.png — RULES CHANGE FASTER THAN STRATEGY
+Create a strong closing metaphor in a realistic technology testing facility. An established generic product-development process occupies the foreground: careful hardware testing, long planning documents and physical prototypes. Behind it, a faster software-led ecosystem cycles through touchscreen prototypes, developers and rapid iterations. Use visual rhythm and depth to show that the market rules are changing faster than the old strategy. Serious documentary tone, no brands, no readable text, no futuristic holograms, 16:9.
+
+BLOCK 2 QC
+Verify Bild 18.png, Bild 21.png, Bild 24.png, Bild 27.png and Bild 29.png exist with exact names and pass the same quality checks.
+
+============================================================
+FINAL CLEANUP
+============================================================
+The final Flow images folder must contain EXACTLY these AI-created files:
+Bild 01.png
+Bild 03.png
+Bild 06.png
+Bild 09.png
+Bild 12.png
+Bild 15.png
+Bild 18.png
+Bild 21.png
+Bild 24.png
+Bild 27.png
+Bild 29.png
+
+Delete Cover A/B/C temporary files, rejected retries, duplicate generations and unused alternatives.
+Do NOT generate the missing image numbers. Bild 02, 04, 05, 07, 08, 10, 11, 13, 14, 16, 17, 19, 20, 22, 23, 25, 26, 28 and 30 are reserved for genuine source images/B-roll and verified overlays.
+
+Do not ask for another prompt.
+Do not ask for repository files.
+Do not summarize the production plan.
+BEGIN NOW BY GENERATING COVER A.

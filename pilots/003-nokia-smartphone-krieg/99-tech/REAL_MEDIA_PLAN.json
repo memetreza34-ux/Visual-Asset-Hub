@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "profile": "company-documentary-v2",
+  "project": "003-nokia-smartphone-krieg",
+  "rules": {
+    "exact_brand_visuals": "real-source-required",
+    "exact_product_visuals": "real-source-required",
+    "historic_event_visuals": "real-source-required",
+    "financial_numbers": "verified-overlay-on-valid-visual",
+    "generic_explanation": "ai-allowed",
+    "rights_review_required": true,
+    "missing_asset_behavior": "BLOCK_RENDER",
+    "placeholder_card_behavior": "FORBIDDEN",
+    "technical_slot_card_behavior": "FORBIDDEN",
+    "final_primary_visuals": ["REAL_IMAGE", "REAL_VIDEO", "AI_IMAGE"]
+  },
+  "priority_assets": [
+    {"image": 2, "need": "echtes Nokia-Handyportfolio / Nokia-Marktpräsenz um 2007", "mode": "REAL", "status": "source-needed", "overlay": "52 %", "source_hint": "Nokia annual-report/media archive or rights-cleared editorial source", "on_missing": "BLOCK_RENDER"},
+    {"image": 4, "need": "echtes Nokia N95 oder vergleichbares Nokia-Smartphone aus 2007", "mode": "REAL", "status": "source-needed", "on_missing": "BLOCK_RENDER"},
+    {"image": 5, "need": "echtes frühes iPhone / 2007-era touchscreen smartphone source visual", "mode": "REAL", "status": "source-needed", "on_missing": "BLOCK_RENDER"},
+    {"image": 7, "need": "echtes frühes iPhone/iOS-App- bzw. Touch-Interface-Visual", "mode": "REAL", "status": "source-needed", "on_missing": "BLOCK_RENDER"},
+    {"image": 8, "need": "echtes frühes Android-Gerät / Android-era source visual", "mode": "REAL", "status": "source-needed", "on_missing": "BLOCK_RENDER"},
+    {"image": 10, "need": "echtes Nokia-Symbian-Gerät oder originale Symbian-Oberfläche", "mode": "REAL", "status": "source-needed", "on_missing": "BLOCK_RENDER"},
+    {"image": 11, "need": "echter Nokia-Hauptsitz / Nokia corporate visual", "mode": "REAL", "status": "source-needed", "on_missing": "BLOCK_RENDER"},
+    {"image": 13, "need": "echtes Nokia-Microsoft-Partnership-Visual von 2011 / Pressebild", "mode": "REAL", "status": "source-needed", "source_hint": "Microsoft/Nokia official press archive", "on_missing": "BLOCK_RENDER"},
+    {"image": 14, "need": "echtes erstes Lumia / Windows-Phone-Nokia-Gerät", "mode": "REAL", "status": "source-needed", "on_missing": "BLOCK_RENDER"},
+    {"image": 16, "need": "echte Lumia-Produktreihe", "mode": "REAL", "status": "source-needed", "on_missing": "BLOCK_RENDER"},
+    {"image": 17, "need": "echtes Lumia-Kamera-/Hardwaredetail", "mode": "REAL", "status": "source-needed", "on_missing": "BLOCK_RENDER"},
+    {"image": 19, "need": "echte App-Ökosystem-/Store-Visuals aus der Smartphone-Ära", "mode": "REAL", "status": "source-needed", "on_missing": "BLOCK_RENDER"},
+    {"image": 20, "need": "echte Smartphone-Retail-/Markt-B-Roll mit mehreren realen Geräten", "mode": "REAL", "status": "source-needed", "on_missing": "BLOCK_RENDER"},
+    {"image": 22, "need": "echtes Microsoft/Nokia-Deal- oder Executive-Pressevisual 2013", "mode": "REAL", "status": "source-needed", "on_missing": "BLOCK_RENDER"},
+    {"image": 23, "need": "offizielle Microsoft/Nokia-Übernahmeankündigung oder Deal-Visual", "mode": "REAL", "status": "source-identified", "overlay": "5,44 Mrd. €", "source_hint": "Microsoft official acquisition announcement, 2013-09-03", "on_missing": "BLOCK_RENDER"},
+    {"image": 25, "need": "echte Nokia-Geräteproduktion / Devices-and-Services-Operation", "mode": "REAL", "status": "source-needed", "on_missing": "BLOCK_RENDER"},
+    {"image": 26, "need": "echtes Microsoft-Lumia-Visual nach der Übernahme", "mode": "REAL", "status": "source-needed", "on_missing": "BLOCK_RENDER"},
+    {"image": 28, "need": "echtes heutiges Nokia-Corporate-/Netzwerkinfrastruktur-Visual", "mode": "REAL", "status": "source-needed", "on_missing": "BLOCK_RENDER"},
+    {"image": 30, "need": "echtes Nokia-Logo/Hauptsitz-Abschlussbild", "mode": "REAL", "status": "source-needed", "on_missing": "BLOCK_RENDER"}
+  ],
+  "verified_number_rule": "Exact numbers appear only as short overlays on valid visual assets. Never render a full-screen metrics card.",
+  "final_render_rule": "If any required real visual remains source-needed, manual-required, unresolved or missing, final rendering is blocked. Never substitute a source-needed card, text card, debug frame or production note."
+}
