@@ -1,0 +1,93 @@
+# Mercedes unter Druck — Visual Production List
+
+REGEL: `REAL` = echtes/cleared Material oder Originalquelle. `GRAPHIC` = aus verifizierten Zahlen später sauber rendern. `AI` = Google Flow erlaubt. Keine REAL/GRAPHIC-Szene durch ein frei erfundenes KI-Bild ersetzen.
+
+Bild 01 — COVER / REAL+FLOW
+3 Cover A/B/C nach den separaten Cover-Prompts. Nutzer wählt. Gewinner = `Bild 01.png` und weiche Stilreferenz.
+
+Bild 02 — REAL
+Mercedes-Benz Werk / Unternehmensstandort oder genuine Mercedes-Keyvisual. Einstieg: Mercedes steht nicht vor dem Aus.
+
+Bild 03 — AI
+Abstraktes, realistisches Druckmotiv: premium automotive business facing multiple market pressures; no logos, no text.
+
+Bild 04 — GRAPHIC
+2025 Mercedes-Benz Cars: ca. 1,8 Mio. Fahrzeuge; -9% gegenüber 2024. Quelle in `99-tech/RESEARCH.md`.
+
+Bild 05 — REAL
+Genuine Mercedes passenger-car lineup / dealership / press image, rights reviewed.
+
+Bild 06 — REAL
+China: glaubwürdige reale Großstadt-/Premium-EV-Marktaufnahme, vorzugsweise lizenzierte B-Roll.
+
+Bild 07 — GRAPHIC
+China Mercedes-Benz Cars 2025: 551.900; -19% gegenüber 2024.
+
+Bild 08 — REAL
+Realer chinesischer EV-Markt / viele moderne Elektroautos / Showroom oder Straße; keine Fake-Marken.
+
+Bild 09 — AI
+Neutraler visueller Vergleich: traditionelles Premium-Auto-Geschäft gegen schnellere softwaregetriebene Produktzyklen; keine echten Logos.
+
+Bild 10 — REAL
+Original Mercedes-Benz Strategy Update 2021 oder offizieller Screenshot/Dokument-Ausschnitt zur Electric-only-Strategie; Source-ID dokumentieren.
+
+Bild 11 — GRAPHIC
+Timeline 2021 → 2024/2025: von starkem Electric-only-Kurs zu flexiblerer ICE/BEV-Strategie. Kein erfundener Wortlaut.
+
+Bild 12 — REAL
+Genuine combustion-engine / hybrid Mercedes production or vehicle reference, rights reviewed.
+
+Bild 13 — AI
+Realistische symbolische Doppelstrategie: EV architecture and combustion/hybrid engineering paths side by side, no logos/text.
+
+Bild 14 — GRAPHIC
+Mercedes-Benz Cars adjusted EBIT: 2024 8,7 Mrd. € → 2025 4,8 Mrd. €.
+
+Bild 15 — GRAPHIC
+Adjusted Return on Sales: 2024 8,1% → 2025 5,0%.
+
+Bild 16 — AI
+Corporate cost-pressure visualization: factory, logistics, engineering and currency/tariff cost layers; documentary realism, no text.
+
+Bild 17 — REAL
+Echte Automobilproduktion / Mercedes-Werk wenn rechtegeprüft; Maschinen und Karosseriebau in Bewegung.
+
+Bild 18 — GRAPHIC
+Globale Produktionskapazität soll bis 2028 auf rund 2,2 Mio. Einheiten angepasst werden.
+
+Bild 19 — REAL
+Genuine current Mercedes product-offensive reference / official new-model imagery, rights reviewed.
+
+Bild 20 — REAL
+Original Mercedes MB.OS / infotainment / software-interface material. Kein KI-Fake-UI.
+
+Bild 21 — AI
+Neutraler Explain-shot zu Software, Fahrerassistenz und Fahrzeugarchitektur; no brand UI, no text.
+
+Bild 22 — AI
+Premium heritage facing a rapidly changing digital market; elegant factual metaphor, no Mercedes logo.
+
+Bild 23 — REAL
+Reale China-EV-B-Roll mit moderner Ladeinfrastruktur / dichten EV-Straßenszenen.
+
+Bild 24 — AI
+Schnelle Produktentwicklung visualisieren: automotive design studio, software engineers, prototype iterations; generic, no logos.
+
+Bild 25 — REAL
+Reales Mercedes-Händler-/Straßenmaterial in Europa, rights reviewed.
+
+Bild 26 — REAL
+USA: Hafen, importierte Fahrzeuge oder Zoll-/Logistik-B-Roll ohne erfundene Mercedes-Zuordnung.
+
+Bild 27 — GRAPHIC
+Drei Belastungsfaktoren sauber visualisieren: China competition / pricing & volume / tariffs. Keine erfundenen Prozentwerte.
+
+Bild 28 — REAL
+Genuine Mercedes star / grille / vehicle close-up as heritage anchor, rights reviewed.
+
+Bild 29 — AI
+Neutraler Zukunfts-Shot: premium car industry between electric platform and software ecosystem, realistic documentary style, no logo.
+
+Bild 30 — REAL
+Genuine Mercedes vehicle/factory closing image. Aussage: Die nächsten Jahre entscheiden über die Stärke im Elektro- und Softwarezeitalter.

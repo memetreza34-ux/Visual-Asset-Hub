@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "profile": "company-documentary-v1",
+  "project": "002-mercedes-unter-druck",
+  "rules": {
+    "exact_brand_visuals": "real-source-required",
+    "exact_product_visuals": "real-source-required",
+    "exact_interfaces": "real-source-required",
+    "financial_numbers": "rendered-graphic-from-verified-data",
+    "generic_explanation": "ai-allowed",
+    "rights_review_required": true
+  },
+  "priority_assets": [
+    {"image": 2, "need": "Mercedes Werk / corporate keyvisual", "mode": "REAL", "status": "source-needed"},
+    {"image": 5, "need": "genuine Mercedes lineup", "mode": "REAL", "status": "source-needed"},
+    {"image": 10, "need": "official 2021 strategy source", "mode": "REAL", "status": "source-identified"},
+    {"image": 12, "need": "genuine ICE/hybrid Mercedes visual", "mode": "REAL", "status": "source-needed"},
+    {"image": 17, "need": "automotive production / Mercedes plant", "mode": "REAL", "status": "source-needed"},
+    {"image": 19, "need": "current Mercedes product offensive", "mode": "REAL", "status": "source-needed"},
+    {"image": 20, "need": "MB.OS genuine interface", "mode": "REAL", "status": "source-needed"},
+    {"image": 28, "need": "Mercedes star / grille close-up", "mode": "REAL", "status": "source-needed"},
+    {"image": 30, "need": "genuine Mercedes closing image", "mode": "REAL", "status": "source-needed"}
+  ]
+}
