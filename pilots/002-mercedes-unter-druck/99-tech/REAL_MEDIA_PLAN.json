@@ -1,24 +1,30 @@
 {
-  "version": 1,
-  "profile": "company-documentary-v1",
+  "version": 2,
+  "profile": "company-documentary-v2",
   "project": "002-mercedes-unter-druck",
   "rules": {
     "exact_brand_visuals": "real-source-required",
     "exact_product_visuals": "real-source-required",
     "exact_interfaces": "real-source-required",
-    "financial_numbers": "rendered-graphic-from-verified-data",
+    "financial_numbers": "verified-overlay-on-valid-visual",
     "generic_explanation": "ai-allowed",
-    "rights_review_required": true
+    "rights_review_required": true,
+    "missing_asset_behavior": "BLOCK_RENDER",
+    "placeholder_card_behavior": "FORBIDDEN",
+    "technical_slot_card_behavior": "FORBIDDEN",
+    "final_primary_visuals": ["REAL_IMAGE", "REAL_VIDEO", "AI_IMAGE"]
   },
   "priority_assets": [
-    {"image": 2, "need": "Mercedes Werk / corporate keyvisual", "mode": "REAL", "status": "source-needed"},
-    {"image": 5, "need": "genuine Mercedes lineup", "mode": "REAL", "status": "source-needed"},
-    {"image": 10, "need": "official 2021 strategy source", "mode": "REAL", "status": "source-identified"},
-    {"image": 12, "need": "genuine ICE/hybrid Mercedes visual", "mode": "REAL", "status": "source-needed"},
-    {"image": 17, "need": "automotive production / Mercedes plant", "mode": "REAL", "status": "source-needed"},
-    {"image": 19, "need": "current Mercedes product offensive", "mode": "REAL", "status": "source-needed"},
-    {"image": 20, "need": "MB.OS genuine interface", "mode": "REAL", "status": "source-needed"},
-    {"image": 28, "need": "Mercedes star / grille close-up", "mode": "REAL", "status": "source-needed"},
-    {"image": 30, "need": "genuine Mercedes closing image", "mode": "REAL", "status": "source-needed"}
-  ]
+    {"image": 2, "need": "Mercedes Werk / corporate keyvisual", "mode": "REAL", "status": "source-needed", "on_missing": "BLOCK_RENDER"},
+    {"image": 5, "need": "genuine Mercedes lineup", "mode": "REAL", "status": "source-needed", "on_missing": "BLOCK_RENDER"},
+    {"image": 10, "need": "official 2021 strategy source", "mode": "REAL", "status": "source-identified", "on_missing": "BLOCK_RENDER"},
+    {"image": 12, "need": "genuine ICE/hybrid Mercedes visual", "mode": "REAL", "status": "source-needed", "on_missing": "BLOCK_RENDER"},
+    {"image": 17, "need": "automotive production / Mercedes plant", "mode": "REAL", "status": "source-needed", "on_missing": "BLOCK_RENDER"},
+    {"image": 19, "need": "current Mercedes product offensive", "mode": "REAL", "status": "source-needed", "on_missing": "BLOCK_RENDER"},
+    {"image": 20, "need": "MB.OS genuine interface", "mode": "REAL", "status": "source-needed", "on_missing": "BLOCK_RENDER"},
+    {"image": 28, "need": "Mercedes star / grille close-up", "mode": "REAL", "status": "source-needed", "on_missing": "BLOCK_RENDER"},
+    {"image": 30, "need": "genuine Mercedes closing image", "mode": "REAL", "status": "source-needed", "on_missing": "BLOCK_RENDER"}
+  ],
+  "verified_number_rule": "If an exact business number is shown, keep a real image, real B-roll or accepted AI image as the primary visual and place the number as a short verified overlay. Never render a full-screen technical metrics card or production placeholder.",
+  "final_render_rule": "If any required visual remains source-needed, manual-required, unresolved or missing, the video is NOT render-ready. Do not replace the missing visual with a text card, slot card, source-needed card, debug frame or production note."
 }
