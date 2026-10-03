@@ -6,7 +6,7 @@
   "format": "16:9",
   "target_duration_seconds": 120,
   "script_word_count": 257,
-  "profile": "company-documentary-v3",
+  "profile": "company-documentary-v4",
   "visuals": {
     "total_slots": 30,
     "cover_slot": 1,
@@ -17,12 +17,17 @@
     "technical_cards_allowed": false,
     "missing_asset_behavior": "BLOCK_RENDER",
     "data_display_mode": "overlay-on-valid-visual-only",
-    "generated_visual_language": "illustration-first-editorial-documentary",
+    "generated_visual_language": "realistic-editorial-documentary",
     "human_density": "low",
     "default_people_per_generated_image": 0,
-    "text_in_generated_images": "short-labels-allowed-when-helpful",
-    "adjacent_visual_form_repetition_allowed": false,
-    "generic_business_people_as_filler": false
+    "graphics_role": "support-only",
+    "target_mix": {
+      "photoreal_or_realistic_3d_percent": 70,
+      "realistic_scene_with_light_graphic_support_percent": 20,
+      "pure_graphic_percent": 10
+    },
+    "generic_business_people_as_filler": false,
+    "full_frame_infographic_as_default": false
   },
   "flow": {
     "master_prompt": "00-bildprompts/google-flow-agent-prompt.txt",
@@ -34,16 +39,16 @@
       [18, 21, 24, 27, 29]
     ],
     "preferred_visual_forms": [
-      "market-map",
-      "split-explainer",
-      "ecosystem-diagram",
-      "crossroads-illustration",
-      "timeline-process",
-      "product-ecosystem-rings",
-      "symbolic-island",
-      "asset-transfer-infographic",
-      "transformation-graphic",
-      "process-race-metaphor"
+      "realistic-retail-shelf",
+      "realistic-engineering-workbench",
+      "empty-development-lab",
+      "physical-prototype-table",
+      "realistic-prototype-sequence",
+      "editorial-product-still-life",
+      "realistic-showroom-metaphor",
+      "realistic-archive-transfer",
+      "phones-to-network-infrastructure",
+      "realistic-lab-contrast"
     ]
   }
 }
