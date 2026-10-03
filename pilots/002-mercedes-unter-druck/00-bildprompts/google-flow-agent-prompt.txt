@@ -1,128 +1,228 @@
-GOOGLE FLOW AI AGENT MASTER PROMPT — MERCEDES UNTER DRUCK
+GOOGLE FLOW AI AGENT — COMPLETE SELF-CONTAINED PRODUCTION PROMPT
+VIDEO: Warum Mercedes plötzlich unter Druck steht
+LANGUAGE: German
+FORMAT: 16:9
+COVER TEXT: MERCEDES UNTER DRUCK
 
-PROJECT
-- Video title: Warum Mercedes plötzlich unter Druck steht
-- Language: German
-- Final format: 16:9
-- This prompt controls ONLY the images that Google Flow must generate.
-- Real source assets and verified data graphics are handled outside Flow and must NOT be invented here.
+CRITICAL INSTRUCTION — READ THIS FIRST
+Everything you need for the Google Flow image production is contained INSIDE THIS ONE PROMPT.
+Do NOT ask me for another prompt file, cover file, image-prompt file, script file, repository path or local file.
+Do NOT tell me that you cannot see `cover-prompt.txt`, `99-alle-bildprompts.txt` or any other file.
+You do not need those files. All required cover instructions and all required Stage-2 image prompts are included below.
 
-PRIMARY FILES
-1. `00-bildprompts/cover/cover-prompt.txt`
-2. `00-bildprompts/99-alle-bildprompts.txt`
-3. `01-script/voice-script.txt`
+Your task is to START THE PRODUCTION YOURSELF.
+Do not reply with a plan and wait for me to paste another prompt.
+Do not ask what to create first.
+Start immediately with COVER A, then COVER B, then COVER C.
+After all three cover designs exist, STOP and wait only for my choice A, B or C.
 
-FINAL IMAGE FOLDER
-`00-bildprompts/images/`
+============================================================
+GLOBAL VISUAL WORLD
+============================================================
 
-CRITICAL FINAL-FOLDER RULE
-The final image folder is a CLEAN FINAL-ONLY folder.
-At the end it may contain ONLY:
-- the ONE user-selected cover renamed exactly to `Bild 01.png`
-- the accepted Flow story images whose exact filenames are listed in `99-alle-bildprompts.txt`
+Create a serious German business-documentary visual world about Mercedes-Benz under economic and technological pressure.
 
-Never leave inside the final folder:
-- Cover A / Cover B / Cover C temporary candidates
-- the two rejected cover candidates
-- failed generations
-- alternates
-- duplicates
-- files with names such as `_v2`, `final-final`, `candidate`, `test`, `alt`, `retry`
-- any image for a REAL or GRAPHIC slot
+Visual character:
+- photorealistic factual documentary imagery
+- premium automotive environments without glossy advertising excess
+- believable contemporary Germany, China, factories, engineering and corporate environments
+- natural practical light
+- realistic glass, metal, concrete, paper, screens and automotive materials
+- restrained contrast
+- sophisticated neutral color palette
+- subtle cinematic depth
+- credible editorial composition
+- no cyberpunk
+- no sci-fi holograms
+- no fantasy
+- no plastic skin
+- no fake UI
+- no pseudo-writing
+- no watermark
+- no visible image numbers
 
-Use a temporary workspace outside `images/` for cover candidates and rejected/regenerated outputs. Clean that temporary workspace after the final QC.
+The cover establishes the overall visual quality, color family, contrast and documentary mood for the rest of the AI-generated images. Later images must belong to the same video world but must have individual compositions suited to their own narration beat.
 
-GLOBAL VISUAL RULES
-- Serious premium business-documentary look, believable contemporary environments, editorial rather than advertising.
-- Photorealistic documentary frame, natural practical light, realistic materials, physically plausible scale and anatomy.
-- Restrained contrast, sophisticated neutral color palette, subtle cinematic depth.
-- No glossy car-ad look, no cyberpunk, no sci-fi holograms, no fantasy, no plastic skin, no fake UI, no watermarks, no pseudo-writing.
-- Do not invent a Mercedes logo, Mercedes grille, Mercedes vehicle model, MB.OS interface, executive face, factory identity or exact corporate document.
-- When a genuine approved Mercedes reference is supplied, preserve its exact brand/product identity; do not redesign it.
-- For generated explanatory scenes, use no real logos unless they are present in an approved supplied reference.
-- Visible text is OFF unless a prompt explicitly provides exact text.
+============================================================
+STAGE 1 — CREATE 3 COVER DESIGNS NOW
+============================================================
 
-STAGE 1 — COVER FIRST
-Read `00-bildprompts/cover/cover-prompt.txt`.
-Create exactly THREE different cover designs from that one brief:
-- temporary Cover A
-- temporary Cover B
-- temporary Cover C
+Create exactly THREE separate cover images: COVER A, COVER B and COVER C.
+They are temporary alternatives, not three scenes inside one image.
 
-Generate them as three separate images, not one collage.
-All three must share the same documentary world and exact cover text but use meaningfully different composition/framing.
+All three covers must communicate the same story:
+Mercedes-Benz is still a globally important premium car company, but it is under simultaneous pressure from falling sales, stronger competition in China, lower profitability and the transition toward EVs and software.
+The cover must communicate PRESSURE and STRATEGIC TENSION — not bankruptcy, collapse or destruction.
 
-After A, B and C are complete:
-STOP COMPLETELY.
-Do NOT choose the winner yourself.
-Do NOT start any story image.
-Wait for the user to explicitly choose A, B or C.
+Use a recognizable modern Mercedes-Benz premium vehicle as the editorial main subject. The vehicle must read clearly as Mercedes-Benz, with a believable Mercedes three-pointed-star identity, but do not claim that the image depicts a specific model year or exact documentary event. Do not invent competitor logos or fake corporate documents.
 
-AFTER USER COVER SELECTION
-1. Take only the selected winner.
-2. Save/rename it exactly to `00-bildprompts/images/Bild 01.png`.
-3. Delete/discard the two rejected cover candidates.
-4. Remove all cover-candidate files from the final image folder if any were placed there accidentally.
-5. Use `Bild 01.png` as the SOFT STYLE / CONTINUITY REFERENCE for every later Flow image.
-6. Preserve overall realism, color family, contrast discipline, material quality and visual polish.
-7. Do NOT copy the cover composition, text placement or subject arrangement into later images.
+Exact visible text on every cover:
+"MERCEDES UNTER DRUCK"
 
-STAGE 2 — GENERATE ONLY THE NEEDED FLOW IMAGES
-Read `00-bildprompts/99-alle-bildprompts.txt`.
-Generate ONLY the BILDPROMPT blocks that exist in that file.
-Do NOT fill missing image numbers. Missing numbers are intentional REAL/GRAPHIC slots supplied by the production pipeline.
+Text rules:
+- exact wording only
+- exactly once
+- correctly spelled
+- large and readable at YouTube thumbnail size
+- strong contrast
+- no other visible words
+- no pseudo-writing
 
-FIVE-IMAGE PRODUCTION BLOCKS — MANDATORY
-Work in blocks of MAXIMUM FIVE needed Flow images.
-For this project the blocks are:
+COVER A — SUBJECT FORWARD
+Create a powerful subject-forward documentary cover. A recognizable Mercedes-Benz premium vehicle dominates the foreground from a three-quarter angle. Behind it, show a believable modern Chinese EV-market environment: contemporary city architecture, charging infrastructure and dense premium-car competition without visible competitor logos. Use subtle visual pressure cues such as directional movement, compressed space and restrained non-readable market-chart shapes in the far background. Reserve clean negative space for the exact title "MERCEDES UNTER DRUCK". Editorial realism, serious mood, high readability, no disaster imagery, no cracked logo, no explosion, no glossy car-ad aesthetic. 16:9.
 
-BLOCK 1
-- Bild 03.png
-- Bild 09.png
-- Bild 13.png
-- Bild 16.png
-- Bild 21.png
+Generate COVER A now. Wait until it is fully complete before continuing.
 
-BLOCK 2
-- Bild 22.png
-- Bild 24.png
-- Bild 29.png
+COVER B — MARKET PRESSURE
+Create a second cover in the SAME visual world but with a clearly different composition. Use a wider documentary framing. Keep a recognizable Mercedes-Benz premium vehicle as the main subject, but show more surrounding market pressure: modern Chinese EV city/showroom context, multiple generic contemporary EV silhouettes in the environment, charging infrastructure and a fast-moving urban technology atmosphere. The Mercedes subject must remain visually dominant. Place the exact text "MERCEDES UNTER DRUCK" in a different clean high-contrast area than Cover A. No collage, no fake logos, no fake statistics, no pseudo-writing, no advertising gloss. 16:9.
 
-Inside each block, process every image carefully:
-1. Read the exact BILDPROMPT.
-2. Load/use selected `Bild 01.png` as the soft style reference.
-3. Generate exactly ONE image for that filename.
-4. Wait until generation is fully complete.
-5. QC the result.
-6. If FAIL: discard the failed result and regenerate the SAME filename only.
-7. If PASS: save/rename exactly to the requested `Bild NN.png` in `00-bildprompts/images/`.
-8. Continue until the current block is complete.
-9. After the block, perform BLOCK QC on all accepted images before starting the next block.
+Generate COVER B only after Cover A is complete. Wait until it is fully complete before continuing.
 
-BLOCK QC
-After each 5-image block, verify:
-- all expected filenames from that block exist
-- no extra files were added
+COVER C — STRATEGIC CROSSROADS
+Create a third cover in the SAME visual world with another clearly different camera angle and spatial arrangement. Show the recognizable Mercedes-Benz subject at a visual crossroads between traditional premium automotive heritage and a faster EV/software future. One side may suggest refined classic premium engineering and established factory heritage; the other side may suggest modern charging, software-led development and a fast-changing Chinese EV market. Keep the image photorealistic, editorial and believable, not symbolic fantasy. Use the exact text "MERCEDES UNTER DRUCK" once in clean negative space. No extra words, no fake logos, no fake data, no sci-fi UI, no glossy advertisement look. 16:9.
+
+Generate COVER C only after Cover B is complete.
+
+COVER GATE — MANDATORY STOP
+After Cover A, Cover B and Cover C are all complete:
+- show all three candidates to me
+- do NOT choose the winner yourself
+- do NOT create any story image yet
+- STOP COMPLETELY
+- wait for me to answer only A, B or C
+
+============================================================
+AFTER I CHOOSE THE COVER
+============================================================
+
+When I choose A, B or C:
+1. Keep ONLY the selected cover as the final cover.
+2. Treat it as `Bild 01.png`.
+3. Discard/delete the two rejected cover candidates from the final output.
+4. Use the selected cover as a SOFT STYLE / CONTINUITY REFERENCE for every later AI image.
+5. Preserve overall documentary realism, color family, contrast discipline, material quality and visual polish.
+6. Do NOT copy the cover layout, text placement or subject arrangement into later images.
+7. Later images must be individually composed for their own narration beat.
+8. Later images normally contain no visible text.
+
+============================================================
+STAGE 2 — REQUIRED AI IMAGES
+============================================================
+
+Generate ONLY the eight AI story images listed below.
+Do NOT invent missing image numbers.
+Missing numbers are intentional slots for real source media or verified graphics handled elsewhere.
+
+Work in production blocks of MAXIMUM FIVE required AI images.
+Every image is still generated separately.
+
+MANDATORY PER-IMAGE PROCEDURE
+For every image:
+1. Use the selected `Bild 01.png` cover as a soft visual reference.
+2. Read the exact prompt for the current image below.
+3. Generate exactly ONE image.
+4. Wait until it is fully complete.
+5. QC it.
+6. If it fails, regenerate that SAME image only.
+7. If it passes, save/rename it exactly to the required `Bild NN.png` filename.
+8. Continue to the next required image.
+
+Never create a collage containing several image slots.
+Never put image numbers visibly inside the picture.
+
+============================================================
+PRODUCTION BLOCK 1 — 5 IMAGES
+============================================================
+
+IMAGE 1 OF BLOCK 1
+FINAL FILENAME: Bild 03.png
+AUDIO ANCHOR: „Aber die Zahlen zeigen, wie stark der Druck auf den Konzern inzwischen geworden ist.“
+VISUAL PURPOSE: Den gleichzeitigen wirtschaftlichen Druck auf ein etabliertes Premium-Autounternehmen sofort verständlich machen.
+
+BILDPROMPT:
+Use the selected Bild 01.png only as a soft visual-style reference for documentary realism, restrained premium color treatment, contrast and material quality. Create a photorealistic editorial business-documentary scene inside a large modern automotive headquarters strategy room. In the foreground, a polished but generic premium vehicle silhouette is partially visible from a three-quarter angle, with no recognizable competitor logo or exact production-model claim. Around it, several distinct pressures are represented physically and realistically: a wall of market charts trending downward without readable numbers, a distant EV-focused city skyline, manufacturing-cost folders and tariff paperwork on a conference table, and executives seen only as small anonymous figures in discussion. The composition should feel tense but factual, not catastrophic: established premium industry under pressure from several directions at once. Wide cinematic framing, 35mm documentary lens feel, eye-level camera, natural office daylight mixed with practical interior lighting, realistic glass, metal and paper textures, subtle depth of field, no glossy advertising look, no holograms, no visible text, no fake UI, no watermark. 16:9.
+
+IMAGE 2 OF BLOCK 1
+FINAL FILENAME: Bild 09.png
+AUDIO ANCHOR: „Doch inzwischen greifen chinesische Marken mit neuen Elektroautos, aggressiven Preisen und sehr kurzen Entwicklungszyklen an.“
+VISUAL PURPOSE: Unterschied zwischen klassischem Premium-Modell und schneller softwaregetriebener EV-Entwicklung zeigen.
+
+BILDPROMPT:
+Use the selected Bild 01.png as a soft style reference only. Create a photorealistic factual documentary comparison in one coherent frame, not a collage. On the left, show a traditional premium automotive development environment: clay-model studio, engineering drawings, physical prototype parts and deliberate long-cycle product development. On the right, show a faster modern electric-vehicle development environment: generic compact EV prototype, software engineers testing dashboards on laptops, rapid prototype iteration boards with shapes but no readable text, charging hardware and digital validation equipment. No competitor logos, no fake Chinese branding. The visual message must be immediate: long-established premium development cycle versus faster software-led EV iteration. Balanced composition, medium-wide camera, realistic contemporary industrial design studio, neutral practical lighting with slightly cooler light on the fast-iteration side, physically plausible equipment, candid workers, no posing, no text, no holograms, no watermarks, no glossy commercial aesthetic. 16:9.
+
+IMAGE 3 OF BLOCK 1
+FINAL FILENAME: Bild 13.png
+AUDIO ANCHOR: „Später wurde die Strategie flexibler. Verbrenner und Hybride sollen nun noch weit in die 2030er-Jahre angeboten werden können.“
+VISUAL PURPOSE: Parallele Technologiepfade statt einer einzigen elektrischen Richtung erklären.
+
+BILDPROMPT:
+Use the selected Bild 01.png only as a soft visual reference for realism, tonal balance and quality. Create a photorealistic automotive engineering documentary scene built around one central decision point inside a modern development center. From the center, two physically believable engineering work zones extend into the background. One side contains a generic electric skateboard platform with battery modules, inverter hardware and charging test equipment. The other side contains a generic hybrid/combustion powertrain test bench with engine components, exhaust-analysis equipment and hybrid electrical modules. Engineers move naturally between both areas, showing that two technology paths are being maintained in parallel. Do not show competitor logos or readable labels. Wide symmetrical-but-natural composition, slightly elevated eye-level camera, deep enough focus to understand both paths, realistic industrial lighting, authentic metal, cables, tools and floor markings, restrained premium documentary mood, no sci-fi interface, no text, no advertising gloss, no watermark. 16:9.
+
+IMAGE 4 OF BLOCK 1
+FINAL FILENAME: Bild 16.png
+AUDIO ANCHOR: „Gleichzeitig schrumpft die Profitabilität.“
+VISUAL PURPOSE: Kosten- und Margendruck als reale betriebliche Belastung visualisieren.
+
+BILDPROMPT:
+Use Bild 01.png as a soft style and quality reference, never as a composition template. Create a photorealistic business-documentary scene inside a large premium-car manufacturing complex. The image should visually connect four cost layers in one believable environment: body production in the background, logistics pallets and transport containers in the middle ground, engineering workstations behind glass, and procurement/currency/tariff documents on a foreground desk. A small group of anonymous managers and engineers reviews the situation with serious but natural body language. The scene must communicate margin pressure through operational complexity rather than dramatic disaster imagery. No readable financial numbers, no fake newspaper headlines. Medium-wide editorial framing, natural industrial overhead light with daylight from high factory windows, realistic steel, concrete, cardboard and glass textures, candid atmosphere, subtle cinematic depth, no holograms, no blue-tech glow, no watermark. 16:9.
+
+IMAGE 5 OF BLOCK 1
+FINAL FILENAME: Bild 21.png
+AUDIO ANCHOR: „Gleichzeitig investiert der Konzern weiter in Software, MB.OS, Fahrerassistenz und neue Elektroplattformen.“
+VISUAL PURPOSE: Software, Assistenz und Fahrzeugarchitektur als Zukunftsinvestition erklären, ohne eine echte MB.OS-Oberfläche zu fälschen.
+
+BILDPROMPT:
+Use the selected Bild 01.png only as a soft style reference. Create a photorealistic documentary scene in a contemporary automotive software and vehicle-architecture lab. A premium EV prototype sits on a test platform. Around it, engineers work on three clearly different but connected tasks: sensor calibration for driver assistance, software validation on ordinary engineering monitors with abstract non-readable interface blocks, and inspection of a modular electric vehicle platform with visible battery structure. The image must feel like real engineering work, not futuristic marketing. Do not recreate the real MB.OS interface. No readable code, no holographic projections. Over-shoulder documentary camera from behind one engineer, 35mm lens feel, realistic lab lighting, neutral whites and metal tones, authentic cables, calibration targets and test hardware, candid people, subtle depth of field, no glossy advertisement look, no watermark. 16:9.
+
+BLOCK 1 QC — MANDATORY
+Before continuing, compare Bild 03, Bild 09, Bild 13, Bild 16 and Bild 21 together.
+Check:
+- exact filenames
+- no missing images
 - no duplicate or near-identical compositions
-- no visible style drift from selected `Bild 01.png`
-- each image still has an individual composition suited to its narration beat
-- no malformed people, vehicles, hands or geometry
-- no invented Mercedes identity
+- no style drift away from selected Bild 01
+- every image clearly matches its Audio Anchor
+- no malformed hands, people, cars or geometry
 - no unwanted visible text
-- no glossy advertisement look
+- no glossy advertising look
+Regenerate only failed slots. Do not continue until Block 1 passes.
 
-Do not create one collage containing five scenes. The 5-image rule is a production step, not a single-image layout.
+============================================================
+PRODUCTION BLOCK 2 — 3 IMAGES
+============================================================
 
-FINAL CLEANUP — MANDATORY
-Only after all Flow blocks are complete:
-1. Compare the final folder against the exact expected Flow filename list.
-2. Delete the two unselected cover candidates if they still exist anywhere in the project output.
-3. Delete rejected retries, temporary files and accidental alternates.
-4. Do not keep duplicate versions.
-5. Do not keep unused generated images.
-6. Confirm that `00-bildprompts/images/` contains ONLY the selected cover plus the required accepted Flow images.
+IMAGE 1 OF BLOCK 2
+FINAL FILENAME: Bild 22.png
+AUDIO ANCHOR: „Das Problem ist also nicht, dass Mercedes plötzlich keine guten Autos mehr baut. Das Problem ist, dass sich der Markt schneller verändert als das alte Premium-Modell es gewohnt war.“
+VISUAL PURPOSE: Starke Premium-Qualität gegen einen schneller werdenden Markt stellen.
 
-EXPECTED FINAL FLOW FILES FOR THIS PROJECT
+BILDPROMPT:
+Use Bild 01.png as a soft reference for visual polish, documentary realism and restrained premium tones. Create a photorealistic editorial metaphor in a large automotive design museum connected to a modern development corridor. In the foreground, a beautifully crafted premium grand-tourer shape is displayed under calm museum-quality light. Behind it, through a wide glass opening, a fast-moving contemporary development floor is visible with EV prototypes, software teams, charging rigs and rapid design iteration activity. The premium object is sharp and calm while the new-market environment behind it feels faster and more dynamic through subtle motion blur of people, not the car. The message is heritage and quality facing a faster market, not decline or ruin. Elegant wide composition, strong foreground-background separation, physically plausible museum and studio architecture, no visible text, no holograms, no fake UI, no watermark, no melodramatic cracks or explosions. 16:9.
+
+IMAGE 2 OF BLOCK 2
+FINAL FILENAME: Bild 24.png
+AUDIO ANCHOR: „In China kämpfen neue Hersteller um Technik, Software und Preis.“
+VISUAL PURPOSE: Sehr kurze Entwicklungszyklen und schnelle Produktiteration visuell zeigen.
+
+BILDPROMPT:
+Use the selected Bild 01.png only as a soft style reference. Create a photorealistic documentary scene in a busy contemporary electric-vehicle development studio in China. Show several stages of rapid product iteration within one believable open-plan environment: an EV prototype under inspection, a designer reviewing physical scale models, software engineers testing a dashboard prototype, battery-pack engineers around a modular test rig, and a wall with pinned shape studies and colored cards that contain no readable words. The people should look focused and candid, not staged. Visual emphasis on speed, parallel workstreams and tight feedback loops. Medium-wide 28mm documentary framing, slightly elevated angle to reveal simultaneous activities, bright practical studio light, realistic skin, tools, prototypes and materials, no sci-fi holograms, no readable text, no fake luxury-ad lighting, no watermark. 16:9.
+
+IMAGE 3 OF BLOCK 2
+FINAL FILENAME: Bild 29.png
+AUDIO ANCHOR: „Aber die nächsten Jahre entscheiden, ob der Stern im Elektro- und Softwarezeitalter genauso stark bleibt wie im Verbrennerzeitalter.“
+VISUAL PURPOSE: Offene Zukunft zwischen Elektroplattform, Software und klassischem Premium-Erbe darstellen.
+
+BILDPROMPT:
+Use the selected Bild 01.png as a soft visual reference for the same restrained premium documentary world. Create a realistic, thoughtful closing image at dusk inside an automotive proving and development campus. In the foreground, a premium vehicle prototype is parked in partial silhouette. In the middle ground, an electric charging test area and sensor-calibration zone suggest the software-and-EV future. In the far background, a traditional engine development building and older test infrastructure remain visible, creating a visual bridge between two eras. The scene should feel unresolved but confident, communicating that the next phase is still being decided. Wide 24mm composition, low eye-level camera, natural blue-hour sky balanced by warm practical facility lights, realistic asphalt, glass and metal, subtle cinematic depth, no text, no holograms, no apocalyptic mood, no watermark. 16:9.
+
+BLOCK 2 QC — MANDATORY
+Verify Bild 22.png, Bild 24.png and Bild 29.png with the same standards as Block 1. Regenerate failed slots only.
+
+============================================================
+FINAL CLEANUP
+============================================================
+
+At the end, the final Flow-created image set must contain ONLY:
 - Bild 01.png
 - Bild 03.png
 - Bild 09.png
@@ -133,5 +233,23 @@ EXPECTED FINAL FLOW FILES FOR THIS PROJECT
 - Bild 24.png
 - Bild 29.png
 
-FINAL SUCCESS CONDITION
-Exactly 9 final Flow-created images remain in `00-bildprompts/images/`: one selected cover plus eight required story images. No Cover A/B/C leftovers, no rejected generations, no unused alternates and no extra image numbers.
+Remove/discard:
+- Cover A/B/C temporary names
+- the two unselected cover designs
+- failed generations
+- retries after a successful replacement exists
+- duplicates
+- unused alternates
+- test images
+
+Do NOT generate these numbers in Flow:
+Bild 02, 04–08, 10–12, 14–15, 17–20, 23, 25–28, 30.
+Those are intentionally reserved for real source media or verified graphics outside this AI-image task.
+
+============================================================
+START NOW
+============================================================
+
+Do not ask me for any other file or prompt.
+Do not summarize the plan first.
+BEGIN NOW BY GENERATING COVER A.
