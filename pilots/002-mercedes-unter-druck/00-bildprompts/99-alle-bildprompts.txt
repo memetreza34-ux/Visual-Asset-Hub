@@ -1,18 +1,27 @@
-# GOOGLE FLOW — ALLE ECHTEN KI-BILDPROMPTS
+# GOOGLE FLOW — BENÖTIGTE KI-BILDPROMPTS
 # Video: Warum Mercedes plötzlich unter Druck steht
 # Format: 16:9
 
-IMPORTANT FOR THE AI AGENT
-- These are the ONLY Stage-2 images that Google Flow should generate freely.
-- `Bild 01.png` is the user-selected cover and must be loaded as a SOFT STYLE REFERENCE before every prompt below.
-- Preserve the selected cover's documentary realism, restrained premium color family, contrast discipline, material quality and overall polish.
-- Do NOT copy the cover composition, text placement or subject arrangement.
-- Every image below must have its own composition and clearly match its Audio Anchor.
-- No visible text unless explicitly requested.
-- No Mercedes logo, exact Mercedes model, MB.OS interface, executive likeness or exact factory identity may be invented.
-- Generate exactly ONE image at a time, wait, QC, rename, then continue.
+AGENT RULE
+- First finish the 3-cover gate from `cover/cover-prompt.txt` and wait for the user's selection.
+- The selected winner becomes `images/Bild 01.png`.
+- Use `Bild 01.png` as a SOFT STYLE REFERENCE for every prompt below.
+- Generate ONLY the image blocks listed in this file.
+- Work in production blocks of maximum 5 required images.
+- Each image is still generated separately: prompt → generate one image → wait → QC → rename exactly → next image.
+- After each block, perform block QC before continuing.
+- Do NOT fill missing image numbers. Those are intentional REAL/GRAPHIC slots.
+- At the end `images/` must contain only the selected `Bild 01.png` plus the accepted files listed below. No other cover candidates, retries, alternates or duplicates.
 
----
+============================================================
+PRODUCTION BLOCK 1 — 5 REQUIRED FLOW IMAGES
+Expected files after this block:
+Bild 03.png
+Bild 09.png
+Bild 13.png
+Bild 16.png
+Bild 21.png
+============================================================
 
 ## Bild 03.png
 Audio Anchor: „Aber die Zahlen zeigen, wie stark der Druck auf den Konzern inzwischen geworden ist.“
@@ -62,7 +71,16 @@ Visual Form: Generic automotive software-and-platform engineering scene.
 BILDPROMPT:
 Use the selected `Bild 01.png` only as a soft style reference. Create a photorealistic documentary scene in a contemporary automotive software and vehicle-architecture lab. A generic premium EV prototype with no logo or recognizable production-model details sits on a test platform. Around it, engineers work on three clearly different but connected tasks: sensor calibration for driver assistance, software validation on ordinary engineering monitors with abstract non-readable interface blocks, and inspection of a modular electric vehicle platform with visible battery structure. The image must feel like real engineering work, not futuristic marketing. No Mercedes branding, no MB.OS recreation, no recognizable UI, no logos, no readable code, no holographic projections. Over-shoulder documentary camera from behind one engineer, 35mm lens feel, realistic lab lighting, neutral whites and metal tones, authentic cables, calibration targets and test hardware, candid people, subtle depth of field, no glossy advertisement look, no watermark. 16:9.
 
----
+BLOCK 1 QC — REQUIRED BEFORE BLOCK 2
+Confirm all five expected files exist with exact names. Compare them together for duplicated compositions, style drift, unwanted text, malformed people/vehicles, fake brand identity and mismatch with their Audio Anchors. Regenerate failed slots only.
+
+============================================================
+PRODUCTION BLOCK 2 — 3 REQUIRED FLOW IMAGES
+Expected files after this block:
+Bild 22.png
+Bild 24.png
+Bild 29.png
+============================================================
 
 ## Bild 22.png
 Audio Anchor: „Das Problem ist also nicht, dass Mercedes plötzlich keine guten Autos mehr baut. Das Problem ist, dass sich der Markt schneller verändert als das alte Premium-Modell es gewohnt war.“
@@ -92,8 +110,19 @@ Visual Form: Forward-looking documentary closing metaphor.
 BILDPROMPT:
 Use the selected `Bild 01.png` as a soft visual reference for the same restrained premium documentary world. Create a realistic, thoughtful closing image at dusk inside a generic automotive proving and development campus. In the foreground, a neutral premium vehicle prototype is parked in partial silhouette with no visible logo, badge, grille identity or exact production-model design. In the middle ground, an electric charging test area and sensor-calibration zone suggest the software-and-EV future. In the far background, a traditional engine development building and older test infrastructure remain visible, creating a visual bridge between two eras. The scene should feel unresolved but confident, communicating that the next phase is still being decided. Wide 24mm composition, low eye-level camera, natural blue-hour sky balanced by warm practical facility lights, realistic asphalt, glass and metal, subtle cinematic depth, no text, no logos, no holograms, no apocalyptic mood, no watermark. 16:9.
 
----
+BLOCK 2 QC — REQUIRED
+Confirm Bild 22.png, Bild 24.png and Bild 29.png exist with exact names and pass the same quality checks.
 
-END OF FLOW-ONLY IMAGE PROMPTS
+FINAL CLEANUP
+The final folder must contain exactly these Flow-created files and nothing else:
+Bild 01.png
+Bild 03.png
+Bild 09.png
+Bild 13.png
+Bild 16.png
+Bild 21.png
+Bild 22.png
+Bild 24.png
+Bild 29.png
 
-Do not generate Bild 02, 04–08, 10–12, 14–15, 17–20, 23, 25–28 or 30 in Flow. Those slots are intentionally reserved for genuine source media or verified graphics defined in `99-tech/REAL_MEDIA_PLAN.json`.
+Delete Cover A/B/C temporary files, rejected retries, duplicates and unused alternates. Do not generate Bild 02, 04–08, 10–12, 14–15, 17–20, 23, 25–28 or 30 in Flow. Those slots are intentionally reserved for genuine source media or verified graphics defined in `99-tech/REAL_MEDIA_PLAN.json`.
