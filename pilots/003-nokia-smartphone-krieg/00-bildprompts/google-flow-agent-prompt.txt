@@ -1,4 +1,4 @@
-GOOGLE FLOW AGENT — VIDEO 003: NOKIA — ILLUSTRATION-FIRST V2
+GOOGLE FLOW AGENT — VIDEO 003: NOKIA — REALISTIC EDITORIAL V3
 
 IMPORTANT
 You have everything required in this single prompt. Do NOT ask for repository files, local paths, cover files, scripts or additional prompts. Do NOT summarize the plan first. Start producing the requested images.
@@ -8,38 +8,27 @@ Title: Wie Nokia den Smartphone-Krieg verlor
 Format: 16:9
 Exact cover text: SO VERLOR NOKIA
 
-VISUAL WORLD
-Premium editorial business-documentary illustration with believable materials and clean explanatory composition. Combine semi-realistic 3D objects, magazine-style information design, restrained infographic elements, clean depth and strong object silhouettes. The result should feel like a high-quality business explainer/documentary, NOT like corporate stock photography and NOT like a childish cartoon.
+VISUAL WORLD — VERY IMPORTANT
+The base look is a premium realistic business-documentary frame, NOT an infographic poster.
+Think: high-end editorial photography, realistic 3D product photography, believable technology environments, physical objects, shelves, workbenches, labs, archives, retail spaces, factories and infrastructure.
 
-HUMAN-DENSITY RULE — VERY IMPORTANT
-- Default: ZERO people.
-- Prefer products, devices, diagrams, maps, timelines, interfaces, arrows, nodes, process visuals and symbolic objects.
-- If a human is truly necessary, use at most 1–2 small anonymous figures and never make faces the focal point.
-- Do NOT default to meetings, executives at tables, developers at desks or groups of business people.
-- No generic boardroom scenes in this production.
+TARGET MIX FOR THE AI IMAGES
+- about 70% photorealistic / realistic 3D documentary scenes
+- about 20% realistic scenes with one or two subtle graphic helpers
+- at most about 10% pure graphic treatment, only if a physical scene cannot explain the idea
 
-TEXT / INFO RULE
-- Short useful visual labels are allowed when they improve understanding.
-- Examples: HARDWARE, SOFTWARE, APPS, GERÄT, ÖKOSYSTEM, 2007, 2011, 2013.
-- Use at most a few short labels per image.
-- No paragraphs, fake documents or text walls.
+HUMAN RULE
+- Prefer zero people.
+- People are allowed only when the action truly requires them.
+- If used, keep them small, anonymous and secondary.
+- Never default to executives around tables, teams in meetings or developers posing at desks.
+
+GRAPHICS / TEXT RULE
+- Graphics are SUPPORT, not the whole image.
+- A subtle arrow, one short label, one year marker or a small callout is allowed when it makes the idea clearer.
+- Do NOT create white-background infographic posters, textbook diagrams, icon clouds, full-screen timelines or PowerPoint-looking layouts.
+- No text walls.
 - Do NOT invent exact financial numbers or market shares inside AI images. Verified numbers are added later as overlays.
-- If Flow cannot render a short label cleanly, leave clear negative space instead of generating unreadable pseudo-text.
-
-VARIETY RULE — VERY IMPORTANT
-Every adjacent AI image must use a DIFFERENT visual form. Rotate between:
-- object-centered explainer
-- split comparison
-- ecosystem diagram
-- timeline
-- symbolic editorial illustration
-- process diagram
-- product spotlight
-- transformation graphic
-- market map
-- clean infographic scene
-
-Do not produce several images with the same blue office background, same camera angle, same table composition or same human arrangement.
 
 GLOBAL PRODUCTION RULES
 - Generate ONE image at a time.
@@ -48,11 +37,11 @@ GLOBAL PRODUCTION RULES
 - Never create technical cards, source-needed cards, slot cards, debug frames or placeholders.
 - Never invent a Nokia, Apple, Microsoft, Symbian, Windows Phone or Android logo/product identity in the AI scenes below.
 - Exact branded products and historic source visuals are handled separately and must NOT be generated here.
-- Follow-up images should feel like the same documentary, but each composition must be clearly individual.
-- After the user selects a cover, use Bild 01.png only as a SOFT STYLE REFERENCE for quality, tonal family, contrast, material treatment and editorial language. Do NOT copy its composition, background or object arrangement.
+- Each image must have a clearly different environment or framing from the previous one.
+- After the user selects a cover, use Bild 01.png only as a SOFT STYLE REFERENCE for quality, tonal family, contrast, material realism and editorial mood. Do NOT copy its composition.
 
 ============================================================
-STAGE 1 — THREE DIFFERENT COVER DESIGNS
+STAGE 1 — THREE REALISTIC COVER DESIGNS
 ============================================================
 
 Create exactly three separate temporary cover candidates: Cover A, Cover B and Cover C.
@@ -61,16 +50,16 @@ SO VERLOR NOKIA
 
 Use the text exactly once, correctly spelled, large, high-contrast and readable at thumbnail size. Do not show any other readable words on the covers.
 The word NOKIA may appear only as part of the exact cover text. Do not fabricate a Nokia logo or exact branded phone.
-People should not be used on the cover.
+Prefer no people on the cover.
 
-COVER A — OLD KING VS NEW WORLD — OBJECT SPOTLIGHT
-Create a bold object-centered editorial cover. A premium generic late-2000s keypad smartphone stands large on a simple dark pedestal like a former market king. Behind and around it, a growing field of modern touchscreen silhouettes, app tiles and connected nodes rises into the frame. The old device must still look premium and successful, not broken. Strong contrast, clean geometry, restrained blue/gray palette with selective brighter app colors, strong negative space for the exact text SO VERLOR NOKIA. No people, no logos, no fake UI, no cracks, no explosion, 16:9.
+COVER A — FORMER KING
+Create a photorealistic editorial product shot. A premium generic late-2000s keypad smartphone stands large in the foreground on a dark reflective studio surface, beautifully lit and still looking expensive and successful. In the background, several modern touchscreen silhouettes sit farther back, softly out of focus but visibly growing in number. Use realistic metal, glass and plastic materials, shallow depth of field, dramatic but credible studio lighting, strong negative space for SO VERLOR NOKIA. No diagrams, no arrows, no logos, no fake UI, 16:9.
 
-COVER B — MARKET SHIFT — EDITORIAL INFOGRAPHIC
-Create a premium magazine-style market-shift illustration. A large classic mobile-phone silhouette dominates the left side, while a sweeping directional flow of touchscreen devices, app tiles and network nodes expands across the right side. Use clean arrows, scale changes and layered depth to communicate that the market rules are moving away from pure hardware. Do not create a literal chart with fake numbers. No people. Exact cover text SO VERLOR NOKIA large and highly readable. Serious documentary aesthetic, clean information design, 16:9.
+COVER B — RETAIL SHIFT
+Create a realistic electronics-store scene after closing time with no visible customers. In the foreground, a clean display of premium classic keypad smartphones is still prominent. Deeper in the store, a much larger wall of touchscreen devices dominates the new display area. Use real retail shelves, price-card holders without readable text, reflections, practical store lighting and strong visual depth. The story must be understandable without infographic graphics. Exact cover text SO VERLOR NOKIA, 16:9.
 
-COVER C — ECOSYSTEM GAP — SYMBOLIC NETWORK ILLUSTRATION
-Create a strong symbolic editorial cover. In the center, one premium generic classic smartphone sits on a small isolated platform with only a few connection lines. Around it, a much larger connected ecosystem of touchscreen devices, app tiles, cloud/service nodes and developer-tool symbols forms a dense network. The visual story is isolation versus ecosystem scale. No people, no logos, no branded UI. Exact cover text SO VERLOR NOKIA clearly readable with strong contrast. Premium business-documentary illustration, 16:9.
+COVER C — THE CROSSROADS
+Create a realistic editorial tabletop scene in a dark technology studio. In the center sits a premium generic classic smartphone. Around it are three physical development directions made from tangible objects: keypad hardware components, touchscreen prototypes, and software/service test devices on small monitors. Use subtle physical placement to suggest a strategic crossroads, not a drawn diagram. No people, no logos, no fake branded UI. Exact cover text SO VERLOR NOKIA, 16:9.
 
 After Cover A, Cover B and Cover C are fully generated, STOP COMPLETELY.
 Do not choose a winner.
@@ -92,30 +81,29 @@ Bild 09.png
 Bild 12.png
 Bild 15.png
 
-BILD 03.png — MARKET LEADER UNDER PRESSURE — MARKET MAP
-Create a premium editorial market-map illustration with ZERO people. In the center, a large cluster of polished generic keypad smartphones forms a strong dominant block representing an established market leader. From three different directions, new forces move toward it: large touchscreen device silhouettes, colorful app tiles and connected internet/service nodes. Use arrows, spatial pressure and scale to make the conflict immediately understandable. Optional short labels only if rendered cleanly: HARDWARE, SOFTWARE, APPS. No percentages, no logos, no fake brands. Clean off-white/dark-blue documentary palette, crisp object separation, 16:9.
+BILD 03.png — MARKET LEADER UNDER PRESSURE — REALISTIC RETAIL SHELF
+Create a photorealistic late-2000s electronics retail display with ZERO people. The foreground shelf is packed with polished generic keypad smartphones in many shapes and sizes, visually communicating dominance and variety. On a neighboring display farther back, several larger touchscreen phones are beginning to take over more shelf space. Use real shelves, security tethers, glass, metal, practical retail lighting and believable depth. No diagrams, no arrows, no logos, no readable brand names. The market pressure must come from the physical shelf composition itself. 16:9.
 
-BILD 06.png — HARDWARE TO ECOSYSTEM — SPLIT EXPLAINER
-Create a clean split-comparison editorial illustration with ZERO people. Left half: an exploded-view generic premium phone showing camera module, battery, antenna, keypad, casing and hardware components arranged neatly around the device. Right half: a touchscreen phone connected to a network of app tiles, cloud/service nodes, maps, music, messaging and software blocks. A subtle directional arrow moves from left to right. Short clean labels may be used: HARDWARE on the left, ÖKOSYSTEM on the right. No brands, no fake logos, no unreadable tiny text. Premium semi-realistic materials, infographic clarity, 16:9.
+BILD 06.png — HARDWARE TO ECOSYSTEM — REALISTIC WORKBENCH + SUBTLE GRAPHICS
+Create a high-end photorealistic engineering workbench with ZERO people. On the left lies an opened generic keypad smartphone with real battery, camera module, antenna parts, screws and casing pieces arranged like a careful teardown. On the right sits a modern touchscreen prototype beside a laptop and several connected test devices showing generic app-like blocks without readable labels. Add only ONE subtle directional arrow from left to right and, if rendered cleanly, two small labels: HARDWARE and ÖKOSYSTEM. The physical objects must dominate the frame; graphics are secondary. Realistic lab light, 16:9.
 
-BILD 09.png — DEVELOPERS MOVE TOWARD PLATFORMS — ECOSYSTEM DIAGRAM
-Create an editorial ecosystem diagram with no visible people. Show three generic mobile-platform islands/nodes from a slightly elevated isometric perspective. The older platform has fewer connected app tiles, tools and partner nodes. Two newer touchscreen-oriented platforms have many more app tiles, connection lines and integration nodes flowing toward them. Use scale and network density to explain developer attention without showing literal developers. Optional clean label at top: APPS ENTSCHEIDEN. No brands, no fake platform names, no exact numbers, no cartoons, 16:9.
+BILD 09.png — DEVELOPERS MOVE TO OTHER PLATFORMS — EMPTY DEVELOPMENT LAB
+Create a realistic early-2010s mobile software lab after hours with ZERO people. Show three development stations. One older station has a keypad test phone, fewer test devices and only a small number of app-like windows on its monitor. Two newer touchscreen stations have many test phones, accessory docks and multiple app-like screens. Cables, notebooks, keyboards and device stands should make the room believable. Do not draw network diagrams or icon clouds. No logos, no readable code, no fake platform names. Medium-wide documentary framing, 16:9.
 
-BILD 12.png — STRATEGIC DECISION — CROSSROADS ILLUSTRATION
-Create a sophisticated editorial crossroads illustration with ZERO people. A premium generic smartphone sits at the center of a three-way strategic junction. One path leads toward an aging closed hardware-centric system with physical-keyboard symbols; a second leads toward a partner-platform route with touchscreen and software blocks; a third suggests rebuilding around a new internal platform using modular software components. Use clean arrows, path geometry and object clusters. Optional short central label: STRATEGIE. No company names, no logos, no fake documents, no meeting table. Strong magazine-explainer composition, 16:9.
+BILD 12.png — STRATEGIC DECISION — PHYSICAL PROTOTYPE TABLE
+Create a realistic dark product-strategy studio with ZERO people. A long black table holds three clearly different prototype directions made from physical objects: one path built around keypad phones and hardware parts, one path around touchscreen partner-platform prototypes, and one path around modular internal software/hardware test devices. Use actual folders, prototype shells, cables, circuit boards and monitors with generic unreadable interfaces. Small colored tape lines on the table may subtly separate the three paths, but do NOT turn the image into a diagram. Cinematic overhead/three-quarter camera, 16:9.
 
-BILD 15.png — TRANSITION WHILE THE MARKET MOVES — TIMELINE / PROCESS VISUAL
-Create a horizontal editorial timeline illustration with ZERO people. Foreground lane: a slow, long product-development pipeline shown through physical prototypes, hardware testing blocks and long sequential stages. Parallel lane: a faster software-led market shown through short repeating cycles of touchscreen prototypes, app updates and connected-service icons. The fast lane visibly completes several cycles while the slow lane advances only once. Optional small labels: LANGER ZYKLUS and SCHNELLE ZYKLEN. No exact dates or numbers. Clean process visualization, strong left-to-right motion, 16:9.
+BILD 15.png — MARKET MOVES FASTER — REALISTIC PROTOTYPE SEQUENCE + LIGHT OVERLAY
+Create a photorealistic engineering bench viewed from a slightly elevated angle with ZERO people. Along the upper half, show one slow hardware-development sequence: rough shell, engineering sample, refined prototype, final-looking keypad phone. Along the lower half, show several faster touchscreen prototype iterations with visibly changing screen layouts and form factors. Add only two small clean labels if possible: LANGER ZYKLUS and SCHNELLE ZYKLEN. No full timeline, no icon poster, no fake dates or statistics. The image must still look like a real table photographed for a documentary. 16:9.
 
 BLOCK 1 QC
 Before continuing, verify all five files exist with exact names.
 Reject/regenerate a slot if:
+- it looks primarily like an infographic or PowerPoint slide,
 - it contains unnecessary groups of people,
-- it looks like generic corporate stock photography,
-- it repeats the composition of another slot,
+- it repeats the same environment or camera angle as another slot,
 - it contains malformed devices,
 - visible text is unreadable,
-- it drifts away from the editorial illustration language,
 - or the main idea is not understandable within two seconds.
 Then continue to Block 2.
 
@@ -129,24 +117,24 @@ Bild 24.png
 Bild 27.png
 Bild 29.png
 
-BILD 18.png — ONE GOOD DEVICE IS NOT ENOUGH — PRODUCT + ECOSYSTEM RINGS
-Create a premium object-centered explainer with ZERO people. A beautifully designed generic smartphone is centered on a clean dark platform. Around it are multiple concentric ecosystem rings containing app tiles, maps, messaging, music, cloud/service nodes, payments and connected-device symbols. The phone is excellent, but visually it occupies only the center of a much larger system. Optional short labels: GERÄT in the center and ÖKOSYSTEM outside. No brands, no fake UI, no hologram sci-fi look; use tangible semi-realistic icons and clean editorial depth, 16:9.
+BILD 18.png — ONE GOOD DEVICE IS NOT ENOUGH — REALISTIC PRODUCT ECOSYSTEM STILL LIFE
+Create a premium photorealistic editorial still life with ZERO people. A beautifully designed generic smartphone stands at the center on a dark desk. Around it are physical ecosystem objects: earbuds, navigation device, payment terminal, small music player, laptop, accessory dock and a monitor showing a generic app grid. The phone looks excellent, but the wider arrangement clearly suggests that the surrounding services and connected devices matter too. No circular infographic rings, no floating icon cloud, no holograms, no brands. Product-photography lighting, 16:9.
 
-BILD 21.png — SHRINKING PLATFORM ISLAND — SYMBOLIC EDITORIAL ILLUSTRATION
-Create a serious semi-realistic editorial island metaphor with ZERO people. A small central technology island contains one generic smartphone platform and only a few app/service nodes. Two much larger surrounding islands contain dense app tiles, partner nodes and connection routes. Several thin bridges to the small island are disappearing while the larger ecosystems remain highly connected. The image must feel like a business-magazine illustration, not a fantasy landscape. No brands, no fake numbers, restrained materials and colors, 16:9.
+BILD 21.png — SHRINKING PLATFORM — REALISTIC RETAIL / DISPLAY METAPHOR
+Create a realistic technology showroom with ZERO people. On one side, a small isolated display pedestal holds a capable generic older-style smartphone with only a few accessories and little shelf space. Across the room, two much larger connected display walls are filled with touchscreen devices, accessory docks and app-demo screens. Use actual furniture, screens, shelves and lighting to communicate ecosystem scale. Do NOT use islands, bridges, diagrams or drawn networks. No logos, no readable brand labels. Wide documentary composition, 16:9.
 
-BILD 24.png — CORPORATE TRANSITION — ASSET-TRANSFER INFOGRAPHIC
-Create a clean editorial business-transfer illustration with ZERO people. On the left, a neutral corporate structure contains stacks of generic phone prototypes, design files, manufacturing symbols and engineering blocks. On the right, a second neutral corporate structure receives the device-business assets through a broad transfer arrow. Keep patents/rights as separate linked document icons rather than implying that every asset is identical. Optional small year marker: 2013. No logos, no handshakes, no boardroom, no fake contract text, no currency amount, 16:9.
+BILD 24.png — CORPORATE TRANSITION — REALISTIC ARCHIVE / ASSET HANDOVER + ONE ARROW
+Create a believable technology archive or logistics room with ZERO people. On the left, shelves and rolling cases contain generic phone prototypes, engineering binders, molds and manufacturing samples. On the right, a second storage zone is prepared to receive those assets. Several sealed transport cases sit between the two areas. Add at most ONE subtle directional arrow showing the transfer direction and a small year marker 2013 if it renders cleanly. No handshakes, no boardroom, no fake contracts, no currency figure, no logos. 16:9.
 
-BILD 27.png — PHONE DOMINANCE ENDS, COMPANY CONTINUES — TRANSFORMATION GRAPHIC
-Create a premium transformation illustration with ZERO people. On the left, an archive-like row of generic mobile phones gradually reduces in prominence. Across the middle, the visual transforms into telecom infrastructure: radio antennas, fiber links, server/network racks and enterprise connectivity nodes. The right side is larger and active, showing the company continuing in infrastructure rather than disappearing. Optional short labels: HANDYS on the left, NETZE on the right. No logos, no fake brand names, clean editorial documentary style, 16:9.
+BILD 27.png — PHONE ERA TO NETWORK INFRASTRUCTURE — REALISTIC TRANSITION SHOT
+Create a photorealistic documentary scene with ZERO people. In the foreground, a shallow-depth-of-field row of older generic mobile phones sits in a museum/archive display. Through glass in the background, a modern telecom equipment room is visible with server racks, radio hardware, fiber connections and network cabinets. The camera composition should naturally lead the eye from phones in front to infrastructure behind. No transformation arrows, no infographic layout, no labels unless absolutely necessary. Serious, realistic industrial lighting, 16:9.
 
-BILD 29.png — RULES CHANGE FASTER THAN STRATEGY — PROCESS-RACE METAPHOR
-Create a strong closing editorial process metaphor with ZERO people. Two parallel tracks run across the frame. The upper track is a long hardware roadmap with large physical prototype milestones spaced far apart. The lower track is a rapid software/ecosystem loop with many short iterations, app tiles and touchscreen updates cycling quickly. The lower track visibly evolves several times before the upper track reaches its next milestone. Optional short labels: HARDWARE and SOFTWARE. No literal race cars, no people, no logos, no fake statistics. Elegant business-explainer design, 16:9.
+BILD 29.png — OLD PROCESS VS FAST ITERATION — REALISTIC LAB CONTRAST
+Create a strong closing photorealistic technology lab scene with ZERO people. On the left side of a long workbench, one hardware prototype is surrounded by thick engineering binders, measurement tools and a small number of carefully staged physical revisions. On the right side, several touchscreen test devices show visibly different generic interface iterations beside rapid test rigs and software build monitors. Use depth, repetition and physical quantity to show that the software-led side iterates faster. No race-track graphic, no diagram, no logos, no fake statistics. Cinematic editorial lighting, 16:9.
 
 BLOCK 2 QC
 Verify Bild 18.png, Bild 21.png, Bild 24.png, Bild 27.png and Bild 29.png exist with exact names.
-Reject/regenerate any image that defaults back to generic business people, repeated office photography or a composition too similar to another generated slot.
+Reject/regenerate any image that becomes a full-screen infographic, generic business meeting, cartoon/vector illustration or a composition too similar to another generated slot.
 
 ============================================================
 FINAL CLEANUP
