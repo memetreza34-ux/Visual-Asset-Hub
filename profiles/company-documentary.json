@@ -1,5 +1,5 @@
 {
-  "id": "company-documentary-v2",
+  "id": "company-documentary-v3",
   "name": "Company / Business Documentary",
   "language": "de",
   "core_topics": [
@@ -16,6 +16,40 @@
     "reine Listen ohne wirtschaftliche Story oder Konflikt"
   ],
   "editorial_rule": "Die Story beginnt bei einer realen Firma, Marke, Entscheidung, Kennzahl, Krise, Konkurrenz oder einem konkreten Geschäftsprozess.",
+  "visual_language": {
+    "default_mode": "illustration-first-editorial-documentary",
+    "human_density": "low",
+    "human_rule": "Menschen nur verwenden, wenn sie für den Inhalt wirklich nötig sind. Standardmäßig 0 Personen; wenn nötig höchstens 1 bis 2 kleine, anonyme Figuren statt einer menschenzentrierten Szene.",
+    "text_in_images": "allowed-when-useful",
+    "text_rule": "Kurze Wörter, Jahreszahlen, Pfeile, Labels und Callouts sind erlaubt, wenn sie den Inhalt schneller erklären. Keine Textwände. Exakte Kennzahlen bleiben verifizierte Overlays im Schnitt.",
+    "preferred_visual_forms": [
+      "editorial illustration",
+      "object-centered explainer",
+      "product spotlight",
+      "comparison layout",
+      "timeline illustration",
+      "map or market map",
+      "ecosystem diagram",
+      "process diagram",
+      "cutaway or exploded-view style explanation",
+      "symbolic object metaphor",
+      "clean infographic scene",
+      "UI or platform explainer",
+      "diagram with arrows and short labels"
+    ],
+    "avoid_visual_forms": [
+      "generic executives around a conference table",
+      "repeated office meetings",
+      "groups of anonymous business people as filler",
+      "five scenes in a row with people at desks",
+      "generic corporate stock-photo composition",
+      "human faces as the default focal point",
+      "repeated blue office environments",
+      "different prompts that produce nearly identical compositions"
+    ],
+    "variety_rule": "Adjacent AI images should not use the same visual form. Rotate between object, comparison, diagram, timeline, map, product, process and symbolic compositions. A meeting/boardroom composition may appear at most once per 10 AI-generated images unless the story explicitly requires more.",
+    "cover_reference_rule": "The selected cover controls quality, palette and editorial language only. It must not force every following image to reuse the same composition, background, camera angle or subject arrangement."
+  },
   "visual_policy": {
     "real_first": [
       "echte Unternehmen und Marken",
@@ -32,8 +66,9 @@
       "abstrakte Erklärbilder",
       "nicht-belegende Rekonstruktionen",
       "symbolische Übergänge",
-      "generische Markt- oder Konkurrenzsituationen",
-      "Prozessvisualisierungen ohne konkrete Markenbehauptung"
+      "generische Markt-/Wettbewerbssituationen",
+      "Prozessvisualisierungen ohne konkrete Markenbehauptung",
+      "editoriale Illustrationen und Infografik-artige Erklärbilder mit wenig oder keinen Menschen"
     ],
     "graphics": [
       "Kennzahlen werden aus verifizierten Daten erzeugt, nicht von einem Bildmodell erfunden",
