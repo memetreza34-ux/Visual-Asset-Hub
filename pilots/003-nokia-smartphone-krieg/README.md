@@ -4,41 +4,45 @@
 **Cover-Text:** `SO VERLOR NOKIA`  
 **Ziel:** ca. 2 Minuten  
 **Format:** 16:9  
-**Profil:** `profiles/company-documentary.json` (`company-documentary-v3`)
+**Profil:** `profiles/company-documentary.json` (`company-documentary-v4`)
 
 ## Story
 
 Das Video zeigt, wie Nokia trotz enormer Marktstärke den Übergang vom hardwaregetriebenen Handygeschäft zum software- und plattformgetriebenen Smartphone-Markt verlor. Der Kern ist nicht „Nokia baute plötzlich schlechte Handys“, sondern der Wechsel der Wettbewerbsregeln: Betriebssystem, Apps, Entwickler, Touch-UX und Ökosystem wurden entscheidend.
 
-# Neue Bildsprache
+# Bildsprache V4 — realistische Editorial-Doku
 
-Die erste Flow-Version war zu menschenlastig und zu ähnlich: Meetings, Entwickler, Büros und Gruppen von Business-Personen erzeugten optisch immer wieder fast dieselbe Szene.
+Die ersten beiden Flow-Ansätze waren jeweils zu extrem:
 
-Für dieses Video gilt jetzt:
+1. zu viele generische Business-Menschen / Meetings
+2. danach zu viele Infografik-, Timeline- und PowerPoint-artige Illustrationen
 
-- **Illustration first**
-- **so wenig Menschen wie möglich**
-- Standard für KI-Bilder: **0 Personen**
-- Menschen nur, wenn sie inhaltlich wirklich nötig sind
-- kurze Labels / Pfeile / Jahreszahlen sind erlaubt, wenn sie etwas erklären
-- keine Textwände
-- exakte Kennzahlen bleiben verifizierte Overlays im Schnitt
-- direkt aufeinanderfolgende KI-Bilder müssen unterschiedliche Visual Forms nutzen
+V4 setzt den Mittelweg als festen Standard:
 
-Die 10 Flow-Bilder wechseln bewusst zwischen:
+- ca. **70 % realistisch / photorealistisch / hochwertige 3D-Editorial-Szene**
+- ca. **20 % realistische Szene mit dezenten grafischen Hilfen**
+- höchstens ca. **10 % reine Grafik**, nur wenn die Idee anders nicht sinnvoll erklärbar ist
+- so wenig Menschen wie möglich
+- Grafiken sind Unterstützung, nicht das gesamte Bild
+- Text nur kurz und gezielt
+- keine weißen Infografikposter, Icon-Wolken oder vollgeschriebenen Timelines
 
-1. Marktkarte
-2. Split-Explainer
-3. Ecosystem-Diagramm
-4. Crossroads-Illustration
-5. Timeline / Prozessvisual
-6. Produkt + Ecosystem-Ringe
-7. symbolische Plattform-Insel
-8. Asset-Transfer-Infografik
-9. Transformation Handys → Netzinfrastruktur
-10. Prozess-Race-Metapher
+## Neue Flow-Bildtypen
 
-Damit soll das Video wie eine abwechslungsreiche redaktionelle Wirtschafts-/Tech-Doku aussehen und nicht wie eine Sammlung ähnlicher Corporate-KI-Fotos.
+Die 10 KI-Slots sind jetzt echte Szenen statt Diagrammfolien:
+
+1. realistisches Retail-Regal mit alten und neuen Gerätetypen
+2. echte Engineering-Werkbank mit Hardware-Teardown + dezenter Pfeil
+3. leeres frühes Smartphone-Entwicklerlabor
+4. physischer Strategie-/Prototypentisch
+5. reale Prototypenfolge auf Werkbank + zwei kleine Labels
+6. hochwertiges Produkt-/Ecosystem-Stillleben
+7. realistischer Showroom als Plattform-Metapher
+8. realistisches Archiv / Asset-Transfer mit höchstens einem Pfeil
+9. alte Handys im Vordergrund → Netzinfrastruktur im Hintergrund
+10. realistischer Laborkontrast Hardwareprozess vs. schnelle Softwareiteration
+
+Menschen werden nur eingesetzt, wenn die Aussage sie wirklich braucht. Für diese zehn KI-Bilder ist standardmäßig **0 Personen** vorgesehen.
 
 ## Visuelle Final-Regel
 
@@ -56,10 +60,10 @@ Exakte Kennzahlen wie `52 %` oder `5,44 Mrd. €` werden nur als kurze, verifizi
 
 ```text
 00-bildprompts/google-flow-agent-prompt.txt
-→ 3 illustration-first Cover-Designs
+→ 3 realistische Cover-Designs
 → Nutzer wählt
 → benötigte KI-Bilder in 5er-Blöcken
-→ QC: keine generischen Business-Menschen / keine Wiederholungen
+→ QC: kein PowerPoint-Look / keine Business-Meeting-Serie
 
 01-script/voice-script.txt
 02-audio/
@@ -77,8 +81,8 @@ Exakte Kennzahlen wie `52 %` oder `5,44 Mrd. €` werden nur als kurze, verifizi
 
 ## Status
 
-`REGENERATE_FLOW_IMAGES_WITH_ILLUSTRATION_FIRST_V3`
+`REGENERATE_FLOW_IMAGES_WITH_REALISTIC_EDITORIAL_V4`
 
-Die bereits erzeugten menschenlastigen Flow-Bilder gelten nicht als final akzeptiert. Der neue `google-flow-agent-prompt.txt` soll für eine neue Generation verwendet werden.
+Die bereits erzeugten Business-Menschen- und Infografik-Versionen gelten nicht als final akzeptiert. Der aktuelle `google-flow-agent-prompt.txt` soll für eine neue Generation verwendet werden.
 
-Finaler Render bleibt blockiert, bis alle `source-needed`-Slots tatsächlich mit Bild/B-Roll belegt sind und die neue Flow-Generation akzeptiert ist.
+Finaler Render bleibt blockiert, bis alle `source-needed`-Slots tatsächlich mit Bild/B-Roll belegt sind und die V4-Flow-Generation akzeptiert ist.
