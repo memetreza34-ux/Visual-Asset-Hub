@@ -1,5 +1,5 @@
 {
-  "id": "company-documentary-v3",
+  "id": "company-documentary-v4",
   "name": "Company / Business Documentary",
   "language": "de",
   "core_topics": [
@@ -17,25 +17,30 @@
   ],
   "editorial_rule": "Die Story beginnt bei einer realen Firma, Marke, Entscheidung, Kennzahl, Krise, Konkurrenz oder einem konkreten Geschäftsprozess.",
   "visual_language": {
-    "default_mode": "illustration-first-editorial-documentary",
+    "default_mode": "realistic-editorial-documentary",
+    "target_mix": {
+      "photoreal_or_realistic_3d_percent": 70,
+      "realistic_scene_with_light_graphic_support_percent": 20,
+      "pure_graphic_or_infographic_percent": 10
+    },
     "human_density": "low",
-    "human_rule": "Menschen nur verwenden, wenn sie für den Inhalt wirklich nötig sind. Standardmäßig 0 Personen; wenn nötig höchstens 1 bis 2 kleine, anonyme Figuren statt einer menschenzentrierten Szene.",
-    "text_in_images": "allowed-when-useful",
-    "text_rule": "Kurze Wörter, Jahreszahlen, Pfeile, Labels und Callouts sind erlaubt, wenn sie den Inhalt schneller erklären. Keine Textwände. Exakte Kennzahlen bleiben verifizierte Overlays im Schnitt.",
+    "human_rule": "Menschen nur verwenden, wenn sie die Aussage wirklich tragen. Standardmäßig 0 Personen; wenn nötig wenige anonyme Personen als Nebenmotiv statt menschenzentrierter Business-Szene.",
+    "primary_rule": "Das Bild soll zuerst wie ein glaubwürdiger dokumentarischer Frame wirken: reale oder realistisch gerenderte Produkte, Geräte, Räume, Regale, Werkbänke, Labore, Fabriken, Infrastruktur oder physische Objekte. Grafische Elemente unterstützen nur die Aussage.",
+    "graphics_role": "support-only",
+    "graphics_rule": "Pfeile, kurze Labels, Jahreszahlen, Linien oder kleine Diagramm-Elemente dürfen dezent über einer realistisch wirkenden Szene liegen. Sie dürfen nicht das gesamte Bild in eine PowerPoint-, Lehrbuch- oder Infografikfolie verwandeln.",
+    "text_in_images": "short-and-sparse",
+    "text_rule": "Kurze Wörter oder Jahreszahlen sind erlaubt, wenn sie wirklich helfen. Keine Textwände, keine vollgeschriebenen Timelines und keine pseudo-technischen Beschriftungen. Exakte Kennzahlen bleiben verifizierte Overlays im Schnitt.",
     "preferred_visual_forms": [
-      "editorial illustration",
-      "object-centered explainer",
-      "product spotlight",
-      "comparison layout",
-      "timeline illustration",
-      "map or market map",
-      "ecosystem diagram",
-      "process diagram",
-      "cutaway or exploded-view style explanation",
-      "symbolic object metaphor",
-      "clean infographic scene",
-      "UI or platform explainer",
-      "diagram with arrows and short labels"
+      "photorealistic product close-up",
+      "realistic object-centered editorial scene",
+      "empty or low-human technology workspace",
+      "realistic retail or archive environment",
+      "realistic device comparison on table or shelf",
+      "realistic laboratory or engineering bench",
+      "realistic factory or infrastructure environment",
+      "editorial still life with physical objects",
+      "realistic scene with one subtle arrow or short label",
+      "limited clean graphic only when a concept cannot be shown physically"
     ],
     "avoid_visual_forms": [
       "generic executives around a conference table",
@@ -44,11 +49,15 @@
       "five scenes in a row with people at desks",
       "generic corporate stock-photo composition",
       "human faces as the default focal point",
-      "repeated blue office environments",
+      "white-background infographic posters",
+      "full-frame diagrams with many icons and arrows",
+      "fully illustrated timelines covering the whole frame",
+      "PowerPoint or textbook infographic look",
+      "cartoon or vector-flat illustration style",
       "different prompts that produce nearly identical compositions"
     ],
-    "variety_rule": "Adjacent AI images should not use the same visual form. Rotate between object, comparison, diagram, timeline, map, product, process and symbolic compositions. A meeting/boardroom composition may appear at most once per 10 AI-generated images unless the story explicitly requires more.",
-    "cover_reference_rule": "The selected cover controls quality, palette and editorial language only. It must not force every following image to reuse the same composition, background, camera angle or subject arrangement."
+    "variety_rule": "Rotate physical environments and shot types: macro product shot, tabletop, retail shelf, archive, lab bench, factory, server room, exterior, low-human workspace and occasional hybrid graphic. Adjacent AI images should not repeat the same environment, framing or visual form.",
+    "cover_reference_rule": "The selected cover controls quality, palette and editorial tone only. It must not force every following image to reuse the same composition, background or object arrangement."
   },
   "visual_policy": {
     "real_first": [
@@ -63,17 +72,18 @@
       "exakte Geschäftszahlen und Charts"
     ],
     "ai_allowed": [
-      "abstrakte Erklärbilder",
-      "nicht-belegende Rekonstruktionen",
-      "symbolische Übergänge",
+      "realistisch gerenderte Erklärszenen ohne konkrete Markenbehauptung",
+      "physische Objektmetaphern",
+      "neutrale Rekonstruktionen",
       "generische Markt-/Wettbewerbssituationen",
-      "Prozessvisualisierungen ohne konkrete Markenbehauptung",
-      "editoriale Illustrationen und Infografik-artige Erklärbilder mit wenig oder keinen Menschen"
+      "Prozessbilder mit realen oder realistisch gerenderten Gegenständen",
+      "abstrakte Zusammenhänge, wenn sie als glaubwürdige physische Szene umgesetzt werden"
     ],
     "graphics": [
       "Kennzahlen werden aus verifizierten Daten erzeugt, nicht von einem Bildmodell erfunden",
       "Charts müssen Quelle, Zeitraum und Einheit im technischen Plan besitzen",
-      "Kennzahlen und Charts dürfen im finalen Video nur als dezente Overlays auf einem echten oder KI-generierten visuellen Asset erscheinen, nicht als technische Vollbildkarte"
+      "Kennzahlen und Charts dürfen im finalen Video nur als dezente Overlays auf einem echten oder KI-generierten visuellen Asset erscheinen, nicht als technische Vollbildkarte",
+      "Reine Infografikbilder sind Ausnahme, nicht Standard"
     ]
   },
   "final_render_policy": {

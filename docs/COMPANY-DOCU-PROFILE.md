@@ -4,180 +4,128 @@ Dieses Profil definiert die inhaltliche und visuelle Richtung für Firmen-/Wirts
 
 ## Kern des Kanals
 
-Der Kanal behandelt **konkrete Unternehmen, Marken, Geschäftsmodelle, wirtschaftliche Konflikte und Firmenprozesse**.
+Der Kanal behandelt konkrete Unternehmen, Marken, Geschäftsmodelle, wirtschaftliche Konflikte und Firmenprozesse.
 
 Bevorzugte Themen:
-
 - Aufstieg und Absturz von Firmen
-- Warum eine Marke Marktanteile verliert oder gewinnt
-- Geschäftsmodelle hinter bekannten Marken
+- Marktanteilsverluste und Strategiewechsel
+- Geschäftsmodelle großer Marken
 - Firmenkriege und Konkurrenz
-- Fehlentscheidungen, Strategiewechsel und gescheiterte Produkte
-- Übernahmen, Milliardeninvestitionen und Kostensenkungsprogramme
+- Fehlentscheidungen und gescheiterte Produkte
+- Übernahmen und Milliarden-Deals
 - Fabriken, Lieferketten und Produktionsentscheidungen
-- Wie ein Unternehmen tatsächlich Geld verdient
+- Wie Unternehmen tatsächlich Geld verdienen
 
-Nicht als Kernformat gedacht:
+## Visual World V4 — realistic editorial documentary
 
-- beliebige Alltagserklärungen ohne klaren Firmen-/Wirtschaftsbezug
-- Themen nur deshalb, weil sich leicht KI-Bilder erzeugen lassen
-- generische Wissenslisten ohne Story, Konflikt oder wirtschaftliche Konsequenz
+Die Standardbildwelt ist **realistisch und dokumentarisch**. Wenig Menschen bleibt richtig, aber reine Infografik-/PowerPoint-Bilder sind nicht die Zielästhetik.
 
-## Editorial Gate
+Zielmix für KI-Erklärbilder:
+- ca. **70 %** photorealistische oder realistisch gerenderte Szenen
+- ca. **20 %** realistische Szene mit dezenten grafischen Hilfen
+- ca. **10 %** reine Grafik/Infografik, nur wenn eine physische Szene die Idee nicht sinnvoll erklären kann
 
-Ein Thema ist stark, wenn mindestens zwei dieser Punkte vorhanden sind:
+### Standard
 
-1. bekannte Firma oder Marke
-2. klarer Konflikt / Wendepunkt
-3. belastbare Kennzahlen
-4. echte Konkurrenz oder Marktverschiebung
-5. konkrete Management-/Produktentscheidung
-6. sichtbarer Geschäftsprozess
-7. Konsequenz für Kunden, Mitarbeiter, Anleger oder Markt
+Das Bild soll zuerst wie ein glaubwürdiger Dokumentarframe wirken. Bevorzugt werden:
+- reale oder realistisch gerenderte Produkte und Geräte
+- Makro-/Detailaufnahmen
+- Werkbänke und Labore
+- Regale, Archive und Retail-Umgebungen
+- Fabriken und Infrastruktur
+- Server-/Netzwerkräume
+- physische Objektvergleiche auf Tisch, Regal oder Podest
+- leere oder menschenarme Arbeitsplätze
+- hochwertige Editorial-Stillleben
 
-# Bildsprache: Illustration first, Menschen second
+Menschen sind erlaubt, wenn sie wirklich etwas erklären. Sie sind aber nicht das automatische Hauptmotiv.
 
-Für KI-generierte Erklärbilder gilt ab jetzt standardmäßig **eine redaktionelle Illustrationssprache mit geringer Menschendichte**.
+### Grafiken nur als Unterstützung
 
-Die KI soll nicht automatisch Business-Menschen, Meetings oder Büros als Füllmotiv erzeugen.
+Erlaubt:
+- ein kurzer Pfeil
+- ein kurzes Label
+- eine Jahreszahl
+- ein kleines Vergleichselement
+- dezente Linien oder Markierungen
 
-## Standard
-
-- Standardmäßig **keine Menschen** im Bild.
-- Wenn Menschen inhaltlich nötig sind: möglichst nur 1–2 kleine, anonyme Figuren.
-- Menschen sind nicht automatisch der Hauptfokus.
-- Produkte, Geräte, Prozesse, Diagramme, Karten, Interfaces und visuelle Metaphern haben Vorrang.
-
-## Bevorzugte Visual Forms
-
-Die KI soll zwischen verschiedenen Formen wechseln:
-
-- editorial illustration
-- object-centered explainer
-- product spotlight
-- Vergleich links/rechts
-- Timeline
-- Karte / Marktkarte
-- Ecosystem-Diagramm
-- Prozessdiagramm
-- Cutaway / Exploded-view-Erklärung
-- symbolische Objektmetapher
-- saubere Infografik-Szene
-- UI-/Plattform-Erklärung
-- Diagramm mit Pfeilen und kurzen Labels
-
-Direkt aufeinanderfolgende KI-Bilder sollen **nicht dieselbe Visual Form** verwenden.
-
-### Vermeiden
-
-- generische Manager am Konferenztisch
-- wiederholte Boardroom-Szenen
-- Gruppen anonymer Business-Menschen als Füllmotiv
-- fünf Büro-/Meeting-Bilder hintereinander
-- typische Corporate-Stockfoto-Komposition
-- Gesichter als automatisches Hauptmotiv
-- immer dieselbe dunkelblaue Büro-Bildwelt
-- unterschiedliche Prompts, die praktisch gleich aussehen
-
-Eine Meeting-/Boardroom-Komposition ist höchstens einmal pro zehn KI-Bilder vorgesehen, außer die Story verlangt ausdrücklich mehr.
-
-## Text in KI-Bildern
-
-Text ist **nicht mehr pauschal verboten**.
-
-Erlaubt, wenn er die Erklärung verbessert:
-
-- kurze Labels wie `HARDWARE`, `SOFTWARE`, `APPS`
-- Jahreszahlen
-- einzelne kurze Begriffe
-- Pfeile und Callouts
-- kurze Kapitel-/Vergleichshinweise
-
-Nicht erlaubt:
-
-- Textwände
-- lange Sätze
-- erfundene Geschäftszahlen
-- Fake-Dokumente
-- Fake-Logos / Fake-Interfaces
+Nicht als Standard:
+- weiße Infografikposter
+- vollflächige Diagramme mit vielen Icons
+- komplette Timelines als Folie
+- PowerPoint-/Lehrbuch-Look
+- Cartoon-/Flat-Vector-Stil
+- Bilder, die fast nur aus Text, Pfeilen und Symbolen bestehen
 
 Exakte Geschäftszahlen bleiben verifizierte Overlays im Schnitt.
 
-## Cover als Referenz
+## Menschenregel
 
-Das gewählte Cover ist nur eine **weiche Stilreferenz** für:
+- Standardmäßig 0 Personen möglich.
+- Wenn nötig wenige anonyme Personen als Nebenmotiv.
+- Keine Meeting-Serie.
+- Keine generischen Managergruppen als Füllmotiv.
+- Keine fünf Büro-/Desk-Szenen hintereinander.
 
-- Qualitätsniveau
-- Farb-/Kontrastfamilie
-- Materialbehandlung
-- redaktionelle Bildsprache
+## Abwechslung
 
-Es darf nicht dazu führen, dass jedes Folgebild dieselbe Komposition, denselben Hintergrund oder dieselben Personen kopiert.
+Direkt benachbarte KI-Bilder sollen Umgebung, Perspektive und Visual Form wechseln. Gute Rotation:
+- Macro product
+- tabletop still life
+- retail shelf
+- archive
+- engineering bench
+- factory
+- server room
+- exterior/location
+- low-human workspace
+- gelegentliche Hybrid-Grafik
 
-## Visual Gate: Real first bei echten Firmen, Illustration first bei Erklärungen
+Das ausgewählte Cover ist nur eine weiche Stilreferenz für Qualitätsniveau, Farbwelt und Kontrast. Es ist keine Kompositionsschablone.
 
-Bei Firmen-Dokus gilt **nicht** pauschal „Generate first, search second“.
+## Real first bei echten Firmen
 
-### Reales Material ist Pflicht oder erste Wahl bei
-
+Reales Material ist Pflicht oder erste Wahl bei:
 - echten Firmen und Logos
 - konkreten Produkten oder Fahrzeugmodellen
 - Vorständen und realen Personen
 - echten Werken, Standorten und Händlern
 - Originaldokumenten, Webseiten und Geschäftsberichten
-- aktuellen oder historischen Ereignissen
-- exakten Zahlen, Tabellen und Charts
+- realen Ereignissen
+- historischen Originalbildern
+- exakten Geschäftszahlen und Charts
 
-Ein generisches KI-Auto darf beispielsweise **nicht** als Mercedes-Modell ausgegeben werden.
-
-### KI ist sinnvoll bei
-
-- abstrakten Zusammenhängen
-- symbolischen Übergängen
+KI ist sinnvoll bei:
+- generischen Erklärszenen
 - neutralen Rekonstruktionen
-- generischen Markt-/Wettbewerbssituationen
-- Prozessbildern, die keinen konkreten Beleg vortäuschen
-- editorialen Illustrationen und Infografik-artigen Erklärbildern
+- Objektmetaphern
+- Prozessbildern ohne konkrete Markenbehauptung
+- abstrakten Zusammenhängen, wenn sie als glaubwürdige physische Szene umgesetzt werden
 
 ## Harte Final-Video-Regel
 
-Im finalen Video sind als **Primärvisual ausschließlich** erlaubt:
-
+Im finalen Video sind als Primärvisual ausschließlich erlaubt:
 - echte Bilder
 - echte B-Roll / echtes Videomaterial
 - akzeptierte KI-Bilder
 
-Nicht erlaubt sind:
-
+Nicht erlaubt:
 - `REAL SOURCE ASSET`-Karten
 - Slot-/Bildnummer-Karten
 - Produktionsnotizen
 - Debug-Frames
 - Missing-Asset-Platzhalter
-- Texttafeln, die nur erklären, welches Material dort später hin soll
-- technische Vollbildkarten aus dem Produktionsplan
+- technische Vollbildkarten
 
-Wenn ein echtes Bild oder B-Roll fehlt, wird **nicht** mit einer Platzhalterkarte weitergerendert. Der Render muss stoppen, bis ein passendes visuelles Asset vorhanden ist.
-
-### Zahlen und Charts
-
-Kennzahlen dürfen gezeigt werden, aber nicht als sterile technische Produktionskarte. Wenn eine Zahl wichtig ist:
-
-- Primärvisual bleibt ein passendes echtes Bild, echte B-Roll oder ein akzeptiertes KI-Bild.
-- Die verifizierte Zahl wird als kurze, saubere Overlay-Grafik darübergelegt.
-- Keine internen Quellenhinweise, Slotnummern oder Produktionskommentare im sichtbaren Bild.
+Fehlt ein Asset, stoppt der Render.
 
 ## Cover
 
 1. immer drei Cover A/B/C
 2. gleicher exakter Covertext
-3. gleiche Kernidee / Bildwelt
+3. gleiche Kernidee/Bildwelt
 4. Nutzer wählt einen Gewinner
-5. bei konkreter Marke oder Produkt muss eine echte Referenz als Ingredient/Source dienen
-6. das gewählte Cover wird weiche Stilreferenz, aber Folgebilder bleiben individuell
-
-## Tonalität
-
-Starke Titel sind erlaubt, aber die Aussage muss durch Fakten gedeckt sein. Bei einer Firma, die unter Druck steht, aber weiterhin profitabel und relevant ist, wird nicht ohne Beleg „Firmenkollaps“ oder „pleite“ behauptet.
+5. bei konkreter Marke/Produkt echte Referenz verwenden
+6. Gewinner ist nur weiche Stilreferenz für Folgebilder
 
 Maschinenlesbare Version: `profiles/company-documentary.json`.
