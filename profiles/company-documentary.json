@@ -1,5 +1,5 @@
 {
-  "id": "company-documentary-v1",
+  "id": "company-documentary-v2",
   "name": "Company / Business Documentary",
   "language": "de",
   "core_topics": [
@@ -36,9 +36,24 @@
       "Prozessvisualisierungen ohne konkrete Markenbehauptung"
     ],
     "graphics": [
-      "Kennzahlen werden aus verifizierten Daten gerendert, nicht von einem Bildmodell erfunden",
-      "Charts müssen Quelle, Zeitraum und Einheit im technischen Plan besitzen"
+      "Kennzahlen werden aus verifizierten Daten erzeugt, nicht von einem Bildmodell erfunden",
+      "Charts müssen Quelle, Zeitraum und Einheit im technischen Plan besitzen",
+      "Kennzahlen und Charts dürfen im finalen Video nur als dezente Overlays auf einem echten oder KI-generierten visuellen Asset erscheinen, nicht als technische Vollbildkarte"
     ]
+  },
+  "final_render_policy": {
+    "allowed_primary_visuals": [
+      "real-image",
+      "real-video",
+      "ai-image"
+    ],
+    "full_screen_technical_cards_allowed": false,
+    "placeholder_frames_allowed": false,
+    "slot_cards_allowed": false,
+    "production_notes_allowed": false,
+    "missing_asset_behavior": "block-render-and-resolve",
+    "data_display_mode": "overlay-on-valid-visual-only",
+    "rule": "Jeder sichtbare Frame muss ein echtes Bild, echte B-Roll oder ein akzeptiertes KI-Bild als Primärvisual besitzen. Interne Slotkarten, Source-Hinweise, Produktionsnotizen, Missing-Asset-Karten und Debug-Frames dürfen niemals im finalen Video erscheinen. Fehlt ein Asset, wird der Render blockiert, bis ein visuelles Asset vorhanden ist."
   },
   "cover_policy": {
     "candidates": 3,
