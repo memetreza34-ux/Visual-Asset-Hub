@@ -1,6 +1,6 @@
 # Company Documentary Profile
 
-Dieses Profil definiert die inhaltliche Richtung für Firmen-/Wirtschaftsdokus im Visual Asset Hub.
+Dieses Profil definiert die inhaltliche und visuelle Richtung für Firmen-/Wirtschaftsdokus im Visual Asset Hub.
 
 ## Kern des Kanals
 
@@ -35,7 +35,86 @@ Ein Thema ist stark, wenn mindestens zwei dieser Punkte vorhanden sind:
 6. sichtbarer Geschäftsprozess
 7. Konsequenz für Kunden, Mitarbeiter, Anleger oder Markt
 
-## Visual Gate: Real first, AI second
+# Bildsprache: Illustration first, Menschen second
+
+Für KI-generierte Erklärbilder gilt ab jetzt standardmäßig **eine redaktionelle Illustrationssprache mit geringer Menschendichte**.
+
+Die KI soll nicht automatisch Business-Menschen, Meetings oder Büros als Füllmotiv erzeugen.
+
+## Standard
+
+- Standardmäßig **keine Menschen** im Bild.
+- Wenn Menschen inhaltlich nötig sind: möglichst nur 1–2 kleine, anonyme Figuren.
+- Menschen sind nicht automatisch der Hauptfokus.
+- Produkte, Geräte, Prozesse, Diagramme, Karten, Interfaces und visuelle Metaphern haben Vorrang.
+
+## Bevorzugte Visual Forms
+
+Die KI soll zwischen verschiedenen Formen wechseln:
+
+- editorial illustration
+- object-centered explainer
+- product spotlight
+- Vergleich links/rechts
+- Timeline
+- Karte / Marktkarte
+- Ecosystem-Diagramm
+- Prozessdiagramm
+- Cutaway / Exploded-view-Erklärung
+- symbolische Objektmetapher
+- saubere Infografik-Szene
+- UI-/Plattform-Erklärung
+- Diagramm mit Pfeilen und kurzen Labels
+
+Direkt aufeinanderfolgende KI-Bilder sollen **nicht dieselbe Visual Form** verwenden.
+
+### Vermeiden
+
+- generische Manager am Konferenztisch
+- wiederholte Boardroom-Szenen
+- Gruppen anonymer Business-Menschen als Füllmotiv
+- fünf Büro-/Meeting-Bilder hintereinander
+- typische Corporate-Stockfoto-Komposition
+- Gesichter als automatisches Hauptmotiv
+- immer dieselbe dunkelblaue Büro-Bildwelt
+- unterschiedliche Prompts, die praktisch gleich aussehen
+
+Eine Meeting-/Boardroom-Komposition ist höchstens einmal pro zehn KI-Bilder vorgesehen, außer die Story verlangt ausdrücklich mehr.
+
+## Text in KI-Bildern
+
+Text ist **nicht mehr pauschal verboten**.
+
+Erlaubt, wenn er die Erklärung verbessert:
+
+- kurze Labels wie `HARDWARE`, `SOFTWARE`, `APPS`
+- Jahreszahlen
+- einzelne kurze Begriffe
+- Pfeile und Callouts
+- kurze Kapitel-/Vergleichshinweise
+
+Nicht erlaubt:
+
+- Textwände
+- lange Sätze
+- erfundene Geschäftszahlen
+- Fake-Dokumente
+- Fake-Logos / Fake-Interfaces
+
+Exakte Geschäftszahlen bleiben verifizierte Overlays im Schnitt.
+
+## Cover als Referenz
+
+Das gewählte Cover ist nur eine **weiche Stilreferenz** für:
+
+- Qualitätsniveau
+- Farb-/Kontrastfamilie
+- Materialbehandlung
+- redaktionelle Bildsprache
+
+Es darf nicht dazu führen, dass jedes Folgebild dieselbe Komposition, denselben Hintergrund oder dieselben Personen kopiert.
+
+## Visual Gate: Real first bei echten Firmen, Illustration first bei Erklärungen
 
 Bei Firmen-Dokus gilt **nicht** pauschal „Generate first, search second“.
 
@@ -58,6 +137,7 @@ Ein generisches KI-Auto darf beispielsweise **nicht** als Mercedes-Modell ausgeg
 - neutralen Rekonstruktionen
 - generischen Markt-/Wettbewerbssituationen
 - Prozessbildern, die keinen konkreten Beleg vortäuschen
+- editorialen Illustrationen und Infografik-artigen Erklärbildern
 
 ## Harte Final-Video-Regel
 
@@ -86,22 +166,6 @@ Kennzahlen dürfen gezeigt werden, aber nicht als sterile technische Produktions
 - Primärvisual bleibt ein passendes echtes Bild, echte B-Roll oder ein akzeptiertes KI-Bild.
 - Die verifizierte Zahl wird als kurze, saubere Overlay-Grafik darübergelegt.
 - Keine internen Quellenhinweise, Slotnummern oder Produktionskommentare im sichtbaren Bild.
-
-Beispiel:
-
-```text
-Mercedes-Werk / Fahrzeug-B-Roll
-+
-kurzes Overlay: „China 2025: -19 %“
-```
-
-Nicht:
-
-```text
-schwarze Karte
-REAL SOURCE ASSET / B-ROLL
-BILD 06 — CHINA...
-```
 
 ## Cover
 
