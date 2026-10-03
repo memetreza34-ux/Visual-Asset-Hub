@@ -1,0 +1,19 @@
+{
+  "project": "003-nokia-smartphone-krieg",
+  "status": "READY_FOR_FLOW_COVER_AND_REAL_MEDIA_RESOLUTION",
+  "render_ready": false,
+  "blocking_conditions": [
+    "user must select one of three Flow cover candidates",
+    "all 10 required Flow AI images must be generated and accepted",
+    "all 19 real/source slots must contain valid assets",
+    "voiceover timing must be available",
+    "final render guard must pass"
+  ],
+  "hard_rules": {
+    "placeholder_cards": "FORBIDDEN",
+    "slot_cards": "FORBIDDEN",
+    "debug_frames": "FORBIDDEN",
+    "full_screen_metric_cards": "FORBIDDEN",
+    "missing_visual": "BLOCK_RENDER"
+  }
+}
