@@ -1,59 +1,81 @@
 # Bildproduktion — Mercedes unter Druck
 
-## Was der KI-Agent verwenden soll
+## Welche Datei bekommt der Google-Flow-KI-Agent?
 
-Der eigentliche Prompt für den Google-Flow-KI-Agenten ist:
+Dem Agenten wird **`google-flow-agent-prompt.txt`** gegeben.
 
-`google-flow-agent-prompt.txt`
+Der Agent liest danach:
 
-Diesen Prompt vollständig an den Agenten geben. Er steuert Cover-Gate, Referenznutzung, Reihenfolge, QC, Dateinamen und Stage 2.
+1. `cover/cover-prompt.txt`
+2. `99-alle-bildprompts.txt`
+3. `../01-script/voice-script.txt`
 
 ## Stage 1 — Cover
 
-Der Agent liest nacheinander:
+Es gibt nur **einen Cover-Brief**. Aus diesem einen Brief erzeugt Google Flow drei unterschiedliche Designs:
 
-- `cover/cover-A.txt`
-- `cover/cover-B.txt`
-- `cover/cover-C.txt`
+- Cover A
+- Cover B
+- Cover C
 
-Jede Datei enthält einen vollständigen Google-Flow-Bildprompt.
+Die drei Cover sind nur temporäre Kandidaten.
 
-Alle drei Cover:
+Nach A/B/C gilt ein harter STOP. Der Nutzer wählt genau einen Gewinner.
 
-- exakter sichtbarer Text `MERCEDES UNTER DRUCK`
-- gleiche zugelassene Mercedes-Referenz als Ingredient, wenn vorhanden
-- gleiche seriöse Wirtschafts-Doku-Bildwelt
-- keine erfundenen Mercedes-Modelle oder Logos
-- unterschiedliche Komposition, Fokus und Negativraum
+Der Gewinner wird:
 
-Danach MUSS der Agent stoppen. Der Nutzer wählt A, B oder C. Gewinner = `Bild 01.png`.
+`images/Bild 01.png`
 
-## Stage 2 — echte Flow-Bildprompts
+Die beiden anderen Cover werden verworfen/gelöscht und dürfen **nicht** im finalen Bilderordner bleiben.
 
-`99-alle-bildprompts.txt` enthält jetzt **keine Produktions-Stichpunkte mehr**, sondern ausschließlich vollständige, direkt ausführbare `BILDPROMPT:`-Blöcke für die Bilder, die Google Flow wirklich erzeugen soll.
+## Stage 2 — benötigte Flow-Bilder in 5er-Schritten
 
-Jeder Block enthält:
+Nach der Cover-Auswahl verwendet Flow `Bild 01.png` als weiche Stil-/Continuity-Referenz.
 
-- exakten Audio Anchor
-- Visual Purpose
-- Visual Form
-- vollständigen englischen Google-Flow-Prompt
-- exakten Ziel-Dateinamen `Bild NN.png`
+Flow erzeugt nur die tatsächlich benötigten KI-Bilder aus `99-alle-bildprompts.txt`.
 
-Das ausgewählte `Bild 01.png` wird bei jedem Stage-2-Prompt als **weiche Style-Referenz** verwendet. Stil, Farbwelt und Qualitätsniveau bleiben zusammenhängend; Komposition, Handlung, Kamera und Motiv müssen pro Bild individuell sein.
+Für dieses Video:
 
-## Was NICHT in Flow erzeugt wird
+### Block 1
+- `Bild 03.png`
+- `Bild 09.png`
+- `Bild 13.png`
+- `Bild 16.png`
+- `Bild 21.png`
 
-Konkrete Mercedes-Produkte, Logos, Werke, offizielle Dokumente, echte Interfaces und exakte Geschäftszahlen werden nicht frei erfunden. Diese Slots kommen aus echten Quellen oder werden als verifizierte Grafik erzeugt. Die Zuordnung steht in:
+### Block 2
+- `Bild 22.png`
+- `Bild 24.png`
+- `Bild 29.png`
 
-`99-tech/REAL_MEDIA_PLAN.json`
+Ein 5er-Block bedeutet **nicht** fünf Szenen in einem Bild. Jedes Bild wird einzeln erzeugt, geprüft und korrekt umbenannt. Nach maximal fünf akzeptierten Bildern folgt Block-QC; danach beginnt der nächste Block.
 
-Der Flow-Agent darf diese Nummern nicht durch generische KI-Bilder ersetzen.
+Nummernlücken sind Absicht: Diese Slots werden durch echte Quellen oder verifizierte Grafiken gefüllt. Flow darf sie nicht erfinden.
 
-## Produktionsregel
+## Finaler Bilderordner
 
-Für jedes KI-Bild:
+`00-bildprompts/images/` ist ein **Final-only-Ordner**.
 
-`Prompt lesen → Bild 01 als Style-Referenz laden → genau 1 Bild erzeugen → vollständig warten → QC → korrekt als Bild NN.png speichern → nächstes Bild`
+Nach Abschluss dürfen dort für diesen Flow-Lauf nur diese Dateien liegen:
 
-Keine Collagen, keine parallelen Szenen in einem Bild, keine sichtbaren Bildnummern, keine automatisch erfundenen Zusatztexte.
+- `Bild 01.png`
+- `Bild 03.png`
+- `Bild 09.png`
+- `Bild 13.png`
+- `Bild 16.png`
+- `Bild 21.png`
+- `Bild 22.png`
+- `Bild 24.png`
+- `Bild 29.png`
+
+Nicht erlaubt:
+
+- Cover A/B/C als zusätzliche Dateien
+- die zwei nicht gewählten Cover
+- Fehlversuche
+- alternative Versionen
+- Duplikate
+- `v2`, `retry`, `test`, `candidate`, `final-final` usw.
+- KI-Ersatz für REAL/GRAPHIC-Slots
+
+Am Ende wird der Ordner bereinigt und gegen die erwartete Dateiliste geprüft.

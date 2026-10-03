@@ -1,0 +1,42 @@
+GOOGLE FLOW COVER BRIEF — MERCEDES UNTER DRUCK
+
+GOAL
+Create THREE clearly different cover designs A, B and C from this ONE cover concept. These are temporary alternatives. They must belong to the same serious German business-documentary visual world, but each design must use a meaningfully different composition.
+
+FORMAT
+16:9 YouTube cover / opening image.
+
+EXACT VISIBLE TEXT
+"MERCEDES UNTER DRUCK"
+Use the text exactly once, correctly spelled, large, high-contrast and readable at thumbnail size. No other visible words.
+
+APPROVED BRAND REFERENCE
+If a genuine rights-cleared Mercedes-Benz reference image is supplied, use it as the exact brand/product reference. Preserve the real vehicle, badge, grille and model identity from the supplied source. Do not redraw, redesign or hallucinate Mercedes-specific details.
+
+CORE STORY
+Mercedes is still a globally recognized premium car company, but it is under simultaneous pressure from falling sales, stronger competition in China, lower profitability and the transition toward EVs and software. The cover must communicate pressure and strategic tension, not collapse or bankruptcy.
+
+SHARED VISUAL WORLD FOR ALL THREE DESIGNS
+- photorealistic factual business-documentary look
+- contemporary premium automotive environment
+- restrained, credible lighting; editorial rather than glossy advertising
+- realistic materials and physically plausible perspective
+- one dominant Mercedes subject when an approved reference is available
+- visual tension from market/technology pressure without fake disaster imagery
+- no invented competitor logos
+- no fake financial numbers
+- no pseudo-writing
+- no sci-fi holograms
+- no watermark
+
+DESIGN A — SUBJECT FORWARD
+Make the genuine Mercedes subject large and dominant in the foreground. Use a modern China/EV-market context deeper in the frame. Reserve clean negative space for the exact cover text. Strong immediate readability and clear premium-business tension.
+
+DESIGN B — MARKET PRESSURE
+Use a wider composition. Keep the genuine Mercedes subject clearly recognizable but show more surrounding market context: modern EV city/showroom atmosphere, dense competitive environment and subtle non-readable business-pressure graphics. Do not make a collage.
+
+DESIGN C — STRATEGIC CROSSROADS
+Use a different camera angle or crop. Present the Mercedes subject at a believable visual crossroads between traditional premium automotive heritage and a faster EV/software future. Keep the same realism, palette family and quality level as A/B, but use different spatial arrangement and text negative space.
+
+OUTPUT RULE
+Generate A, B and C as three separate temporary images. Do not choose a winner. After all three are complete, STOP and wait for the user to select one.
