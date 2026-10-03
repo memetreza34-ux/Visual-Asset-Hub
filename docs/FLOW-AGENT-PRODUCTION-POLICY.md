@@ -2,9 +2,40 @@
 
 Diese Regel gilt für alle Video-Projekte, die ihre Bilder über `00-bildprompts/` produzieren.
 
+## 0. Ein Prompt muss vollständig selbstständig sein
+
+Der Nutzer soll Google Flow **genau einen Master-Prompt** geben können.
+
+Dieser Master-Prompt muss alles enthalten, was Flow für seine KI-Bilder benötigt:
+
+- Cover-Brief
+- Cover A/B/C
+- Cover-STOP und Nutzerauswahl
+- alle benötigten Story-Bildprompts
+- Produktionsblöcke
+- QC-Regeln
+- Dateinamen
+- Cleanup-Regeln
+
+Der Flow-Agent darf **nicht** voraussetzen, dass er Zugriff auf lokale Repo-Dateien hat.
+
+Nicht erlaubt im Master-Prompt:
+
+- „lies `cover-prompt.txt`“
+- „öffne `99-alle-bildprompts.txt`“
+- „lade `voice-script.txt` aus dem Repo“
+- „öffne diesen lokalen Pfad“
+- andere notwendige Informationen, die nur außerhalb des eingefügten Prompts existieren
+
+Wenn der Nutzer den Master-Prompt einfügt, muss der Agent sofort starten können. Der Prompt endet deshalb mit einer eindeutigen Startanweisung wie:
+
+`BEGIN NOW BY GENERATING COVER A.`
+
+Zusätzliche Projektdateien dürfen intern für Planung/Dokumentation existieren, aber der an Flow gegebene Master-Prompt darf sie nicht benötigen.
+
 ## 1. Cover zuerst
 
-- Es gibt **einen Cover-Brief**.
+- Der Master-Prompt enthält **einen vollständigen Cover-Brief**.
 - Google Flow erzeugt daraus exakt **3 unterschiedliche Cover-Designs**: A, B und C.
 - Alle drei gehören zur gleichen Video-Bildwelt und verwenden denselben exakten Cover-Text.
 - Die Designs dürfen sich in Komposition, Kamera, Framing und Negativraum deutlich unterscheiden.
@@ -21,7 +52,7 @@ Nach der Auswahl:
 
 ## 2. Bilder in 5er-Produktionsblöcken
 
-Nach der Cover-Auswahl liest der Agent die tatsächlich vorhandenen `BILDPROMPT:`-Blöcke.
+Nach der Cover-Auswahl verwendet der Agent die **vollständig im Master-Prompt eingebetteten** Story-Bildprompts.
 
 Er arbeitet in Gruppen von maximal fünf **benötigten** Bildern:
 
@@ -33,7 +64,7 @@ usw.
 
 Innerhalb eines Blocks wird trotzdem jedes Bild separat erzeugt:
 
-`Prompt lesen → Cover-Referenz laden → 1 Bild erzeugen → warten → QC → korrekt umbenennen → nächstes Bild`
+`Prompt lesen → Cover-Referenz verwenden → 1 Bild erzeugen → warten → QC → korrekt umbenennen → nächstes Bild`
 
 Ein 5er-Block ist niemals eine Collage und niemals ein einzelnes Bild mit fünf Szenen.
 
@@ -48,7 +79,7 @@ Nach jedem Block:
 
 ## 3. Nur tatsächlich benötigte Bilder erzeugen
 
-- Der Agent erzeugt nur Bildnummern, für die ein Flow-`BILDPROMPT:` existiert.
+- Der Agent erzeugt nur Bildnummern, für die im Master-Prompt ein echter Flow-Bildprompt vorhanden ist.
 - Nummernlücken werden nicht automatisch aufgefüllt.
 - REAL-/GRAPHIC-/SOURCE-Slots werden nicht durch KI-Ersatz gefüllt.
 - Keine unnötigen Varianten nach akzeptiertem QC.
@@ -79,7 +110,7 @@ Temporäre Dateien müssen außerhalb des finalen Bilderordners liegen und nach 
 
 Vor Fertigmeldung muss der Agent:
 
-1. erwartete finale Dateiliste aus den Bildprompts bestimmen
+1. erwartete finale Dateiliste aus dem eingebetteten Produktionsplan bestimmen
 2. finalen Ordner dagegen prüfen
 3. alle Extras löschen
 4. sicherstellen, dass keine benötigte Datei fehlt

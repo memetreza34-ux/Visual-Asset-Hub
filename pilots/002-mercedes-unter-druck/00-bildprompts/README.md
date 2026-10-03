@@ -1,40 +1,66 @@
 # Bildproduktion — Mercedes unter Druck
 
-## Welche Datei bekommt der Google-Flow-KI-Agent?
+## Genau eine Datei an Google Flow senden
 
-Dem Agenten wird **`google-flow-agent-prompt.txt`** gegeben.
+Für Google Flow wird **nur diese eine Datei verwendet**:
 
-Der Agent liest danach:
+`google-flow-agent-prompt.txt`
 
-1. `cover/cover-prompt.txt`
-2. `99-alle-bildprompts.txt`
-3. `../01-script/voice-script.txt`
+Den kompletten Inhalt dieser Datei in den Google-Flow-KI-Agenten einfügen.
 
-## Stage 1 — Cover
+Der Prompt ist vollständig selbstständig und enthält bereits:
 
-Es gibt nur **einen Cover-Brief**. Aus diesem einen Brief erzeugt Google Flow drei unterschiedliche Designs:
+- den kompletten Cover-Brief
+- Cover A / B / C als drei unterschiedliche Designs
+- die Anweisung, sofort mit Cover A zu starten
+- den harten STOP nach drei Covern
+- die Nutzerauswahl A/B/C
+- die Regel `Gewinner = Bild 01.png`
+- die Verwendung von `Bild 01.png` als weiche Stil-/Continuity-Referenz
+- alle benötigten Stage-2-Bildprompts vollständig inline
+- die 5er-Produktionsblöcke
+- QC-Regeln
+- exakte Dateinamen
+- Final-Cleanup
 
-- Cover A
-- Cover B
-- Cover C
+**Der Flow-Agent muss keine andere Repo-Datei lesen können.**
 
-Die drei Cover sind nur temporäre Kandidaten.
+Er darf insbesondere nicht nach folgenden Dateien fragen:
 
-Nach A/B/C gilt ein harter STOP. Der Nutzer wählt genau einen Gewinner.
+- `cover-prompt.txt`
+- `99-alle-bildprompts.txt`
+- `voice-script.txt`
+- lokalen Repo-Pfaden
 
-Der Gewinner wird:
+Alles, was er für seine KI-Bilder benötigt, steht bereits im Master-Prompt.
 
-`images/Bild 01.png`
+## Ablauf
 
-Die beiden anderen Cover werden verworfen/gelöscht und dürfen **nicht** im finalen Bilderordner bleiben.
+```text
+Master-Prompt senden
+↓
+Flow startet sofort mit Cover A
+↓
+Cover B
+↓
+Cover C
+↓
+STOP
+↓
+Nutzer wählt A / B / C
+↓
+Gewinner = Bild 01.png
+↓
+Block 1: 5 benötigte Bilder
+↓
+Block-QC
+↓
+Block 2: restliche benötigte Bilder
+↓
+Final-QC + Cleanup
+```
 
-## Stage 2 — benötigte Flow-Bilder in 5er-Schritten
-
-Nach der Cover-Auswahl verwendet Flow `Bild 01.png` als weiche Stil-/Continuity-Referenz.
-
-Flow erzeugt nur die tatsächlich benötigten KI-Bilder aus `99-alle-bildprompts.txt`.
-
-Für dieses Video:
+## Stage 2 dieses Videos
 
 ### Block 1
 - `Bild 03.png`
@@ -48,15 +74,11 @@ Für dieses Video:
 - `Bild 24.png`
 - `Bild 29.png`
 
-Ein 5er-Block bedeutet **nicht** fünf Szenen in einem Bild. Jedes Bild wird einzeln erzeugt, geprüft und korrekt umbenannt. Nach maximal fünf akzeptierten Bildern folgt Block-QC; danach beginnt der nächste Block.
+Nummernlücken sind Absicht. Diese Slots werden später durch echte Quellen oder verifizierte Grafiken gefüllt und werden nicht von Flow erfunden.
 
-Nummernlücken sind Absicht: Diese Slots werden durch echte Quellen oder verifizierte Grafiken gefüllt. Flow darf sie nicht erfinden.
+## Finaler Flow-Bilderordner
 
-## Finaler Bilderordner
-
-`00-bildprompts/images/` ist ein **Final-only-Ordner**.
-
-Nach Abschluss dürfen dort für diesen Flow-Lauf nur diese Dateien liegen:
+Am Ende dürfen aus der Flow-Produktion nur diese Dateien übrig bleiben:
 
 - `Bild 01.png`
 - `Bild 03.png`
@@ -68,14 +90,14 @@ Nach Abschluss dürfen dort für diesen Flow-Lauf nur diese Dateien liegen:
 - `Bild 24.png`
 - `Bild 29.png`
 
-Nicht erlaubt:
+Nicht behalten:
 
-- Cover A/B/C als zusätzliche Dateien
+- Cover A/B/C unter temporären Namen
 - die zwei nicht gewählten Cover
 - Fehlversuche
-- alternative Versionen
+- Retry-Versionen
+- Alternativen
 - Duplikate
-- `v2`, `retry`, `test`, `candidate`, `final-final` usw.
-- KI-Ersatz für REAL/GRAPHIC-Slots
+- Testbilder
 
-Am Ende wird der Ordner bereinigt und gegen die erwartete Dateiliste geprüft.
+Die wichtigste Regel ist: **ein Prompt rein → Flow startet selbst mit den drei Covern.**
