@@ -59,9 +59,49 @@ Ein generisches KI-Auto darf beispielsweise **nicht** als Mercedes-Modell ausgeg
 - generischen Markt-/Wettbewerbssituationen
 - Prozessbildern, die keinen konkreten Beleg vortäuschen
 
-## Zahlen und Charts
+## Harte Final-Video-Regel
 
-Kennzahlen werden aus Quellen übernommen und später als saubere Grafik/Remotion-Layer gerendert. Ein Bildmodell darf keine Geschäftszahlen erfinden oder einen Fake-Geschäftsbericht erzeugen.
+Im finalen Video sind als **Primärvisual ausschließlich** erlaubt:
+
+- echte Bilder
+- echte B-Roll / echtes Videomaterial
+- akzeptierte KI-Bilder
+
+Nicht erlaubt sind:
+
+- `REAL SOURCE ASSET`-Karten
+- Slot-/Bildnummer-Karten
+- Produktionsnotizen
+- Debug-Frames
+- Missing-Asset-Platzhalter
+- Texttafeln, die nur erklären, welches Material dort später hin soll
+- technische Vollbildkarten aus dem Produktionsplan
+
+Wenn ein echtes Bild oder B-Roll fehlt, wird **nicht** mit einer Platzhalterkarte weitergerendert. Der Render muss stoppen, bis ein passendes visuelles Asset vorhanden ist.
+
+### Zahlen und Charts
+
+Kennzahlen dürfen gezeigt werden, aber nicht als sterile technische Produktionskarte. Wenn eine Zahl wichtig ist:
+
+- Primärvisual bleibt ein passendes echtes Bild, echte B-Roll oder ein akzeptiertes KI-Bild.
+- Die verifizierte Zahl wird als kurze, saubere Overlay-Grafik darübergelegt.
+- Keine internen Quellenhinweise, Slotnummern oder Produktionskommentare im sichtbaren Bild.
+
+Beispiel:
+
+```text
+Mercedes-Werk / Fahrzeug-B-Roll
++
+kurzes Overlay: „China 2025: -19 %“
+```
+
+Nicht:
+
+```text
+schwarze Karte
+REAL SOURCE ASSET / B-ROLL
+BILD 06 — CHINA...
+```
 
 ## Cover
 
