@@ -1,0 +1,56 @@
+{
+  "id": "company-documentary-v1",
+  "name": "Company / Business Documentary",
+  "language": "de",
+  "core_topics": [
+    "Aufstieg und Absturz von Unternehmen",
+    "Geschäftsmodelle großer Marken",
+    "Firmenkriege und Konkurrenz",
+    "Fehlentscheidungen und Strategiewechsel",
+    "Übernahmen, Milliarden-Deals und gescheiterte Produkte",
+    "Wie Unternehmen, Fabriken, Lieferketten und Märkte funktionieren"
+  ],
+  "avoid_as_core_topics": [
+    "beliebige Alltags-Erklärthemen ohne Firmenbezug",
+    "generische Wissensfragen nur weil sie leicht visualisierbar sind",
+    "reine Listen ohne wirtschaftliche Story oder Konflikt"
+  ],
+  "editorial_rule": "Die Story beginnt bei einer realen Firma, Marke, Entscheidung, Kennzahl, Krise, Konkurrenz oder einem konkreten Geschäftsprozess.",
+  "visual_policy": {
+    "real_first": [
+      "echte Unternehmen und Marken",
+      "Logos und Markenidentität",
+      "konkrete Fahrzeug- und Produktmodelle",
+      "Vorstände und reale Personen",
+      "Werke, Standorte und Händler",
+      "reale Ereignisse, Pressekonferenzen und Nachrichtenbilder",
+      "Original-Webseiten, Geschäftsberichte und Dokumente",
+      "historische Originalbilder",
+      "exakte Geschäftszahlen und Charts"
+    ],
+    "ai_allowed": [
+      "abstrakte Erklärbilder",
+      "nicht-belegende Rekonstruktionen",
+      "symbolische Übergänge",
+      "generische Markt- oder Konkurrenzsituationen",
+      "Prozessvisualisierungen ohne konkrete Markenbehauptung"
+    ],
+    "graphics": [
+      "Kennzahlen werden aus verifizierten Daten gerendert, nicht von einem Bildmodell erfunden",
+      "Charts müssen Quelle, Zeitraum und Einheit im technischen Plan besitzen"
+    ]
+  },
+  "cover_policy": {
+    "candidates": 3,
+    "same_exact_text": true,
+    "user_selects": true,
+    "real_reference_required_for_exact_brand_or_product": true,
+    "selected_cover_is_soft_style_reference": true
+  },
+  "story_standard": {
+    "fact_first": true,
+    "show_counterpoint": true,
+    "avoid_false_collapse_claims": true,
+    "separate_fact_from_interpretation": true
+  }
+}

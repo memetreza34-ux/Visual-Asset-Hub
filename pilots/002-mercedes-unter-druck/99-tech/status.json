@@ -1,0 +1,14 @@
+{
+  "project": "002-mercedes-unter-druck",
+  "script": "ready",
+  "research": "ready",
+  "cover_prompts": "ready",
+  "visual_plan": "ready-manual-v1",
+  "real_media": "needs-rights-cleared-sources",
+  "cover_reference": "needed",
+  "flow_stage_1": "blocked-until-real-reference",
+  "flow_stage_2": "blocked-until-cover-selection",
+  "audio": "not-started",
+  "timeline": "not-started",
+  "export": "not-started"
+}

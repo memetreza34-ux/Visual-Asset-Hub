@@ -1,0 +1,13 @@
+{
+  "id": "002-mercedes-unter-druck",
+  "title": "Warum Mercedes plötzlich unter Druck steht",
+  "cover_text": "MERCEDES UNTER DRUCK",
+  "profile": "profiles/company-documentary.json",
+  "orientation": "horizontal",
+  "target_duration_seconds": 120,
+  "script_words": 269,
+  "visual_target": 30,
+  "content_type": "company-business-documentary",
+  "asset_strategy": "real-first-for-exact-company-evidence-ai-for-explanations",
+  "status": "READY_FOR_REAL_REFERENCE_AND_COVER_TEST"
+}
