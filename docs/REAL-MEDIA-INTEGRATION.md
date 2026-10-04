@@ -98,9 +98,12 @@ npm run real:review -- --dir .local-storage/visual-plans/SESSION/real-media
 npm run real:review -- --dir <ordner> --approve beat-001,beat-007
 npm run real:review -- --dir <ordner> --approve all
 npm run real:review -- --dir <ordner> --reject beat-016
+npm run real:review -- --dir <ordner> --approve all --reject beat-016
 ```
 
-Prüfe bei jedem Treffer: Zeigt das Bild wirklich das Richtige? Passt die Lizenz? Bei CC BY-SA gilt zusätzlich „Weitergabe unter gleichen Bedingungen“.
+Prüfe bei jedem Treffer: Zeigt das Bild wirklich das Richtige? Passt die Lizenz? Bei CC BY-SA gilt zusätzlich „Weitergabe unter gleichen Bedingungen“. Bei erkennbaren Personen auch Persönlichkeitsrechte beachten.
+
+**Ablehnen ersetzt automatisch:** `--reject` lädt die nächstbeste der gespeicherten Alternativen (Standard: 5 pro Beat) und setzt sie wieder auf `review-required`. Übersprungen werden Treffer, die schon ein anderer Beat nutzt, früher abgelehnte Treffer und Bilder aus derselben Fotoserie. Erst wenn keine Alternative mehr passt, wird der Beat `rejected`. Mit `--replace false` wird nur abgelehnt. Kombiniert mit `--approve all` bleibt der ersetzte Beat ausgenommen, bis du die neue Alternative gesehen hast.
 
 Nach jeder Freigabe entsteht `credits.txt` mit allen Quellenangaben für die YouTube-Beschreibung. Bei CC-BY-Material ist diese Namensnennung Pflicht.
 
@@ -280,7 +283,7 @@ Zusätzlich: Lizenzcode, Credit-Text und ein Hinweis bei CC BY-SA. Exakte Marken
 --queries <1-8>            Suchrichtungen je Beat
 --pages <1-10>             Seiten je Query und Quelle
 --per-page <1-80>          Treffer je Anfrage
---alternates <0-10>        gespeicherte Alternativen
+--alternates <0-10>        gespeicherte Alternativen (Ersatz bei Ablehnung); Standard: 5
 --max-dimension <px>       bevorzugte maximale Videokante
 --default-duration <sek>   Dauer ohne Timing-Datei
 --download <true|false>    echter Download oder Auswahltest

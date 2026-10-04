@@ -13,7 +13,7 @@ import {
 import { normalizePage, searchWikimedia } from '../scripts/lib/providers/wikimedia.mjs';
 import { mapRights as openverseRights } from '../scripts/lib/providers/openverse.mjs';
 import { buildCreditLines, chooseDownload, matchesRequiredTerms, rankRealCandidates } from '../scripts/lib/real-media.mjs';
-import { applyReviewDecisions } from '../scripts/lib/real-media-review.mjs';
+import { applyAlternate, approveBindings, nextAlternate, rejectBinding, syncResolution } from '../scripts/lib/real-media-review.mjs';
 import { findEntities, planAiFirstVisuals } from '../scripts/lib/ai-visual-planner.mjs';
 import { buildUnifiedVideoManifest } from '../scripts/lib/video-manifest.mjs';
 
@@ -156,25 +156,53 @@ test('Credits enthalten nur freigegebene Treffer, ohne Dubletten', () => {
   assert.deepEqual(lines, ['- „A“ von B, CC BY-SA 3.0, via Wikimedia Commons – https://c/5']);
 });
 
-test('Review: Freigabe setzt ready, Ablehnung setzt rejected, Rest bleibt offen', () => {
+test('Review: "all" gibt frei, gleichzeitig abgelehnte Beats bleiben ausgenommen', () => {
   const timeline = {
     bindings: [
       { beat_id: 'beat-001', status: 'review-required' },
       { beat_id: 'beat-002', status: 'review-required' },
-      { beat_id: 'beat-003', status: 'review-required' },
-      { beat_id: 'beat-004', status: 'ready' }
+      { beat_id: 'beat-003', status: 'ready' }
     ]
   };
-  const resolution = { items: [{ beat_id: 'beat-001', status: 'review-required' }], summary: {} };
-  const result = applyReviewDecisions({ timeline, resolution, approve: ['beat-001', 'beat-009'], reject: ['beat-002'] });
+  const resolution = { items: [{ beat_id: 'beat-001', status: 'review-required' }, { beat_id: 'beat-002', status: 'review-required' }] };
+  const result = approveBindings({ timeline, resolution, approve: ['all', 'beat-009'], exclude: ['beat-002'] });
   assert.deepEqual(result.approved, ['beat-001']);
-  assert.deepEqual(result.rejected, ['beat-002']);
   assert.deepEqual(result.unknown, ['beat-009']);
-  assert.deepEqual(timeline.bindings.map((b) => b.status), ['ready', 'rejected', 'review-required', 'ready']);
-  assert.equal(resolution.items[0].status, 'ready');
+  assert.deepEqual(timeline.bindings.map((b) => b.status), ['ready', 'review-required', 'ready']);
 
-  applyReviewDecisions({ timeline, approve: ['all'] });
-  assert.equal(timeline.bindings[2].status, 'ready');
+  rejectBinding({ binding: timeline.bindings[1], resolutionItem: resolution.items[1] });
+  syncResolution(resolution, timeline);
+  assert.deepEqual(resolution.summary, { ready: 1, review_required: 0, rejected: 1 });
+});
+
+test('Ersatz: nächste Alternative ohne Dubletten, Fotoserien und früher Abgelehntes', () => {
+  const alt = (id, title, extra = {}) => ({ provider: 'wikimedia', provider_id: id, type: 'image', title, downloads: [{ url: `https://upload.wikimedia.org/${id}.jpg` }], ...extra });
+  const binding = {
+    id: 'beat-001-real-01', beat_id: 'beat-001', status: 'review-required', provider: 'wikimedia', provider_id: '1', asset_type: 'image',
+    title: 'Nokia HQ 01.jpg', local_file: 'a.jpg', placement: { start_seconds: 3, duration_seconds: 4, requested_duration_seconds: 4 }
+  };
+  const other = { beat_id: 'beat-002', status: 'ready', provider: 'wikimedia', provider_id: '2', asset_type: 'image', title: 'Nokia 3310.jpg' };
+  const resolutionItem = {
+    beat_id: 'beat-001',
+    alternates: [
+      alt('2', 'Nokia 3310.jpg'),
+      alt('3', 'Nokia HQ 02.jpg'),
+      alt('4', 'Nokia N95.jpg', { downloads: [] }),
+      alt('5', 'Nokia Lumia 800.jpg', { rights: { license_status: 'cc-by', license_code: 'CC BY 4.0' } })
+    ]
+  };
+  const next = nextAlternate({ binding, resolutionItem, bindings: [binding, other] });
+  assert.equal(next.provider_id, '5');
+
+  applyAlternate({ binding, resolutionItem, alternate: next, localFile: 'b.jpg' });
+  assert.equal(binding.status, 'review-required');
+  assert.equal(binding.provider_id, '5');
+  assert.equal(binding.local_file, 'b.jpg');
+  assert.equal(binding.rights.license_code, 'CC BY 4.0');
+  assert.equal(binding.placement.start_seconds, 3);
+  assert.equal(binding.replaced[0].provider_id, '1');
+  assert.equal(resolutionItem.alternates.some((entry) => entry.provider_id === '5'), false);
+  assert.equal(nextAlternate({ binding, resolutionItem, bindings: [binding, other] }), null);
 });
 
 test('Planer erkennt Firmen/Produkte und nutzt den letzten Namen als Kontext', () => {
@@ -221,7 +249,12 @@ test('Unified Manifest blockiert ungeprüfte Archiv-Treffer', () => {
   assert.equal(manifest.status, 'needs-resolution');
 });
 
-test('real:integrate lädt Archivtreffer, sperrt NC-Lizenzen und verlangt Review (ohne Netzwerk)', () => {
+// Führt real:integrate bzw. real:review mit gemocktem Wikimedia aus (kein Netzwerk).
+function runMocked(script, args) {
+  return spawnSync(process.execPath, ['--import', './tests/fixtures/mock-wikimedia-fetch.mjs', script, ...args], { cwd: process.cwd(), encoding: 'utf8' });
+}
+
+function integrateNokiaFixture() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vah-real-'));
   const queue = path.join(dir, 'real-material-queue.json');
   fs.writeFileSync(queue, JSON.stringify({
@@ -230,13 +263,13 @@ test('real:integrate lädt Archivtreffer, sperrt NC-Lizenzen und verlangt Review
       reason: 'exact-brand-or-product', stock_query: 'Nokia N95', search_terms: ['Nokia N95'], required_terms: ['Nokia N95']
     }]
   }));
-  const run = spawnSync(process.execPath, [
-    '--import', './tests/fixtures/mock-wikimedia-fetch.mjs',
-    'scripts/real-media-integrate.mjs', '--queue', queue, '--providers', 'wikimedia'
-  ], { cwd: process.cwd(), encoding: 'utf8' });
+  const run = runMocked('scripts/real-media-integrate.mjs', ['--queue', queue, '--providers', 'wikimedia']);
   assert.equal(run.status, 0, run.stderr || run.stdout);
+  return { dir, outDir: path.join(dir, 'real-media') };
+}
 
-  const outDir = path.join(dir, 'real-media');
+test('real:integrate lädt Archivtreffer, sperrt NC-Lizenzen und verlangt Review (ohne Netzwerk)', () => {
+  const { dir, outDir } = integrateNokiaFixture();
   const timeline = JSON.parse(fs.readFileSync(path.join(outDir, 'remotion-real-media.json'), 'utf8'));
   const [binding] = timeline.bindings;
   assert.equal(binding.status, 'review-required');
@@ -249,5 +282,29 @@ test('real:integrate lädt Archivtreffer, sperrt NC-Lizenzen und verlangt Review
   const review = spawnSync(process.execPath, ['scripts/real-media-review.mjs', '--dir', outDir, '--approve', 'all'], { cwd: process.cwd(), encoding: 'utf8' });
   assert.equal(review.status, 0, review.stderr);
   assert.match(fs.readFileSync(path.join(outDir, 'credits.txt'), 'utf8'), /Nokia N95 front\.jpg.*Tester.*CC BY-SA 3\.0/);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test('real:review ersetzt Abgelehntes durch die nächste Alternative, bis keine mehr passt', () => {
+  const { dir, outDir } = integrateNokiaFixture();
+  const readBinding = () => JSON.parse(fs.readFileSync(path.join(outDir, 'remotion-real-media.json'), 'utf8')).bindings[0];
+  assert.equal(readBinding().provider_id, '5');
+
+  const first = runMocked('scripts/real-media-review.mjs', ['--dir', outDir, '--reject', 'beat-001']);
+  assert.equal(first.status, 0, first.stderr);
+  assert.match(first.stdout, /Durch Alternative ersetzt/);
+  const replaced = readBinding();
+  assert.equal(replaced.status, 'review-required');
+  assert.equal(replaced.provider_id, '6');
+  assert.equal(replaced.replaced.length, 1);
+  assert.ok(fs.existsSync(path.resolve(replaced.local_file)));
+
+  // "Nokia N95 front 2" gehört zur abgelehnten Fotoserie und wird übersprungen.
+  const second = runMocked('scripts/real-media-review.mjs', ['--dir', outDir, '--reject', 'beat-001']);
+  assert.equal(second.status, 0, second.stderr);
+  assert.match(second.stdout, /Abgelehnt ohne Ersatz: beat-001/);
+  assert.equal(readBinding().status, 'rejected');
+  const resolution = JSON.parse(fs.readFileSync(path.join(outDir, 'real-media-resolution.json'), 'utf8'));
+  assert.equal(resolution.summary.rejected, 1);
   fs.rmSync(dir, { recursive: true, force: true });
 });

@@ -249,6 +249,17 @@ function isPlayableFile(file, type) {
   return /jpe?g|png|webp/.test(mime) || ['jpg', 'jpeg', 'png', 'webp'].includes(ext);
 }
 
+/**
+ * Schlüssel, unter denen ein Treffer als "schon verwendet" gilt. Openverse indexiert auch Wikimedia,
+ * daher zusätzlich der Titel; Fotoserien ("Stuttgart 03.jpg" / "Stuttgart 04.jpg") zählen als ein Motiv.
+ */
+export function assetIdentityKeys(asset) {
+  if (!asset?.provider) return [];
+  const title = String(asset.title ?? '').toLowerCase().replace(/\.(jpe?g|png|webp|tiff?|webm|mp4)$/i, '').replace(/[^a-z0-9]+/g, ' ').trim();
+  const series = title.replace(/(\s+\d+)+$/, '').trim();
+  return [`${asset.provider}:${asset.type ?? asset.asset_type}:${asset.provider_id}`, ...(series ? [`title:${series}`] : [])];
+}
+
 /** Credits-Block für die YouTube-Beschreibung aus allen freigegebenen Bindings. */
 export function buildCreditLines(bindings = []) {
   const lines = [];
@@ -322,6 +333,7 @@ export function buildTimelineBinding({ item, selected, localFile = null, timing 
     placement: {
       start_seconds: start ?? null,
       duration_seconds: round(duration, 3),
+      requested_duration_seconds: round(requestedDuration, 3),
       trim_start_seconds: 0,
       fit: 'cover',
       mute: selected?.type === 'video'

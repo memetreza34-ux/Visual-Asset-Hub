@@ -34,7 +34,10 @@ globalThis.fetch = async (input) => {
         pages: [
           page({ pageid: 3, index: 1, title: 'Nokia N95 restricted.jpg', license: 'CC BY-NC 2.0', licenseUrl: 'https://creativecommons.org/licenses/by-nc/2.0' }),
           page({ pageid: 4, index: 2, title: 'Random building.jpg', license: 'CC0', licenseUrl: '' }),
-          page({ pageid: 5, index: 3, title: 'Nokia N95 front.jpg', license: 'CC BY-SA 3.0', licenseUrl: 'https://creativecommons.org/licenses/by-sa/3.0' })
+          page({ pageid: 5, index: 3, title: 'Nokia N95 front.jpg', license: 'CC BY-SA 3.0', licenseUrl: 'https://creativecommons.org/licenses/by-sa/3.0' }),
+          page({ pageid: 6, index: 4, title: 'Nokia N95 back.jpg', license: 'CC BY 4.0', licenseUrl: 'https://creativecommons.org/licenses/by/4.0' }),
+          // Gleiche Fotoserie wie "front" – darf nach Ablehnung von "front" nicht als Ersatz kommen.
+          page({ pageid: 7, index: 5, title: 'Nokia N95 front 2.jpg', license: 'CC0', licenseUrl: '' })
         ]
       }
     });
