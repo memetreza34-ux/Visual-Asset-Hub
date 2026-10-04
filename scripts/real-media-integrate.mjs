@@ -195,10 +195,12 @@ async function resolveItem(item, context) {
     return unresolved(item, timing, options.defaultDuration, errors[0]?.message ?? 'Keine passenden Treffer mit nutzbarer Lizenz.', { providers, queries, errors, candidates_seen: candidateMap.size });
   }
 
-  // Openverse indexiert auch Wikimedia: dieselbe Datei zusätzlich über den Titel erkennen.
+  // Openverse indexiert auch Wikimedia: dieselbe Datei über den Titel erkennen. Fotoserien
+  // ("Niederlassung Stuttgart 03.jpg" / "… 04.jpg") zählen als ein Motiv.
   const assetKeys = (asset) => {
     const title = String(asset.title ?? '').toLowerCase().replace(/\.(jpe?g|png|webp|tiff?|webm|mp4)$/i, '').replace(/[^a-z0-9]+/g, ' ').trim();
-    return [`${asset.provider}:${asset.type}:${asset.provider_id}`, ...(title ? [`title:${title}`] : [])];
+    const series = title.replace(/(\s+\d+)+$/, '').trim();
+    return [`${asset.provider}:${asset.type}:${asset.provider_id}`, ...(series ? [`title:${series}`] : [])];
   };
   const unused = ranked.filter((asset) => !assetKeys(asset).some((key) => usedAssets.has(key)));
   const pool = unused.length ? unused : ranked;
