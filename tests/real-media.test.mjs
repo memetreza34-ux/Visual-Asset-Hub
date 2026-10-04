@@ -10,10 +10,18 @@ import {
   timingMapFromPayload
 } from '../scripts/lib/real-media.mjs';
 
-test('exakte Belege werden nicht automatisch durch Stock ersetzt', () => {
-  for (const reason of ['original-interface-or-document', 'real-event-authenticity', 'exact-brand-or-product', 'historical-evidence']) {
+test('Screenshots und Originaldokumente bleiben manuell', () => {
+  const policy = realMediaPolicy({ reason: 'original-interface-or-document' });
+  assert.equal(policy.auto_search, false);
+  assert.equal(policy.requires_exact_source, true);
+  assert.equal(policy.review_required, true);
+});
+
+test('exakte Belege werden nur in Archiven gesucht, nie durch Stock ersetzt und immer reviewt', () => {
+  for (const reason of ['real-event-authenticity', 'exact-brand-or-product', 'historical-evidence']) {
     const policy = realMediaPolicy({ reason });
-    assert.equal(policy.auto_search, false);
+    assert.equal(policy.auto_search, true);
+    assert.equal(policy.source_tier, 'archive');
     assert.equal(policy.requires_exact_source, true);
     assert.equal(policy.review_required, true);
   }

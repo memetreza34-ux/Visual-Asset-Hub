@@ -4,11 +4,12 @@ import process from 'node:process';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { spawnSync } from 'node:child_process';
-import { searchPexels } from './lib/pexels.mjs';
 import { planSearchQueries } from './lib/search-planner.mjs';
+import { isAllowedDownloadHost, providersFor, searchProvider, searchTypesFor } from './lib/providers/index.mjs';
 import {
+  buildCreditLines,
   buildTimelineBinding,
-  choosePexelsDownload,
+  chooseDownload,
   extensionForDownload,
   mergeRealCandidate,
   rankRealCandidates,
@@ -49,7 +50,8 @@ try {
     maxDimension: integerOption(args['max-dimension'], 1920, 720, 7680, 'max-dimension'),
     defaultDuration: numberOption(args['default-duration'], 4, 1, 30, 'default-duration'),
     download: booleanOption(args.download, true, 'download'),
-    locale: String(args.locale ?? 'en-US')
+    locale: String(args.locale ?? 'en-US'),
+    providers: args.providers ? String(args.providers).split(',').map((name) => name.trim()).filter(Boolean) : null
   };
 
   const report = {
@@ -69,9 +71,12 @@ try {
     bindings: []
   };
 
+  // Gleiche Suchanfragen mehrerer Beats nur einmal stellen; gleiche Treffer nicht mehrfach verwenden.
+  const searchCache = new Map();
+  const usedAssets = new Set();
   for (const [index, item] of queue.assets.entries()) {
     console.log(`[${index + 1}/${queue.assets.length}] ${item.beat_id ?? item.id}: ${item.stock_query ?? item.reason ?? 'real media'}`);
-    const result = await resolveItem(item, { suggestions, timings, options, mediaDir, metaDir });
+    const result = await resolveItem(item, { suggestions, timings, options, mediaDir, metaDir, searchCache, usedAssets });
     report.items.push(result.reportItem);
     timeline.bindings.push(result.binding);
   }
@@ -79,17 +84,22 @@ try {
   report.summary = summarize(report.items);
   fs.writeFileSync(path.join(outputDir, 'real-media-resolution.json'), `${JSON.stringify(report, null, 2)}\n`);
   fs.writeFileSync(path.join(outputDir, 'remotion-real-media.json'), `${JSON.stringify(timeline, null, 2)}\n`);
+  const credits = buildCreditLines(timeline.bindings);
+  fs.writeFileSync(path.join(outputDir, 'credits.txt'), credits.length ? `Bild- und Videoquellen:\n${credits.join('\n')}\n` : '');
 
-  console.log(`Fertig: ${report.summary.ready} Timeline-Assets bereit, ${report.summary.manual_required} exakte Quellen manuell/official nötig, ${report.summary.unresolved} ungelöst.`);
+  console.log(`Fertig: ${report.summary.ready} bereit, ${report.summary.review_required} warten auf deine Prüfung, ${report.summary.manual_required} manuell, ${report.summary.unresolved} ungelöst, ${report.summary.download_failed} Download fehlgeschlagen.`);
   console.log(`Resolution: ${relative(path.join(outputDir, 'real-media-resolution.json'))}`);
   console.log(`Remotion-Manifest: ${relative(path.join(outputDir, 'remotion-real-media.json'))}`);
+  if (report.summary.review_required) {
+    console.log(`Prüfen und freigeben: npm run real:review -- --dir ${relative(outputDir)}`);
+  }
 } catch (error) {
   console.error(error instanceof Error ? error.message : String(error));
   process.exitCode = 1;
 }
 
 async function resolveItem(item, context) {
-  const { suggestions, timings, options, mediaDir, metaDir } = context;
+  const { suggestions, timings, options, mediaDir, metaDir, searchCache, usedAssets } = context;
   const policy = realMediaPolicy(item);
   const timing = timings.get(item.beat_id) ?? null;
 
@@ -120,74 +130,113 @@ async function resolveItem(item, context) {
     };
   }
 
+  const searchTerms = unique(item.search_terms ?? []);
   const querySeed = String(item.stock_query ?? '').trim();
-  if (!querySeed) {
+  if (!querySeed && !searchTerms.length) {
     return unresolved(item, timing, options.defaultDuration, 'stock_query fehlt.');
   }
 
-  const plan = planSearchQueries({
-    topic: querySeed,
-    topicSuggestions: suggestions.topics ?? {},
-    maxQueries: options.queries
+  const providers = providersFor({
+    tier: policy.source_tier,
+    assetType: item.asset_type,
+    reason: item.reason,
+    override: options.providers
   });
-  const queries = unique([querySeed, ...plan.queries.map((entry) => entry.query)]).slice(0, options.queries);
-  const pexelsType = item.asset_type === 'video' ? 'video' : 'photo';
+  if (!providers.length) {
+    return unresolved(item, timing, options.defaultDuration, 'Keine nutzbare Quelle: API-Key fehlt oder --providers ist leer.');
+  }
+
+  // Erkannte Marken/Produkte werden direkt gesucht; sonst plant der Search Planner Varianten.
+  const queries = searchTerms.length
+    ? searchTerms.slice(0, Math.max(options.queries, (item.required_terms ?? []).length))
+    : unique([querySeed, ...planSearchQueries({
+      topic: querySeed,
+      topicSuggestions: suggestions.topics ?? {},
+      maxQueries: options.queries
+    }).queries.map((entry) => entry.query)]).slice(0, options.queries);
   const candidateMap = new Map();
   const errors = [];
 
-  for (const query of queries) {
-    for (let page = 1; page <= options.pages; page += 1) {
-      try {
-        const response = await searchPexels({
-          apiKey: process.env.PEXELS_API_KEY,
-          query,
-          type: pexelsType,
-          orientation: item.orientation,
-          locale: options.locale,
-          page,
-          perPage: options.perPage
-        });
-        for (const asset of response.assets) mergeRealCandidate(candidateMap, asset, query, page);
-        if (!response.next_page || response.assets.length < options.perPage) break;
-      } catch (error) {
-        errors.push({ query, page, message: error instanceof Error ? error.message : String(error) });
-        break;
+  for (const provider of providers) {
+    for (const type of searchTypesFor(provider, item.asset_type)) {
+      for (const query of queries) {
+        for (let page = 1; page <= options.pages; page += 1) {
+          try {
+            const cacheKey = [provider, type, query, page, item.orientation].join('|');
+            if (!searchCache.has(cacheKey)) {
+              searchCache.set(cacheKey, await searchProvider({
+                provider,
+                type,
+                query,
+                orientation: item.orientation,
+                locale: options.locale,
+                page,
+                perPage: options.perPage
+              }));
+            }
+            const response = searchCache.get(cacheKey);
+            for (const asset of response.assets) mergeRealCandidate(candidateMap, asset, query, page);
+            if (!response.next_page || response.assets.length === 0) break;
+          } catch (error) {
+            errors.push({ provider, query, page, message: error instanceof Error ? error.message : String(error) });
+            break;
+          }
+        }
       }
     }
   }
 
   const ranked = rankRealCandidates([...candidateMap.values()], {
     orientation: item.orientation,
-    assetType: item.asset_type
+    assetType: item.asset_type,
+    requiredTerms: item.required_terms ?? searchTerms
   });
-  const selected = ranked[0] ?? null;
-  if (!selected) return unresolved(item, timing, options.defaultDuration, errors[0]?.message ?? 'Keine geeigneten Treffer.', { queries, errors });
+  if (!ranked.length) {
+    return unresolved(item, timing, options.defaultDuration, errors[0]?.message ?? 'Keine passenden Treffer mit nutzbarer Lizenz.', { providers, queries, errors, candidates_seen: candidateMap.size });
+  }
 
-  const alternates = ranked.slice(1, 1 + options.alternates).map(candidateSummary);
+  // Openverse indexiert auch Wikimedia: dieselbe Datei zusätzlich über den Titel erkennen.
+  const assetKeys = (asset) => {
+    const title = String(asset.title ?? '').toLowerCase().replace(/\.(jpe?g|png|webp|tiff?|webm|mp4)$/i, '').replace(/[^a-z0-9]+/g, ' ').trim();
+    return [`${asset.provider}:${asset.type}:${asset.provider_id}`, ...(title ? [`title:${title}`] : [])];
+  };
+  const unused = ranked.filter((asset) => !assetKeys(asset).some((key) => usedAssets.has(key)));
+  const pool = unused.length ? unused : ranked;
+  let selected = pool[0];
   let localFile = null;
   let technical = null;
   let download = null;
   let downloadError = null;
 
   if (options.download) {
-    download = choosePexelsDownload(selected, { maxDimension: options.maxDimension });
-    if (!download?.url) {
-      downloadError = 'Kein geeigneter direkter Download verfügbar.';
-    } else {
+    // Bis zu 5 Kandidaten versuchen, falls Host nicht erlaubt ist oder der Download scheitert.
+    for (const candidate of pool.slice(0, 5)) {
+      const downloads = candidate.downloads?.filter((file) => isAllowedDownloadHost(candidate.provider, file.url));
+      const choice = chooseDownload(downloads ? { ...candidate, downloads } : candidate, { maxDimension: options.maxDimension });
+      if (!choice?.url || !isAllowedDownloadHost(candidate.provider, choice.url)) {
+        downloadError = 'Kein geeigneter direkter Download verfügbar.';
+        continue;
+      }
       try {
-        const target = await downloadAsset({ item, selected, download, mediaDir });
+        const target = await downloadAsset({ item, selected: candidate, download: choice, mediaDir });
+        selected = candidate;
+        download = choice;
+        downloadError = null;
         localFile = relative(target);
-        technical = selected.type === 'video' ? analyzeVideo(target) : {
-          width: selected.width ?? null,
-          height: selected.height ?? null,
-          orientation: selected.orientation ?? null
+        technical = candidate.type === 'video' ? analyzeVideo(target) : {
+          width: choice.width ?? candidate.width ?? null,
+          height: choice.height ?? candidate.height ?? null,
+          orientation: candidate.orientation ?? null
         };
-        writeMetadata({ item, selected, download, target, technical, metaDir, queries });
+        writeMetadata({ item, selected: candidate, download: choice, target, technical, metaDir, queries });
+        break;
       } catch (error) {
         downloadError = error instanceof Error ? error.message : String(error);
       }
     }
   }
+  for (const key of assetKeys(selected)) usedAssets.add(key);
+  const alternates = pool.filter((asset) => asset !== selected).slice(0, options.alternates).map(candidateSummary);
 
   const binding = buildTimelineBinding({
     item,
@@ -199,7 +248,10 @@ async function resolveItem(item, context) {
   });
   if (!options.download) binding.status = 'selected-not-downloaded';
   if (downloadError) binding.status = 'download-failed';
-  binding.review_required = policy.review_required;
+  // Exakte Quellen und Share-Alike-Lizenzen gehen erst nach deiner Freigabe in den Render.
+  const needsReview = policy.requires_exact_source || Boolean(selected.rights?.share_alike);
+  if (binding.status === 'ready' && needsReview) binding.status = 'review-required';
+  binding.review_required = policy.review_required || needsReview;
   binding.selection_score = selected.real_media_score;
 
   return {
@@ -208,8 +260,10 @@ async function resolveItem(item, context) {
       beat_id: item.beat_id,
       status: binding.status,
       reason: item.reason,
-      stock_query: querySeed,
+      stock_query: querySeed || null,
+      search_terms: searchTerms,
       policy,
+      providers,
       queries,
       errors,
       selected: candidateSummary(selected),
@@ -256,16 +310,20 @@ function unresolved(item, timing, defaultDuration, message, extra = {}) {
 }
 
 async function downloadAsset({ item, selected, download, mediaDir }) {
-  assertSafePexelsUrl(download.url);
+  if (!isAllowedDownloadHost(selected.provider, download.url)) throw new Error(`Unerwarteter Download-Host für ${selected.provider}.`);
   const ext = extensionForDownload(download.url, download.file_type, selected.type);
   const base = `${safeMediaName(item.beat_id ?? item.id)}-${selected.type}-${safeMediaName(selected.provider_id)}.${ext}`;
   const target = uniquePath(path.join(mediaDir, base));
   const partial = `${target}.part`;
   const response = await fetch(download.url, {
-    headers: { 'User-Agent': 'Visual-Asset-Hub/0.5', Accept: '*/*' },
+    headers: { 'User-Agent': 'Visual-Asset-Hub/0.9 (https://github.com/memetreza34-ux/Visual-Asset-Hub)', Accept: '*/*' },
     redirect: 'follow'
   });
   if (!response.ok || !response.body) throw new Error(`Download fehlgeschlagen (${response.status}).`);
+  const contentType = String(response.headers.get('content-type') ?? '').toLowerCase();
+  if (contentType && !contentType.startsWith(`${selected.type === 'video' ? 'video' : 'image'}/`) && !contentType.includes('octet-stream')) {
+    throw new Error(`Unerwarteter Dateityp: ${contentType}`);
+  }
 
   const maxBytes = 700 * 1024 * 1024;
   const declared = Number(response.headers.get('content-length') ?? 0);
@@ -306,15 +364,20 @@ function writeMetadata({ item, selected, download, target, technical, metaDir, q
     beat_id: item.beat_id,
     request_id: item.id,
     reason: item.reason,
-    provider: 'pexels',
+    provider: selected.provider,
     provider_id: selected.provider_id,
     title: selected.title,
     source_url: selected.source_url,
     creator: selected.creator,
     creator_url: selected.creator_url,
-    license_status: 'licensed',
-    license_url: 'https://www.pexels.com/license/',
-    attribution: selected.attribution,
+    license_status: selected.rights?.license_status ?? null,
+    license_code: selected.rights?.license_code ?? null,
+    license_url: selected.rights?.license_url ?? null,
+    attribution_required: selected.rights?.attribution_required ?? null,
+    attribution_text: selected.rights?.attribution_text ?? null,
+    share_alike: selected.rights?.share_alike ?? false,
+    rights_warning: selected.rights?.warning ?? null,
+    attribution: selected.attribution ?? null,
     matched_queries: selected.matched_queries,
     queries,
     selection_score: selected.real_media_score,
@@ -346,6 +409,8 @@ function candidateSummary(asset) {
     duration_seconds: asset.duration_seconds ?? null,
     orientation: asset.orientation,
     preview_url: asset.preview_url,
+    license_status: asset.rights?.license_status ?? null,
+    license_code: asset.rights?.license_code ?? null,
     score: asset.real_media_score,
     matched_queries: asset.matched_queries
   };
@@ -355,18 +420,12 @@ function summarize(items) {
   return {
     total: items.length,
     ready: items.filter((item) => item.status === 'ready').length,
+    review_required: items.filter((item) => item.status === 'review-required').length,
     selected_not_downloaded: items.filter((item) => item.status === 'selected-not-downloaded').length,
     download_failed: items.filter((item) => item.status === 'download-failed').length,
     manual_required: items.filter((item) => item.status === 'manual-required').length,
     unresolved: items.filter((item) => item.status === 'unresolved').length
   };
-}
-
-function assertSafePexelsUrl(value) {
-  const url = new URL(value);
-  if (url.protocol !== 'https:') throw new Error('Nur HTTPS-Downloads sind erlaubt.');
-  const host = url.hostname.toLowerCase();
-  if (host !== 'pexels.com' && !host.endsWith('.pexels.com')) throw new Error(`Unerwarteter Download-Host: ${host}`);
 }
 
 function uniquePath(target) {
@@ -439,9 +498,14 @@ function help() {
   console.log(`
 Real Media Integration
 
-Löst die real-material-queue des AI-first Visual Planners auf, sucht echte Pexels-
+Löst die real-material-queue des AI-first Visual Planners auf, sucht echte
 B-Rolls/Fotos, lädt die beste Datei, analysiert Videos und erzeugt ein Remotion-
 kompatibles Beat-Mapping.
+
+Quellen:
+  Generische B-Roll   → Pexels, Pixabay (API-Key in .env)
+  Marken/Produkte/
+  Ereignisse/Geschichte → Wikimedia Commons, Openverse, Internet Archive (ohne Key)
 
 Beispiel:
   npm run real:integrate -- --queue .local-storage/visual-plans/SESSION/real-material-queue.json
@@ -454,21 +518,25 @@ Optionen:
   --timings <pfad>           optional: { beats: [{ beat_id, start_seconds, duration_seconds }] }
   --output-dir <pfad>        Standard: real-media/ neben der Queue
   --queries <1-8>            Suchrichtungen pro Beat; Standard: 3
-  --pages <1-10>             Pexels-Seiten je Suchrichtung; Standard: 2
+  --pages <1-10>             Ergebnisseiten je Suchrichtung; Standard: 2
   --per-page <1-80>          Treffer je Anfrage; Standard: 30
   --alternates <0-10>        alternative Kandidaten speichern; Standard: 3
   --max-dimension <px>       bevorzugte maximale Videokante; Standard: 1920
   --default-duration <sek>   Timeline-Dauer ohne Timing-Datei; Standard: 4
   --download <true|false>    Dateien wirklich laden; Standard: true
-  --locale <wert>            Pexels-Suchsprache; Standard: en-US
+  --locale <wert>            Suchsprache für Stock; Standard: en-US
+  --providers <liste>        Quellen erzwingen, z. B. wikimedia,openverse
 
 Ausgabe:
   real-media-resolution.json
   remotion-real-media.json
+  credits.txt                Quellenangaben für die YouTube-Beschreibung
   files/*
   metadata/*
 
-Exakte Screenshots, Dokumente, Marken und Ereignisbelege werden absichtlich nicht
-mit generischem Stockmaterial ersetzt, sondern als manual-required markiert.
+Marken, Produkte, Ereignisse und Geschichte werden nie mit generischem Stock
+ersetzt: Treffer aus Archiven bekommen den Status review-required und müssen mit
+npm run real:review freigegeben werden. Screenshots/Originaldokumente bleiben
+manual-required.
 `);
 }

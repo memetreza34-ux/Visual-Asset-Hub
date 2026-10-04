@@ -15,6 +15,10 @@ const REAL_EVIDENCE_PATTERNS = [
   { regex: /\b(exact location|konkreter ort|landmark|sehensw[uü]rdigkeit|brandenburger tor|eiffelturm|white house|wei[sß]es haus)\b/i, reason: 'identifiable-real-location', type: 'real-image' }
 ];
 
+// Marken aus REAL_EVIDENCE_PATTERNS in Schreibweise für die Archivsuche.
+const BUILT_IN_ENTITIES = ['iPhone', 'MacBook', 'Tesla', 'PlayStation', 'Nvidia', 'OpenAI', 'YouTube', 'TikTok', 'Instagram'];
+const ARCHIVE_SEARCH_REASONS = new Set(['exact-brand-or-product', 'historical-evidence', 'real-event-authenticity']);
+
 const MOTION_PATTERNS = [
   /\b(driving|f[aä]hrt|running|rennt|crowd moving|menschenmenge|machine operating|maschine l[aä]uft|assembly line|flie[sß]band|sports action|sportaktion|waves crashing|wellen|fire burning|feuer|train moving|zug f[aä]hrt|traffic|verkehr|factory production|produktion)\b/i
 ];
@@ -72,10 +76,58 @@ export function estimateHoldSeconds(text, wordsPerSecond = 2.35) {
   return Math.round(Math.min(9, Math.max(3.5, words / wordsPerSecond)) * 10) / 10;
 }
 
-export function classifyVisualSource(text, { preferMotionBroll = true } = {}) {
+/**
+ * Entities als Strings ("Nokia") oder mit Suchhinweisen ({ name: 'Nokia', queries: ['Nokia mobile phone'] }).
+ * Suchhinweise verhindern Verwechslungen, z. B. Nokia (Firma) mit Nokia (Stadt in Finnland).
+ */
+export function normalizeEntities(entities = []) {
+  const byName = new Map();
+  for (const entry of entities) {
+    const name = String(entry?.name ?? entry ?? '').trim();
+    if (!name) continue;
+    const queries = (entry?.queries ?? []).map((query) => String(query).trim()).filter(Boolean);
+    byName.set(name.toLowerCase(), { name, queries });
+  }
+  return [...byName.values()];
+}
+
+/** Liest "Nokia=Nokia mobile phone|Nokia N95,Lumia" aus der CLI. */
+export function parseEntitiesOption(value) {
+  return normalizeEntities(String(value ?? '').split(',').map((entry) => {
+    const [name, hints = ''] = entry.split(/=(.*)/s);
+    return { name, queries: hints.split('|') };
+  }));
+}
+
+/**
+ * Findet Firmen-, Marken- und Produktnamen in einem Beat (inkl. Genitiv "Nokias" und "Lumia-Geräte").
+ * Rückgabe in Reihenfolge des Auftretens; kürzere Namen innerhalb längerer Treffer entfallen.
+ */
+export function findEntities(text, entities = []) {
+  const value = String(text ?? '');
+  const candidates = [...new Map([...entities, ...BUILT_IN_ENTITIES]
+    .map((entity) => String(entity?.name ?? entity ?? '').trim())
+    .filter(Boolean)
+    .map((entity) => [entity.toLowerCase(), entity])).values()];
+  const hits = [];
+  for (const entity of candidates) {
+    const body = entity.split(/\s+/).map(escapeRegex).join('[\\s-]+');
+    const match = new RegExp(`(?<![\\p{L}\\p{N}])${body}(?:s|'s|’s)?(?![\\p{L}\\p{N}])`, 'iu').exec(value);
+    if (match) hits.push({ entity, start: match.index, end: match.index + match[0].length });
+  }
+  return hits
+    .filter((hit) => !hits.some((other) => other !== hit && other.end - other.start > hit.end - hit.start && other.start <= hit.start && other.end >= hit.end))
+    .sort((a, b) => a.start - b.start)
+    .map((hit) => hit.entity);
+}
+
+export function classifyVisualSource(text, { preferMotionBroll = true, entities = [] } = {}) {
   const value = String(text ?? '').trim();
   for (const rule of REAL_EVIDENCE_PATTERNS) {
     if (rule.regex.test(value)) return { mode: 'real-first', preferredAsset: rule.type, reason: rule.reason, aiAllowed: false };
+  }
+  if (entities.length && findEntities(value, entities).length) {
+    return { mode: 'real-first', preferredAsset: 'real-image', reason: 'exact-brand-or-product', aiAllowed: false };
   }
   if (preferMotionBroll && MOTION_PATTERNS.some((pattern) => pattern.test(value))) {
     return { mode: 'real-first', preferredAsset: 'real-video', reason: 'authentic-motion-broll', aiAllowed: true };
@@ -212,7 +264,7 @@ export function buildStockQuery(text) {
     .join(' ');
 }
 
-export function planAiFirstVisuals({ text, orientation = 'horizontal', maxWordsPerBeat = 16, preferMotionBroll = true }) {
+export function planAiFirstVisuals({ text, orientation = 'horizontal', maxWordsPerBeat = 16, preferMotionBroll = true, entities = [] }) {
   if (!['horizontal', 'vertical', 'square'].includes(orientation)) throw new Error('orientation muss horizontal, vertical oder square sein.');
   const beats = splitIntoVisualBeats(text, { maxWordsPerBeat });
   const assets = [];
@@ -232,8 +284,17 @@ export function planAiFirstVisuals({ text, orientation = 'horizontal', maxWordsP
     negative_guidance: 'No invented cover text, no watermark, no malformed anatomy, no duplicated subjects, no fake UI or logos.'
   });
 
+  const knownEntities = normalizeEntities(entities);
+  const hintsByName = new Map(knownEntities.map((entity) => [entity.name.toLowerCase(), entity.queries]));
+  // Letzter genannter Name gilt als Kontext für Sätze wie "Die Marke stand für ...".
+  let contextEntities = [];
   for (const [index, beat] of beats.entries()) {
-    const decision = classifyVisualSource(beat.text, { preferMotionBroll });
+    const decision = classifyVisualSource(beat.text, { preferMotionBroll, entities });
+    const ownEntities = findEntities(beat.text, entities);
+    if (ownEntities.length) {
+      decision.entities = ownEntities;
+      contextEntities = ownEntities;
+    }
     beat.source_decision = decision;
 
     if (decision.mode === 'ai-first') {
@@ -256,7 +317,7 @@ export function planAiFirstVisuals({ text, orientation = 'horizontal', maxWordsP
       continue;
     }
 
-    assets.push({
+    const realAsset = {
       id: `${beat.id}-real-01`,
       beat_id: beat.id,
       source_mode: 'stock-or-real',
@@ -266,7 +327,24 @@ export function planAiFirstVisuals({ text, orientation = 'horizontal', maxWordsP
       reason: decision.reason,
       stock_query: buildStockQuery(beat.text),
       ai_fallback_allowed: decision.aiAllowed
-    });
+    };
+    const names = ownEntities.length ? ownEntities : contextEntities;
+    if (ARCHIVE_SEARCH_REASONS.has(decision.reason) && names.length) {
+      // Reihum je Name, damit bei "Nokia + Symbian" nicht nur Nokia-Hinweise gesucht werden.
+      const perName = names.map((name) => {
+        const hints = hintsByName.get(name.toLowerCase());
+        return hints?.length ? hints : [name];
+      });
+      const queries = [];
+      for (let round = 0; round < Math.max(...perName.map((list) => list.length)); round += 1) {
+        for (const list of perName) if (list[round]) queries.push(list[round]);
+      }
+      realAsset.search_terms = [...new Set(queries)];
+      realAsset.required_terms = names;
+      realAsset.entity_source = ownEntities.length ? 'beat' : 'context';
+      realAsset.stock_query = names.join(' ');
+    }
+    assets.push(realAsset);
 
     if (decision.aiAllowed) {
       const card = createSceneCard({ beat, index, orientation, context: text });
@@ -301,7 +379,7 @@ export function planAiFirstVisuals({ text, orientation = 'horizontal', maxWordsP
       real_material_only_when: ['authentic real-world evidence is required', 'exact interfaces/documents/brands/locations are required', 'real motion B-roll is clearly superior'],
       generation: 'Generate one image at a time, wait for completion, QC it, rename it, then continue. Group later images into five-image QC blocks without parallel generation.'
     },
-    input: { text, orientation, maxWordsPerBeat, preferMotionBroll },
+    input: { text, orientation, maxWordsPerBeat, preferMotionBroll, entities: knownEntities },
     summary: {
       beats: beats.length,
       planned_assets: assets.length,
@@ -342,4 +420,8 @@ function compositionFor(form, orientation, cover) {
   return `${base} ${orientation === 'vertical' ? 'Keep the main read inside the central mobile-safe area.' : 'Use the width to create clear foreground-to-background reading.'}`;
 }
 
-export const visualPlannerConstants = { SHOTS, REAL_EVIDENCE_PATTERNS, MOTION_PATTERNS };
+function escapeRegex(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+export const visualPlannerConstants = { SHOTS, REAL_EVIDENCE_PATTERNS, MOTION_PATTERNS, BUILT_IN_ENTITIES };

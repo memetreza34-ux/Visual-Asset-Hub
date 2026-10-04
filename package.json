@@ -17,6 +17,7 @@
     "flow:import": "node scripts/flow-import.mjs",
     "pilot:check": "node scripts/pilot-check.mjs",
     "real:integrate": "node scripts/real-media-integrate.mjs",
+    "real:review": "node scripts/real-media-review.mjs",
     "video:manifest": "node scripts/video-manifest.mjs",
     "render:check": "node scripts/render-check.mjs",
     "validate": "node scripts/validate-catalog.mjs",

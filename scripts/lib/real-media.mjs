@@ -1,9 +1,17 @@
+// Echte Screenshots, Interfaces und Originaldokumente gibt es in freien Archiven kaum rechtssicher.
 const MANUAL_SOURCE_REASONS = new Set([
-  'original-interface-or-document',
+  'original-interface-or-document'
+]);
+
+// Exakte Marken, Produkte, Ereignisse und Geschichte: nur in Archiven suchen (nie Stock) und immer reviewen.
+const ARCHIVE_SOURCE_REASONS = new Set([
   'real-event-authenticity',
   'exact-brand-or-product',
   'historical-evidence'
 ]);
+
+const USABLE_LICENSES = new Set(['licensed', 'cc0', 'public-domain', 'cc-by']);
+const MIN_IMAGE_EDGE = 800;
 
 const RELEVANCE_STOPWORDS = new Set([
   'the','and','with','from','into','onto','this','that','these','those','for','to','of','in','on','at','by','a','an',
@@ -42,6 +50,18 @@ export function realMediaPolicy(item) {
       auto_download: false,
       requires_exact_source: true,
       review_required: true,
+      source_tier: null,
+      reason
+    };
+  }
+
+  if (ARCHIVE_SOURCE_REASONS.has(reason)) {
+    return {
+      auto_search: true,
+      auto_download: true,
+      requires_exact_source: true,
+      review_required: true,
+      source_tier: 'archive',
       reason
     };
   }
@@ -51,8 +71,31 @@ export function realMediaPolicy(item) {
     auto_download: true,
     requires_exact_source: false,
     review_required: reason === 'identifiable-real-location',
+    source_tier: 'stock',
     reason
   };
+}
+
+/** Nur Treffer mit YouTube-tauglicher Lizenz und brauchbarer Auflösung kommen in die Auswahl. */
+export function isUsableCandidate(asset) {
+  const status = asset?.rights?.license_status;
+  if (status && !USABLE_LICENSES.has(status)) return false;
+  if (asset?.type === 'image') {
+    const { width, height } = bestResolution(asset);
+    const longest = Math.max(width, height);
+    if (longest > 0 && longest < MIN_IMAGE_EDGE) return false;
+  }
+  return true;
+}
+
+/** Jeder Begriff (z. B. "Nokia" oder "Windows Phone") muss vollständig im Titel/Beschreibung/Tags vorkommen. */
+export function matchesRequiredTerms(asset, terms = []) {
+  if (!terms?.length) return true;
+  const haystack = ` ${normalizeForRelevance(assetText(asset))} `;
+  return terms.some((term) => {
+    const tokens = normalizeForRelevance(term).split(' ').filter(Boolean);
+    return tokens.length > 0 && tokens.every((token) => haystack.includes(` ${token} `));
+  });
 }
 
 export function mergeRealCandidate(map, asset, query, page = 1) {
@@ -74,6 +117,10 @@ export function mergeRealCandidate(map, asset, query, page = 1) {
 
 export function isSyntheticMediaCandidate(asset) {
   return SYNTHETIC_MEDIA_PATTERN.test(`${asset?.title ?? ''} ${asset?.source_url ?? ''}`);
+}
+
+function assetText(asset) {
+  return `${asset?.title ?? ''} ${asset?.description ?? ''} ${(asset?.tags ?? []).join(' ')} ${asset?.source_url ?? ''}`;
 }
 
 export function requiredConceptGroups(asset) {
@@ -98,7 +145,7 @@ export function passesRequiredConcepts(asset) {
   return groups.every((group) => group.some((needle) => haystack.includes(needle)));
 }
 
-export function scoreRealCandidate(asset, { orientation, assetType } = {}) {
+export function scoreRealCandidate(asset, { orientation, assetType, requiredTerms = [] } = {}) {
   const resolution = bestResolution(asset);
   const queryRelevance = scoreQueryRelevance(asset);
   let score = 8;
@@ -125,6 +172,10 @@ export function scoreRealCandidate(asset, { orientation, assetType } = {}) {
 
   score += queryRelevance;
   if (queryRelevance === 0) score -= 10;
+  // Name im Dateititel ("Nokia N95 front.jpg") ist ein viel stärkeres Signal als in einer langen Beschreibung.
+  // Mehrere Namen im Titel ("Nokia" + "Symbian") schlagen einen einzelnen.
+  const titleMatches = (requiredTerms ?? []).filter((term) => matchesRequiredTerms({ title: asset.title }, [term])).length;
+  score += Math.min(titleMatches, 2) * 12;
   if (isSyntheticMediaCandidate(asset)) score -= 35;
   if (!passesRequiredConcepts(asset)) score -= 50;
 
@@ -132,7 +183,7 @@ export function scoreRealCandidate(asset, { orientation, assetType } = {}) {
 }
 
 export function scoreQueryRelevance(asset) {
-  const haystack = normalizeForRelevance(`${asset?.title ?? ''} ${asset?.source_url ?? ''}`);
+  const haystack = normalizeForRelevance(assetText(asset));
   if (!haystack) return 0;
   let best = 0;
   for (const query of asset?.matched_queries ?? []) {
@@ -158,12 +209,61 @@ export function rankRealCandidates(candidates, options = {}) {
     real_media_score: scoreRealCandidate(asset, options)
   }));
   const hasHardRequirements = scored.some((asset) => requiredConceptGroups(asset).length > 0);
-  const eligible = hasHardRequirements ? scored.filter((asset) => asset.hard_relevance_pass) : scored;
+  const eligible = (hasHardRequirements ? scored.filter((asset) => asset.hard_relevance_pass) : scored)
+    .filter((asset) => isUsableCandidate(asset))
+    .filter((asset) => matchesRequiredTerms(asset, options.requiredTerms));
   return eligible.sort((a, b) => b.real_media_score - a.real_media_score
     || b.query_relevance_score - a.query_relevance_score
     || Number(a.synthetic_media_risk) - Number(b.synthetic_media_risk)
     || (b.matched_queries?.length ?? 0) - (a.matched_queries?.length ?? 0)
     || String(a.provider_id).localeCompare(String(b.provider_id)));
+}
+
+/**
+ * Wählt die Datei für jeden Provider: Bilder in der kleinsten Größe, die maxDimension noch abdeckt,
+ * Videos bevorzugt als MP4/WebM innerhalb der Zielgröße.
+ */
+export function chooseDownload(asset, { maxDimension = 1920 } = {}) {
+  if (!asset) return null;
+  if (!Array.isArray(asset.downloads)) return choosePexelsDownload(asset, { maxDimension });
+  const usable = asset.downloads.filter((file) => file?.url && isPlayableFile(file, asset.type));
+  if (!usable.length) return null;
+  if (asset.type === 'image') {
+    const longest = (file) => Math.max(Number(file.width ?? 0), Number(file.height ?? 0));
+    const covering = usable.filter((file) => longest(file) >= maxDimension).sort((a, b) => longest(a) - longest(b));
+    if (covering.length) return covering[0];
+    return [...usable].sort((a, b) => longest(b) - longest(a))[0];
+  }
+  const fitting = usable.filter((file) => {
+    const edge = Math.max(Number(file.width ?? 0), Number(file.height ?? 0));
+    return edge >= 720 && edge <= maxDimension;
+  });
+  const pool = fitting.length ? fitting : usable;
+  return [...pool].sort((a, b) => downloadScore(b, maxDimension) - downloadScore(a, maxDimension))[0];
+}
+
+function isPlayableFile(file, type) {
+  const mime = String(file.file_type ?? '').toLowerCase();
+  const ext = String(file.url).split('?')[0].split('.').pop().toLowerCase();
+  if (type === 'video') return /mp4|webm/.test(mime) || ['mp4', 'webm', 'm4v'].includes(ext);
+  return /jpe?g|png|webp/.test(mime) || ['jpg', 'jpeg', 'png', 'webp'].includes(ext);
+}
+
+/** Credits-Block für die YouTube-Beschreibung aus allen freigegebenen Bindings. */
+export function buildCreditLines(bindings = []) {
+  const lines = [];
+  const seen = new Set();
+  for (const binding of bindings) {
+    if (binding?.status !== 'ready' || !binding.provider) continue;
+    const key = `${binding.provider}:${binding.provider_id}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const rights = binding.rights ?? {};
+    const text = rights.attribution_text ?? `${binding.title ?? binding.provider_id}${binding.creator ? ` von ${binding.creator}` : ''}`;
+    const license = rights.license_code && !String(text).includes(rights.license_code) ? `, ${rights.license_code}` : '';
+    lines.push(`- ${text}${license} – ${binding.source_url ?? ''}`.trim());
+  }
+  return lines;
 }
 
 export function choosePexelsDownload(asset, { maxDimension = 1920 } = {}) {
@@ -227,6 +327,8 @@ export function buildTimelineBinding({ item, selected, localFile = null, timing 
       mute: selected?.type === 'video'
     },
     needs_additional_fill: Boolean(availableDuration && availableDuration < requestedDuration),
+    title: selected?.title ?? null,
+    rights: selected?.rights ?? null,
     attribution: selected?.attribution ?? null
   };
 }
@@ -274,7 +376,7 @@ function bestResolution(asset) {
   if (asset.type === 'image') {
     return { width: Number(asset.width ?? 0), height: Number(asset.height ?? 0) };
   }
-  const files = Array.isArray(asset.files) ? asset.files : [];
+  const files = Array.isArray(asset.downloads) ? asset.downloads : Array.isArray(asset.files) ? asset.files : [];
   return files.reduce((best, file) => {
     const current = { width: Number(file.width ?? 0), height: Number(file.height ?? 0) };
     return current.width * current.height > best.width * best.height ? current : best;
@@ -329,4 +431,4 @@ function round(value, digits) {
   return Math.round(value * factor) / factor;
 }
 
-export const realMediaConstants = { MANUAL_SOURCE_REASONS, RELEVANCE_STOPWORDS, RELEVANCE_SYNONYMS, SYNTHETIC_MEDIA_PATTERN };
+export const realMediaConstants = { MANUAL_SOURCE_REASONS, ARCHIVE_SOURCE_REASONS, USABLE_LICENSES, RELEVANCE_STOPWORDS, RELEVANCE_SYNONYMS, SYNTHETIC_MEDIA_PATTERN };

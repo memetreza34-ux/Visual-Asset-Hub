@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { planAiFirstVisuals } from './lib/ai-visual-planner.mjs';
+import { parseEntitiesOption, planAiFirstVisuals } from './lib/ai-visual-planner.mjs';
 
 const args = parseArgs(process.argv.slice(2));
 
@@ -17,8 +17,9 @@ try {
   const orientation = String(args.orientation ?? 'horizontal').toLowerCase();
   const maxWordsPerBeat = integerOption(args['max-words-per-beat'], 16, 8, 40, 'max-words-per-beat');
   const preferMotionBroll = booleanOption(args['motion-broll'], true, 'motion-broll');
+  const entities = args.entities && args.entities !== 'true' ? parseEntitiesOption(args.entities) : [];
 
-  const plan = planAiFirstVisuals({ text, orientation, maxWordsPerBeat, preferMotionBroll });
+  const plan = planAiFirstVisuals({ text, orientation, maxWordsPerBeat, preferMotionBroll, entities });
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const baseDir = args.output
@@ -66,6 +67,15 @@ try {
   console.log(`Primäre KI-Bilder: ${plan.summary.ai_images} (${plan.summary.ai_share_percent} % der primären Visuals).`);
   console.log(`KI-Fallbacks: ${plan.summary.ai_fallbacks}.`);
   console.log(`Reales/Stock-Material: ${plan.summary.real_or_stock_assets}.`);
+  const archiveAssets = realAssets.filter((asset) => asset.search_terms?.length);
+  if (archiveAssets.length) {
+    const counts = new Map();
+    for (const asset of archiveAssets) for (const term of asset.required_terms) counts.set(term, (counts.get(term) ?? 0) + 1);
+    console.log(`Archivsuche für echte Marken/Produkte: ${archiveAssets.length} Beats (${[...counts].map(([term, count]) => `${term} ×${count}`).join(', ')}).`);
+  }
+  if (!entities.length) {
+    console.log('Tipp: Mit --entities "Firma,Produkt,..." werden Marken und Produkte als echtes Material aus Archiven gesucht statt per KI nachgebaut.');
+  }
   console.log(`Plan: ${planPath}`);
   console.log(`Scene Cards: ${sceneCardsPath}`);
   console.log(`KI-Queue: ${aiQueuePath}`);
@@ -137,6 +147,7 @@ oder echte Bewegung klar besser ist.
 Beispiele:
   npm run visual:plan -- "Immer mehr Unternehmen automatisieren Büroarbeit mit KI."
   npm run visual:plan -- --file ./script.txt --orientation horizontal --max-words-per-beat 14
+  npm run visual:plan -- --file ./script.txt --entities "Nokia=Nokia mobile phone|Nokia N95,Lumia=Nokia Lumia,iPhone"
 
 Optionen:
   --text <text>                 Sprechertext; alternativ Positionswert
@@ -144,6 +155,10 @@ Optionen:
   --orientation <wert>          horizontal, vertical oder square; Standard: horizontal
   --max-words-per-beat <8-40>   Bilddichte; Standard: 16. Kleinere Zahl = mehr echte Story-Bilder
   --motion-broll <true|false>   echte B-Roll für starke Bewegung bevorzugen; Standard: true
+  --entities <liste>            Firmen/Marken/Produkte, kommagetrennt, z. B. "Nokia,Lumia,Symbian".
+                                Beats mit diesen Namen werden echtes Archivmaterial (Wikimedia & Co.).
+                                Suchhinweise mit = und |, z. B. "Nokia=Nokia mobile phone|Nokia N95"
+                                (verhindert Verwechslungen wie Nokia-Firma vs. Stadt Nokia).
   --output <pfad>               optionaler Pfad für visual-plan.json
   --help                        Hilfe anzeigen
 

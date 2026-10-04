@@ -43,6 +43,9 @@ export function buildUnifiedVideoManifest({ visualPlan, productionPlan, flowImpo
       } else if (real?.status === 'manual-required') {
         status = 'manual-required';
         requiredAction = 'Provide the exact official/original source for this beat.';
+      } else if (real?.status === 'review-required' && real.local_file) {
+        status = 'review-required';
+        requiredAction = 'Archive match found: check subject and license, then approve it with npm run real:review.';
       } else {
         status = fallbackPlanned ? 'fallback-generation-required' : 'unresolved';
         requiredAction = fallbackPlanned
@@ -122,6 +125,7 @@ function normalizeReal(binding) {
     source_url: binding.source_url ?? null,
     creator: binding.creator ?? null,
     attribution: binding.attribution ?? null,
+    rights: binding.rights ?? null,
     mute: binding.placement?.mute ?? binding.asset_type === 'video',
     needs_additional_fill: Boolean(binding.needs_additional_fill)
   };

@@ -150,9 +150,14 @@ npm run pilot:check -- \
 ```bash
 npm run real:integrate -- \
   --queue ./real-material-queue.json
+
+npm run real:review -- \
+  --dir ./real-media --approve all
 ```
 
-Echte Screenshots, Originaldokumente, konkrete News-Ereignisse, historische Originalaufnahmen und exakte Marken-/Produktdarstellungen werden **nicht** durch generischen Stock ersetzt. Sie bleiben `manual-required`, bis eine echte Quelle vorhanden ist.
+Quellen: Pexels und Pixabay für generische B-Roll, Wikimedia Commons, Openverse und Internet Archive (ohne Key) für echte Marken, Produkte, Ereignisse und Geschichte. Damit der Planer Marken erkennt, beim `visual:plan` `--entities "Firma=Suchbegriff,Produkt"` angeben.
+
+Exakte Marken, Produkte, Ereignisse und Geschichte werden **nie** durch generischen Stock ersetzt: Archivtreffer bekommen `review-required` und müssen freigegeben werden. `credits.txt` enthält danach die Quellenangaben für die YouTube-Beschreibung. Screenshots und Originaldokumente bleiben `manual-required`. Details: [`docs/REAL-MEDIA-INTEGRATION.md`](docs/REAL-MEDIA-INTEGRATION.md).
 
 ## 7. AI + Real zusammenführen
 
@@ -215,6 +220,7 @@ npm run flow:select-cover -- --help
 npm run flow:import -- --help
 npm run pilot:check -- --help
 npm run real:integrate -- --help
+npm run real:review -- --help
 npm run video:manifest -- --help
 npm run render:check -- --help
 npm run discover -- --help

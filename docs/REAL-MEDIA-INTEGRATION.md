@@ -11,9 +11,11 @@ real-material-queue.json
         ↓
 Policy Gate
         ↓
-┌───────────────────────────────┐
-│ echte Bewegung / Real-B-Roll │ → Pexels-Suche
-└───────────────────────────────┘
+┌──────────────────────────────────┐
+│ echte Bewegung / Real-B-Roll     │ → Pexels, Pixabay
+│ Marken, Produkte, Ereignisse,    │ → Wikimedia Commons, Openverse,
+│ Geschichte                       │   Internet Archive (+ Review)
+└──────────────────────────────────┘
         ↓
 Multi-Query + Pagination
         ↓
@@ -30,11 +32,25 @@ Beat-Binding
 remotion-real-media.json
 ```
 
+## Quellen
+
+| Quelle | Key | Wofür |
+|---|---|---|
+| Pexels | `PEXELS_API_KEY` | generische B-Roll und Fotos |
+| Pixabay | `PIXABAY_API_KEY` | generische B-Roll und Fotos |
+| Wikimedia Commons | nein | echte Marken, Produkte, Firmengebäude, Orte, Geschichte |
+| Openverse | nein | Fotos (v. a. Flickr) mit CC-Lizenz |
+| Internet Archive | nein | historische Videos und Fotos |
+
+Ohne Stock-Key weicht auch generische B-Roll auf die schlüssellosen Archive aus. Mit `--providers wikimedia,openverse` lassen sich Quellen erzwingen.
+
+Automatisch ausgewählt werden nur Treffer mit YouTube-tauglicher Lizenz (Public Domain, CC0, CC BY, CC BY-SA, Pexels/Pixabay-Lizenz) und mindestens 800 px Kantenlänge. NC-/ND-Lizenzen und ungeklärte Rechte werden verworfen.
+
 ## Grundregel
 
 Die Pipeline darf keine generische Stockaufnahme als angeblich exakten Beleg verwenden.
 
-Automatisch such- und downloadbar sind insbesondere:
+Automatisch per Stock such- und downloadbar sind insbesondere:
 
 - fahrende Züge, Autos und Verkehr
 - Maschinen und Produktionsanlagen in Bewegung
@@ -44,15 +60,49 @@ Automatisch such- und downloadbar sind insbesondere:
 - allgemeine reale Orte und Establishing Shots
 - passende reale Fotos ohne Beweisfunktion
 
+Nur in Archiven gesucht (nie Stock) und immer mit Status `review-required`:
+
+- konkrete Marken oder Produkte
+- konkrete Nachrichtenereignisse
+- historische Originalbelege
+
 Als `manual-required` bleiben:
 
 - echte Screenshots / Webseiten / Interfaces
 - Originaldokumente
-- konkrete Nachrichtenereignisse
-- konkrete Marken oder Produkte, wenn Exaktheit wichtig ist
-- historische Originalbelege
 
 So verhindert die Pipeline, dass ein beliebiger Stockclip als Originalaufnahme ausgegeben wird.
+
+## Marken und Produkte erkennen (`--entities`)
+
+Der Planer kennt deine Firmen und Produkte nicht von selbst. Gib sie beim Planen mit:
+
+```bash
+npm run visual:plan -- \
+  --file ./script.txt \
+  --entities "Nokia=Nokia mobile phone|Nokia N95|Nokia headquarters Espoo,iPhone=iPhone 2G,Lumia=Nokia Lumia,Symbian=Symbian phone"
+```
+
+- Jeder Beat mit einem dieser Namen wird echtes Archivmaterial statt KI-Bild.
+- Sätze ohne Namen („Die Marke stand für …“) übernehmen den zuletzt genannten Namen.
+- Nach `=` stehen Suchbegriffe, getrennt mit `|`. Sie verhindern Verwechslungen (Nokia-Firma vs. Stadt Nokia).
+- Ein Treffer muss den Namen im Titel, in der Beschreibung oder in den Tags enthalten.
+- Dasselbe Bild wird nicht für mehrere Beats verwendet.
+
+## Prüfen und freigeben (`real:review`)
+
+Archivtreffer gehen erst nach deiner Freigabe in den Render:
+
+```bash
+npm run real:review -- --dir .local-storage/visual-plans/SESSION/real-media
+npm run real:review -- --dir <ordner> --approve beat-001,beat-007
+npm run real:review -- --dir <ordner> --approve all
+npm run real:review -- --dir <ordner> --reject beat-016
+```
+
+Prüfe bei jedem Treffer: Zeigt das Bild wirklich das Richtige? Passt die Lizenz? Bei CC BY-SA gilt zusätzlich „Weitergabe unter gleichen Bedingungen“.
+
+Nach jeder Freigabe entsteht `credits.txt` mit allen Quellenangaben für die YouTube-Beschreibung. Bei CC-BY-Material ist diese Namensnennung Pflicht.
 
 ## Verwendung
 
@@ -80,12 +130,12 @@ npm run real:integrate -- \
 
 Standardmäßig werden pro Real-Beat:
 
-- bis zu 3 Suchrichtungen erzeugt
-- 2 Pexels-Seiten pro Suchrichtung geprüft
-- 30 Treffer pro Anfrage geladen
-- Kandidaten dedupliziert
-- Auflösung, Format, Suchtreffer und Videolänge bewertet
-- der beste Treffer heruntergeladen
+- bis zu 3 Suchrichtungen erzeugt (bei Marken: die Suchbegriffe aus `--entities`)
+- 2 Seiten pro Suchrichtung und Quelle geprüft
+- bis zu 30 Treffer pro Anfrage geladen (je nach Quelle weniger)
+- Kandidaten dedupliziert, Lizenz und Mindestauflösung geprüft
+- Auflösung, Format, Suchtreffer, Name im Titel und Videolänge bewertet
+- der beste noch nicht verwendete Treffer heruntergeladen
 - 3 Alternativen in den Metadaten behalten
 
 ## Mit echten Beat-Zeiten
@@ -127,6 +177,7 @@ Neben der Queue entsteht standardmäßig:
 real-media/
   real-media-resolution.json
   remotion-real-media.json
+  credits.txt
   files/
     beat-002-video-12345.mp4
     beat-006-image-98765.jpg
@@ -218,7 +269,7 @@ Jeder Download erhält eine Metadatendatei mit:
 - Downloadzeit
 - lokaler Datei
 
-Die aktuelle automatische Downloadstufe verwendet Pexels als realen Stock-Provider. Exakte journalistische/archivarische Quellen werden nicht automatisch durch Pexels ersetzt.
+Zusätzlich: Lizenzcode, Credit-Text und ein Hinweis bei CC BY-SA. Exakte Marken, Produkte und Ereignisse werden nie durch Pexels/Pixabay ersetzt.
 
 ## CLI-Optionen
 
@@ -227,13 +278,14 @@ Die aktuelle automatische Downloadstufe verwendet Pexels als realen Stock-Provid
 --timings <pfad>           optionale Beat-Timings
 --output-dir <pfad>        Ausgabeverzeichnis
 --queries <1-8>            Suchrichtungen je Beat
---pages <1-10>             Seiten je Query
+--pages <1-10>             Seiten je Query und Quelle
 --per-page <1-80>          Treffer je Anfrage
 --alternates <0-10>        gespeicherte Alternativen
 --max-dimension <px>       bevorzugte maximale Videokante
 --default-duration <sek>   Dauer ohne Timing-Datei
 --download <true|false>    echter Download oder Auswahltest
---locale <wert>            Pexels-Locale
+--locale <wert>            Suchsprache für Stock
+--providers <liste>        Quellen erzwingen, z. B. wikimedia,openverse
 ```
 
 ## Was damit jetzt möglich ist
